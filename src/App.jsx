@@ -3,17 +3,14 @@ import {
   Heart, Shield, Users, Brain, Sparkles, Phone, MessageSquare, 
   Settings, CheckCircle, RefreshCw, Music, Coffee, Sun, CloudRain, 
   Flame, TreePine, Award, Bell, Activity, Pill, Mic, Video, Volume2, 
-  ChevronRight, Calendar, UserCheck, Zap, Lock, Globe, ExternalLink, Play
+  ChevronRight, Calendar, UserCheck, Zap, Lock, Globe, ExternalLink, Play, X
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home') // 'home', 'games', 'buddies', 'care', 'telehealth'
   
-  // --- Realistic Vitals & Telehealth State ---
-  // In real life, web apps don't magically grab heart rates without Bluetooth Web Bluetooth API or connected wearables (Apple Health, Google Fit, Fitbit, or medical IoT cuffs).
-  // Here we explicitly show realistic connection states for Bluetooth/Apple Health/Google Fit, with live simulated telemetry.
-  const [deviceConnected, setDeviceConnected] = useState(true)
+  // --- Vitals & Telehealth State ---
   const [heartRate, setHeartRate] = useState(72)
   const [spo2, setSpo2] = useState(98)
   const [bp, setBp] = useState('122 / 78')
@@ -53,8 +50,9 @@ export default function App() {
     { id: 3, name: 'Donepezil (Memory Support)', time: '8:00 PM', taken: false }
   ])
 
-  // --- Coffee Circles with Real Jitsi Meet Rooms ---
-  // Using official free Jitsi Meet public rooms (meet.jit.si) which allow zero-account, instant, secure video calls.
+  // --- Coffee Circles with Modal Embedding AND External Link option ---
+  const [activeVideoModal, setActiveVideoModal] = useState(null) // null or { title, url }
+
   const coffeeCircles = [
     { 
       id: 1, 
@@ -214,8 +212,8 @@ export default function App() {
                     onClick={() => setActiveTab('buddies')}
                     className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold px-6 py-3 rounded-2xl text-xs shadow-lg transition flex items-center space-x-2"
                   >
-                    <span>Join Live Coffee Circle (Jitsi)</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Join Live Coffee Circle</span>
+                    <Video className="w-3.5 h-3.5" />
                   </button>
                   <button 
                     onClick={() => setActiveTab('telehealth')}
@@ -389,23 +387,21 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 3: COFFEE CIRCLES WITH REAL JITSI LINKS */}
+        {/* TAB 3: COFFEE CIRCLES WITH WORKING EMBEDDED JITSI IFRAME */}
         {activeTab === 'buddies' && (
           <div className="space-y-8 animate-in fade-in duration-200">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-black text-white">Live Coffee Circles & Isolation Prevention</h2>
-                <p className="text-xs sm:text-sm text-slate-400">Real video conference meeting rooms via secure open-source Jitsi Meet.</p>
+                <p className="text-xs sm:text-sm text-slate-400">Launch secure video rooms instantly directly inside CareSphere.</p>
               </div>
-              <a 
-                href="https://meet.jit.si/CareSphere-NewSocialRoom2026" 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <button 
+                onClick={() => setActiveVideoModal({ title: 'CareSphere Open Room', url: 'https://meet.jit.si/CareSphere-GeneralCoffeeCircle-2026' })}
                 className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-5 py-2.5 rounded-2xl text-xs shadow-lg transition flex items-center space-x-1.5"
               >
-                <span>+ Launch New Room</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+                <span>+ Launch Room</span>
+                <Video className="w-3.5 h-3.5" />
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -422,23 +418,32 @@ export default function App() {
                     <p className="text-xs text-slate-400">Hosted by <span className="text-slate-200 font-semibold">{room.host}</span> • {room.participants}</p>
                   </div>
                   
-                  <a 
-                    href={room.jitsiUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 rounded-2xl text-xs shadow transition flex items-center justify-center space-x-2"
-                  >
-                    <span>Join Jitsi Video Room</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setActiveVideoModal({ title: room.title, url: room.jitsiUrl })}
+                      className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 rounded-2xl text-xs shadow transition flex items-center justify-center space-x-1.5"
+                    >
+                      <Video className="w-3.5 h-3.5" />
+                      <span>Join in App</span>
+                    </button>
+                    <a 
+                      href={room.jitsiUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-xs transition flex items-center justify-center"
+                      title="Open in new tab"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
                 </div>
               ))}
             </div>
 
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-xs text-slate-400 space-y-2">
-              <div className="font-bold text-white">💡 How Coffee Circles Work in Real Life:</div>
+              <div className="font-bold text-white">💡 Seamless Video Integration:</div>
               <p>
-                To eliminate loneliness and isolation safely, seniors and volunteers can click any active Jitsi meeting link. It opens instantly in the browser with zero downloads or account setup required, adhering to top-tier privacy standards.
+                Clicking "Join in App" embeds the secure Jitsi Meet room right into CareSphere so seniors and volunteers can connect without switching tabs or installing software.
               </p>
             </div>
           </div>
@@ -515,7 +520,7 @@ export default function App() {
                 <p className="text-xs sm:text-sm text-slate-400">Realistic Bluetooth Low Energy (BLE) / Apple Health integration and virtual visits.</p>
               </div>
               <button 
-                onClick={() => alert("Launching secure telehealth video consultation with physician via Jitsi Meet...")}
+                onClick={() => setActiveVideoModal({ title: 'Telehealth Physician Consultation', url: 'https://meet.jit.si/CareSphere-TelehealthConsultation-2026' })}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-5 py-2.5 rounded-2xl text-xs shadow-lg transition flex items-center space-x-2"
               >
                 <Video className="w-4 h-4" />
@@ -584,12 +589,56 @@ export default function App() {
 
       </main>
 
+      {/* --- VIDEO MEETING MODAL (EMBEDDED JITSI IFRAME) --- */}
+      {activeVideoModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-6">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="font-bold text-sm text-white">{activeVideoModal.title}</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <a 
+                  href={activeVideoModal.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1"
+                >
+                  <span>Open Full Tab</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+                <button 
+                  onClick={() => setActiveVideoModal(null)}
+                  className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Embedded Jitsi Meeting Iframe */}
+            <div className="flex-1 bg-black relative">
+              <iframe 
+                src={activeVideoModal.url}
+                allow="camera; microphone; fullscreen; display-capture; autoplay"
+                className="w-full h-full border-0"
+                title="Jitsi Video Meeting"
+              />
+            </div>
+
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <footer className="border-t border-slate-800 bg-slate-900/60 py-8 text-center text-xs text-slate-500 space-y-2">
         <div className="flex items-center justify-center space-x-2 font-bold text-slate-300">
           <span>💚 CareSphere AI — Production-Grade Senior Care & Autism Platform</span>
         </div>
-        <p>Integrated with real Jitsi Meet video rooms and wearable health telemetry simulation.</p>
+        <p>Integrated with live embedded Jitsi Meet video rooms and wearable health telemetry simulation.</p>
       </footer>
 
     </div>
