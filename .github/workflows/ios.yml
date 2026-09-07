@@ -22,6 +22,18 @@ jobs:
       - name: Generate Xcode project
         run: cd ios && xcodegen generate
 
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i ios
+
+      - name: Resolve packages
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild -resolvePackageDependencies \
+            -project CareSphere.xcodeproj -scheme CareSphere 2>&1 | tee /tmp/spm.log | tail -20
+
       - name: Build (compile check, unsigned simulator build)
         run: |
           set -o pipefail
@@ -31,4 +43,12 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
-            build 2>&1 | tail -60
+            build 2>&1 | tee /tmp/xcodebuild.log | tail -60
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: /tmp/*.log
+          if-no-files-found: ignore
