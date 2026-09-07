@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import UserNotifications
 
 /// Single source of truth for user content. Persists to JSON in Documents —
 /// nothing leaves the device. Syncs medication reminders into the system

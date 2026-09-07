@@ -21,14 +21,6 @@ final class HealthKitService: NSObject, ObservableObject {
             statusMessage = "Apple Health isn't available on this device."
             return
         }
-        store.getRequestStatusForAuthorization(toRead: readTypes, toWrite: []) { status, _ in
-            DispatchQueue.main.async {
-                self.isAuthorized = (status == .shouldRequest) ? false : true
-                self.statusMessage = self.isAuthorized
-                    ? "Reading from Apple Health"
-                    : "Apple Health access not granted yet"
-            }
-        }
     }
 
     private var readTypes: Set<HKObjectType> {
