@@ -52,3 +52,14 @@ jobs:
           name: xcodebuild-log
           path: /tmp/*.log
           if-no-files-found: ignore
+
+      - name: Surface errors as annotations
+        if: failure()
+        run: |
+          { grep -hE "error:" /tmp/spm.log /tmp/xcodebuild.log 2>/dev/null | head -15;
+            echo "── log tail ──";
+            tail -12 /tmp/spm.log 2>/dev/null;
+            tail -12 /tmp/xcodebuild.log 2>/dev/null; } | sort -u | head -30 | while IFS= read -r line; do
+            echo "::error::${line:0:380}"
+          done
+
