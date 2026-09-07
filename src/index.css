@@ -1,7 +1,34 @@
-@tailwind base; @tailwind components; @tailwind utilities;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+}
+
+/* ── Accessibility: text scaling (rem-based Tailwind scales globally) ── */
+html[data-textscale='lg'] { font-size: 17.5px; }
+html[data-textscale='xl'] { font-size: 19.5px; }
+
+/* ── Accessibility: high-contrast mode ──
+   Brightens the low-contrast grey text/borders used across dark cards.
+   Scope: CareSphere's slate utilities, applied after Tailwind so they win. */
+html[data-contrast='high'] .text-slate-300 { color: #e2e8f0; }
+html[data-contrast='high'] .text-slate-400 { color: #cbd5e1; }
+html[data-contrast='high'] .text-slate-500 { color: #b6c2d4; }
+html[data-contrast='high'] .text-slate-600 { color: #9fb0c8; }
+html[data-contrast='high'] .border-slate-600 { border-color: #64748b; }
+html[data-contrast='high'] .border-slate-700 { border-color: #5b6b83; }
+html[data-contrast='high'] .border-slate-800 { border-color: #526078; }
+html[data-contrast='high'] .placeholder-slate-500::placeholder { color: #94a3b8; }
+
+/* ── Accessibility: respect reduced-motion preference ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
