@@ -1,0 +1,34 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [arena/01a0626b-care, main]
+    paths: ['ios/**', '.github/workflows/ios.yml']
+  pull_request:
+    paths: ['ios/**', '.github/workflows/ios.yml']
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build CareSphere (SwiftUI · Swift)
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: cd ios && xcodegen generate
+
+      - name: Build (compile check, unsigned simulator build)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ios/CareSphere.xcodeproj \
+            -scheme CareSphere \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tail -60

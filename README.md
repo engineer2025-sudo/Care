@@ -1,6 +1,9 @@
 # 💚 CareSphere AI
 
-**Proactive Senior Care · Isolation Prevention · Autism Support** — a production-grade, installable web app built with React + Vite + Tailwind.
+**Proactive Senior Care · Isolation Prevention · Autism Support** — a production-grade platform with **two native clients**:
+
+- 📱 **iOS app (Swift/SwiftUI)** — [`ios/`](ios/README.md) · HealthKit + CoreBluetooth vitals, official Jitsi Meet SDK video, UserNotifications medication reminders, AVAudioEngine sensory soundscapes. Compiles in CI on macOS runners.
+- 🌐 **Web app (React + Vite)** — the original installable PWA below, sharing the same real `meet.jit.si` rooms so family on any device joins the same calls.
 
 > Live tabs: **Overview · Therapy & Sensory · Coffee Circles · Care Circle · Vitals & Telehealth**
 
