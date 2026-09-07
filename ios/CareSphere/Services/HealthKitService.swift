@@ -90,10 +90,10 @@ final class HealthKitService: NSObject, ObservableObject {
             var dia: Double?
             for sample in (correlation.objects as? Set<HKQuantitySample>) ?? [] {
                 if sample.sampleType == HKObjectType.quantityType(forIdentifier: .bloodPressureSystolic) {
-                    sys = sample.quantity.doubleValue(for: HKUnit.millimetersOfMercury())
+                    sys = sample.quantity.doubleValue(for: HKUnit(from: "mmHg"))
                 }
                 if sample.sampleType == HKObjectType.quantityType(forIdentifier: .bloodPressureDiastolic) {
-                    dia = sample.quantity.doubleValue(for: HKUnit.millimetersOfMercury())
+                    dia = sample.quantity.doubleValue(for: HKUnit(from: "mmHg"))
                 }
             }
             DispatchQueue.main.async {
