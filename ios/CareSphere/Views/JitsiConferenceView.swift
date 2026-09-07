@@ -13,8 +13,6 @@ struct JitsiConferenceView: UIViewRepresentable {
         let options = JitsiMeetConferenceOptions.fromBuilder { builder in
             builder.serverURL = URL(string: "https://meet.jit.si")
             builder.room = room
-            builder.videoMuted = false
-            builder.audioMuted = false
             builder.userInfo = JitsiMeetUserInfo(displayName: displayName, email: nil, avatar: nil)
         }
         view.join(options)

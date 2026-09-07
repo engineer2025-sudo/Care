@@ -121,7 +121,7 @@ struct OverviewView: View {
         ["Struggling", "Low", "Okay", "Good", "Great"][score - 1]
     }
     private func moodColor(_ score: Int) -> Color {
-        [.red, .orange, .yellow, .lime, .emerald][score - 1]
+        [.red, .orange, .yellow, .green, .emerald][score - 1]
     }
 
     private var routinesCard: some View {
