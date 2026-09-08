@@ -122,30 +122,18 @@ jobs:
       - name: Publish to GitHub Releases
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
         run: |
-          NOTES=$(cat <<'EOF'
-          ## 💚 CareSphere for Mac 1.0.0
-
-          Native SwiftUI app for macOS 13+ with:
-          - 📡 **Garmin & BLE heart-rate live streaming** — pair your Garmin (Settings → Health & Wellness → Wrist Heart Rate → Broadcast Heart Rate) or any Bluetooth chest strap via CoreBluetooth
-          - 🩺 Apple Health (HealthKit) blood pressure & heart-rate history
-          - ☕ Real Jitsi Meet video coffee circles (meet.jit.si)
-          - 💊 Medication reminders with lock-screen actions
-          - 🎧 Sensory soundscapes generated live via AVAudioEngine
-          - 🚨 Emergency SOS with location
-
-          ### Install
-          1. Download `CareSphere-1.0.0-mac.dmg` below and open it.
-          2. Drag **CareSphere** into **Applications**.
-          3. First launch: right-click the app → **Open** (it's ad-hoc signed, not notarized), then approve.
-
-          Or from Terminal: `xattr -cr /Applications/CareSphere.app`
-          EOF
-          )
-          gh release view mac-v1.0.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
-            gh release create mac-v1.0.0 --repo "$GITHUB_REPOSITORY" \
-              --title "CareSphere for Mac 1.0.0" --notes "$NOTES"
-          gh release upload mac-v1.0.0 CareSphere-1.0.0-mac.dmg --repo "$GITHUB_REPOSITORY" --clobber
+          BODY="## 💚 CareSphere for Mac 1.0.0"$'\n\n'"Native SwiftUI app for macOS 13+ with: 📡 Garmin & BLE heart-rate live streaming (CoreBluetooth) · 🩺 Apple Health (HealthKit) · ☕ Real Jitsi Meet coffee circles · 💊 Medication reminders · 🎧 Sensory soundscapes (AVAudioEngine) · 🚨 Emergency SOS."$'\n\n'"### Install"$'\n'"1. Download and open CareSphere-1.0.0-mac.dmg"$'\n'"2. Drag CareSphere into Applications"$'\n'"3. First launch: right-click the app → Open (ad-hoc signed, not notarized), or run: xattr -cr /Applications/CareSphere.app"
+          if ! gh release view mac-v1.0.0 --repo "$REPO" >/dev/null 2>&1; then
+            OUT=$(gh release create mac-v1.0.0 \
+              --repo "$REPO" \
+              --target "$GITHUB_SHA" \
+              --title "CareSphere for Mac 1.0.0" \
+              --notes "$BODY" 2>&1) || { echo "::error::release create failed: ${OUT:0:340}"; exit 1; }
+          fi
+          OUT=$(gh release upload mac-v1.0.0 "CareSphere-1.0.0-mac.dmg" --repo "$REPO" --clobber 2>&1) || { echo "::error::release upload failed: ${OUT:0:340}"; exit 1; }
+          echo "✅ Release published: https://github.com/$REPO/releases/tag/mac-v1.0.0"
 
       - name: Upload mac build log
         if: always()
