@@ -1,6 +1,10 @@
 # 📱 CareSphere for iOS — native SwiftUI app
 
-The official **CareSphere AI** iOS application, written in **Swift 5.9 / SwiftUI** (iOS 16+), with the full feature set of the web app implemented on Apple's native stacks.
+> **⬇️ Download for Mac:** [CareSphere-1.0.0-mac.dmg](https://github.com/engineer2025-sudo/Care/releases/download/mac-v1.0.0/CareSphere-1.0.0-mac.dmg) (macOS 13+, native Apple Silicon/Intel build from CI)
+> Install: open the DMG → drag **CareSphere** to Applications → first launch right-click → **Open** (ad-hoc signed).
+> 📡 **Garmin:** on your watch enable *Settings → Health & Wellness → Wrist Heart Rate → Broadcast Heart Rate* (Venu/vivoactive) or *Settings → Sensors & Accessories → Wrist Heart Rate → Broadcast Heart Rate* (Forerunner/Fenix), then tap **Pair** in the app's Vitals tab — Garmin broadcasts the standard Bluetooth Heart Rate profile.
+
+The official **CareSphere AI** iOS application, written in **Swift 5.9 / SwiftUI** (iOS 16+), with the full feature set of the web app implemented on Apple's native stacks — and a **native Mac (.dmg) target** built by CI.
 
 ## Feature ↔ native stack map
 
