@@ -1,8 +1,6 @@
 name: CareSphere
 options:
   bundleIdPrefix: org.caresphere
-  deploymentTarget:
-    iOS: "16.0"
   createIntermediateGroups: true
 
 packages:
@@ -19,9 +17,12 @@ settings:
     DEVELOPMENT_TEAM: ""
 
 targets:
+  # ── iPhone / iPad app ────────────────────────────────────────────────
   CareSphere:
     type: application
     platform: iOS
+    deploymentTarget:
+      iOS: "16.0"
     sources:
       - path: CareSphere
     dependencies:
@@ -31,7 +32,7 @@ targets:
       properties:
         com.apple.developer.healthkit: true
     info:
-      path: Info.plist
+      path: CareSphere-iOS-Info.plist
       properties:
         CFBundleDisplayName: CareSphere
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
@@ -48,7 +49,39 @@ targets:
         NSMicrophoneUsageDescription: "CareSphere uses the microphone for video coffee circles and telehealth visits."
         NSHealthShareUsageDescription: "CareSphere reads your heart rate, blood oxygen and blood pressure from Apple Health so you and your care circle can spot trends early."
         NSHealthUpdateUsageDescription: "CareSphere can save vitals you record in the app to Apple Health."
-        NSBluetoothAlwaysUsageDescription: "CareSphere connects to Bluetooth heart-rate monitors and pulse oximeters to stream live vitals."
+        NSBluetoothAlwaysUsageDescription: "CareSphere connects to Bluetooth heart-rate monitors — including Garmin watches broadcasting heart rate — to stream live vitals."
+        NSLocationWhenInUseUsageDescription: "CareSphere attaches your location to an emergency SOS alert so responders and family can find you."
+
+  # ── Native Mac app (ships as .dmg) ──────────────────────────────────
+  CareSphereMac:
+    type: application
+    platform: macOS
+    deploymentTarget:
+      macOS: "13.0"
+    sources:
+      - path: CareSphere
+    settings:
+      base:
+        PRODUCT_NAME: CareSphere
+        PRODUCT_BUNDLE_IDENTIFIER: org.caresphere.CareSphereMac
+        CODE_SIGN_IDENTITY: "-"
+    entitlements:
+      path: CareSphereMac.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+    info:
+      path: CareSphere-Mac-Info.plist
+      properties:
+        CFBundleDisplayName: CareSphere
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSApplicationCategoryType: public.app-category.healthcare-fitness
+        LSMinimumSystemVersion: "13.0"
+        NSHighResolutionCapable: true
+        ITSAppUsesNonExemptEncryption: false
+        NSHealthShareUsageDescription: "CareSphere reads heart rate and blood pressure from Apple Health so you and your care circle can spot trends early."
+        NSHealthUpdateUsageDescription: "CareSphere can save vitals you record in the app to Apple Health."
+        NSBluetoothAlwaysUsageDescription: "CareSphere connects to Bluetooth heart-rate monitors — including Garmin watches broadcasting heart rate — to stream live vitals."
         NSLocationWhenInUseUsageDescription: "CareSphere attaches your location to an emergency SOS alert so responders and family can find you."
 
 schemes:
@@ -58,3 +91,9 @@ schemes:
         CareSphere: all
     run:
       config: Debug
+  CareSphereMac:
+    build:
+      targets:
+        CareSphereMac: all
+    run:
+      config: Release

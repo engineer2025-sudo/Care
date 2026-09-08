@@ -81,8 +81,10 @@ final class SoundScapeEngine {
 
     private func startEngineIfNeeded() {
         guard !isRunning else { return }
+        #if os(iOS)
         try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
         try? AVAudioSession.sharedInstance().setActive(true)
+        #endif
 
         guard let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1) else { return }
         let source = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in

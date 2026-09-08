@@ -1,4 +1,5 @@
 import SwiftUI
+#if os(iOS)
 import JitsiMeetSDK
 
 /// Native video conferencing via the official Jitsi Meet iOS SDK
@@ -48,3 +49,48 @@ struct ConferenceSheet: View {
         }
     }
 }
+
+#else
+import AppKit
+
+/// On macOS the Jitsi SDK is unavailable (iOS-only framework), so the room —
+/// the very same real meet.jit.si room — opens in the default browser, where
+/// macOS provides first-class WebRTC camera/microphone support.
+struct ConferenceSheet: View {
+    let circle: CoffeeCircle
+    let displayName: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 18) {
+            Text(circle.emoji)
+                .font(.system(size: 52))
+            Text(circle.title)
+                .font(.title2.weight(.heavy))
+                .multilineTextAlignment(.center)
+            Text("You'll join as \(displayName). Video rooms run on meet.jit.si — on Mac the room opens in your default browser with full camera & microphone support.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            Button {
+                NSWorkspace.shared.open(circle.url)
+                dismiss()
+            } label: {
+                Label("Open video room in browser", systemImage: "video.fill")
+                    .font(.subheadline.weight(.black))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+            }
+            .buttonStyle(.borderedProminent)
+            Link("Copy-safe link · \(circle.url.absoluteString)", destination: circle.url)
+                .font(.caption2)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Button("Close") { dismiss() }
+                .font(.caption.weight(.bold))
+        }
+        .padding(26)
+        .frame(width: 440)
+    }
+}
+#endif

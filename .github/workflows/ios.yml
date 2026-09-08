@@ -1,4 +1,4 @@
-name: iOS Build
+name: iOS & Mac Builds
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build CareSphere (SwiftUI · Swift)
+  ios-build:
+    name: Build CareSphere (SwiftUI · Swift · iOS)
     runs-on: macos-14
     timeout-minutes: 45
     steps:
@@ -68,3 +68,96 @@ jobs:
             echo "::error::${line:0:380}"
           done
 
+  mac-release:
+    name: Build & release CareSphere for Mac (.dmg)
+    runs-on: macos-14
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Select newest installed Xcode
+        run: |
+          LATEST_XCODE="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          echo "Selecting $LATEST_XCODE"
+          sudo xcode-select -s "$LATEST_XCODE"
+          xcodebuild -version
+
+      - name: Generate Xcode project
+        run: cd ios && xcodegen generate
+
+      - name: Build Mac app (Release, ad-hoc signed)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ios/CareSphere.xcodeproj \
+            -scheme CareSphereMac \
+            -configuration Release \
+            -destination 'generic/platform=macOS' \
+            CODE_SIGN_IDENTITY="-" CODE_SIGNING_ALLOWED=YES \
+            build 2>&1 | tee /tmp/mac.log | tail -40
+
+      - name: Locate app bundle
+        run: |
+          APP_PATH="$(find ~/Library/Developer/Xcode/DerivedData -path '*Build/Products/Release*' -type d -name 'CareSphere.app' | head -1)"
+          echo "Found: $APP_PATH"
+          test -n "$APP_PATH"
+          echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+
+      - name: Package DMG
+        run: |
+          mkdir -p staging
+          cp -R "$APP_PATH" staging/
+          ln -s /Applications staging/Applications
+          hdiutil create -volname "CareSphere" \
+            -srcfolder staging \
+            -ov -format UDZO \
+            CareSphere-1.0.0-mac.dmg
+          ls -lh CareSphere-1.0.0-mac.dmg
+
+      - name: Publish to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES=$(cat <<'EOF'
+          ## 💚 CareSphere for Mac 1.0.0
+
+          Native SwiftUI app for macOS 13+ with:
+          - 📡 **Garmin & BLE heart-rate live streaming** — pair your Garmin (Settings → Health & Wellness → Wrist Heart Rate → Broadcast Heart Rate) or any Bluetooth chest strap via CoreBluetooth
+          - 🩺 Apple Health (HealthKit) blood pressure & heart-rate history
+          - ☕ Real Jitsi Meet video coffee circles (meet.jit.si)
+          - 💊 Medication reminders with lock-screen actions
+          - 🎧 Sensory soundscapes generated live via AVAudioEngine
+          - 🚨 Emergency SOS with location
+
+          ### Install
+          1. Download `CareSphere-1.0.0-mac.dmg` below and open it.
+          2. Drag **CareSphere** into **Applications**.
+          3. First launch: right-click the app → **Open** (it's ad-hoc signed, not notarized), then approve.
+
+          Or from Terminal: `xattr -cr /Applications/CareSphere.app`
+          EOF
+          )
+          gh release view mac-v1.0.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create mac-v1.0.0 --repo "$GITHUB_REPOSITORY" \
+              --title "CareSphere for Mac 1.0.0" --notes "$NOTES"
+          gh release upload mac-v1.0.0 CareSphere-1.0.0-mac.dmg --repo "$GITHUB_REPOSITORY" --clobber
+
+      - name: Upload mac build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-build-log
+          path: /tmp/mac.log
+          if-no-files-found: ignore
+
+      - name: Surface mac errors as annotations
+        if: failure()
+        run: |
+          grep -hE "\.swift:[0-9]+:[0-9]+: error:" /tmp/mac.log 2>/dev/null | sort -u | head -25 | while IFS= read -r line; do
+            echo "::error::${line:0:380}"
+          done

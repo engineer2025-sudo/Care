@@ -29,6 +29,7 @@ struct VitalsView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     sensorBar
+                    garminCard
                     triageBanner
                     heartRateCard
                     spo2Card
@@ -85,6 +86,36 @@ struct VitalsView: View {
                         .buttonStyle(.bordered)
                         .font(.caption.weight(.bold))
                         .disabled(healthKit.isAuthorized)
+                }
+            }
+        }
+    }
+
+    /// Garmin wearables broadcast the *standard* Bluetooth Heart Rate profile
+    /// (0x180D), so the same CoreBluetooth pairing flow connects to them.
+    private var garminCard: some View {
+        SectionCard(title: "Connect Garmin", systemImage: "figure.run") {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Garmin watches (Forerunner, Venu, Fenix, vivoactive) broadcast standard Bluetooth heart rate — pair them exactly like any chest strap:")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Label {
+                    Text("On the watch: **Settings → Health & Wellness → Wrist Heart Rate → Broadcast Heart Rate** (Venu/vivoactive) or **Settings → Sensors & Accessories → Wrist Heart Rate → Broadcast Heart Rate** (Forerunner/Fenix).")
+                        .font(.caption)
+                } icon: {
+                    Image(systemName: "1.circle.fill").foregroundStyle(Color.emerald)
+                }
+                Label {
+                    Text("Keep the watch on the broadcast screen nearby, then tap **Pair** above — it appears as a heart-rate monitor.")
+                        .font(.caption)
+                } icon: {
+                    Image(systemName: "2.circle.fill").foregroundStyle(Color.emerald)
+                }
+                Label {
+                    Text("Live BPM streams here and into the sparkline. Turn off broadcast on the watch afterwards to save battery.")
+                        .font(.caption)
+                } icon: {
+                    Image(systemName: "3.circle.fill").foregroundStyle(Color.emerald)
                 }
             }
         }

@@ -60,8 +60,13 @@ struct BigMetricButton<Label: View>: View {
 }
 
 extension View {
-    /// Gentle success haptic — the iOS-native equivalent of the web confetti.
+    /// Gentle success haptic — iOS uses UIKit's notification generator,
+    /// macOS uses the NSHapticFeedbackManager.
     func celebrate() {
+        #if os(iOS)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+        #else
+        NSHapticFeedbackManager.defaultPerformer.feedback(.alignment)
+        #endif
     }
 }
