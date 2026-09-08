@@ -132,6 +132,27 @@ struct OverviewView: View {
         [.red, .orange, .yellow, .green, .emerald][score - 1]
     }
 
+    #if os(iOS)
+    private var stepsCard: some View {
+        SectionCard(title: "Today's steps", systemImage: "figure.walk") {
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("\(steps.todaySteps)")
+                        .font(.system(size: 32, weight: .black))
+                    Text("of \(store.profile.dailyStepGoal) goal · \(steps.statusMessage)")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                ProgressView(value: Double(min(steps.todaySteps, store.profile.dailyStepGoal)),
+                             total: Double(max(store.profile.dailyStepGoal, 1)))
+                    .frame(width: 130)
+                    .tint(.emerald)
+            }
+        }
+    }
+    #endif
+
     private var routinesCard: some View {
         SectionCard(title: "Predictable daily routine", systemImage: "calendar") {
             VStack(spacing: 8) {
