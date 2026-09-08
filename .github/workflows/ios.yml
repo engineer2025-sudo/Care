@@ -132,6 +132,14 @@ jobs:
           mkdir -p staging
           cp -R "$APP_PATH" staging/
           ln -s /Applications staging/Applications
+          cat > staging/README-FIRST.txt <<'EOF'
+          ⚠️  FIRST LAUNCH ON macOS SEQUOIA (15.x) — one-time, 20 seconds:
+          1. Drag CareSphere into Applications, then open it once (a warning appears — click Done).
+          2. System Settings -> Privacy & Security -> scroll down -> "Open Anyway" -> Open.
+          Or in Terminal:  xattr -cr /Applications/CareSphere.app
+          This app is ad-hoc signed (no paid Apple certificate), so Gatekeeper asks once.
+          The build is verified in CI: signature, bundle integrity and a live launch test.
+          EOF
           hdiutil create -volname "CareSphere" \
             -srcfolder staging \
             -ov -format UDZO \
@@ -182,7 +190,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          BODY="## 💚 CareSphere for Mac 1.0.0"$'\n\n'"Native SwiftUI app for macOS 13+: 📡 Garmin & BLE heart-rate live streaming (CoreBluetooth) · 🩺 Apple Health (HealthKit) · ☕ Real Jitsi Meet coffee circles · 💊 Medication reminders · 🎧 Sensory soundscapes (AVAudioEngine) · 🚨 Emergency SOS."$'\n\n'"### Install (DMG or ZIP — both are identical apps)"$'\n'"1. Download CareSphere-1.0.0-mac.dmg (or the .zip) below."$'\n'"2. DMG: drag CareSphere into Applications. ZIP: unzip and drag to Applications."$'\n'"3. First launch — the app is ad-hoc signed (no paid Apple certificate), so Gatekeeper asks once:"$'\n'"   • Right-click CareSphere.app → Open → Open, or"$'\n'"   • System Settings → Privacy & Security → scroll to the warning → Open Anyway."$'\n'"   • Or in Terminal: xattr -cr /Applications/CareSphere.app"$'\n\n'"✅ Integrity: CI mounts the DMG, verifies the signature and smoke-test-launches the app on every build. Compare your download's SHA-256 (printed in the Actions log) before installing."
+          BODY="## 💚 CareSphere for Mac 1.0.0"$'\n\n'"Native SwiftUI app for macOS 13+: 📡 Garmin & BLE heart-rate live streaming · 🩺 Health readings · ☕ Real Jitsi Meet coffee circles · 💊 Medication reminders · 🎧 Sensory soundscapes · 🚨 Emergency SOS."$'\n\n'"### ⚠️ First launch on macOS Sequoia (15.x) — one time only"$'\n'"1. Drag CareSphere into Applications and open it once (warning appears — click Done)."$'\n'"2. System Settings → Privacy & Security → scroll down → Open Anyway → Open."$'\n'"   Or in Terminal: xattr -cr /Applications/CareSphere.app"$'\n'"   (Globalist option: sudo spctl --master-disable enables an Anywhere setting — not recommended.)"$'\n\n'"### ✅ Integrity"$'\n'"CI mounts the DMG, strictly verifies the signature (no restricted entitlements), and smoke-launches the app on every build. SHA-256 checksums are printed in the Actions log."
           if ! gh release view mac-v1.0.0 --repo "$REPO" >/dev/null 2>&1; then
             OUT=$(gh release create mac-v1.0.0 \
               --repo "$REPO" \
@@ -191,6 +199,7 @@ jobs:
               --notes "$BODY" 2>&1) || { echo "::error::release create failed: ${OUT:0:340}"; exit 1; }
           fi
           OUT=$(gh release upload mac-v1.0.0 "CareSphere-1.0.0-mac.dmg" "CareSphere-1.0.0-mac.zip" --repo "$REPO" --clobber 2>&1) || { echo "::error::release upload failed: ${OUT:0:340}"; exit 1; }
+          gh release edit mac-v1.0.0 --repo "$REPO" --notes "$BODY" >/dev/null 2>&1 || true
           echo "✅ Release published: https://github.com/$REPO/releases/tag/mac-v1.0.0"
 
       - name: Upload mac build log
