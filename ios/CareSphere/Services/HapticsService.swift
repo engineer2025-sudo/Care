@@ -10,13 +10,10 @@ enum HapticsService {
 
     private static var engine: CHHapticEngine?
 
-    private static var supportsHaptics: Bool {
-        CHHapticEngine.capabilities.supportsHaptics
-    }
-
     private static func ensureEngine() -> CHHapticEngine? {
         if let engine { return engine }
-        guard supportsHaptics, let newEngine = try? CHHapticEngine() else { return nil }
+        // Probe by constructing the engine — on unsupported hardware this fails.
+        guard let newEngine = try? CHHapticEngine() else { return nil }
         newEngine.resetHandler = { try? newEngine.start() }
         try? newEngine.start()
         engine = newEngine

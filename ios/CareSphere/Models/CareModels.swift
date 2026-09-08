@@ -103,6 +103,18 @@ let coffeeCircles: [CoffeeCircle] = [
 ]
 
 enum CareTime {
+    static func date(hour: Int, minute: Int) -> Date {
+        var comps = DateComponents()
+        comps.hour = hour
+        comps.minute = minute
+        return Calendar.current.date(from: comps) ?? Date()
+    }
+
+    static func hourMinute(from date: Date) -> (hour: Int, minute: Int) {
+        let comps = Calendar.current.dateComponents([.hour, .minute], from: date)
+        return (comps.hour ?? 8, comps.minute ?? 0)
+    }
+
     static func label(hour: Int, minute: Int) -> String {
         var comps = DateComponents()
         comps.hour = hour

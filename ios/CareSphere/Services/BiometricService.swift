@@ -11,7 +11,7 @@ enum BiometricService {
     static var biometryName: String {
         let context = LAContext()
         var error: NSError?
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: error) else {
+        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
             return "Passcode"
         }
         switch context.biometryType {
@@ -25,7 +25,7 @@ enum BiometricService {
     static var hasBiometrics: Bool {
         let context = LAContext()
         var error: NSError?
-        return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: error)
+        return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
 
     /// Prompts the user. Falls back to the device passcode automatically.

@@ -57,7 +57,7 @@ struct CareSphereApp: App {
 /// fullScreenCover on iPhone; window-modal sheet on macOS (no fullScreenCover there).
 private extension View {
     @ViewBuilder
-    func fullScreenOrSheetLock<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: () -> Content) -> some View {
+    func fullScreenOrSheetLock<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: @escaping () -> Content) -> some View {
         #if os(iOS)
         self.fullScreenCover(isPresented: isPresented, content: content)
         #else
