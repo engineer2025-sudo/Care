@@ -11,6 +11,15 @@ import { soundEngine } from './lib/audio'
 import { connectHeartRateMonitor } from './lib/bluetooth'
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Platform detection — iPhone/iPad (incl. iPadOS desktop-mode UA) and whether
+// CareSphere is running as an installed home-screen app.
+// ─────────────────────────────────────────────────────────────────────────────
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+const isStandalone = window.navigator.standalone === true ||
+  window.matchMedia('(display-mode: standalone)').matches
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Persistence — routines, meds, notes, scores, mood and display settings are
 // remembered locally (nothing leaves the device).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -131,6 +140,11 @@ function VideoModal({ session, displayName, onClose }) {
         <div className="flex-1 bg-black">
           <JitsiRoom room={session.room} displayName={displayName} />
         </div>
+        {isIOS && (
+          <div className="px-5 py-2.5 bg-sky-500/10 border-t border-sky-500/25 text-[11px] text-sky-200 leading-relaxed">
+            📱 On iPhone, Safari manages camera & microphone permissions best — if video doesn't start in the embed, tap <span className="font-bold">"Open full tab"</span> above.
+          </div>
+        )}
       </div>
     </div>
   )
@@ -371,10 +385,18 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
 
         <Row
           label="Browser notifications"
-          hint={notifyState === 'granted' ? 'Enabled — reminders pop up even if the tab is in the background.' : 'Optional: lets reminders reach you outside the tab.'}
+          hint={
+            notifyState === 'granted'
+              ? 'Enabled — reminders pop up even if the tab is in the background.'
+              : notifyState === 'unsupported' && isIOS
+                ? 'On iPhone, enable by installing to the Home Screen first (Share → Add to Home Screen), then revisit Settings.'
+                : 'Optional: lets reminders reach you outside the tab.'
+          }
         >
           {notifyState === 'granted' ? (
             <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> On</span>
+          ) : notifyState === 'unsupported' ? (
+            <span className="text-[11px] text-slate-400 font-semibold max-w-40 text-right">Not available in this browser</span>
           ) : (
             <button onClick={enableNotifications} className="bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white px-4 py-2 rounded-xl border border-slate-700 transition">
               Enable
@@ -1059,10 +1081,10 @@ export default function App() {
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950">
+    <div className="app-shell bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950">
 
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-4">
+      <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 pb-4 safe-x ios-header">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center space-x-3 cursor-pointer shrink-0" onClick={() => setActiveTab('home')}>
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 text-xl shadow-lg shadow-emerald-500/20">💚</div>
@@ -1125,7 +1147,23 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-8">
+      {/* iOS install tip — Safari requires manual Add to Home Screen */}
+      {showInstallTip && (
+        <div className="bg-emerald-500/10 border-b border-emerald-500/25 px-4 sm:px-8 py-2.5 text-xs text-emerald-200 flex items-center gap-3 safe-x">
+          <span className="flex-1 leading-relaxed">
+            📲 Install CareSphere on your iPhone: tap the <span className="font-bold">Share</span> icon in Safari, then <span className="font-bold">Add to Home Screen</span> — it opens full-screen with reminders and offline support.
+          </span>
+          <button
+            onClick={() => setIosTipDismissed(true)}
+            aria-label="Dismiss install tip"
+            className="p-1.5 text-emerald-300/70 hover:text-white shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 safe-x space-y-8">
 
         {/* ══════════ OVERVIEW ══════════ */}
         {activeTab === 'home' && (
@@ -1480,6 +1518,18 @@ export default function App() {
               </div>
             </div>
 
+            {/* iPhone capability note — honest about iOS Safari limits */}
+            {isIOS && (
+              <div className="bg-sky-500/10 border border-sky-500/25 rounded-3xl p-4 text-xs text-sky-200 flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span className="leading-relaxed">
+                  <span className="font-bold">iPhone note:</span> iOS Safari doesn't support Web Bluetooth.
+                  For live Apple Watch vitals use the native <span className="font-bold">CareSphere iOS app</span> (HealthKit + CoreBluetooth).
+                  On desktop Chrome/Edge, "Pair heart-rate monitor" pairs real BLE straps — the clearly-labeled simulated stream keeps the workflow usable on iPhone.
+                </span>
+              </div>
+            )}
+
             {/* AI triage banner */}
             <div className={`rounded-3xl border p-5 flex items-start gap-3 ${
               anyFlag ? 'bg-amber-950/40 border-amber-500/40' : 'bg-emerald-950/30 border-emerald-500/30'
@@ -1596,14 +1646,14 @@ export default function App() {
       />
 
       {/* Toast stack */}
-      <div className="fixed bottom-4 right-4 z-[60] flex flex-col gap-3 pointer-events-none" aria-live="polite">
+      <div className="fixed bottom-4 right-4 z-[60] flex flex-col gap-3 pointer-events-none safe-bottom pr-4" aria-live="polite">
         {toasts.map(t => (
           <ToastItem key={t.id} toast={t} onDismiss={dismissToast} />
         ))}
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-900/60 py-8 text-center text-xs text-slate-500 space-y-2 px-4">
+      <footer className="border-t border-slate-800 bg-slate-900/60 py-8 safe-bottom text-center text-xs text-slate-500 space-y-2 px-4">
         <div className="font-bold text-slate-300">💚 CareSphere AI — proactive senior care & autism support</div>
         <p>Real Jitsi Meet rooms · Web Bluetooth vitals · Web Audio sensory studio · Your data stays on your device.</p>
       </footer>

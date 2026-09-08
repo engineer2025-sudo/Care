@@ -32,3 +32,55 @@ html[data-contrast='high'] .placeholder-slate-500::placeholder { color: #94a3b8;
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── iOS usability ────────────────────────────────────────────────────────
+   Home-screen/PWA standalone support, notch & home-indicator safe areas,
+   native-feeling taps (no 300 ms delay, no double-tap zoom, no tap flash). */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  /* Fallback for older iOS; modern iOS 16.4+ supports dvh units below. */
+  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a, input, [role='button'] {
+  touch-action: manipulation;             /* removes 300 ms tap delay */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe areas: apply only when env() is non-zero (notched devices / standalone). */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.safe-x {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Sticky header sits under the iOS status bar in standalone mode. */
+.ios-header {
+  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+}
+
+/* Full-height app shell that respects iOS chrome in standalone mode. */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Larger, comfortable touch targets on coarse pointers (iPhone). */
+@media (pointer: coarse) {
+  button, a[role='button'] {
+    min-height: 44px;
+  }
+}
+
