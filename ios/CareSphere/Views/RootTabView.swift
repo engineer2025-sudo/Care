@@ -26,7 +26,7 @@ struct RootTabView: View {
                     Image(systemName: "gearshape.fill")
                         .font(.system(size: 15, weight: .bold))
                         .padding(10)
-                        .background(Color(.secondarySystemBackground), in: Circle())
+                        .background(Color.card, in: Circle())
                 }
                 .accessibilityLabel("Settings")
                 Button {

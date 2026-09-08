@@ -35,7 +35,7 @@ struct ConferenceSheet: View {
             JitsiConferenceView(room: circle.room, displayName: displayName)
                 .ignoresSafeArea(edges: .bottom)
                 .navigationTitle(circle.title)
-                .navigationBarTitleDisplayMode(.inline)
+                .inlineTitle()
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button("Leave") { dismiss() }

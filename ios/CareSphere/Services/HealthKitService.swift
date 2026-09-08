@@ -106,7 +106,9 @@ final class HealthKitService: NSObject, ObservableObject {
 
     /// Live updates: re-fetch whenever Apple Health gains a new sample.
     private func observe(_ type: HKQuantityType) {
+        #if os(iOS)
         store.enableBackgroundDelivery(for: type, frequency: .immediate) { _, _ in }
+        #endif
         let observer = HKObserverQuery(sampleType: type, predicate: nil) { [weak self] _, completion, _ in
             if type == HKObjectType.quantityType(forIdentifier: .heartRate) {
                 self?.refreshAll()

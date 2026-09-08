@@ -1,4 +1,45 @@
 import SwiftUI
+#if os(iOS)
+import UIKit
+#else
+import AppKit
+#endif
+
+// MARK: - Cross-platform semantic colors & helpers
+// iOS uses UISystemBackground colors; macOS maps them to AppKit equivalents
+// so the same SwiftUI sources compile on both platforms.
+
+extension Color {
+    /// Outer card background.
+    static let card = {
+        #if os(iOS)
+        return Color(UIColor.secondarySystemBackground)
+        #else
+        return Color(NSColor.controlBackgroundColor)
+        #endif
+    }()
+    /// Inner row / element background inside cards.
+    static let cardInner = {
+        #if os(iOS)
+        return Color(UIColor.tertiarySystemBackground)
+        #else
+        return Color(NSColor.unemphasizedSelectedContentBackgroundColor)
+        #endif
+    }()
+}
+
+extension View {
+    /// Inline navigation titles on iOS; no-op on macOS where titles are
+    /// already rendered inline in the window chrome.
+    @ViewBuilder
+    func inlineTitle() -> some View {
+        #if os(iOS)
+        navigationBarTitleDisplayMode(.inline)
+        #else
+        self
+        #endif
+    }
+}
 
 /// Card container used across all tabs.
 struct SectionCard<Content: View>: View {
@@ -15,7 +56,7 @@ struct SectionCard<Content: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(Color.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -53,7 +94,7 @@ struct BigMetricButton<Label: View>: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
-            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .background(Color.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
         .buttonStyle(.plain)
     }

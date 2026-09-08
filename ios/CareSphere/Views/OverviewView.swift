@@ -26,7 +26,7 @@ struct OverviewView: View {
             }
             .background(Color.ink)
             .navigationTitle("Overview")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .onAppear {
                 if notifications.authorizationStatus == .authorized {
                     NotificationService.shared.syncMedicationReminders(store.medications)
@@ -105,7 +105,7 @@ struct OverviewView: View {
                 .font(.title2)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(selected ? Color.yellow.opacity(0.22) : Color(.tertiarySystemBackground),
+                .background(selected ? Color.yellow.opacity(0.22) : Color.cardInner,
                             in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -143,7 +143,7 @@ struct OverviewView: View {
                                 .foregroundStyle(routine.isDone ? Color.emerald : Color.secondary)
                         }
                         .padding(12)
-                        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
                     .buttonStyle(.plain)
                 }
@@ -179,7 +179,7 @@ struct OverviewView: View {
                         StatusChip(text: med.isTaken ? "Taken" : "Due", color: med.isTaken ? .gray : .pink)
                     }
                     .padding(12)
-                    .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
             }
             Label("Dose times become real iOS reminders with ✓ Taken / Snooze buttons on the lock screen.",

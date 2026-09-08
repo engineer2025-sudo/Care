@@ -19,7 +19,7 @@ struct CoffeeCirclesView: View {
             }
             .background(Color.ink)
             .navigationTitle("Coffee Circles")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .sheet(item: $activeCircle) { circle in
                 ConferenceSheet(circle: circle, displayName: store.displayName)
             }
@@ -75,12 +75,12 @@ struct CoffeeCirclesView: View {
                         .font(.subheadline.weight(.bold))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
-                        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             }
         }
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(Color.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
     private var openCircleButton: some View {
@@ -110,6 +110,6 @@ struct CoffeeCirclesView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(Color.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }

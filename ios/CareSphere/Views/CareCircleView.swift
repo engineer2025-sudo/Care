@@ -25,7 +25,7 @@ struct CareCircleView: View {
             }
             .background(Color.ink)
             .navigationTitle("Care Circle")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
         }
     }
 
@@ -57,7 +57,7 @@ struct CareCircleView: View {
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
         }
     }
@@ -87,7 +87,7 @@ struct CareCircleView: View {
             HStack(spacing: 6) {
                 ForEach(0..<7, id: \.self) { index in
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(adherenceWeek[index] ? Color.emerald.opacity(0.85) : Color(.tertiarySystemBackground))
+                        .fill(adherenceWeek[index] ? Color.emerald.opacity(0.85) : Color.cardInner)
                         .frame(height: 30)
                 }
             }

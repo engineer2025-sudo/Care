@@ -89,11 +89,13 @@ struct SosView: View {
             }
             .padding(22)
             .background(Color.ink)
+            #if os(iOS)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { dismiss() } label: { Image(systemName: "xmark.circle.fill") }
                 }
             }
+            #endif
         }
         .preferredColorScheme(.dark)
         .presentationDetents([.large])

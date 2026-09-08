@@ -40,7 +40,7 @@ struct VitalsView: View {
             }
             .background(Color.ink)
             .navigationTitle("Vitals & Telehealth")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .onReceive(bluetooth.$bpm.compactMap { $0 }) { value in
                 series.append(VitalsPoint(date: Date(), bpm: Double(value)))
                 if series.count > 60 { series.removeFirst() }
@@ -164,7 +164,7 @@ struct VitalsView: View {
                     .foregroundStyle(.tertiary)
                     .frame(height: 90, alignment: .center)
                     .frame(maxWidth: .infinity)
-                    .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                    .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 12))
             }
             Text("BLE: Bluetooth SIG Heart Rate profile (0x180D/0x2A37) · Apple Health: Apple Watch samples")
                 .font(.caption2)
@@ -226,7 +226,7 @@ struct VitalsView: View {
         .foregroundStyle(.secondary)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(Color.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }
 

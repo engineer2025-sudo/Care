@@ -14,7 +14,7 @@ struct TherapyView: View {
             }
             .background(Color.ink)
             .navigationTitle("Therapy & Sensory")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
         }
     }
 }
@@ -49,7 +49,7 @@ struct EmotionMatchCard: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 ForEach(emotions, id: \.name) { emotion in
                     Button {
@@ -59,7 +59,7 @@ struct EmotionMatchCard: View {
                             .font(.largeTitle)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                     .accessibilityLabel("Option \(emotion.name)")
                 }
@@ -231,7 +231,7 @@ struct SoundscapesCard: View {
                 Spacer()
             }
             .padding(12)
-            .background(active ? Color.emerald.opacity(0.18) : Color(.tertiarySystemBackground),
+            .background(active ? Color.emerald.opacity(0.18) : Color.cardInner,
                         in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)

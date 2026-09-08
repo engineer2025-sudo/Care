@@ -65,7 +65,7 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings & Accessibility")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
