@@ -21,6 +21,13 @@ final class HealthKitService: NSObject, ObservableObject {
             statusMessage = "Apple Health isn't available on this device."
             return
         }
+        #if os(macOS)
+        // The direct-download Mac build is ad-hoc signed and cannot carry the
+        // restricted HealthKit entitlement — BLE pairing is the live source.
+        statusMessage = "Apple Health on Mac requires a notarized (App Store) build. Pair a Garmin or BLE heart-rate strap below for live readings."
+        #else
+        statusMessage = "Apple Health ready — tap Enable to authorize reading your vitals."
+        #endif
     }
 
     private var readTypes: Set<HKObjectType> {

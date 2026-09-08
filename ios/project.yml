@@ -53,6 +53,9 @@ targets:
         NSLocationWhenInUseUsageDescription: "CareSphere attaches your location to an emergency SOS alert so responders and family can find you."
 
   # ── Native Mac app (ships as .dmg) ──────────────────────────────────
+  # NOTE: no entitlements on purpose — restricted entitlements (e.g. HealthKit)
+  # cannot be ad-hoc signed; taskgated kills the app with "Invalid Signature".
+  # Garmin/BLE via CoreBluetooth needs no entitlement.
   CareSphereMac:
     type: application
     platform: macOS
@@ -65,10 +68,7 @@ targets:
         PRODUCT_NAME: CareSphere
         PRODUCT_BUNDLE_IDENTIFIER: org.caresphere.CareSphereMac
         CODE_SIGN_IDENTITY: "-"
-    entitlements:
-      path: CareSphereMac.entitlements
-      properties:
-        com.apple.developer.healthkit: true
+        CODE_SIGN_ENTITLEMENTS: ""
     info:
       path: CareSphere-Mac-Info.plist
       properties:

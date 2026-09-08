@@ -108,6 +108,25 @@ jobs:
           test -n "$APP_PATH"
           echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
 
+      - name: Re-sign ad-hoc (no entitlements) and verify strictly
+        run: |
+          APP_PATH="$APP_PATH"
+          echo "── Entitlements before (should be none/empty) ──"
+          codesign -d --entitlements - "$APP_PATH" 2>&1 | head -3 || true
+          codesign --remove-signature "$APP_PATH" 2>/dev/null || true
+          codesign --force --deep --sign - "$APP_PATH"
+          codesign --verify --deep --strict "$APP_PATH" && echo "✅ strict verify OK"
+          echo "── Final signature ──"
+          codesign -dv "$APP_PATH" 2>&1 | head -6
+          echo "── Entitlements after (must be empty) ──"
+          codesign -d --entitlements - "$APP_PATH" 2>&1 | head -3 || true
+          # A restricted entitlement here would get the app SIGKILLed by
+          # taskgated on user Macs ("Code Signature Invalid").
+          if codesign -d --entitlements - "$APP_PATH" 2>/dev/null | grep -q "healthkit"; then
+            echo "::error::Restricted entitlement present — ad-hoc app will be killed on user machines"
+            exit 1
+          fi
+
       - name: Package DMG + ZIP
         run: |
           mkdir -p staging
