@@ -4,6 +4,7 @@ struct OverviewView: View {
     @EnvironmentObject private var store: CareStore
     @EnvironmentObject private var notifications: NotificationService
     @EnvironmentObject private var bluetooth: BluetoothHeartRateService
+    @EnvironmentObject private var steps: StepCountService
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
