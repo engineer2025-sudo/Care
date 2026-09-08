@@ -1,5 +1,8 @@
 # 📱 CareSphere for iOS — native SwiftUI app
 
+> **🆕 v2.0.0 — "Setup & Lock"**: first-run **onboarding wizard** (name & age → care focus → medications → routines → emergency contact → Touch ID → permissions), **Touch ID / Face ID app lock** (LocalAuthentication with passcode fallback, auto-locks on background), **CoreHaptics** custom haptic patterns, **NaturalLanguage** on-device sentiment analysis for the care journal, **CoreMotion** daily step tracking (iPhone), and **Contacts** import for the SOS contact — on top of every v1 feature (HealthKit, CoreBluetooth Garmin streaming, Jitsi SDK video, UserNotifications, AVAudioEngine soundscapes, SOS with location).
+
+
 > **⬇️ Download for Mac:** [CareSphere-1.0.0-mac.dmg](https://github.com/engineer2025-sudo/Care/releases/download/mac-v1.0.0/CareSphere-1.0.0-mac.dmg) (macOS 13+, native Apple Silicon/Intel build from CI)
 > Install: open the DMG → drag **CareSphere** to Applications → first launch right-click → **Open** (ad-hoc signed).
 > 📡 **Garmin:** on your watch enable *Settings → Health & Wellness → Wrist Heart Rate → Broadcast Heart Rate* (Venu/vivoactive) or *Settings → Sensors & Accessories → Wrist Heart Rate → Broadcast Heart Rate* (Forerunner/Fenix), then tap **Pair** in the app's Vitals tab — Garmin broadcasts the standard Bluetooth Heart Rate profile.
