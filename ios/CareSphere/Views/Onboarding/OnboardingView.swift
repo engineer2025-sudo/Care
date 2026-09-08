@@ -339,7 +339,9 @@ struct OnboardingView: View {
                 Text("Phone").font(.caption.weight(.bold)).foregroundStyle(.secondary)
                 TextField("+1 555 010 2030", text: $emergencyPhone)
                     .textFieldStyle(.roundedBorder)
+                    #if os(iOS)
                     .keyboardType(.phonePad)
+                    #endif
             }
             #if os(iOS)
             Button {

@@ -69,7 +69,9 @@ struct SettingsView: View {
         Section("Emergency contact (SOS)") {
             TextField("Name", text: $store.profile.emergencyContact.name)
             TextField("Phone", text: $store.profile.emergencyContact.phone)
+                #if os(iOS)
                 .keyboardType(.phonePad)
+                #endif
             #if os(iOS)
             Button {
                 contactPickerShown = true
