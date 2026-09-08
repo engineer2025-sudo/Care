@@ -34,14 +34,8 @@ final class StepCountService: ObservableObject {
                 }
             }
         }
-        // Immediate baseline query so the card isn't empty before first update.
-        pedometer.queryCurrentData(from: startOfDay, to: Date()) { [weak self] data, error in
-            DispatchQueue.main.async {
-                if let data {
-                    self?.todaySteps = data.numberOfSteps.intValue
-                }
-            }
-        }
+        // startUpdates delivers today's accumulated totals immediately,
+        // then streams deltas as the user moves.
     }
 }
 #else
