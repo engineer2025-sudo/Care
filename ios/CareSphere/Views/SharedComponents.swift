@@ -107,7 +107,24 @@ extension View {
         #if os(iOS)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         #else
-        NSHapticFeedbackManager.defaultPerformer.feedback(.alignment)
+        NSHapticFeedbackManager.defaultPerformer.performFeedback(.alignment, performanceTime: .default)
         #endif
     }
+}
+
+// Global haptic helpers usable from any view or model.
+func hapticWarning() {
+    #if os(iOS)
+    UINotificationFeedbackGenerator().notificationOccurred(.warning)
+    #else
+    NSHapticFeedbackManager.defaultPerformer.performFeedback(.generic, performanceTime: .default)
+    #endif
+}
+
+func hapticError() {
+    #if os(iOS)
+    UINotificationFeedbackGenerator().notificationOccurred(.error)
+    #else
+    NSHapticFeedbackManager.defaultPerformer.performFeedback(.pattern(0.4, 0.4, 2), performanceTime: .default)
+    #endif
 }

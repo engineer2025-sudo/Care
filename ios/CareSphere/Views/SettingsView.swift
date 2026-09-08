@@ -67,7 +67,7 @@ struct SettingsView: View {
             .navigationTitle("Settings & Accessibility")
             .inlineTitle()
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
             }

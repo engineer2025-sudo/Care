@@ -172,7 +172,7 @@ struct PatternRecallCard: View {
         }
         guard sequence[inputIndex] == pad else {
             phase = .over
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            hapticError()
             return
         }
         if inputIndex == sequence.count - 1 {

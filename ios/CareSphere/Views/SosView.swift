@@ -72,7 +72,7 @@ struct SosView: View {
                     }
                     Button {
                         notifiedAt = Date()
-                        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                        hapticWarning()
                         SpeechService.shared.speak("Emergency alert sent to your care circle.", enabled: true)
                     } label: {
                         Label("Notify Care Circle", systemImage: "bell.fill")
