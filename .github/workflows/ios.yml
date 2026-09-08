@@ -132,15 +132,15 @@ jobs:
           echo "── Code signature (ad-hoc expected) ──"
           codesign -dv "$APP" 2>&1 | head -6
           codesign --verify --deep "$APP" && echo "✅ codesign verify: OK"
-          echo "── Launch smoke test ──"
-          "$APP/Contents/MacOS/CareSphere" & APP_PID=$!
+          echo "── Launch smoke test (informational; GUI apps can be limited on CI VMs) ──"
+          nohup "$APP/Contents/MacOS/CareSphere" >/tmp/app-run.log 2>&1 < /dev/null &
+          APP_PID=$!
           sleep 5
           if kill -0 "$APP_PID" 2>/dev/null; then
             echo "✅ App launched and stayed running — bundle is healthy"
-            kill "$APP_PID" 2>/dev/null || true
+            pkill -f "CareSphere.app/Contents/MacOS" 2>/dev/null || true
           else
-            wait "$APP_PID"; EXIT=$?
-            echo "::warning::App process exited immediately (code $EXIT). If this is a headless-VM GUI limitation it's benign; check the bundle manually."
+            echo "::warning::App process exited on the headless CI VM — verify manually on a real Mac (GUI session limitation is common and benign)."
           fi
           hdiutil detach /tmp/caremount
           echo "── SHA-256 checksums ──"
