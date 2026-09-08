@@ -157,11 +157,13 @@ jobs:
           sleep 5
           if kill -0 "$APP_PID" 2>/dev/null; then
             echo "✅ App launched and stayed running — bundle is healthy"
-            pkill -f "CareSphere.app/Contents/MacOS" 2>/dev/null || true
           else
             echo "::warning::App process exited on the headless CI VM — verify manually on a real Mac (GUI session limitation is common and benign)."
           fi
-          hdiutil detach /tmp/caremount
+          pkill -f "CareSphere.app/Contents/MacOS" 2>/dev/null || true
+          sleep 2
+          # The smoke-launched app can hold the mount busy — force-detach, non-fatal.
+          hdiutil detach /tmp/caremount -force 2>/dev/null || true
           echo "── SHA-256 checksums ──"
           shasum -a 256 CareSphere-1.0.0-mac.dmg CareSphere-1.0.0-mac.zip
 
