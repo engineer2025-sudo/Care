@@ -106,9 +106,8 @@ extension View {
     func celebrate() {
         #if os(iOS)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        #else
-        NSHapticFeedbackManager.defaultPerformer.performFeedback(.alignment, performanceTime: .default)
         #endif
+        // macOS: no trackpad haptics — visual feedback carries the celebration.
     }
 }
 
@@ -116,15 +115,11 @@ extension View {
 func hapticWarning() {
     #if os(iOS)
     UINotificationFeedbackGenerator().notificationOccurred(.warning)
-    #else
-    NSHapticFeedbackManager.defaultPerformer.performFeedback(.generic, performanceTime: .default)
     #endif
 }
 
 func hapticError() {
     #if os(iOS)
     UINotificationFeedbackGenerator().notificationOccurred(.error)
-    #else
-    NSHapticFeedbackManager.defaultPerformer.performFeedback(.pattern(0.4, 0.4, 2), performanceTime: .default)
     #endif
 }
