@@ -54,6 +54,14 @@ struct CareCircleView: View {
                         Text(note.createdAt, style: .date).font(.caption2).foregroundStyle(.tertiary)
                     }
                     Text(note.body).font(.footnote).foregroundStyle(.secondary)
+                    if let sentiment = note.sentiment {
+                        HStack(spacing: 5) {
+                            Text(TextInsightsService.emoji(for: sentiment))
+                            StatusChip(text: TextInsightsService.label(for: sentiment),
+                                       color: sentiment >= 0.35 ? .emerald : sentiment <= -0.35 ? .orange : .gray)
+                            Text("on-device NLP").font(.caption2).foregroundStyle(.tertiary)
+                        }
+                    }
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)

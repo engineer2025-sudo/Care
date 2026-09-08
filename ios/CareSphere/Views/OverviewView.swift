@@ -19,6 +19,9 @@ struct OverviewView: View {
                     hero
                     metricsGrid
                     moodCheckIn
+                    #if os(iOS)
+                    stepsCard
+                    #endif
                     routinesCard
                     medicationsCard
                 }
@@ -45,6 +48,11 @@ struct OverviewView: View {
             Text("Live Apple Health & Bluetooth vitals, one-tap Jitsi coffee circles, and sensory therapy games — with family one tap away.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+            if !store.personalizedTagline.isEmpty {
+                Text(store.personalizedTagline)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(Color.emerald)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)

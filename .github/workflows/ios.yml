@@ -143,15 +143,15 @@ jobs:
           hdiutil create -volname "CareSphere" \
             -srcfolder staging \
             -ov -format UDZO \
-            CareSphere-1.0.0-mac.dmg
+            CareSphere-2.0.0-mac.dmg
           # Mac-native zip (preserves metadata/resource forks) as an
           # alternative download format.
-          ditto -c -k --keepParent --sequesterRsrc "$APP_PATH" CareSphere-1.0.0-mac.zip
-          ls -lh CareSphere-1.0.0-mac.dmg CareSphere-1.0.0-mac.zip
+          ditto -c -k --keepParent --sequesterRsrc "$APP_PATH" CareSphere-2.0.0-mac.zip
+          ls -lh CareSphere-2.0.0-mac.dmg CareSphere-2.0.0-mac.zip
 
       - name: Verify integrity & smoke-test launch
         run: |
-          hdiutil attach CareSphere-1.0.0-mac.dmg -mountpoint /tmp/caremount -nobrowse
+          hdiutil attach CareSphere-2.0.0-mac.dmg -mountpoint /tmp/caremount -nobrowse
           APP="/tmp/caremount/CareSphere.app"
           echo "── Bundle contents ──"
           ls -la "$APP/Contents/MacOS/"
@@ -173,7 +173,7 @@ jobs:
           # The smoke-launched app can hold the mount busy — force-detach, non-fatal.
           hdiutil detach /tmp/caremount -force 2>/dev/null || true
           echo "── SHA-256 checksums ──"
-          shasum -a 256 CareSphere-1.0.0-mac.dmg CareSphere-1.0.0-mac.zip
+          shasum -a 256 CareSphere-2.0.0-mac.dmg CareSphere-2.0.0-mac.zip
 
       - name: Upload installers as workflow artifacts too
         if: always()
@@ -181,8 +181,8 @@ jobs:
         with:
           name: mac-installers
           path: |
-            CareSphere-1.0.0-mac.dmg
-            CareSphere-1.0.0-mac.zip
+            CareSphere-2.0.0-mac.dmg
+            CareSphere-2.0.0-mac.zip
           if-no-files-found: ignore
 
       - name: Publish to GitHub Releases
@@ -190,17 +190,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
-          BODY="## 💚 CareSphere for Mac 1.0.0"$'\n\n'"Native SwiftUI app for macOS 13+: 📡 Garmin & BLE heart-rate live streaming · 🩺 Health readings · ☕ Real Jitsi Meet coffee circles · 💊 Medication reminders · 🎧 Sensory soundscapes · 🚨 Emergency SOS."$'\n\n'"### ⚠️ First launch on macOS Sequoia (15.x) — one time only"$'\n'"1. Drag CareSphere into Applications and open it once (warning appears — click Done)."$'\n'"2. System Settings → Privacy & Security → scroll down → Open Anyway → Open."$'\n'"   Or in Terminal: xattr -cr /Applications/CareSphere.app"$'\n'"   (Globalist option: sudo spctl --master-disable enables an Anywhere setting — not recommended.)"$'\n\n'"### ✅ Integrity"$'\n'"CI mounts the DMG, strictly verifies the signature (no restricted entitlements), and smoke-launches the app on every build. SHA-256 checksums are printed in the Actions log."
-          if ! gh release view mac-v1.0.0 --repo "$REPO" >/dev/null 2>&1; then
-            OUT=$(gh release create mac-v1.0.0 \
+          BODY="## 💚 CareSphere for Mac 2.0.0 — v2"$'\n\n'"v2: beautiful onboarding wizard, Touch ID / Face ID app lock, CoreHaptics, on-device NaturalLanguage sentiment, CoreMotion step tracking, Contacts SOS import — plus Garmin & BLE heart-rate streaming, Jitsi coffee circles, medication reminders and sensory soundscapes."$'\n\n'"### ⚠️ First launch on macOS Sequoia (15.x) — one time only"$'\n'"1. Drag CareSphere into Applications and open it once (warning appears — click Done)."$'\n'"2. System Settings → Privacy & Security → scroll down → Open Anyway → Open."$'\n'"   Or in Terminal: xattr -cr /Applications/CareSphere.app"$'\n'"   (Globalist option: sudo spctl --master-disable enables an Anywhere setting — not recommended.)"$'\n\n'"### ✅ Integrity"$'\n'"CI mounts the DMG, strictly verifies the signature (no restricted entitlements), and smoke-launches the app on every build. SHA-256 checksums are printed in the Actions log."
+          if ! gh release view mac-v2.0.0 --repo "$REPO" >/dev/null 2>&1; then
+            OUT=$(gh release create mac-v2.0.0 \
               --repo "$REPO" \
               --target "$GITHUB_SHA" \
-              --title "CareSphere for Mac 1.0.0" \
+              --title "CareSphere for Mac 2.0.0" \
               --notes "$BODY" 2>&1) || { echo "::error::release create failed: ${OUT:0:340}"; exit 1; }
           fi
-          OUT=$(gh release upload mac-v1.0.0 "CareSphere-1.0.0-mac.dmg" "CareSphere-1.0.0-mac.zip" --repo "$REPO" --clobber 2>&1) || { echo "::error::release upload failed: ${OUT:0:340}"; exit 1; }
-          gh release edit mac-v1.0.0 --repo "$REPO" --notes "$BODY" >/dev/null 2>&1 || true
-          echo "✅ Release published: https://github.com/$REPO/releases/tag/mac-v1.0.0"
+          OUT=$(gh release upload mac-v2.0.0 "CareSphere-2.0.0-mac.dmg" "CareSphere-2.0.0-mac.zip" --repo "$REPO" --clobber 2>&1) || { echo "::error::release upload failed: ${OUT:0:340}"; exit 1; }
+          gh release edit mac-v2.0.0 --repo "$REPO" --notes "$BODY" >/dev/null 2>&1 || true
+          echo "✅ Release published: https://github.com/$REPO/releases/tag/mac-v2.0.0"
 
       - name: Upload mac build log
         if: always()

@@ -12,7 +12,7 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     CODE_SIGN_STYLE: Automatic
-    MARKETING_VERSION: "1.0.0"
+    MARKETING_VERSION: "2.0.0"
     CURRENT_PROJECT_VERSION: "1"
     DEVELOPMENT_TEAM: ""
 
@@ -45,6 +45,8 @@ targets:
         UIBackgroundModes:
           - audio
           - voip
+        NSFaceIDUsageDescription: "CareSphere locks your health data behind Touch ID / Face ID."
+        NSMotionUsageDescription: "CareSphere counts your daily steps to encourage gentle, healthy movement."
         NSCameraUsageDescription: "CareSphere uses the camera for video coffee circles and telehealth visits."
         NSMicrophoneUsageDescription: "CareSphere uses the microphone for video coffee circles and telehealth visits."
         NSHealthShareUsageDescription: "CareSphere reads your heart rate, blood oxygen and blood pressure from Apple Health so you and your care circle can spot trends early."

@@ -101,25 +101,18 @@ struct BigMetricButton<Label: View>: View {
 }
 
 extension View {
-    /// Gentle success haptic — iOS uses UIKit's notification generator,
-    /// macOS uses the NSHapticFeedbackManager.
+    /// Gentle success haptic — CoreHaptics custom patterns on iPhone,
+    /// no-op on macOS. See HapticsService.
     func celebrate() {
-        #if os(iOS)
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        #endif
-        // macOS: no trackpad haptics — visual feedback carries the celebration.
+        HapticsService.success()
     }
 }
 
 // Global haptic helpers usable from any view or model.
 func hapticWarning() {
-    #if os(iOS)
-    UINotificationFeedbackGenerator().notificationOccurred(.warning)
-    #endif
+    HapticsService.warning()
 }
 
 func hapticError() {
-    #if os(iOS)
-    UINotificationFeedbackGenerator().notificationOccurred(.error)
-    #endif
+    HapticsService.error()
 }

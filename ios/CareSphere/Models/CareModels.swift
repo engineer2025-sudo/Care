@@ -27,6 +27,47 @@ struct CareNote: Identifiable, Codable, Equatable {
     var author: String
     var body: String
     var createdAt: Date = Date()
+    /// On-device NaturalLanguage sentiment score (-1...1) for journal insights.
+    var sentiment: Double?
+}
+
+/// Care focus chosen during onboarding — personalizes the whole app.
+enum CareMode: String, Codable, CaseIterable, Identifiable {
+    case senior, autism, both
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .senior: return "Senior Care"
+        case .autism: return "Autism Support"
+        case .both: return "Both"
+        }
+    }
+    var emoji: String {
+        switch self {
+        case .senior: return "🌿"
+        case .autism: return "🧩"
+        case .both: return "💚"
+        }
+    }
+}
+
+struct EmergencyContact: Codable, Equatable {
+    var name: String = ""
+    var phone: String = ""
+    var isEmpty: Bool { name.trimmingCharacters(in: .whitespaces).isEmpty }
+}
+
+struct CareProfile: Codable, Equatable {
+    var birthDate: Date? = nil
+    var careMode: CareMode = .both
+    var emergencyContact = EmergencyContact()
+    var dailyStepGoal: Int = 6000
+
+    /// Age in whole years (nil when birth date not provided).
+    var age: Int? {
+        guard let birthDate else { return nil }
+        return Calendar.current.dateComponents([.year], from: birthDate, to: Date()).year
+    }
 }
 
 struct MoodEntry: Identifiable, Codable, Equatable {

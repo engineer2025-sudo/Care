@@ -7,6 +7,10 @@ struct CareSphereApp: App {
     @StateObject private var bluetooth = BluetoothHeartRateService()
     @StateObject private var notifications = NotificationService.shared
     @StateObject private var location = LocationService()
+    @StateObject private var steps = StepCountService()
+
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isLocked = false
 
     init() {
         NotificationService.shared.registerCategories()
@@ -14,14 +18,51 @@ struct CareSphereApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootTabView()
-                .environmentObject(store)
-                .environmentObject(healthKit)
-                .environmentObject(bluetooth)
-                .environmentObject(notifications)
-                .environmentObject(location)
-                .tint(.emerald)
+            Group {
+                if store.hasCompletedOnboarding {
+                    RootTabView()
+                        .fullScreenOrSheetLock(isPresented: $isLocked) {
+                            AppLockView(onUnlock: { isLocked = false })
+                        }
+                        .onAppear {
+                            if store.biometricEnabled && !isLocked && !hasShownInitialLock {
+                                hasShownInitialLock = true
+                                isLocked = true
+                            }
+                            steps.start()
+                        }
+                } else {
+                    OnboardingView()
+                }
+            }
+            .environmentObject(store)
+            .environmentObject(healthKit)
+            .environmentObject(bluetooth)
+            .environmentObject(notifications)
+            .environmentObject(location)
+            .environmentObject(steps)
+            .tint(.emerald)
+            .onChange(of: scenePhase) { phase in
+                // Lock whenever the app leaves the foreground (if enabled).
+                if store.hasCompletedOnboarding && store.biometricEnabled && phase != .active {
+                    isLocked = true
+                }
+            }
         }
+    }
+
+    @State private var hasShownInitialLock = false
+}
+
+/// fullScreenCover on iPhone; window-modal sheet on macOS (no fullScreenCover there).
+private extension View {
+    @ViewBuilder
+    func fullScreenOrSheetLock<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: () -> Content) -> some View {
+        #if os(iOS)
+        self.fullScreenCover(isPresented: isPresented, content: content)
+        #else
+        self.sheet(isPresented: isPresented, content: content)
+        #endif
     }
 }
 

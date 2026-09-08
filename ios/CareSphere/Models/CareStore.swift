@@ -23,6 +23,11 @@ final class CareStore: ObservableObject {
     @Published var emotionScore: Int { didSet { save() } }
     @Published var bestPattern: Int { didSet { save() } }
 
+    // MARK: v2 — onboarding, profile & security
+    @Published var hasCompletedOnboarding: Bool { didSet { save() } }
+    @Published var biometricEnabled: Bool { didSet { save() } }
+    @Published var profile: CareProfile { didSet { save() } }
+
     private let fileURL: URL
     private var observers: [NSObjectProtocol] = []
 
@@ -32,29 +37,32 @@ final class CareStore: ObservableObject {
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         fileURL = documents.appendingPathComponent("carestore.json")
 
-        let saved = Self.load(from: fileURL)
-        displayName = saved?.displayName ?? "Alex"
-        voiceReminders = saved?.voiceReminders ?? false
-        routines = saved?.routines ?? [
+        let box = Self.load(from: fileURL)
+        displayName = box?.displayName ?? "Alex"
+        voiceReminders = box?.voiceReminders ?? false
+        routines = box?.routines ?? [
             Routine(emoji: "💧", title: "Morning hydration"),
             Routine(emoji: "🧩", title: "10-minute brain game"),
             Routine(emoji: "☕", title: "Join a coffee circle"),
             Routine(emoji: "🌿", title: "Evening stretch & wind-down"),
         ]
-        medications = saved?.medications ?? [
+        medications = box?.medications ?? [
             Medication(name: "Lisinopril", purpose: "Blood pressure", hour: 8, minute: 0),
             Medication(name: "Vitamin D3", purpose: "Bone health", hour: 12, minute: 30),
             Medication(name: "Donepezil", purpose: "Memory support", hour: 20, minute: 0),
         ]
-        notes = saved?.notes ?? [
+        notes = box?.notes ?? [
             CareNote(author: "Dr. Evelyn Vance (PCP)",
                      body: "BP stable at 122/78. Continue morning walks and current dose."),
             CareNote(author: "Sarah M. (daughter)",
                      body: "Alex completed 3 emotion-recognition sessions — engagement is way up!"),
         ]
-        moods = saved?.moods ?? []
-        emotionScore = saved?.emotionScore ?? 0
-        bestPattern = saved?.bestPattern ?? 0
+        moods = box?.moods ?? []
+        emotionScore = box?.emotionScore ?? 0
+        bestPattern = box?.bestPattern ?? 0
+        hasCompletedOnboarding = box?.hasCompletedOnboarding ?? false
+        biometricEnabled = box?.biometricEnabled ?? false
+        profile = box?.profile ?? CareProfile()
 
         observeNotificationActions()
     }
@@ -77,7 +85,10 @@ final class CareStore: ObservableObject {
             notes: notes,
             moods: moods,
             emotionScore: emotionScore,
-            bestPattern: bestPattern)
+            bestPattern: bestPattern,
+            hasCompletedOnboarding: hasCompletedOnboarding,
+            biometricEnabled: biometricEnabled,
+            profile: profile)
         if let data = try? JSONEncoder().encode(box) {
             try? data.write(to: fileURL, options: .atomic)
         }
@@ -92,6 +103,10 @@ final class CareStore: ObservableObject {
         var moods: [MoodEntry]
         var emotionScore: Int
         var bestPattern: Int
+        // v2 fields decode as nil from v1 files and fall back to defaults.
+        var hasCompletedOnboarding: Bool?
+        var biometricEnabled: Bool?
+        var profile: CareProfile?
     }
 
     // MARK: Derived values
@@ -104,6 +119,14 @@ final class CareStore: ObservableObject {
             .min { ($0.hour, $0.minute) < ($1.hour, $1.minute) }
     }
     var moodToday: MoodEntry? { moods.first { $0.day == CareTime.dayKey() } }
+
+    /// Personalized greeting line based on age + care focus.
+    var personalizedTagline: String {
+        var parts: [String] = []
+        if let age = profile.age { parts.append("\(age) years young") }
+        parts.append("focused on \(profile.careMode.label.lowercased())")
+        return parts.joined(separator: " · ")
+    }
 
     // MARK: Mutations
 
@@ -149,7 +172,10 @@ final class CareStore: ObservableObject {
 
     func addNote(author: String, body: String) {
         guard !body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        notes.insert(CareNote(author: author, body: body.trimmingCharacters(in: .whitespacesAndNewlines)), at: 0)
+        let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        notes.insert(
+            CareNote(author: author, body: trimmed, sentiment: TextInsightsService.sentimentScore(for: trimmed)),
+            at: 0)
     }
 
     // MARK: Notification-action plumbing (✓ Taken / Snooze from lock screen)
