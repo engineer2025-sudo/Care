@@ -85,7 +85,7 @@ The release DMG is ad-hoc signed, not Developer ID signed or notarized. On macOS
 
 ## CI
 
-`.github/workflows/ios.yml` is configured to build the iOS simulator and native Mac Release targets, verify the Mac signature, and package the DMG. The Mac release job now waits for the iOS build; if successful it checksum-verifies and packages the optional Kokoro asset before publishing. This 2.1 run and its assets still need to pass verification before the release can be considered available. The Mac target intentionally has no HealthKit entitlement to avoid the invalid ad-hoc signature issue seen in v1.
+`.github/workflows/ios.yml` is configured to compile an unsigned generic iOS device target and the native Mac Release target, verify the Mac signature, and package the DMG. The current llama.cpp XCFramework has no iOS Simulator slice, so simulator builds are not supported by this dependency. The Mac release job waits for the iOS build; if successful it checksum-verifies and packages the optional Kokoro asset before publishing. This 2.1 run and its assets still need to pass verification before the release can be considered available. The Mac target intentionally has no HealthKit entitlement to avoid the invalid ad-hoc signature issue seen in v1.
 
 ## Project layout
 

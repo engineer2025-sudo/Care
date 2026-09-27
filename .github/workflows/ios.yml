@@ -42,13 +42,13 @@ jobs:
           xcodebuild -resolvePackageDependencies \
             -project CareSphere.xcodeproj -scheme CareSphere 2>&1 | tee /tmp/spm.log | tail -20
 
-      - name: Build (compile check, unsigned simulator build)
+      - name: Build (compile check, unsigned iOS device target)
         run: |
           set -o pipefail
           xcodebuild \
             -project ios/CareSphere.xcodeproj \
             -scheme CareSphere \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination 'generic/platform=iOS' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             build 2>&1 | tee /tmp/xcodebuild.log | tail -60
