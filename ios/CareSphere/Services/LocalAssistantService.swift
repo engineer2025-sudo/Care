@@ -320,7 +320,7 @@ private actor LocalLlamaRuntime {
         }
         let promptTokens = Array(tokens.prefix(Int(tokenCount)))
 
-        var batch = llama_batch_init(contextParameters.n_batch, 0, 1)
+        var batch = llama_batch_init(Int32(contextParameters.n_batch), 0, 1)
         defer { llama_batch_free(batch) }
         batch.n_tokens = Int32(promptTokens.count)
         for index in promptTokens.indices {
