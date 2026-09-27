@@ -20,8 +20,9 @@ const isStandalone = window.navigator.standalone === true ||
   window.matchMedia('(display-mode: standalone)').matches
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Persistence — routines, meds, notes, scores, mood and display settings are
-// remembered locally (nothing leaves the device).
+// Persistence — routines, medications, notes, scores, mood and display settings
+// are stored in this browser. Joining Jitsi, BLE pairing, SOS sharing, and
+// notification permissions are explicit external/device actions.
 // ─────────────────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'caresphere.v1'
 
@@ -151,11 +152,12 @@ function VideoModal({ session, displayName, onClose }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Emergency SOS — call 911 via tel:, alert the Care Circle, optionally attach
-// real GPS coordinates via the browser Geolocation API.
+// Emergency SOS — call 911 via tel:, optionally attach real GPS coordinates,
+// and share details only after the user selects a recipient in the system sheet.
+// There is no automatic Care Circle push backend in this build.
 // ─────────────────────────────────────────────────────────────────────────────
-function SosModal({ open, onClose, onNotifyCircle }) {
-  const [dispatched, setDispatched] = useState(null)
+function SosModal({ open, onClose }) {
+  const [shareStatus, setShareStatus] = useState(null)
   const [loc, setLoc] = useState(null)
   const [locState, setLocState] = useState('idle') // idle | loading | ok | error
 
@@ -181,7 +183,7 @@ function SosModal({ open, onClose, onNotifyCircle }) {
         <div className="space-y-1.5">
           <h3 className="text-xl font-black text-white">Emergency SOS</h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Real emergencies need real responders. Call 911 directly, and/or broadcast an instant alert to the Care Circle with medical profile{locState === 'ok' ? ' and live location' : ''}.
+            Real emergencies need real responders. Call 911 directly. CareSphere does not send a push alert; you can share a message{locState === 'ok' ? ' with your current location' : ''} using the system share sheet below.
           </p>
         </div>
 
@@ -197,13 +199,12 @@ function SosModal({ open, onClose, onNotifyCircle }) {
           </a>
         )}
         {locState === 'error' && (
-          <p className="text-xs text-amber-300 text-left">Location unavailable or permission denied — the alert will still go out without coordinates.</p>
+          <p className="text-xs text-amber-300 text-left">Location unavailable or permission denied. You can still share an SOS message without coordinates.</p>
         )}
 
-        {dispatched && (
-          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 text-xs text-emerald-300 font-semibold text-left flex items-start gap-2">
-            <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
-            <span>Care Circle alerted at {dispatched} — Sarah M. (daughter, 1.2 mi) and coordinator Elena R. acknowledged{locState === 'ok' ? ' with live location' : ''}.</span>
+        {shareStatus && (
+          <div className="bg-sky-500/10 border border-sky-500/30 rounded-2xl p-3.5 text-xs text-sky-200 font-semibold text-left">
+            {shareStatus}
           </div>
         )}
 
@@ -224,14 +225,28 @@ function SosModal({ open, onClose, onNotifyCircle }) {
             </button>
           )}
           <button
-            onClick={() => {
-              setDispatched(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
-              onNotifyCircle?.(locState === 'ok')
-              speak('Emergency alert sent to your care circle.')
+            onClick={async () => {
+              const map = loc ? ` https://www.google.com/maps?q=${loc.latitude},${loc.longitude}` : ''
+              const message = `CareSphere SOS: I am requesting help. Please check in now.${map}`
+              try {
+                if (navigator.share) {
+                  await navigator.share({ title: 'CareSphere SOS', text: message })
+                  setShareStatus('Share sheet closed. CareSphere cannot confirm message delivery.')
+                } else if (navigator.clipboard?.writeText) {
+                  await navigator.clipboard.writeText(message)
+                  setShareStatus('SOS message copied. Paste it into Messages or another app; CareSphere did not send it.')
+                } else {
+                  setShareStatus(message)
+                }
+              } catch (error) {
+                if (error?.name !== 'AbortError') {
+                  setShareStatus('Sharing was not completed. No alert was sent.')
+                }
+              }
             }}
             className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-2xl text-xs border border-slate-700 transition"
           >
-            🔔 Notify Care Circle
+            ↗ Share SOS details
           </button>
           <button onClick={onClose} className="w-full text-xs text-slate-400 hover:text-white font-bold py-2 transition">
             Close
@@ -292,9 +307,68 @@ function ToastItem({ toast, onDismiss }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Settings — display name, text size, high contrast, voice & notifications.
+// Settings — display name, accessibility, user-entered medication schedule & notifications.
 // ─────────────────────────────────────────────────────────────────────────────
-function SettingsModal({ open, onClose, settings, update, notifyState, enableNotifications }) {
+function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirmed }) {
+  const [name, setName] = useState('')
+  const [time, setTime] = useState('09:00')
+  const [message, setMessage] = useState('')
+  const scheduleReady = meds.length > 0 && meds.every(med =>
+    med && typeof med.name === 'string' && med.name.trim().length > 0 &&
+    typeof med.time === 'string' && /^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(med.time))
+
+  const add = () => {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    const [hours, minutes] = time.split(':').map(Number)
+    const period = hours >= 12 ? 'PM' : 'AM'
+    const timeLabel = `${hours % 12 || 12}:${String(minutes).padStart(2, '0')} ${period}`
+    setMeds(current => [...current, { id: `${Date.now()}-${Math.random()}`, name: trimmed, time: timeLabel, taken: false }])
+    setMedsConfirmed(false)
+    setName('')
+    setMessage('Schedule saved on this device. Review and confirm it below before reminders are enabled.')
+  }
+
+  return (
+    <div className="border-t border-slate-800 pt-4 mt-3 space-y-3">
+      <div>
+        <h4 className="text-sm font-bold text-white">Medication schedule · local only</h4>
+        <p className="text-[11px] text-slate-400 mt-1">Add only medicines and times confirmed by your care team or label. CareSphere does not prescribe, verify a dose, or check interactions.</p>
+      </div>
+      {meds.length === 0 ? (
+        <p className="text-xs text-slate-500">No medication reminders are configured.</p>
+      ) : meds.map(med => (
+        <div key={med.id} className="flex items-center justify-between gap-3 bg-slate-800/60 rounded-xl px-3 py-2">
+          <span className="text-xs text-slate-200">{med.name} · {med.time}</span>
+          <button onClick={() => { setMeds(current => current.filter(item => item.id !== med.id)); setMedsConfirmed(false) }} className="text-[11px] font-bold text-rose-300 hover:text-rose-200">Remove</button>
+        </div>
+      ))}
+      {meds.length > 0 && (
+        <div className={`rounded-xl border p-3 space-y-2 ${medsConfirmed ? 'border-emerald-700/60 bg-emerald-950/20' : 'border-amber-700/60 bg-amber-950/20'}`}>
+          <label className="flex items-start gap-2 text-xs text-slate-200 cursor-pointer">
+            <input type="checkbox" checked={medsConfirmed} disabled={!scheduleReady} onChange={event => setMedsConfirmed(event.target.checked)} aria-label="Confirm medication schedule" className="mt-0.5 accent-emerald-500 disabled:opacity-40" />
+            <span>I reviewed every saved medication name and reminder time against my medication label or care-team instructions.</span>
+          </label>
+          <p className="text-[11px] text-slate-400">
+            {medsConfirmed
+              ? 'Reminders are enabled while CareSphere is running. Browser notifications require permission; this app cannot reliably schedule reminders after the browser is closed.'
+              : scheduleReady
+                ? 'Reminders are paused until you confirm. Schedules saved by an earlier version are kept, but are not trusted or used until reviewed.'
+                : 'Complete or remove any blank/invalid saved entries before confirming this schedule.'}
+          </p>
+        </div>
+      )}
+      <div className="grid grid-cols-[1fr_auto_auto] gap-2">
+        <input value={name} onChange={event => setName(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') add() }} placeholder="Medication name" aria-label="New medication name" className="min-w-0 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500" />
+        <input type="time" value={time} onChange={event => setTime(event.target.value)} aria-label="Reminder time" className="bg-slate-800 border border-slate-700 rounded-xl px-2 py-2 text-xs text-white" />
+        <button onClick={add} disabled={!name.trim()} className="bg-emerald-700 disabled:opacity-40 text-xs font-bold text-white px-3 py-2 rounded-xl">Add</button>
+      </div>
+      {message && <p className="text-[11px] text-emerald-300">{message}</p>}
+    </div>
+  )
+}
+
+function SettingsModal({ open, onClose, settings, update, notifyState, enableNotifications, meds, setMeds, medsConfirmed, setMedsConfirmed }) {
   if (!open) return null
   const Row = ({ label, hint, children }) => (
     <div className="flex items-center justify-between gap-4 py-3.5 border-b border-slate-800 last:border-0">
@@ -371,10 +445,10 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
           <Toggle on={settings.voice} onClick={() => update({ voice: !settings.voice })} label="Voice reminders" />
         </Row>
 
-        <Row label="Preview reminder" hint="See and hear exactly what a medication reminder looks like.">
+        <Row label="Preview reminder" hint="Hear a generic voice preview; a saved schedule preview never records a dose or enables reminders.">
           <button
             onClick={() => {
-              speak('This is your CareSphere reminder. Time to take Lisinopril.')
+              speak('This is a CareSphere reminder preview. Please follow your own verified medication schedule.')
               window.__careSphereTestReminder?.()
             }}
             className="bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white px-4 py-2 rounded-xl border border-slate-700 transition"
@@ -387,10 +461,10 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
           label="Browser notifications"
           hint={
             notifyState === 'granted'
-              ? 'Enabled — reminders pop up even if the tab is in the background.'
+              ? 'Allowed. Reminders run while this page is open; background delivery may vary by browser.'
               : notifyState === 'unsupported' && isIOS
                 ? 'On iPhone, enable by installing to the Home Screen first (Share → Add to Home Screen), then revisit Settings.'
-                : 'Optional: lets reminders reach you outside the tab.'
+                : 'Optional browser alerts while the page is open; no reliable closed-page scheduling.'
           }
         >
           {notifyState === 'granted' ? (
@@ -404,8 +478,10 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
           )}
         </Row>
 
+        <MedicationScheduleEditor meds={meds} setMeds={setMeds} medsConfirmed={medsConfirmed} setMedsConfirmed={setMedsConfirmed} />
+
         <p className="text-[11px] text-slate-500 pt-3 leading-relaxed">
-          🔒 Privacy: your name, routines, notes, mood history and vitals stay on this device (browser local storage). Nothing is uploaded.
+          🔒 Privacy: your name, routines, medication schedule, notes, mood history and vitals stay on this device (browser local storage). Nothing is uploaded.
         </p>
       </div>
     </div>
@@ -854,14 +930,13 @@ export default function App() {
     { id: 3, text: 'Join a coffee circle ☕', done: false },
     { id: 4, text: 'Evening stretch & wind-down 🌿', done: false },
   ])
-  const [meds, setMeds] = usePersisted('meds', [
-    { id: 1, name: 'Lisinopril (blood pressure)', time: '8:00 AM', taken: false },
-    { id: 2, name: 'Vitamin D3 & calcium', time: '12:30 PM', taken: false },
-    { id: 3, name: 'Donepezil (memory support)', time: '8:00 PM', taken: false },
-  ])
+  // Never prefill medications. Older saved schedules remain visible for review,
+  // but reminders stay paused until the user explicitly confirms every entry.
+  const [meds, setMeds] = usePersisted('meds', [])
+  const [medsConfirmed, setMedsConfirmed] = usePersisted('medsConfirmed', false)
   const [notes, setNotes] = usePersisted('notes', [
-    { id: 1, date: 'Today, 9:15 AM', author: 'Dr. Evelyn Vance (PCP)', note: 'BP stable at 122/78. Continue morning walks and current dose.' },
-    { id: 2, date: 'Yesterday', author: 'Sarah M. (daughter)', note: 'Alex completed 3 emotion-recognition sessions — engagement is way up!' },
+    { id: 1, date: 'Sample', author: 'Sample care-team note', note: 'Example only. No clinician has reviewed this entry; replace it with your own private note.' },
+    { id: 2, date: 'Sample', author: 'Sample family note', note: 'Example only. Notes remain in this browser and are not shared with another person.' },
   ])
   const [moods, setMoods] = usePersisted('moods', [])
   const [noteDraft, setNoteDraft] = useState('')
@@ -882,7 +957,7 @@ export default function App() {
       id: Date.now(), date: 'Just now', author: `You (${settings.name})`, note: noteDraft.trim(),
     }, ...ns])
     setNoteDraft('')
-    pushToast({ kind: 'success', title: 'Note posted', body: 'Shared with the Care Circle feed.' })
+    pushToast({ kind: 'success', title: 'Note saved', body: 'Saved in this browser only; no Care Circle sync server is connected.' })
   }
 
   // ── Medication reminder engine ──
@@ -921,9 +996,10 @@ export default function App() {
       return d
     }
     const check = () => {
+      if (!medsConfirmed) return
       const now = new Date()
       meds.forEach(med => {
-        if (med.taken) return
+        if (!med || med.taken || typeof med.name !== 'string' || !med.name.trim()) return
         const due = parseMedTime(med.time)
         if (!due) return
         const diff = now - due
@@ -937,27 +1013,36 @@ export default function App() {
     check()
     const iv = setInterval(check, 15000)
     return () => clearInterval(iv)
-  }, [meds, settings.voice, notifyState]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [meds, medsConfirmed, settings.voice, notifyState]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Demo hook for the "Preview reminder" button in Settings.
   useEffect(() => {
     window.__careSphereTestReminder = () => {
+      if (meds.length === 0) {
+        pushToast({ kind: 'info', title: 'No medication schedule', body: 'Add a verified schedule in Settings, then review and confirm it.' })
+        return
+      }
+      if (!medsConfirmed) {
+        pushToast({ kind: 'info', title: 'Schedule not confirmed', body: 'Review every saved name and time in Settings. This preview will not enable reminders or record a dose.' })
+        return
+      }
       const med = meds.find(m => !m.taken) || meds[0]
       pushToast({
         kind: 'med',
-        title: `Time for ${med.name.split(' (')[0]}`,
-        body: `(Preview) Scheduled at ${med.time}.`,
+        title: `Reminder preview · ${med.name.split(' (')[0]}`,
+        body: `Preview only. Your saved reminder time is ${med.time}; no dose is recorded.`,
         ttl: 12000,
-        actions: [{ label: '✓ Taken', onClick: () => toggleMed(med.id) }],
       })
     }
     return () => { delete window.__careSphereTestReminder }
-  }, [meds]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [meds, medsConfirmed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Vitals ──
   const [hr, setHr] = useState(null)
   const [hrHistory, setHrHistory] = useState([])
+  const [hrRecords, setHrRecords] = useState([])
   const [hrStatus, setHrStatus] = useState({ mode: 'disconnected', message: 'No sensor connected yet.' })
+  const hrModeRef = useRef('disconnected')
   const hrStopRef = useRef(null)
   const [connectingHr, setConnectingHr] = useState(false)
 
@@ -966,10 +1051,16 @@ export default function App() {
     setConnectingHr(true)
     hrStopRef.current = await connectHeartRateMonitor(
       (bpm) => {
+        const timestamp = new Date().toISOString()
+        const source = hrModeRef.current === 'live' ? 'LIVE_BLE' : 'SIMULATED'
         setHr(bpm)
         setHrHistory(h => [...h.slice(-35), bpm])
+        setHrRecords(records => [...records.slice(-499), { timestamp, metric: 'heart_rate_bpm', value: bpm, source }])
       },
-      (status) => setHrStatus(status),
+      (status) => {
+        hrModeRef.current = status.mode
+        setHrStatus(status)
+      },
     )
     setConnectingHr(false)
   }
@@ -978,6 +1069,8 @@ export default function App() {
     hrStopRef.current = null
     setHr(null)
     setHrHistory([])
+    setHrRecords([])
+    hrModeRef.current = 'disconnected'
     setHrStatus({ mode: 'disconnected', message: 'No sensor connected yet.' })
   }
   useEffect(() => () => hrStopRef.current?.(), [])
@@ -1014,11 +1107,10 @@ export default function App() {
   const anyFlag = hrFlag || spo2Flag || bpFlag
 
   const exportVitals = () => {
-    const rows = [['timestamp', 'metric', 'value']]
-    const now = Date.now()
-    hrHistory.forEach((b, i) => rows.push([new Date(now - (hrHistory.length - i) * 1500).toISOString(), 'heart_rate_bpm', b]))
-    if (spo2) rows.push([new Date().toISOString(), 'spo2_pct', spo2])
-    if (bp) rows.push([new Date().toISOString(), 'blood_pressure_mmHg', bp.replace(' / ', '/')])
+    const rows = [['timestamp', 'metric', 'value', 'source']]
+    hrRecords.forEach(record => rows.push([record.timestamp, record.metric, record.value, record.source]))
+    if (spo2 !== null) rows.push([new Date().toISOString(), 'spo2_pct', spo2, 'SIMULATED_SPOT_CHECK'])
+    if (bp !== null) rows.push([new Date().toISOString(), 'blood_pressure_mmHg', bp.replace(' / ', '/'), 'SIMULATED_SEQUENCE'])
     if (rows.length === 1) {
       pushToast({ kind: 'info', title: 'Nothing to export yet', body: 'Pair a sensor or run a spot-check first.' })
       return
@@ -1030,24 +1122,24 @@ export default function App() {
     a.download = `caresphere-vitals-${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(url)
-    pushToast({ kind: 'success', title: 'Exported', body: 'Clinician-ready CSV downloaded.' })
+    pushToast({ kind: 'success', title: 'Exported', body: 'CSV downloaded with source labels. Simulated rows are demo values, not clinical measurements.' })
   }
 
   // ── Coffee circles — real, open Jitsi Meet rooms ──
   const coffeeCircles = [
     {
       id: 1, title: 'Morning Sunshine Tea & Chat', icon: '☕',
-      time: 'Live now', participants: '8 online', host: 'Sarah M. (Volunteer)',
+      time: 'Open Jitsi room · no schedule',
       room: 'CareSphere-MorningSunshineTea-Room2026',
     },
     {
       id: 2, title: 'Classic Movie Trivia & Memories', icon: '🎬',
-      time: '2:00 PM today', participants: '12 online', host: 'David K. (Activity Lead)',
+      time: 'Open Jitsi room · no schedule',
       room: 'CareSphere-ClassicMovieTrivia-Room2026',
     },
     {
       id: 3, title: 'Gentle Stretching & Breathing', icon: '🌿',
-      time: '4:30 PM today', participants: '10 online', host: 'Elena R. (Wellness Coach)',
+      time: 'Open Jitsi room · no schedule',
       room: 'CareSphere-GentleStretchBreathing-Room2026',
     },
   ]
@@ -1060,12 +1152,14 @@ export default function App() {
     })
 
   const routinesDone = routines.filter(r => r.done).length
-  const medsTaken = meds.filter(m => m.taken).length
-  const nextMed = meds
-    .filter(m => !m.taken)
-    .map(m => ({ ...m, t: /^\s*(\d{1,2}):(\d{2})/.exec(m.time) }))
-    .filter(m => m.t)
-    .sort((a, b) => a.t[1] * 60 + Number(a.t[2]) - (b.t[1] * 60 + Number(b.t[2])))[0]
+  const medsTaken = medsConfirmed ? meds.filter(m => m.taken).length : 0
+  const nextMed = medsConfirmed
+    ? meds
+      .filter(m => !m.taken)
+      .map(m => ({ ...m, t: /^\s*(\d{1,2}):(\d{2})/.exec(m.time) }))
+      .filter(m => m.t)
+      .sort((a, b) => a.t[1] * 60 + Number(a.t[2]) - (b.t[1] * 60 + Number(b.t[2])))[0]
+    : null
 
   const tabs = [
     { id: 'home', label: 'Overview', icon: Sparkles },
@@ -1180,7 +1274,7 @@ export default function App() {
                 </h1>
                 <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
                   Live wearable vitals over Bluetooth, one-tap Jitsi video coffee circles that fight isolation,
-                  medication routines that stick, and sensory-friendly therapy games — with family a tap away.
+                  medication reminders you configure, and sensory-friendly games — with real Jitsi rooms you can share with family.
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2">
                   <button
@@ -1218,9 +1312,9 @@ export default function App() {
               </div>
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-1.5">
                 <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Medications</div>
-                <div className="text-2xl font-black text-emerald-400">{medsTaken} / {meds.length}</div>
+                <div className="text-2xl font-black text-emerald-400">{meds.length === 0 ? '—' : medsConfirmed ? `${medsTaken} / ${meds.length}` : 'Review'}</div>
                 <p className="text-xs text-slate-500 truncate">
-                  {nextMed ? `Next: ${nextMed.name.split(' (')[0]} at ${nextMed.time}` : 'All doses taken ✓'}
+                  {meds.length === 0 ? 'No medication schedule' : medsConfirmed ? (nextMed ? `Next: ${nextMed.name.split(' (')[0]} at ${nextMed.time}` : 'All doses marked taken ✓') : 'Saved schedule paused · confirm in Settings'}
                 </p>
               </div>
             </div>
@@ -1259,7 +1353,9 @@ export default function App() {
                   <Bell className="w-4 h-4 text-rose-400" />
                 </div>
                 <div className="space-y-2.5">
-                  {meds.map(m => (
+                  {meds.length === 0 && <p className="text-xs text-slate-400">No reminders are configured. Add only a verified schedule in Settings.</p>}
+                  {meds.length > 0 && !medsConfirmed && <p className="text-xs text-amber-200 bg-amber-950/30 border border-amber-800/50 rounded-xl p-3">A saved schedule needs review in Settings. Reminders and dose check-ins are paused until you confirm every name and time.</p>}
+                  {medsConfirmed && meds.map(m => (
                     <div key={m.id} className={`flex items-center justify-between p-4 rounded-2xl border transition ${m.taken ? 'bg-slate-800/40 border-slate-700/50 text-slate-400' : 'bg-rose-950/30 border-rose-500/30 text-slate-100'}`}>
                       <div className="flex items-center gap-3 min-w-0">
                         <button
@@ -1280,10 +1376,10 @@ export default function App() {
                     </div>
                   ))}
                 </div>
-                <p className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                {medsConfirmed && <p className="text-[11px] text-slate-500 flex items-center gap-1.5">
                   <BellRing className="w-3.5 h-3.5 text-amber-400" />
-                  Reminders pop up automatically at each dose time — enable voice & browser notifications in Settings.
-                </p>
+                  In-app reminders run while this page is open. Browser notifications require permission and do not provide a reliable closed-browser schedule.
+                </p>}
               </div>
             </div>
           </div>
@@ -1314,7 +1410,7 @@ export default function App() {
               <div>
                 <h2 className="text-2xl font-black text-white">Coffee Circles — Isolation Prevention</h2>
                 <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                  Every room is a real, open <span className="text-emerald-300 font-semibold">meet.jit.si</span> video room — join embedded or in a full tab. No installs, no accounts. You'll appear as <span className="text-white font-semibold">{settings.name}</span>.
+                  These buttons open real <span className="text-emerald-300 font-semibold">meet.jit.si</span> rooms — join embedded or in a full tab. Rooms are public links with no scheduled host, attendance count, or CareSphere moderation. Share only with people you trust; no installs or accounts required. You'll appear as <span className="text-white font-semibold">{settings.name}</span>.
                 </p>
               </div>
               <button
@@ -1331,14 +1427,10 @@ export default function App() {
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-3xl">{room.icon}</span>
-                      <span className="text-[11px] bg-emerald-500/15 text-emerald-300 px-2.5 py-1 rounded-full font-bold border border-emerald-500/30 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> {room.time}
-                      </span>
+                      <span className="text-[11px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full font-bold border border-slate-700">{room.time}</span>
                     </div>
                     <h3 className="text-lg font-bold text-white">{room.title}</h3>
-                    <p className="text-xs text-slate-400">
-                      Hosted by <span className="text-slate-200 font-semibold">{room.host}</span> · {room.participants}
-                    </p>
+                    <p className="text-xs text-slate-400">No CareSphere host, attendance tracking, or moderation is configured. Anyone with the Jitsi room link can join.</p>
                     <p className="text-[10px] text-slate-600 font-mono break-all">meet.jit.si/{room.room}</p>
                   </div>
                   <div className="flex gap-2 mt-auto">
@@ -1365,9 +1457,9 @@ export default function App() {
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-xs text-slate-400 space-y-2">
               <div className="font-bold text-white">💡 How the video works</div>
               <p>
-                Rooms run on Jitsi Meet — the open-source, encrypted WebRTC platform used by healthcare and government teams.
-                "Join in app" loads the official Jitsi External API inside CareSphere, so seniors never leave the interface;
-                camera and microphone permissions are requested by the browser only when you enable them.
+                Rooms use Jitsi Meet's encrypted WebRTC transport. "Join in app" loads the official Jitsi External API inside CareSphere;
+                camera and microphone permissions are requested only when you enable them. CareSphere does not host, schedule, or moderate rooms;
+                anyone with a room link may join, so verify participants before sharing private health details.
               </p>
             </div>
           </div>
@@ -1378,23 +1470,23 @@ export default function App() {
           <div className="space-y-8">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-black text-white">Care Circle Hub</h2>
-                <p className="text-xs sm:text-sm text-slate-400 mt-1">Shared notes, coordination, and alerts for family, volunteers, and clinicians.</p>
+                <h2 className="text-2xl font-black text-white">Care Circle · Local</h2>
+                <p className="text-xs sm:text-sm text-slate-400 mt-1">Private notes and check-ins saved in this browser. No family-sync, clinician portal, or push-alert server is connected.</p>
               </div>
               <span className="text-xs bg-purple-500/15 text-purple-300 border border-purple-500/30 px-4 py-2 rounded-2xl font-bold flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5" /> Private to invited members
+                <Lock className="w-3.5 h-3.5" /> Stored on this device
               </span>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 space-y-5">
-                <h3 className="text-lg font-bold text-white">Shared care log</h3>
+                <h3 className="text-lg font-bold text-white">Care notes · local only</h3>
                 <form onSubmit={postNote} className="flex gap-3">
                   <input
                     type="text"
                     value={noteDraft}
                     onChange={(e) => setNoteDraft(e.target.value)}
-                    placeholder="Share an update with the care circle…"
+                    placeholder="Add a note stored in this browser…"
                     aria-label="New care note"
                     className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
                   />
@@ -1418,29 +1510,26 @@ export default function App() {
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-indigo-950 to-purple-950 border border-indigo-500/30 rounded-3xl p-6 space-y-3.5">
                   <div className="inline-flex items-center space-x-2 bg-white/10 px-3 py-1 rounded-full text-xs font-semibold text-amber-300">
-                    <Sparkles className="w-3.5 h-3.5" /> Care insights
+                    <Sparkles className="w-3.5 h-3.5" /> Local check-in summary
                   </div>
-                  <h3 className="text-lg font-bold text-white">This week at a glance</h3>
+                  <h3 className="text-lg font-bold text-white">From this browser's saved entries</h3>
                   <ul className="space-y-2.5 text-xs text-indigo-200/90 leading-relaxed">
                     <li>• Routine completion: <span className="text-white font-bold">{routinesDone}/{routines.length}</span> today — consistency is the goal, not perfection.</li>
-                    <li>• Emotion-match wins: <span className="text-white font-bold">{emotionScore}</span> — emotional-recognition practice trending up.</li>
-                    <li>• Coffee circles attended this week: <span className="text-white font-bold">3</span> — isolation risk trending <span className="text-emerald-300 font-bold">down 18%</span>.</li>
+                    <li>• Emotion-match game score: <span className="text-white font-bold">{emotionScore}</span> — practice activity only, not a clinical progress measure.</li>
+                    <li>• Coffee-circle attendance: <span className="text-white font-bold">Not tracked</span> — no calendar or family-sync connection is configured.</li>
                     <li>• Mood check-ins logged: <span className="text-white font-bold">{moods.length}</span> — a gentle emotional pulse over time{moods.length ? ` (latest: feeling ${MOODS[moods[moods.length - 1].score - 1].label.toLowerCase()})` : ''}.</li>
                   </ul>
                 </div>
 
                 <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2"><Pill className="w-4 h-4 text-rose-400" /> Adherence streak</h3>
-                  <div className="flex gap-1.5">
-                    {[1,1,1,0,1,1,1].map((v, i) => (
-                      <div key={i} className={`h-8 flex-1 rounded-lg ${v ? 'bg-emerald-500/80' : 'bg-slate-800 border border-slate-700'}`} title={v ? 'On time' : 'Missed'} />
-                    ))}
-                  </div>
-                  <p className="text-[11px] text-slate-500">Last 7 days · one missed evening dose on Thursday triggered a family notification.</p>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2"><Pill className="w-4 h-4 text-rose-400" /> Medication check-ins · today</h3>
+                  <div className="text-2xl font-black text-white">{meds.length === 0 ? '—' : medsConfirmed ? `${medsTaken} / ${meds.length}` : 'Review'}{medsConfirmed && <span className="text-xs font-normal text-slate-400"> marked taken</span>}</div>
+                  <p className="text-[11px] text-slate-500">{meds.length === 0 ? 'No medication schedule is saved in this browser.' : medsConfirmed ? 'Local self-reports only. CareSphere cannot verify a dose or send this status to family or a pharmacy.' : 'Saved schedule is paused; review every name and time in Settings. No dose check-ins are counted until confirmed.'}</p>
                 </div>
 
                 <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2"><User className="w-4 h-4 text-sky-400" /> Care Circle members</h3>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2"><User className="w-4 h-4 text-sky-400" /> Sample roster · not contacts</h3>
+                  <p className="text-[11px] text-slate-500">Illustrative names only. This build cannot invite, message, or notify these people.</p>
                   <ul className="space-y-2.5 text-xs">
                     {[
                       { n: 'Sarah M.', r: 'Daughter · primary caregiver', c: 'bg-emerald-500' },
@@ -1472,7 +1561,7 @@ export default function App() {
               <div>
                 <h2 className="text-2xl font-black text-white">Wearable Vitals & Telehealth</h2>
                 <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                  Pair a real BLE heart-rate monitor, run spot-checks, and export a clinician-ready summary.
+                  Pair a real BLE heart-rate monitor, view clearly labeled demo spot-checks, and export source-labeled data for review—not a clinical summary.
                 </p>
               </div>
               <div className="flex gap-2">
@@ -1530,7 +1619,7 @@ export default function App() {
               </div>
             )}
 
-            {/* AI triage banner */}
+            {/* Informational range check only — never clinical triage or notification. */}
             <div className={`rounded-3xl border p-5 flex items-start gap-3 ${
               anyFlag ? 'bg-amber-950/40 border-amber-500/40' : 'bg-emerald-950/30 border-emerald-500/30'
             }`}>
@@ -1539,10 +1628,10 @@ export default function App() {
                 : <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />}
               <div className="text-xs leading-relaxed">
                 <div className={`font-black text-sm ${anyFlag ? 'text-amber-300' : 'text-emerald-300'}`}>
-                  {anyFlag ? 'Triage flag — one or more readings outside expected range' : 'All available readings within expected ranges'}
+                  {anyFlag ? 'A displayed value is outside this simple reference range' : 'No displayed value is outside this simple reference range'}
                 </div>
                 <p className={anyFlag ? 'text-amber-200/80 mt-1' : 'text-emerald-200/70 mt-1'}>
-                  Thresholds: HR 50–110 bpm · SpO₂ ≥ 94% · BP &lt; 140/90 mmHg. Out-of-range values notify the Care Circle and pre-fill the telehealth visit summary.
+                  Broad reference examples only: HR 50–110 bpm · SpO₂ ≥ 94% · BP &lt; 140/90 mmHg. Some values here are simulated; this is not triage, does not notify anyone, and does not pre-fill a clinical record.
                 </p>
               </div>
             </div>
@@ -1569,7 +1658,7 @@ export default function App() {
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <Wind className="w-3.5 h-3.5 text-sky-400" /> Blood oxygen (SpO₂)
                   </span>
-                  <SensorChip mode={spo2 !== null ? 'simulated' : 'disconnected'} label={spo2 !== null ? 'SIM WEARABLE' : 'NO READING'} />
+                  <SensorChip mode={spo2 !== null ? 'simulated' : 'disconnected'} label={spo2 !== null ? 'SIMULATED' : 'NO READING'} />
                 </div>
                 <div className="text-4xl font-black text-white">
                   {spo2Phase === 'measuring' ? '…' : spo2 !== null ? `${spo2}%` : '—'}
@@ -1596,7 +1685,7 @@ export default function App() {
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <Heart className="w-3.5 h-3.5 text-rose-400" /> Blood pressure
                   </span>
-                  <SensorChip mode={bp !== null ? 'simulated' : 'disconnected'} label={bp !== null ? 'SIM BLE CUFF' : 'NOT MEASURED'} />
+                  <SensorChip mode={bp !== null ? 'simulated' : 'disconnected'} label={bp !== null ? 'SIMULATED' : 'NOT MEASURED'} />
                 </div>
                 <div className="text-3xl font-black text-white">
                   {bpPhase !== 'idle' ? '…' : bp ?? '—'} <span className="text-xs text-slate-400 font-normal">mmHg</span>
@@ -1643,6 +1732,10 @@ export default function App() {
         update={updateSettings}
         notifyState={notifyState}
         enableNotifications={enableNotifications}
+        meds={meds}
+        setMeds={setMeds}
+        medsConfirmed={medsConfirmed}
+        setMedsConfirmed={setMedsConfirmed}
       />
 
       {/* Toast stack */}

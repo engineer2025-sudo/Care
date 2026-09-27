@@ -50,6 +50,7 @@ struct OnboardingView: View {
     @State private var birthDate: Date = Calendar.current.date(byAdding: .year, value: -70, to: Date())!
     @State private var careMode: CareMode = .both
     @State private var meds: [Medication] = []
+    @State private var medicationScheduleConfirmed = false
     @State private var routines: [Routine] = []
     @State private var emergencyName = ""
     @State private var emergencyPhone = ""
@@ -134,6 +135,7 @@ struct OnboardingView: View {
         .preferredColorScheme(.dark)
         .onAppear {
             if meds.isEmpty { meds = store.medications }
+            medicationScheduleConfirmed = store.medicationScheduleConfirmed
             if routines.isEmpty { routines = store.routines }
         }
         #if os(iOS)
@@ -180,7 +182,7 @@ struct OnboardingView: View {
 
     private var profilePage: some View {
         VStack(alignment: .leading, spacing: 22) {
-            pageHeader("About you", "We use this to personalize care — nothing leaves your device.", systemImage: "person.crop.circle")
+            pageHeader("About you", "Your profile is stored locally. Your display name is shared with Jitsi only if you join a video room.", systemImage: "person.crop.circle")
             VStack(alignment: .leading, spacing: 8) {
                 Text("Your name").font(.caption.weight(.bold)).foregroundStyle(.secondary)
                 TextField("e.g. Alex", text: $store.displayName)
@@ -243,25 +245,26 @@ struct OnboardingView: View {
 
     private var medicationsPage: some View {
         VStack(alignment: .leading, spacing: 18) {
-            pageHeader("Your medications", "We'll remind you at the right time with lock-screen actions — edit any time in Settings.", systemImage: "pills.fill")
+            pageHeader("Your medications", "Enter only a schedule confirmed by your care team or medication label. Reminders stay paused until you confirm every name and time.", systemImage: "pills.fill")
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach($meds) { $med in
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                TextField("Medication name", text: $med.name)
+                                TextField("Medication name", text: medicationNameBinding($med))
                                     .textFieldStyle(.roundedBorder)
                                 DatePicker("", selection: timeBinding(med), displayedComponents: .hourAndMinute)
                                     .labelsHidden()
                                 Button {
                                     meds.removeAll { $0.id == med.id }
+                                    medicationScheduleConfirmed = false
                                 } label: {
                                     Image(systemName: "minus.circle.fill")
                                         .foregroundStyle(.pink)
                                 }
                                 .buttonStyle(.plain)
                             }
-                            TextField("Purpose (e.g. blood pressure)", text: $med.purpose)
+                            TextField("Purpose (optional)", text: medicationPurposeBinding($med))
                                 .textFieldStyle(.roundedBorder)
                                 .font(.caption)
                         }
@@ -272,13 +275,49 @@ struct OnboardingView: View {
             }
             Button {
                 meds.append(Medication(name: "", purpose: "", hour: 9, minute: 0))
+                medicationScheduleConfirmed = false
             } label: {
                 Label("Add medication", systemImage: "plus.circle.fill")
                     .font(.subheadline.weight(.bold))
             }
             .buttonStyle(.bordered)
+
+            if meds.contains(where: { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
+                Toggle(isOn: $medicationScheduleConfirmed) {
+                    Text("I checked every name and reminder time against the medication label or care-team instructions.")
+                        .font(.caption)
+                }
+                .toggleStyle(.switch)
+            } else {
+                Text("No medications entered. You can add a verified schedule later in Settings.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Text("CareSphere does not prescribe, verify doses, or check interactions. You can edit this schedule in Settings; changes pause reminders until reviewed again.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
         }
         .padding(28)
+    }
+
+    private func medicationNameBinding(_ medication: Binding<Medication>) -> Binding<String> {
+        Binding(
+            get: { medication.wrappedValue.name },
+            set: { value in
+                guard medication.wrappedValue.name != value else { return }
+                medication.wrappedValue.name = value
+                medicationScheduleConfirmed = false
+            })
+    }
+
+    private func medicationPurposeBinding(_ medication: Binding<Medication>) -> Binding<String> {
+        Binding(
+            get: { medication.wrappedValue.purpose },
+            set: { value in
+                guard medication.wrappedValue.purpose != value else { return }
+                medication.wrappedValue.purpose = value
+                medicationScheduleConfirmed = false
+            })
     }
 
     private func timeBinding(_ med: Medication) -> Binding<Date> {
@@ -287,8 +326,10 @@ struct OnboardingView: View {
             set: { newDate in
                 if let idx = meds.firstIndex(where: { $0.id == med.id }) {
                     let comps = CareTime.hourMinute(from: newDate)
+                    guard meds[idx].hour != comps.hour || meds[idx].minute != comps.minute else { return }
                     meds[idx].hour = comps.hour
                     meds[idx].minute = comps.minute
+                    medicationScheduleConfirmed = false
                 }
             })
     }
@@ -486,7 +527,9 @@ struct OnboardingView: View {
         case .focus:
             store.profile.careMode = careMode
         case .medications:
-            store.medications = meds.filter { !$0.name.trimmingCharacters(in: .whitespaces).isEmpty }
+            let confirmedMedications = meds.filter { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            store.medications = confirmedMedications
+            store.medicationScheduleConfirmed = !confirmedMedications.isEmpty && medicationScheduleConfirmed
         case .routines:
             store.routines = routines.filter { !$0.title.trimmingCharacters(in: .whitespaces).isEmpty }
         case .contact:

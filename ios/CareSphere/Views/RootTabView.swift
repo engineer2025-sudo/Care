@@ -56,6 +56,8 @@ struct RootTabView: View {
                     .tabItem { Label("Care", systemImage: "shield.fill") }
                 VitalsView()
                     .tabItem { Label("Vitals", systemImage: "waveform.path.ecg") }
+                HealthGuideView()
+                    .tabItem { Label("Guide", systemImage: "sparkles") }
             }
         }
         .preferredColorScheme(.dark)

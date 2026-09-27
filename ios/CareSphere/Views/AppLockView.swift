@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Full-screen biometric gate. Shown whenever the app becomes active while
-/// biometric lock is enabled — Touch ID on Macs with a Touch Bar sensor,
-/// Face ID / Touch ID on iPhone, passcode fallback everywhere.
+/// Opaque, full-window biometric gate. CareSphereApp switches its root view to
+/// this view while locked, so protected content is removed rather than rendered
+/// underneath a translucent sheet or full-screen cover.
 struct AppLockView: View {
     let onUnlock: () -> Void
     @State private var isAuthenticating = false
@@ -19,7 +19,7 @@ struct AppLockView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 26) {
-                Spacer()
+                Spacer(minLength: 24)
                 ZStack {
                     Circle()
                         .fill(Color.emerald.opacity(0.15))
@@ -28,10 +28,10 @@ struct AppLockView: View {
                         .font(.system(size: 48))
                         .foregroundStyle(Color.emerald)
                 }
-                VStack(spacing: 6) {
+                VStack(spacing: 8) {
                     Text("CareSphere is locked")
                         .font(.title2.weight(.heavy))
-                    Text("Protecting health data, medications and care notes.")
+                    Text("Your private care information is hidden until you unlock.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -52,17 +52,23 @@ struct AppLockView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(isAuthenticating)
-                Spacer()
-                Text("Your data never leaves this device.")
+                Spacer(minLength: 24)
+                Text("Your care data stays on this device.")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
             .padding(30)
+            .frame(maxWidth: 560)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.ink.ignoresSafeArea())
+        .contentShape(Rectangle())
+        .preferredColorScheme(.dark)
         .onAppear { authenticate() }
     }
 
     private func authenticate() {
+        guard !isAuthenticating else { return }
         isAuthenticating = true
         failureText = nil
         BiometricService.authenticate(reason: "Unlock CareSphere to view health data") { success, error in

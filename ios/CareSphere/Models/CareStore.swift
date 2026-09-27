@@ -2,20 +2,34 @@ import Foundation
 import Combine
 import UserNotifications
 
-/// Single source of truth for user content. Persists to JSON in Documents —
-/// nothing leaves the device. Syncs medication reminders into the system
-/// notification center whenever a dose changes.
+/// Single source of truth for user content. Persists care data to JSON in the
+/// app's Documents directory. Network-backed features are opt-in and described
+/// in their views; medication reminders are reconciled with iOS notifications.
 @MainActor
 final class CareStore: ObservableObject {
 
     // MARK: Persisted state
     @Published var displayName: String { didSet { save() } }
     @Published var voiceReminders: Bool { didSet { save() } }
+    @Published var voiceIdentifier: String { didSet { save() } }
     @Published var routines: [Routine] { didSet { save() } }
     @Published var medications: [Medication] {
         didSet {
+            // Names/times added or changed after confirmation need a fresh review.
+            // Taken-state changes alone do not invalidate the schedule.
+            if Self.medicationScheduleSignature(oldValue) != Self.medicationScheduleSignature(medications),
+               medicationScheduleConfirmed {
+                medicationScheduleConfirmed = false
+            } else {
+                save()
+                syncMedicationReminders()
+            }
+        }
+    }
+    @Published var medicationScheduleConfirmed: Bool {
+        didSet {
             save()
-            NotificationService.shared.syncMedicationReminders(medications)
+            syncMedicationReminders()
         }
     }
     @Published var notes: [CareNote] { didSet { save() } }
@@ -40,22 +54,24 @@ final class CareStore: ObservableObject {
         let box = Self.load(from: fileURL)
         displayName = box?.displayName ?? "Alex"
         voiceReminders = box?.voiceReminders ?? false
+        voiceIdentifier = box?.voiceIdentifier ?? ""
         routines = box?.routines ?? [
             Routine(emoji: "💧", title: "Morning hydration"),
             Routine(emoji: "🧩", title: "10-minute brain game"),
             Routine(emoji: "☕", title: "Join a coffee circle"),
             Routine(emoji: "🌿", title: "Evening stretch & wind-down"),
         ]
-        medications = box?.medications ?? [
-            Medication(name: "Lisinopril", purpose: "Blood pressure", hour: 8, minute: 0),
-            Medication(name: "Vitamin D3", purpose: "Bone health", hour: 12, minute: 30),
-            Medication(name: "Donepezil", purpose: "Memory support", hour: 20, minute: 0),
-        ]
+        // Never prefill medication names or times. Fresh users configure only
+        // their own schedule during onboarding; no demo drug creates reminders.
+        medications = box?.medications ?? []
+        // Older stores did not carry an explicit confirmation. Preserve their
+        // saved data, but pause its reminders until the user reviews it.
+        medicationScheduleConfirmed = box?.medicationScheduleConfirmed ?? false
         notes = box?.notes ?? [
-            CareNote(author: "Dr. Evelyn Vance (PCP)",
-                     body: "BP stable at 122/78. Continue morning walks and current dose."),
-            CareNote(author: "Sarah M. (daughter)",
-                     body: "Alex completed 3 emotion-recognition sessions — engagement is way up!"),
+            CareNote(author: "Sample note · replace with your own",
+                     body: "Example only: a user could record a care-team update here. No clinician has reviewed this entry."),
+            CareNote(author: "Sample family note · local demo",
+                     body: "Example only: notes stay on this device and are not shared with family or a clinician."),
         ]
         moods = box?.moods ?? []
         emotionScore = box?.emotionScore ?? 0
@@ -80,8 +96,10 @@ final class CareStore: ObservableObject {
         let box = PersistedBox(
             displayName: displayName,
             voiceReminders: voiceReminders,
+            voiceIdentifier: voiceIdentifier.isEmpty ? nil : voiceIdentifier,
             routines: routines,
             medications: medications,
+            medicationScheduleConfirmed: medicationScheduleConfirmed,
             notes: notes,
             moods: moods,
             emotionScore: emotionScore,
@@ -97,8 +115,12 @@ final class CareStore: ObservableObject {
     private struct PersistedBox: Codable {
         var displayName: String
         var voiceReminders: Bool
+        // Optional so existing v1/v2 carestore.json files continue to decode.
+        var voiceIdentifier: String?
         var routines: [Routine]
         var medications: [Medication]
+        // Optional so pre-confirmation stores decode safely; legacy schedules default paused.
+        var medicationScheduleConfirmed: Bool?
         var notes: [CareNote]
         var moods: [MoodEntry]
         var emotionScore: Int
@@ -112,11 +134,36 @@ final class CareStore: ObservableObject {
     // MARK: Derived values
 
     var routinesDone: Int { routines.filter(\.isDone).count }
-    var medsTaken: Int { medications.filter(\.isTaken).count }
+    var configuredMedications: [Medication] {
+        medications.filter { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    }
+    var medsTaken: Int {
+        medicationScheduleConfirmed ? configuredMedications.filter(\.isTaken).count : 0
+    }
     var nextDueMedication: Medication? {
-        medications
+        guard medicationScheduleConfirmed else { return nil }
+        return configuredMedications
             .filter { !$0.isTaken }
             .min { ($0.hour, $0.minute) < ($1.hour, $1.minute) }
+    }
+
+    /// Reconciles persisted notification requests on app launch, including
+    /// removing legacy reminders when a saved schedule still needs review.
+    func refreshMedicationReminders() {
+        syncMedicationReminders()
+    }
+
+    private func syncMedicationReminders() {
+        NotificationService.shared.syncMedicationReminders(
+            medicationScheduleConfirmed ? configuredMedications : [])
+    }
+
+    private static func medicationScheduleSignature(_ medications: [Medication]) -> String {
+        medications
+            .filter { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            .sorted { $0.id.uuidString < $1.id.uuidString }
+            .map { "\($0.id.uuidString)|\($0.name)|\($0.purpose)|\($0.hour)|\($0.minute)" }
+            .joined(separator: "\\n")
     }
     var moodToday: MoodEntry? { moods.first { $0.day == CareTime.dayKey() } }
 
@@ -137,19 +184,22 @@ final class CareStore: ObservableObject {
     }
 
     func toggleMedication(_ medication: Medication) {
+        guard medicationScheduleConfirmed else { return }
         if let index = medications.firstIndex(where: { $0.id == medication.id }) {
             medications[index].isTaken.toggle()
         }
     }
 
     func takeMedication(id: UUID) {
+        guard medicationScheduleConfirmed else { return }
         if let index = medications.firstIndex(where: { $0.id == id }), !medications[index].isTaken {
             medications[index].isTaken = true
         }
     }
 
     func snoozeMedication(id: UUID) {
-        guard let med = medications.first(where: { $0.id == id }) else { return }
+        guard medicationScheduleConfirmed,
+              let med = medications.first(where: { $0.id == id }) else { return }
         let content = UNMutableNotificationContent()
         content.title = "💊 Snoozed: \(med.shortName)"
         content.body = "Reminder for \(med.timeLabel) snoozed 10 minutes."

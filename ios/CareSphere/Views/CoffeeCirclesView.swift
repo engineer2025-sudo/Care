@@ -30,7 +30,7 @@ struct CoffeeCirclesView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Isolation prevention, one cup at a time")
                 .font(.title3.weight(.heavy))
-            Text("Every room is a real, open meet.jit.si video call — the same rooms as the web app, so family on any device joins the same call. No installs, no accounts; you'll appear as \(store.displayName).")
+            Text("These buttons open real meet.jit.si rooms shared with the web app. They have no CareSphere host, schedule, attendance tracking, or moderation; anyone with a room link can join. Share only with people you trust. You'll appear as \(store.displayName).")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -43,16 +43,16 @@ struct CoffeeCirclesView: View {
                 Text(circle.emoji).font(.title)
                 Spacer()
                 HStack(spacing: 5) {
-                    Circle().fill(Color.emerald).frame(width: 6, height: 6)
+                    Image(systemName: "link")
                     Text(circle.schedule).font(.caption2.weight(.bold))
                 }
                 .padding(.horizontal, 9)
                 .padding(.vertical, 4)
-                .background(Color.emerald.opacity(0.15), in: Capsule())
-                .foregroundStyle(Color.emerald)
+                .background(Color.cardInner, in: Capsule())
+                .foregroundStyle(.secondary)
             }
             Text(circle.title).font(.headline)
-            Text("Hosted by \(circle.host) · \(circle.participants) online")
+            Text("No CareSphere host, attendance tracking, or moderation. Anyone with this room link can join.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Text(circle.room)
@@ -88,8 +88,7 @@ struct CoffeeCirclesView: View {
             let suffix = String(UUID().uuidString.prefix(6))
             activeCircle = CoffeeCircle(
                 id: 99, title: "CareSphere Open Circle", emoji: "🫶",
-                schedule: "Ad-hoc", host: "You", participants: 1,
-                room: "CareSphere-OpenCoffeeCircle-\(suffix)")
+                schedule: "Ad-hoc room", room: "CareSphere-OpenCoffeeCircle-\(suffix)")
         } label: {
             Label("Launch an open circle", systemImage: "plus.circle.fill")
                 .font(.subheadline.weight(.black))
@@ -104,7 +103,7 @@ struct CoffeeCirclesView: View {
         VStack(alignment: .leading, spacing: 6) {
             Label("How the video works", systemImage: "lightbulb.fill")
                 .font(.subheadline.weight(.bold))
-            Text("Calls run on Jitsi Meet — the open-source, encrypted WebRTC platform used by healthcare and government teams. CareSphere embeds the official Jitsi Meet SDK, so the full conference experience (camera, mic, chat, tiles) stays inside the app. Camera and microphone permission prompts appear only when you enable them.")
+            Text("Calls run on Jitsi Meet using encrypted WebRTC transport. CareSphere embeds the Jitsi SDK but does not host, schedule, or moderate rooms. Anyone with a room link may join, so verify participants before sharing private health details. Camera and microphone permission prompts appear only when you enable them.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

@@ -8,9 +8,12 @@ struct CareSphereApp: App {
     @StateObject private var notifications = NotificationService.shared
     @StateObject private var location = LocationService()
     @StateObject private var steps = StepCountService()
+    @StateObject private var localAssistant = LocalAssistantService()
+    @StateObject private var kokoroSpeech = KokoroSpeechService.shared
 
     @Environment(\.scenePhase) private var scenePhase
     @State private var isLocked = false
+    @State private var hasCheckedInitialLock = false
 
     init() {
         NotificationService.shared.registerCategories()
@@ -19,20 +22,14 @@ struct CareSphereApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if store.hasCompletedOnboarding {
-                    RootTabView()
-                        .fullScreenOrSheetLock(isPresented: $isLocked) {
-                            AppLockView(onUnlock: { isLocked = false })
-                        }
-                        .onAppear {
-                            if store.biometricEnabled && !isLocked && !hasShownInitialLock {
-                                hasShownInitialLock = true
-                                isLocked = true
-                            }
-                            steps.start()
-                        }
-                } else {
+                if !store.hasCompletedOnboarding {
                     OnboardingView()
+                } else if store.biometricEnabled && (isLocked || !hasCheckedInitialLock) {
+                    // Replace the app's root view with an opaque lock screen.
+                    // A macOS sheet left the sensitive window visible and live behind it.
+                    AppLockView(onUnlock: { isLocked = false })
+                } else {
+                    RootTabView()
                 }
             }
             .environmentObject(store)
@@ -41,28 +38,32 @@ struct CareSphereApp: App {
             .environmentObject(notifications)
             .environmentObject(location)
             .environmentObject(steps)
+            .environmentObject(localAssistant)
+            .environmentObject(kokoroSpeech)
             .tint(.emerald)
+            .onAppear {
+                store.refreshMedicationReminders()
+                if !hasCheckedInitialLock {
+                    hasCheckedInitialLock = true
+                    if store.biometricEnabled { isLocked = true }
+                }
+                steps.start()
+            }
             .onChange(of: scenePhase) { phase in
-                // Lock whenever the app leaves the foreground (if enabled).
-                if store.hasCompletedOnboarding && store.biometricEnabled && phase != .active {
+                // Lock after the app is actually backgrounded. LocalAuthentication
+                // may make a scene inactive while its own system prompt is visible.
+                if phase == .background {
+                    KokoroSpeechService.shared.stopPlayback()
+                    Task { await KokoroSpeechService.shared.releaseInferenceMemory() }
+                }
+                if store.hasCompletedOnboarding && store.biometricEnabled && phase == .background {
                     isLocked = true
                 }
             }
+            .onChange(of: store.hasCompletedOnboarding) { completed in
+                if completed && store.biometricEnabled { isLocked = true }
+            }
         }
-    }
-
-    @State private var hasShownInitialLock = false
-}
-
-/// fullScreenCover on iPhone; window-modal sheet on macOS (no fullScreenCover there).
-private extension View {
-    @ViewBuilder
-    func fullScreenOrSheetLock<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: @escaping () -> Content) -> some View {
-        #if os(iOS)
-        self.fullScreenCover(isPresented: isPresented, content: content)
-        #else
-        self.sheet(isPresented: isPresented, content: content)
-        #endif
     }
 }
 

@@ -4,7 +4,7 @@ import MapKit
 struct SosView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var location: LocationService
-    @State private var notifiedAt: Date?
+    @EnvironmentObject private var store: CareStore
 
     var body: some View {
         NavigationStack {
@@ -38,15 +38,12 @@ struct SosView: View {
                         .foregroundStyle(.orange)
                 }
 
-                if let notifiedAt {
-                    Label("Care Circle alerted at \(notifiedAt.formatted(date: .omitted, time: .shortened)) — Sarah M. and coordinator Elena R. acknowledged.",
-                          systemImage: "checkmark.seal.fill")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color.emerald)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(12)
-                        .background(Color.emerald.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                }
+                Text("CareSphere has no push-notification server for the Care Circle. Use Share SOS below to send the details with Messages, Mail, or another app you choose.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
 
                 VStack(spacing: 10) {
                     Link(destination: URL(string: "tel:911")!) {
@@ -70,12 +67,8 @@ struct SosView: View {
                         .buttonStyle(.bordered)
                         .disabled(location.isLocating)
                     }
-                    Button {
-                        notifiedAt = Date()
-                        hapticWarning()
-                        SpeechService.shared.speak("Emergency alert sent to your care circle.", enabled: true)
-                    } label: {
-                        Label("Notify Care Circle", systemImage: "bell.fill")
+                    ShareLink(item: emergencyShareMessage) {
+                        Label("Share SOS details", systemImage: "square.and.arrow.up")
                             .font(.subheadline.weight(.bold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 13)
@@ -99,5 +92,14 @@ struct SosView: View {
         }
         .preferredColorScheme(.dark)
         .presentationDetents([.large])
+    }
+
+    private var emergencyShareMessage: String {
+        var message = "CareSphere SOS: \(store.displayName) is requesting help. Please check in now."
+        if let location = location.location {
+            let mapsURL = "https://www.google.com/maps?q=\(location.coordinate.latitude),\(location.coordinate.longitude)"
+            message += " Current location: \(mapsURL)"
+        }
+        return message
     }
 }

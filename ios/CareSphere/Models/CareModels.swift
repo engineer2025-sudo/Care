@@ -77,29 +77,24 @@ struct MoodEntry: Identifiable, Codable, Equatable {
     var createdAt: Date = Date()
 }
 
-/// Real, open Jitsi Meet rooms — the same rooms the web app joins, so family
-/// on Android/web and seniors on iPhone end up in the same video call.
+/// Open Jitsi rooms shared by the native and web clients. CareSphere does not
+/// host these calls or provide attendance, scheduling, or moderation services.
 struct CoffeeCircle: Identifiable {
     let id: Int
     let title: String
     let emoji: String
     let schedule: String
-    let host: String
-    let participants: Int
     let room: String
     var url: URL { URL(string: "https://meet.jit.si/\(room)")! }
 }
 
 let coffeeCircles: [CoffeeCircle] = [
     CoffeeCircle(id: 1, title: "Morning Sunshine Tea & Chat", emoji: "☕",
-                 schedule: "Live now", host: "Sarah M. (Volunteer)",
-                 participants: 8, room: "CareSphere-MorningSunshineTea-Room2026"),
+                 schedule: "Open room · no schedule", room: "CareSphere-MorningSunshineTea-Room2026"),
     CoffeeCircle(id: 2, title: "Classic Movie Trivia & Memories", emoji: "🎬",
-                 schedule: "2:00 PM today", host: "David K. (Activity Lead)",
-                 participants: 12, room: "CareSphere-ClassicMovieTrivia-Room2026"),
+                 schedule: "Open room · no schedule", room: "CareSphere-ClassicMovieTrivia-Room2026"),
     CoffeeCircle(id: 3, title: "Gentle Stretching & Breathing", emoji: "🌿",
-                 schedule: "4:30 PM today", host: "Elena R. (Wellness Coach)",
-                 participants: 10, room: "CareSphere-GentleStretchBreathing-Room2026"),
+                 schedule: "Open room · no schedule", room: "CareSphere-GentleStretchBreathing-Room2026"),
 ]
 
 enum CareTime {

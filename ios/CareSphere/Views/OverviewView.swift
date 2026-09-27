@@ -32,8 +32,11 @@ struct OverviewView: View {
             .navigationTitle("Overview")
             .inlineTitle()
             .onAppear {
-                if notifications.authorizationStatus == .authorized {
-                    NotificationService.shared.syncMedicationReminders(store.medications)
+                store.refreshMedicationReminders()
+            }
+            .onChange(of: notifications.authorizationStatus) { status in
+                if status == .authorized || status == .provisional {
+                    store.refreshMedicationReminders()
                 }
             }
         }
@@ -46,7 +49,7 @@ struct OverviewView: View {
                 .foregroundStyle(Color.emerald)
             Text("Connected care for independent living")
                 .font(.title2.weight(.heavy))
-            Text("Live Apple Health & Bluetooth vitals, one-tap Jitsi coffee circles, and sensory therapy games — with family one tap away.")
+            Text("Live Apple Health & Bluetooth vitals, real Jitsi video rooms you can join with family, and sensory therapy games. Care notes stay on this device.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             if !store.personalizedTagline.isEmpty {
@@ -74,8 +77,14 @@ struct OverviewView: View {
                 Image(systemName: "brain.head.profile").foregroundStyle(.indigo)
             } action: {}
             BigMetricButton(
-                title: "\(store.medsTaken)/\(store.medications.count)",
-                subtitle: store.nextDueMedication.map { "Next: \($0.shortName) at \($0.timeLabel)" } ?? "All doses taken ✓") {
+                title: store.configuredMedications.isEmpty
+                    ? "None"
+                    : store.medicationScheduleConfirmed ? "\(store.medsTaken)/\(store.configuredMedications.count)" : "Review",
+                subtitle: store.configuredMedications.isEmpty
+                    ? "No medication schedule"
+                    : store.medicationScheduleConfirmed
+                        ? store.nextDueMedication.map { "Next: \($0.shortName) at \($0.timeLabel)" } ?? "All doses marked taken ✓"
+                        : "Reminders paused · confirm in Settings") {
                 Image(systemName: "pills.fill").foregroundStyle(.pink)
             } action: {}
         }
@@ -184,38 +193,62 @@ struct OverviewView: View {
     private var medicationsCard: some View {
         SectionCard(title: "Today's medications", systemImage: "bell.badge.fill") {
             VStack(spacing: 8) {
-                ForEach(store.medications) { med in
-                    HStack(spacing: 12) {
-                        Button {
-                            store.toggleMedication(med)
-                            if !med.isTaken { celebrate() }
-                            SpeechService.shared.speak("Dose recorded. Thank you.", enabled: store.voiceReminders)
-                        } label: {
-                            Image(systemName: med.isTaken ? "checkmark.circle.fill" : "circle.dashed")
-                                .font(.title3)
-                                .foregroundStyle(med.isTaken ? Color.emerald : Color.pink)
+                if store.configuredMedications.isEmpty {
+                    Text("No schedule yet. Add only medicines and times confirmed by your care team in Settings.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                } else if !store.medicationScheduleConfirmed {
+                    Text("A saved schedule needs review in Settings. Reminders and dose check-ins are paused until you confirm every name and time.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                if store.medicationScheduleConfirmed {
+                    ForEach(store.configuredMedications) { med in
+                        HStack(spacing: 12) {
+                            Button {
+                                store.toggleMedication(med)
+                                if !med.isTaken { celebrate() }
+                                SpeechService.shared.speak("Dose recorded. Thank you.", enabled: store.voiceReminders, voiceIdentifier: store.voiceIdentifier)
+                            } label: {
+                                Image(systemName: med.isTaken ? "checkmark.circle.fill" : "circle.dashed")
+                                    .font(.title3)
+                                    .foregroundStyle(med.isTaken ? Color.emerald : Color.pink)
+                            }
+                            .accessibilityLabel("Mark \(med.name) \(med.isTaken ? "not taken" : "taken")")
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(med.name)
+                                    .font(.subheadline.weight(.bold))
+                                    .strikethrough(med.isTaken)
+                                    .foregroundStyle(med.isTaken ? .secondary : .primary)
+                                Text("\(med.purpose) · \(med.timeLabel)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            StatusChip(text: med.isTaken ? "Taken" : "Due", color: med.isTaken ? .gray : .pink)
                         }
-                        .accessibilityLabel("Mark \(med.name) \(med.isTaken ? "not taken" : "taken")")
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(med.name)
-                                .font(.subheadline.weight(.bold))
-                                .strikethrough(med.isTaken)
-                                .foregroundStyle(med.isTaken ? .secondary : .primary)
-                            Text("\(med.purpose) · \(med.timeLabel)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        StatusChip(text: med.isTaken ? "Taken" : "Due", color: med.isTaken ? .gray : .pink)
+                        .padding(12)
+                        .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
-                    .padding(12)
-                    .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
             }
-            Label("Dose times become real iOS reminders with ✓ Taken / Snooze buttons on the lock screen.",
-                  systemImage: "lock.iphone")
+            if store.medicationScheduleConfirmed {
+                Label {
+                    Text(notifications.authorizationStatus == .authorized || notifications.authorizationStatus == .provisional
+                         ? "Scheduled iOS reminders use the system sound when the app is closed."
+                         : "Allow notifications in Settings for lock-screen reminders.")
+                } icon: {
+                    Image(systemName: "lock.iphone")
+                }
                 .font(.caption2)
                 .foregroundStyle(.secondary)
+            }
         }
     }
 }

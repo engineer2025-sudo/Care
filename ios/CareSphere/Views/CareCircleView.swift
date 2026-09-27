@@ -4,22 +4,15 @@ struct CareCircleView: View {
     @EnvironmentObject private var store: CareStore
     @State private var noteDraft = ""
 
-    private let members: [(name: String, role: String, color: Color)] = [
-        ("Sarah M.", "Daughter · primary caregiver", .emerald),
-        ("Dr. Evelyn Vance", "Primary care physician", .blue),
-        ("Elena R.", "Wellness coach · circle host", .purple),
-        ("David K.", "Activity lead · trivia host", .orange),
-    ]
-    private let adherenceWeek: [Bool] = [true, true, true, false, true, true, true]
-
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    sharedLog
-                    insightsCard
-                    adherenceCard
-                    membersCard
+                    localOnlyNotice
+                    careNotes
+                    todaySummary
+                    medicationStatus
+                    emergencyContact
                 }
                 .padding()
             }
@@ -29,10 +22,19 @@ struct CareCircleView: View {
         }
     }
 
-    private var sharedLog: some View {
-        SectionCard(title: "Shared care log", systemImage: "square.and.pencil") {
+    private var localOnlyNotice: some View {
+        SectionCard(title: "Private to this device", systemImage: "iphone.gen3") {
+            Text("Care notes and check-ins are saved locally. This build has no family-sync, clinician portal, or push-alert server. Starter notes, if present, are sample content—not messages from real people.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var careNotes: some View {
+        SectionCard(title: "Care notes · local only", systemImage: "square.and.pencil") {
             HStack(spacing: 10) {
-                TextField("Share an update with the care circle…", text: $noteDraft)
+                TextField("Add a private care note…", text: $noteDraft)
                     .textFieldStyle(.roundedBorder)
                     .font(.footnote)
                 Button {
@@ -46,6 +48,7 @@ struct CareCircleView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(noteDraft.trimmingCharacters(in: .whitespaces).isEmpty)
             }
+
             ForEach(store.notes) { note in
                 VStack(alignment: .leading, spacing: 3) {
                     HStack {
@@ -70,58 +73,83 @@ struct CareCircleView: View {
         }
     }
 
-    private var insightsCard: some View {
-        SectionCard(title: "Care insights — this week", systemImage: "sparkles") {
+    private var todaySummary: some View {
+        SectionCard(title: "Today at a glance", systemImage: "chart.bar.fill") {
             VStack(alignment: .leading, spacing: 8) {
-                insightRow("Routine completion", value: "\(store.routinesDone)/\(store.routines.count)", note: "today — consistency is the goal")
-                insightRow("Emotion-match wins", value: "\(store.emotionScore)", note: "recognition practice trending up")
-                insightRow("Coffee circles this week", value: "3", note: "isolation risk down 18%")
-                insightRow("Mood check-ins logged", value: "\(store.moods.count)", note: store.moodToday.map { "latest: feeling \(moodLabel($0.score).lowercased())" } ?? "no entry yet today")
+                insightRow("Routine check-ins", value: "\(store.routinesDone)/\(store.routines.count)", note: "marked complete today")
+                insightRow("Emotion-match score", value: "\(store.emotionScore)", note: "local game score")
+                insightRow(
+                    "Medication check-ins",
+                    value: store.configuredMedications.isEmpty ? "None" : store.medicationScheduleConfirmed ? "\(store.medsTaken)/\(store.configuredMedications.count)" : "Paused",
+                    note: store.configuredMedications.isEmpty ? "no schedule entered" : store.medicationScheduleConfirmed ? "self-reported; no pharmacy integration" : "review saved schedule in Settings")
+                insightRow("Mood check-in", value: store.moodToday.map { moodLabel($0.score) } ?? "Not recorded", note: "optional self-report")
             }
         }
     }
 
     private func insightRow(_ title: String, value: String, note: String) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text("• \(title):").font(.footnote).foregroundStyle(.secondary)
-            Text(value).font(.footnote.weight(.heavy)).foregroundStyle(.primary)
-            Text(note).font(.caption).foregroundStyle(.tertiary)
-            Spacer()
-        }
-    }
-
-    private var adherenceCard: some View {
-        SectionCard(title: "Medication adherence", systemImage: "pills.fill") {
-            HStack(spacing: 6) {
-                ForEach(0..<7, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(adherenceWeek[index] ? Color.emerald.opacity(0.85) : Color.cardInner)
-                        .frame(height: 30)
-                }
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(title).font(.footnote).foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                Text(value).font(.footnote.weight(.heavy)).foregroundStyle(.primary)
             }
-            Text("Last 7 days — one missed evening dose triggered a family notification.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            Text(note).font(.caption2).foregroundStyle(.tertiary)
         }
     }
 
-    private var membersCard: some View {
-        SectionCard(title: "Care Circle members", systemImage: "person.2.fill") {
-            VStack(spacing: 10) {
-                ForEach(members, id: \.name) { member in
-                    HStack(spacing: 12) {
-                        Text(member.name.split(separator: " ").map { "\($0.first!)" }.joined())
-                            .font(.caption.weight(.black))
-                            .foregroundStyle(.white)
-                            .frame(width: 34, height: 34)
-                            .background(member.color.opacity(0.8), in: Circle())
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(member.name).font(.subheadline.weight(.bold))
-                            Text(member.role).font(.caption2).foregroundStyle(.secondary)
+    private var medicationStatus: some View {
+        SectionCard(title: "Medication status · today", systemImage: "pills.fill") {
+            if store.configuredMedications.isEmpty {
+                Text("No medication schedule is saved on this device.")
+                    .font(.caption).foregroundStyle(.secondary)
+            } else if !store.medicationScheduleConfirmed {
+                Text("A saved schedule is paused until you review every name and time in Settings. No dose check-ins or reminders are active yet.")
+                    .font(.caption).foregroundStyle(.secondary)
+            } else {
+                ForEach(store.configuredMedications) { medication in
+                    HStack(spacing: 10) {
+                        Image(systemName: medication.isTaken ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(medication.isTaken ? Color.emerald : Color.secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(medication.shortName).font(.footnote.weight(.semibold))
+                            Text("Scheduled \(medication.timeLabel)")
+                                .font(.caption2).foregroundStyle(.secondary)
                         }
                         Spacer()
+                        Text(medication.isTaken ? "Marked taken" : "Not marked")
+                            .font(.caption2).foregroundStyle(.secondary)
                     }
                 }
+                Text("This reflects only the schedule and check-ins entered in CareSphere. It does not verify that a dose was taken.")
+                    .font(.caption2).foregroundStyle(.tertiary)
+            }
+        }
+    }
+
+    private var emergencyContact: some View {
+        SectionCard(title: "Emergency contact", systemImage: "person.crop.circle.badge.exclamationmark") {
+            let contact = store.profile.emergencyContact
+            if contact.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && contact.phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Text("No emergency contact is set. Add one in Settings. The contact is stored on this device; CareSphere does not automatically notify them.")
+                    .font(.caption).foregroundStyle(.secondary)
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    if !contact.name.isEmpty {
+                        Text(contact.name).font(.footnote.weight(.bold))
+                    }
+                    if !contact.phone.isEmpty {
+                        let phoneForURL = contact.phone.filter { $0.isNumber || $0 == "+" }
+                        if let phoneURL = URL(string: "tel:\(phoneForURL)") {
+                            Link(contact.phone, destination: phoneURL)
+                                .font(.footnote)
+                        }
+                    }
+                    Text("Saved locally. Use SOS → Share SOS details to choose a messaging app and recipient.")
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }

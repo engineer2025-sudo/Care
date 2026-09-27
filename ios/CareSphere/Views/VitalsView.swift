@@ -23,6 +23,9 @@ struct VitalsView: View {
         return false
     }
     private var anyFlag: Bool { hrFlag || spo2Flag || bpFlag }
+    private var hasAnyReading: Bool {
+        effectiveHR != nil || healthKit.spo2 != nil || healthKit.systolic != nil || healthKit.diastolic != nil
+    }
 
     var body: some View {
         NavigationStack {
@@ -30,7 +33,7 @@ struct VitalsView: View {
                 VStack(spacing: 16) {
                     sensorBar
                     garminCard
-                    triageBanner
+                    referenceRangeBanner
                     heartRateCard
                     spo2Card
                     bloodPressureCard
@@ -121,21 +124,21 @@ struct VitalsView: View {
         }
     }
 
-    private var triageBanner: some View {
+    private var referenceRangeBanner: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: anyFlag ? "exclamationmark.triangle.fill" : "checkmark.seal.fill")
-                .foregroundStyle(anyFlag ? Color.orange : Color.emerald)
+            Image(systemName: anyFlag ? "exclamationmark.triangle.fill" : hasAnyReading ? "checkmark.seal.fill" : "waveform.path.ecg")
+                .foregroundStyle(anyFlag ? Color.orange : hasAnyReading ? Color.emerald : Color.secondary)
             VStack(alignment: .leading, spacing: 3) {
-                Text(anyFlag ? "Triage flag — reading outside expected range" : "All readings within expected ranges")
+                Text(anyFlag ? "A reading is outside a broad reference band" : hasAnyReading ? "No displayed reading is outside these broad bands" : "No readings available to compare")
                     .font(.footnote.weight(.black))
-                Text("Thresholds: HR 50–110 bpm · SpO₂ ≥ 94% · BP < 140/90 mmHg. Flags notify your Care Circle and pre-fill the telehealth summary.")
+                Text("Informational only—not triage or a diagnosis. Broad examples: HR 50–110 bpm · SpO₂ ≥ 94% · BP < 140/90 mmHg. CareSphere does not send alerts or create a clinical summary; Apple Health sample freshness may vary.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(anyFlag ? Color.orange.opacity(0.14) : Color.emerald.opacity(0.12),
+        .background(anyFlag ? Color.orange.opacity(0.14) : hasAnyReading ? Color.emerald.opacity(0.12) : Color.cardInner,
                     in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 
