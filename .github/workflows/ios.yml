@@ -116,6 +116,8 @@ jobs:
       - name: Re-sign ad-hoc (no entitlements) and verify strictly
         run: |
           APP_PATH="$APP_PATH"
+          echo "── Normalize bundled framework readability before ad-hoc signing ──"
+          chmod -R u+rwX,go+rX "$APP_PATH"
           echo "── Entitlements before (should be none/empty) ──"
           codesign -d --entitlements - "$APP_PATH" 2>&1 | head -3 || true
           codesign --remove-signature "$APP_PATH" 2>/dev/null || true
