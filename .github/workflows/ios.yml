@@ -202,6 +202,8 @@ jobs:
 
       - name: Package DMG + ZIP
         run: |
+          set -Eeuo pipefail
+          exec > >(tee /tmp/package.log) 2>&1
           mkdir -p staging
           cp -R "$APP_PATH" staging/
           ln -s /Applications staging/Applications
@@ -291,7 +293,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mac-build-log
-          path: /tmp/mac.log
+          path: |
+            /tmp/mac.log
+            /tmp/package.log
           if-no-files-found: ignore
 
       - name: Surface mac errors as annotations
@@ -300,3 +304,7 @@ jobs:
           grep -hE "\.swift:[0-9]+:[0-9]+: error:" /tmp/mac.log 2>/dev/null | sort -u | head -25 | while IFS= read -r line; do
             echo "::error::${line:0:380}"
           done
+          if [[ -s /tmp/package.log ]]; then
+            LOG_TAIL="$(tail -n 35 /tmp/package.log | tr '\r' ' ' | sed -e 's/%/%25/g' -e 's/:/%3A/g' -e 's/,/%2C/g' | awk '{printf "%s%%0A", $0}')"
+            echo "::error title=DMG packaging log tail::${LOG_TAIL:0:6000}"
+          fi
