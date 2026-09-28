@@ -1,6 +1,8 @@
 # 💚 CareSphere for iOS & Mac — native SwiftUI
 
-> **CareSphere 2.1.0 for Mac is released and CI-verified.** It adds an optional **on-device Qwen2.5 1.5B** assistant, offline **MedlinePlus references**, a private **Kiwix/Wikipedia ZIM connector**, an opaque full-window Touch ID/Face ID lock, and optional **Kokoro neural speech**. See the root [`DOWNLOAD.md`](../DOWNLOAD.md) for Mac downloads and the iPhone/Xcode limitations.
+> **CareSphere 2.1.0 for Mac is the latest public release.** It adds an optional **on-device Qwen2.5 1.5B** assistant, offline **MedlinePlus references**, a private **Kiwix/Wikipedia ZIM connector**, an opaque full-window Touch ID/Face ID lock, and optional **Kokoro neural speech**. See the root [`DOWNLOAD.md`](../DOWNLOAD.md) for Mac downloads and the iPhone/Xcode limitations.
+>
+> **Development:** 2.2 privacy controls/storage hardening and the first 2.3 local visit-prep prototype are in progress. Neither has been released. See [`ROADMAP.md`](../ROADMAP.md).
 
 - 📱 **iOS:** native SwiftUI source, iOS 16+; no public App Store/TestFlight build.
 - 🖥️ **Mac:** [download CareSphere 2.1.0 `.dmg`](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-2.1.0-mac.dmg) · [ZIP](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-2.1.0-mac.zip) · [release notes and optional assets](https://github.com/engineer2025-sudo/Care/releases/tag/mac-v2.1.0).
@@ -61,8 +63,9 @@ Binding to `0.0.0.0` lets devices on the network reach Kiwix. Use it only on tru
 | 🔊 Spoken prompts | Apple AVSpeechSynthesizer voices by default; optional Kokoro int8 English TTS via Sherpa-ONNX, with local voice generation and playback. Closed-app notifications use system sounds. |
 | 🎧 Sensory soundscapes | Procedural on-device AVAudioEngine DSP; works without audio downloads. |
 | 🚨 Emergency | SOS, one-tap `tel:911`, and a user-confirmed Share sheet for optional GPS details. No automatic Care Circle push server is configured. |
+| 📝 Visit preparation (2.3 prototype) | Choose local profile, self-entered reminders, mood entries, notes and questions; preview the exact text and share only after tapping the system share sheet. No HealthKit observations are included yet. |
 | 🧩 Therapy & routines | SwiftUI emotion recognition, pattern recall, breathing coach, daily mood check-in and predictable routines. |
-| 🔒 Privacy | Care content, optional Qwen/Kokoro weights, generated audio, and reference index stay in the app container. No cloud-AI endpoint. Kiwix search is restricted to the configured local/private host. |
+| 🔒 Privacy | The 2.2 development code migrates legacy care data into private Application Support, protects the iOS file with Complete File Protection, restricts Mac file/folder access to the current user, and adds explicit JSON export/erase controls. Optional Qwen/Kokoro weights and reference downloads remain separate; Kiwix search is restricted to the configured local/private host. |
 
 ## Build & run (Mac with Xcode)
 

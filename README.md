@@ -23,7 +23,7 @@
 | 📊 **Vitals export** | One-click CSV preserves real BLE readings separately from clearly labeled simulated SpO₂/BP spot-checks. It is a data export—not a clinical record or diagnosis. |
 | 📲 **Installable PWA** | Web app manifest + icons + service worker (production builds). Seniors and families can install it to a home screen; routines still open offline. |
 | ♿ **Accessibility** | Text-size scaling (A / A+ / A++), high-contrast mode, `prefers-reduced-motion` support, ARIA roles/labels throughout, one-tap daily mood check-in. |
-| 🔒 **Privacy** | Web content persists in browser local storage. Native care data stays in the app container. The optional 1.5B GGUF assistant runs on-device; Kiwix search is sent only to a configured local/private host. |
+| 🔒 **Privacy** | Web data is stored in browser localStorage (not encrypted by CareSphere), with explicit JSON export and erase controls. The 2.2 native development code stores care data in protected Application Support with iOS file protection and owner-only Mac permissions, and adds explicit JSON export/erase controls; physical-device verification remains pending. The optional 1.5B GGUF assistant runs on-device; Kiwix search is sent only to a configured local/private host. |
 | 🧠 **Native Health Guide (Mac 2.1.0)** | Optional Qwen2.5 1.5B Instruct GGUF via `llama.cpp`, local MedlinePlus references, and a private Kiwix/ZIM connector. Qwen weights are a separate opt-in download; questions are not sent to a cloud AI. |
 | 🩺 **Offline medical references (Mac 2.1.0)** | The app can download MedlinePlus XML from the U.S. National Library of Medicine after an explicit tap; it is not bundled and is not individualized medical advice. |
 | 🔐 **Biometric privacy** | Native Touch ID/Face ID replaces the root view with an opaque lock screen; private care content is not drawn behind the prompt. |
@@ -34,7 +34,7 @@
 - **Overview** — greeting, day-at-a-glance metrics, daily mood check-in (saved + 14-day history dots), predictable-routine checklist, and today's medications with the next due dose.
 - **Therapy & Sensory** — Emotion Recognition match (autism emotional-literacy training), Pattern Recall (working-memory game with persisted best score), Web-Audio soundscapes, and a guided 4·4·6 breathing coach.
 - **Coffee Circles** — three real Jitsi room links plus an ad-hoc room; join embedded or in a new tab. No CareSphere host, schedule, attendance tracking, or moderation is configured; anyone with a link may join.
-- **Care Circle** — browser/device-local care notes and summaries of saved check-ins. The illustrative roster is sample content only; no account sync, clinician portal, family notifications, or shared backend is configured.
+- **Care Circle** — browser/device-local care notes and summaries of saved check-ins, plus a user-selected visit-prep text brief. It previews exactly which notes, self-reports, medication reminders and source-labeled vitals will be included; simulated readings require an explicit choice and remain labeled. The illustrative roster is sample content only; no account sync, clinician portal, family notifications, or shared backend is configured.
 - **Vitals & Telehealth** — BLE pairing, clearly-labeled source chips, live sparkline, spot-checks, CSV export, and one-tap Jitsi telehealth visit.
 - **Native Health Guide (Mac 2.1.0)** — source-linked offline MedlinePlus search, optional Qwen2.5 1.5B on-device summaries, and a local Kiwix connection for an existing Wikipedia/ZIM file. The AI is educational only—not diagnosis, triage, a drug-interaction checker, or dosing advice.
 
@@ -47,20 +47,18 @@ See the [download and setup guide](DOWNLOAD.md). The latest published Mac instal
 ```bash
 npm install
 npm run dev      # http://localhost:3000
+npm test         # visit-brief privacy/source-label tests
 npm run build    # production bundle + PWA in dist/
 ```
 
-> 💡 For real BLE pairing use Chrome or Edge on desktop/Android — that's a browser/platform capability, not an app limitation.
+Requires Node.js **20.19+** or **22.12+** (Vite 8). For real BLE pairing use Chrome or Edge on desktop/Android — that's a browser/platform capability, not an app limitation.
 
 ## Stack
 
-Web: React 18 · Vite 5 · Tailwind CSS 3 · Web Bluetooth / Web Audio / WebRTC / Notifications / Speech / Geolocation.
+Web: React 18 · Vite 8 · Tailwind CSS 3 · Web Bluetooth / Web Audio / WebRTC / Notifications / Speech / Geolocation.
 
 Native: SwiftUI · HealthKit · CoreBluetooth · `llama.cpp` GGUF · Sherpa-ONNX/Kokoro offline TTS · ZIPFoundation · FoundationXML · UserNotifications · AVFoundation · LocalAuthentication · Kiwix local-search connector.
 
-## Roadmap ideas
+## Versions 2.2 and 2.3
 
-- Push-based family notifications (requires a small backend + VAPID keys)
-- FHIR/HL7 integration for EHR-shared vitals
-- Caregiver realtime sync via WebRTC data channels or CRDTs
-- App Store / TestFlight distribution (requires Apple signing, entitlements, and release review)
+CareSphere for Mac **2.1.0** remains the latest public release. Versions 2.2 and 2.3 are under development—not published builds. See the [2.2/2.3 roadmap](ROADMAP.md) for current implementation status, competitor research, privacy boundaries, and acceptance criteria. Development pushes are CI-only; the release workflow refuses to overwrite an existing versioned release.

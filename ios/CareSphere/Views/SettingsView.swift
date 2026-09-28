@@ -1,5 +1,26 @@
 import SwiftUI
 import UserNotifications
+import UniformTypeIdentifiers
+
+private struct CareDataExportDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.json] }
+    let data: Data
+
+    init(data: Data) {
+        self.data = data
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        self.data = data
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
+    }
+}
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -11,6 +32,10 @@ struct SettingsView: View {
     @State private var contactPickerShown = false
     #endif
     @State private var biometricTestResult: String?
+    @State private var showingDataExporter = false
+    @State private var showingEraseConfirmation = false
+    @State private var exportDocument: CareDataExportDocument?
+    @State private var privacyActionMessage: String?
     @State private var newMedicationName = ""
     @State private var newMedicationPurpose = ""
     @State private var newMedicationTime = CareTime.date(hour: 9, minute: 0)
@@ -35,6 +60,41 @@ struct SettingsView: View {
                     Button("Done") { dismiss() }
                 }
             }
+        }
+        .fileExporter(
+            isPresented: $showingDataExporter,
+            document: exportDocument,
+            contentType: .json,
+            defaultFilename: "CareSphere-Private-Care-Data") { result in
+                switch result {
+                case .success:
+                    privacyActionMessage = "Care data export saved. Review the file before sharing it."
+                case .failure:
+                    privacyActionMessage = "The care data export was cancelled or could not be saved."
+                }
+                exportDocument = nil
+            }
+        .confirmationDialog(
+            "Erase all saved CareSphere care data?",
+            isPresented: $showingEraseConfirmation,
+            titleVisibility: .visible) {
+                Button("Erase All Care Data", role: .destructive) {
+                    store.eraseAllLocalCareData()
+                    privacyActionMessage = store.persistenceIssue ?? "Saved care data and medication notifications were removed."
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This removes your profile, emergency contact, routines, medication schedule, notes, mood history and scores, then returns to onboarding. It does not change system permissions or remove separately downloaded models and reference libraries.")
+            }
+    }
+
+    private func prepareCareDataExport() {
+        do {
+            exportDocument = CareDataExportDocument(data: try store.makeCareDataExport())
+            privacyActionMessage = nil
+            showingDataExporter = true
+        } catch {
+            privacyActionMessage = "CareSphere could not prepare a care data export."
         }
     }
 
@@ -305,9 +365,39 @@ struct SettingsView: View {
     // MARK: Privacy
 
     private var privacySection: some View {
-        Section("Privacy") {
+        Section("Privacy & data") {
             Label("Your profile, routines, medications, notes, moods and scores stay in CareSphere's private app storage.", systemImage: "lock.shield")
                 .font(.caption)
+            #if os(iOS)
+            Text("The care-data file uses iOS Complete File Protection while the device is locked. Touch ID / Face ID is an additional screen lock, not a separate encryption key.")
+                .font(.caption2).foregroundStyle(.secondary)
+            #else
+            Text("The care-data file is restricted to your macOS user account (POSIX permissions 0600). The biometric screen lock is not a separate encryption key.")
+                .font(.caption2).foregroundStyle(.secondary)
+            #endif
+
+            Button(action: prepareCareDataExport) {
+                Label("Export my care data as JSON…", systemImage: "square.and.arrow.up")
+            }
+            Text("The system save sheet lets you choose where to place the export. It contains sensitive profile, medication and journal information; the exported copy is outside CareSphere's app-storage protections.")
+                .font(.caption2).foregroundStyle(.secondary)
+
+            Button(role: .destructive) {
+                showingEraseConfirmation = true
+            } label: {
+                Label("Erase all saved care data…", systemImage: "trash")
+            }
+            Text("Erasing removes saved care data and pending medication notifications, then returns you to onboarding. Notification permission and separately downloaded Qwen, Kokoro, MedlinePlus and external Kiwix files are not removed.")
+                .font(.caption2).foregroundStyle(.secondary)
+
+            if let message = privacyActionMessage {
+                Text(message).font(.caption).foregroundStyle(.secondary).accessibilityAddTraits(.updatesFrequently)
+            }
+            if let issue = store.persistenceIssue {
+                Label(issue, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption).foregroundStyle(.orange)
+            }
+
             Label("The Qwen assistant and optional Kokoro voice run on this device; questions and generated audio are not sent to a cloud AI. Kiwix searches go only to the private/local server address you enter.", systemImage: "cpu")
                 .font(.caption)
             Label("MedlinePlus content and optional model weights are downloaded only when you choose. HealthKit access is explicit, and vitals retain their true source labels.", systemImage: "heart.text.square")
@@ -319,7 +409,7 @@ struct SettingsView: View {
 
     private var aboutSection: some View {
         Section("About") {
-            LabeledContent("Version", value: "2.1.0 (3)")
+            LabeledContent("Version", value: appVersionLabel)
             LabeledContent("Video", value: "Jitsi Meet SDK · meet.jit.si")
             LabeledContent("Health", value: "HealthKit + CoreBluetooth")
             VStack(alignment: .leading, spacing: 4) {
@@ -331,6 +421,13 @@ struct SettingsView: View {
             }
             .padding(.vertical, 2)
         }
+    }
+
+    private var appVersionLabel: String {
+        let info = Bundle.main.infoDictionary ?? [:]
+        let version = info["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let build = info["CFBundleVersion"] as? String ?? "Unknown"
+        return "\(version) (\(build))"
     }
 
     private var statusHint: String {

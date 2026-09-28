@@ -1,0 +1,58 @@
+name: Web app checks
+
+on:
+  push:
+    branches: [arena/01a0626b-care, main]
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.js'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
+      - '.github/workflows/web.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.js'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
+      - '.github/workflows/web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-audit:
+    name: Test and build CareSphere web app
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run local privacy and visit-prep tests
+        run: npm test
+
+      - name: Build production PWA
+        run: npm run build
+
+      - name: Audit dependency vulnerabilities
+        run: npm audit --audit-level=moderate

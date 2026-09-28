@@ -4,11 +4,13 @@ import {
   Volume2, CheckCircle, Bluetooth, BluetoothConnected, Phone, PhoneCall,
   AlertTriangle, Wind, Gamepad2, Flame, TreePine, CloudRain, Waves, Send,
   Bell, Pill, Calendar, Lock, Stethoscope, Timer, Award, Settings, Download,
-  BellRing, Smile, Frown, Meh, Laugh, MapPin, User
+  BellRing, Smile, Frown, Meh, Laugh, MapPin, User, FileText
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import { soundEngine } from './lib/audio'
 import { connectHeartRateMonitor } from './lib/bluetooth'
+import { buildVisitBrief } from './lib/visitBrief'
+import { STORAGE_KEY, RESET_LOCAL_DATA_EVENT, parseCareStorage, normalizePersistedValue } from './lib/careStorage'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Platform detection — iPhone/iPad (incl. iPadOS desktop-mode UA) and whether
@@ -24,19 +26,60 @@ const isStandalone = window.navigator.standalone === true ||
 // are stored in this browser. Joining Jitsi, BLE pairing, SOS sharing, and
 // notification permissions are explicit external/device actions.
 // ─────────────────────────────────────────────────────────────────────────────
-const STORAGE_KEY = 'caresphere.v1'
-
 function loadSaved() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {} } catch { return {} }
+  try { return parseCareStorage(localStorage.getItem(STORAGE_KEY)) } catch { return {} }
 }
 const saved = loadSaved()
 
+// A browser storage event is delivered only to other tabs. Propagate erasures
+// across tabs without echoing ordinary writes back and forth.
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', event => {
+    if (event.key !== STORAGE_KEY || event.newValue !== null) return
+    Object.keys(saved).forEach(key => delete saved[key])
+    window.dispatchEvent(new CustomEvent(RESET_LOCAL_DATA_EVENT, { detail: { closeOverlays: true } }))
+  })
+}
+
 function usePersisted(key, initial) {
-  const [value, setValue] = useState(() => (saved[key] !== undefined ? saved[key] : initial))
+  const initialRef = useRef(initial)
+  const skipWriteRef = useRef(false)
+  const [resetGeneration, setResetGeneration] = useState(0)
+  const [value, setValue] = useState(() => {
+    if (saved[key] === undefined) return initialRef.current
+    const normalized = normalizePersistedValue(key, saved[key], initialRef.current)
+    saved[key] = normalized
+    return normalized
+  })
+
   useEffect(() => {
+    if (skipWriteRef.current) {
+      skipWriteRef.current = false
+      return
+    }
     saved[key] = value
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)) } catch {}
-  }, [key, value])
+  }, [key, value, resetGeneration])
+
+  useEffect(() => {
+    const resetToStoredValue = (incoming) => {
+      const next = incoming && typeof incoming === 'object' && !Array.isArray(incoming) ? incoming : {}
+      if (Object.prototype.hasOwnProperty.call(next, key)) {
+        const normalized = normalizePersistedValue(key, next[key], initialRef.current)
+        saved[key] = normalized
+        setValue(normalized)
+      } else {
+        delete saved[key]
+        skipWriteRef.current = true
+        setValue(initialRef.current)
+        setResetGeneration(generation => generation + 1)
+      }
+    }
+    const handleReset = event => resetToStoredValue(event.detail)
+    window.addEventListener(RESET_LOCAL_DATA_EVENT, handleReset)
+    return () => window.removeEventListener(RESET_LOCAL_DATA_EVENT, handleReset)
+  }, [key])
+
   return [value, setValue]
 }
 
@@ -368,8 +411,31 @@ function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirm
   )
 }
 
-function SettingsModal({ open, onClose, settings, update, notifyState, enableNotifications, meds, setMeds, medsConfirmed, setMedsConfirmed }) {
+function SettingsModal({ open, onClose, settings, update, notifyState, enableNotifications, meds, setMeds, medsConfirmed, setMedsConfirmed, onExportData, onClearLocalData, localDataBytes }) {
+  const [confirmClear, setConfirmClear] = useState(false)
+  const [privacyMessage, setPrivacyMessage] = useState('')
+  useEffect(() => {
+    if (!open) {
+      setConfirmClear(false)
+      setPrivacyMessage('')
+    }
+  }, [open])
   if (!open) return null
+
+  const formatBytes = (bytes) => bytes < 1024 ? `${bytes} bytes` : `${(bytes / 1024).toFixed(1)} KB`
+  const handleExport = () => {
+    const success = onExportData()
+    setPrivacyMessage(success
+      ? 'A private JSON export was downloaded. Review it before sharing; it contains sensitive information.'
+      : 'The export could not be created in this browser.')
+  }
+  const handleClear = () => {
+    const success = onClearLocalData()
+    setConfirmClear(false)
+    setPrivacyMessage(success
+      ? 'Saved CareSphere personal data was cleared from this browser.'
+      : 'This browser did not allow CareSphere to remove its saved data.')
+  }
   const Row = ({ label, hint, children }) => (
     <div className="flex items-center justify-between gap-4 py-3.5 border-b border-slate-800 last:border-0">
       <div className="min-w-0">
@@ -480,9 +546,40 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
 
         <MedicationScheduleEditor meds={meds} setMeds={setMeds} medsConfirmed={medsConfirmed} setMedsConfirmed={setMedsConfirmed} />
 
-        <p className="text-[11px] text-slate-500 pt-3 leading-relaxed">
-          🔒 Privacy: your name, routines, medication schedule, notes, mood history and vitals stay on this device (browser local storage). Nothing is uploaded.
-        </p>
+        <section className="mt-5 rounded-2xl border border-emerald-800/60 bg-gradient-to-br from-emerald-950/60 to-slate-950 p-4 sm:p-5 space-y-4" aria-labelledby="privacy-data-title">
+          <div className="flex items-start gap-3">
+            <div className="rounded-xl bg-emerald-500/15 p-2 text-emerald-300"><Shield className="w-5 h-5" /></div>
+            <div className="min-w-0 flex-1">
+              <h4 id="privacy-data-title" className="text-sm font-bold text-white">Privacy & your data</h4>
+              <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
+                CareSphere saves your entries in this browser profile ({formatBytes(localDataBytes)}). The web app does not encrypt localStorage; anyone with access to this unlocked browser profile may be able to read it. No CareSphere account or sync server is configured.
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button onClick={handleExport} className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 px-3 py-2.5 text-xs font-bold text-white transition">
+              <Download className="w-4 h-4 text-emerald-300" /> Download private JSON export
+            </button>
+            {!confirmClear ? (
+              <button onClick={() => { setPrivacyMessage(''); setConfirmClear(true) }} className="flex items-center justify-center gap-2 rounded-xl border border-rose-900/70 bg-rose-950/50 hover:bg-rose-950 px-3 py-2.5 text-xs font-bold text-rose-200 transition">
+                <X className="w-4 h-4" /> Erase saved care data
+              </button>
+            ) : (
+              <div className="sm:col-span-2 rounded-xl border border-rose-700/60 bg-rose-950/40 p-3 space-y-3" role="group" aria-labelledby="clear-care-data-title">
+                <div>
+                  <h5 id="clear-care-data-title" className="text-xs font-bold text-rose-100">Erase this browser's CareSphere data?</h5>
+                  <p className="text-[11px] text-rose-200/80 mt-1">This removes your saved name, routines, medications, notes, mood history and game score, and clears temporary visit/vitals data in other open CareSphere tabs. It cannot be undone. Browser permissions, installed-app files and data in other browser profiles are not affected.</p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button onClick={() => setConfirmClear(false)} className="rounded-lg px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800">Cancel</button>
+                  <button onClick={handleClear} className="rounded-lg bg-rose-700 hover:bg-rose-600 px-3 py-2 text-xs font-bold text-white">Erase local data</button>
+                </div>
+              </div>
+            )}
+          </div>
+          {privacyMessage && <p className="text-[11px] text-emerald-200" role="status" aria-live="polite">{privacyMessage}</p>}
+          <p className="text-[10px] text-slate-500 leading-relaxed">A downloaded export is no longer protected by CareSphere. Store it carefully and share it only with a person you trust. Optional third-party features such as Jitsi and SOS sharing operate only when you choose them.</p>
+        </section>
       </div>
     </div>
   )
@@ -885,6 +982,119 @@ function MoodCheckIn({ moods, setMoods }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// v2.3 groundwork — user-selected, on-device visit-prep brief. This is an
+// editable handoff aid, not a medical record, diagnosis, or clinical summary.
+// ─────────────────────────────────────────────────────────────────────────────
+function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, notes, moods, hrRecords, spo2, bp }) {
+  const [includeName, setIncludeName] = useState(false)
+  const [includeMeds, setIncludeMeds] = useState(false)
+  const [includeMoods, setIncludeMoods] = useState(false)
+  const [includeNotes, setIncludeNotes] = useState(false)
+  const [includeLiveVitals, setIncludeLiveVitals] = useState(false)
+  const [includeSimulatedVitals, setIncludeSimulatedVitals] = useState(false)
+  const [visitQuestions, setVisitQuestions] = useState('')
+  const [downloadMessage, setDownloadMessage] = useState('')
+
+  useEffect(() => {
+    if (!open) return
+    setIncludeName(false)
+    setIncludeMeds(false)
+    setIncludeMoods(false)
+    setIncludeNotes(false)
+    setIncludeLiveVitals(false)
+    setIncludeSimulatedVitals(false)
+    setVisitQuestions('')
+    setDownloadMessage('')
+  }, [open])
+
+  if (!open) return null
+
+  const brief = buildVisitBrief({
+    displayName,
+    meds,
+    medsConfirmed,
+    notes,
+    moods,
+    hrRecords,
+    spo2,
+    bp,
+    includeName,
+    includeMeds,
+    includeMoods,
+    includeNotes,
+    includeLiveVitals,
+    includeSimulatedVitals,
+    visitQuestions,
+    moodLabels: Object.fromEntries(MOODS.map(mood => [mood.score, mood.label])),
+  })
+
+  const downloadBrief = () => {
+    try {
+      const url = URL.createObjectURL(new Blob([brief], { type: 'text/plain;charset=utf-8' }))
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `caresphere-visit-prep-${new Date().toISOString().slice(0, 10)}.txt`
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      window.setTimeout(() => URL.revokeObjectURL(url), 10000)
+      setDownloadMessage('Downloaded to this device. Review every line before sharing.')
+    } catch {
+      setDownloadMessage('CareSphere could not create the download in this browser.')
+    }
+  }
+
+  const Choice = ({ checked, onChange, title, detail }) => (
+    <label className="flex items-start gap-3 rounded-xl border border-slate-700 bg-slate-800/70 p-3 cursor-pointer hover:border-emerald-700/70">
+      <input type="checkbox" checked={checked} onChange={event => onChange(event.target.checked)} className="mt-0.5 accent-emerald-500" />
+      <span className="min-w-0"><span className="block text-xs font-bold text-slate-100">{title}</span><span className="mt-0.5 block text-[10px] leading-relaxed text-slate-400">{detail}</span></span>
+    </label>
+  )
+
+  return (
+    <div className="fixed inset-0 z-[55] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6" onClick={onClose}>
+      <section role="dialog" aria-modal="true" aria-labelledby="visit-brief-title" className="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl max-h-[92vh] overflow-y-auto space-y-5" onClick={event => event.stopPropagation()}>
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-700/50 bg-sky-950/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-sky-200"><FileText className="h-3.5 w-3.5" /> Local preview · no sync</div>
+            <h2 id="visit-brief-title" className="mt-3 text-xl font-black text-white">Prepare for a care visit</h2>
+            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">Choose exactly what to include. The summary is assembled on this device from your entries; it is not a medical record, diagnosis, or clinical advice, and nothing is sent automatically.</p>
+          </div>
+          <button onClick={onClose} aria-label="Close visit preparation" className="rounded-xl bg-slate-800 p-2 text-slate-400 hover:text-white"><X className="h-5 w-5" /></button>
+        </header>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <Choice checked={includeName} onChange={setIncludeName} title="Display name" detail="Optional. Off by default." />
+          <Choice checked={includeMeds} onChange={setIncludeMeds} title="Medication reminders" detail="User-entered names and times; review/confirmation status is shown." />
+          <Choice checked={includeMoods} onChange={setIncludeMoods} title="Mood check-ins" detail="Self-reports from this browser. They are not a clinical measure." />
+          <Choice checked={includeNotes} onChange={setIncludeNotes} title="Care notes" detail="Private note text may be sensitive; include only after review." />
+          <Choice checked={includeLiveVitals} onChange={setIncludeLiveVitals} title="Live BLE heart-rate samples" detail="Only readings labeled LIVE_BLE from the current browser session." />
+          <Choice checked={includeSimulatedVitals} onChange={setIncludeSimulatedVitals} title="Simulated demonstrations" detail="Optional demo values, explicitly labeled SIMULATED and not measured." />
+        </div>
+
+        <label className="block space-y-2">
+          <span className="text-xs font-bold text-white">Questions or topics to discuss · optional</span>
+          <textarea value={visitQuestions} onChange={event => setVisitQuestions(event.target.value.slice(0, 1200))} rows={3} maxLength={1200} placeholder="Write your own questions or topics. This draft is temporary and is not saved unless you download the brief." className="w-full resize-y rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none" />
+        </label>
+
+        <div className="rounded-2xl border border-slate-700 bg-slate-950/80 p-4">
+          <h3 className="mb-2 text-xs font-bold text-slate-200">Exact file preview</h3>
+          <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words text-[11px] leading-relaxed text-slate-300">{brief}</pre>
+        </div>
+        <footer className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+          <p className="text-[10px] leading-relaxed text-slate-500">Downloaded files are outside CareSphere's local privacy controls. Verify all names, dates, and sources before sharing.</p>
+          <div className="flex gap-2 shrink-0">
+            <button onClick={onClose} className="rounded-xl border border-slate-700 px-4 py-2.5 text-xs font-bold text-slate-300 hover:bg-slate-800">Close</button>
+            <button onClick={downloadBrief} className="flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-sky-500"><Download className="h-4 w-4" /> Download .txt</button>
+          </div>
+        </footer>
+        {downloadMessage && <p role="status" className="text-[11px] text-emerald-300">{downloadMessage}</p>}
+      </section>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main App
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -892,6 +1102,7 @@ export default function App() {
   const [videoSession, setVideoSession] = useState(null)
   const [sosOpen, setSosOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [visitBriefOpen, setVisitBriefOpen] = useState(false)
 
   // Settings (persisted)
   const [settings, setSettings] = usePersisted('settings', {
@@ -934,10 +1145,7 @@ export default function App() {
   // but reminders stay paused until the user explicitly confirms every entry.
   const [meds, setMeds] = usePersisted('meds', [])
   const [medsConfirmed, setMedsConfirmed] = usePersisted('medsConfirmed', false)
-  const [notes, setNotes] = usePersisted('notes', [
-    { id: 1, date: 'Sample', author: 'Sample care-team note', note: 'Example only. No clinician has reviewed this entry; replace it with your own private note.' },
-    { id: 2, date: 'Sample', author: 'Sample family note', note: 'Example only. Notes remain in this browser and are not shared with another person.' },
-  ])
+  const [notes, setNotes] = usePersisted('notes', [])
   const [moods, setMoods] = usePersisted('moods', [])
   const [noteDraft, setNoteDraft] = useState('')
   const [emotionScore, setEmotionScore] = usePersisted('emotionScore', 0)
@@ -1044,12 +1252,15 @@ export default function App() {
   const [hrStatus, setHrStatus] = useState({ mode: 'disconnected', message: 'No sensor connected yet.' })
   const hrModeRef = useRef('disconnected')
   const hrStopRef = useRef(null)
+  const hrConnectionGenerationRef = useRef(0)
+  const spotCheckTimersRef = useRef([])
   const [connectingHr, setConnectingHr] = useState(false)
 
   const connectHr = async () => {
-    if (hrStopRef.current) return
+    if (hrStopRef.current || connectingHr) return
+    const generation = ++hrConnectionGenerationRef.current
     setConnectingHr(true)
-    hrStopRef.current = await connectHeartRateMonitor(
+    const stop = await connectHeartRateMonitor(
       (bpm) => {
         const timestamp = new Date().toISOString()
         const source = hrModeRef.current === 'live' ? 'LIVE_BLE' : 'SIMULATED'
@@ -1062,25 +1273,69 @@ export default function App() {
         setHrStatus(status)
       },
     )
+    if (generation !== hrConnectionGenerationRef.current) {
+      stop?.()
+      return
+    }
+    hrStopRef.current = stop
     setConnectingHr(false)
   }
   const disconnectHr = () => {
+    hrConnectionGenerationRef.current += 1
     hrStopRef.current?.()
     hrStopRef.current = null
+    setConnectingHr(false)
     setHr(null)
     setHrHistory([])
     setHrRecords([])
     hrModeRef.current = 'disconnected'
     setHrStatus({ mode: 'disconnected', message: 'No sensor connected yet.' })
   }
-  useEffect(() => () => hrStopRef.current?.(), [])
+  useEffect(() => () => {
+    hrStopRef.current?.()
+    spotCheckTimersRef.current.forEach(timer => window.clearTimeout(timer))
+  }, [])
 
   const [spo2, setSpo2] = useState(null)
   const [spo2Phase, setSpo2Phase] = useState('idle')
+  const scheduleSpotCheck = (callback, delay) => {
+    const timer = window.setTimeout(() => {
+      spotCheckTimersRef.current = spotCheckTimersRef.current.filter(item => item !== timer)
+      callback()
+    }, delay)
+    spotCheckTimersRef.current.push(timer)
+    return timer
+  }
+  const clearSpotCheckTimers = () => {
+    spotCheckTimersRef.current.forEach(timer => window.clearTimeout(timer))
+    spotCheckTimersRef.current = []
+  }
+  const clearTransientCareData = ({ closeOverlays = false } = {}) => {
+    setNoteDraft('')
+    disconnectHr()
+    clearSpotCheckTimers()
+    setSpo2(null)
+    setSpo2Phase('idle')
+    setBp(null)
+    setBpPhase('idle')
+    setToasts([])
+    setVisitBriefOpen(false)
+    setVideoSession(null)
+    setSosOpen(false)
+    if (closeOverlays) setSettingsOpen(false)
+    notifiedRef.current.clear()
+    Object.values(snoozeTimersRef.current).forEach(timer => window.clearTimeout(timer))
+    snoozeTimersRef.current = {}
+  }
+  useEffect(() => {
+    const handleLocalDataReset = event => clearTransientCareData(event.detail)
+    window.addEventListener(RESET_LOCAL_DATA_EVENT, handleLocalDataReset)
+    return () => window.removeEventListener(RESET_LOCAL_DATA_EVENT, handleLocalDataReset)
+  }, [])
   const runSpo2 = () => {
     if (spo2Phase === 'measuring') return
     setSpo2Phase('measuring')
-    setTimeout(() => {
+    scheduleSpotCheck(() => {
       setSpo2(96 + Math.floor(Math.random() * 4))
       setSpo2Phase('idle')
       confetti({ particleCount: 12 })
@@ -1092,8 +1347,8 @@ export default function App() {
   const runBp = () => {
     if (bpPhase !== 'idle') return
     setBpPhase('inflating')
-    setTimeout(() => setBpPhase('measuring'), 2000)
-    setTimeout(() => {
+    scheduleSpotCheck(() => setBpPhase('measuring'), 2000)
+    scheduleSpotCheck(() => {
       const sys = 112 + Math.floor(Math.random() * 22)
       const dia = 70 + Math.floor(Math.random() * 12)
       setBp(`${sys} / ${dia}`)
@@ -1120,12 +1375,69 @@ export default function App() {
     const a = document.createElement('a')
     a.href = url
     a.download = `caresphere-vitals-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a)
     a.click()
-    URL.revokeObjectURL(url)
+    a.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 10000)
     pushToast({ kind: 'success', title: 'Exported', body: 'CSV downloaded with source labels. Simulated rows are demo values, not clinical measurements.' })
   }
 
-  // ── Coffee circles — real, open Jitsi Meet rooms ──
+  const exportLocalData = () => {
+    try {
+      const snapshot = {
+        app: 'CareSphere',
+        exportVersion: 1,
+        exportedAt: new Date().toISOString(),
+        privacyNotice: 'Contains sensitive personal and health-related data. Review before sharing.',
+        data: {
+          ...saved,
+          settings,
+          routines,
+          medications: meds,
+          medicationScheduleConfirmed: medsConfirmed,
+          notes,
+          moods,
+          emotionScore,
+          bestPattern: normalizePersistedValue('bestPattern', saved.bestPattern, 0),
+        },
+        sessionVitals: {
+          heartRate: hrRecords,
+          oxygenSaturation: spo2 === null ? null : { timestamp: new Date().toISOString(), value: spo2, source: 'SIMULATED_SPOT_CHECK' },
+          bloodPressure: bp === null ? null : { timestamp: new Date().toISOString(), value: bp, source: 'SIMULATED_SEQUENCE' },
+        },
+      }
+      const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `caresphere-private-export-${new Date().toISOString().slice(0, 10)}.json`
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      window.setTimeout(() => URL.revokeObjectURL(url), 10000)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  const clearLocalData = () => {
+    let storageCleared = true
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      storageCleared = false
+    }
+    Object.keys(saved).forEach(key => delete saved[key])
+    window.dispatchEvent(new CustomEvent(RESET_LOCAL_DATA_EVENT, { detail: { closeOverlays: false } }))
+    return storageCleared
+  }
+
+  const localDataBytes = (() => {
+    try { return new Blob([JSON.stringify(saved)]).size } catch { return 0 }
+  })()
+
+  // ── Coffee circles — real, open Jitsi rooms ──
   const coffeeCircles = [
     {
       id: 1, title: 'Morning Sunshine Tea & Chat', icon: '☕',
@@ -1473,9 +1785,14 @@ export default function App() {
                 <h2 className="text-2xl font-black text-white">Care Circle · Local</h2>
                 <p className="text-xs sm:text-sm text-slate-400 mt-1">Private notes and check-ins saved in this browser. No family-sync, clinician portal, or push-alert server is connected.</p>
               </div>
-              <span className="text-xs bg-purple-500/15 text-purple-300 border border-purple-500/30 px-4 py-2 rounded-2xl font-bold flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5" /> Stored on this device
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <button onClick={() => setVisitBriefOpen(true)} className="text-xs bg-sky-700 hover:bg-sky-600 text-white px-4 py-2.5 rounded-2xl font-bold flex items-center gap-2 transition" aria-haspopup="dialog">
+                  <FileText className="w-4 h-4" /> Prepare visit brief
+                </button>
+                <span className="text-xs bg-purple-500/15 text-purple-300 border border-purple-500/30 px-4 py-2 rounded-2xl font-bold flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5" /> Stored on this device
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1723,6 +2040,19 @@ export default function App() {
       </main>
 
       {/* Modals */}
+      <VisitBriefModal
+        key={visitBriefOpen ? 'visit-brief-open' : 'visit-brief-closed'}
+        open={visitBriefOpen}
+        onClose={() => setVisitBriefOpen(false)}
+        displayName={settings.name}
+        meds={meds}
+        medsConfirmed={medsConfirmed}
+        notes={notes}
+        moods={moods}
+        hrRecords={hrRecords}
+        spo2={spo2}
+        bp={bp}
+      />
       <VideoModal session={videoSession} displayName={settings.name} onClose={() => setVideoSession(null)} />
       <SosModal open={sosOpen} onClose={() => setSosOpen(false)} />
       <SettingsModal
@@ -1736,6 +2066,9 @@ export default function App() {
         setMeds={setMeds}
         medsConfirmed={medsConfirmed}
         setMedsConfirmed={setMedsConfirmed}
+        onExportData={exportLocalData}
+        onClearLocalData={clearLocalData}
+        localDataBytes={localDataBytes}
       />
 
       {/* Toast stack */}

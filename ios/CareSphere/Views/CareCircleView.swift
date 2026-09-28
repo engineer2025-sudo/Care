@@ -3,12 +3,14 @@ import SwiftUI
 struct CareCircleView: View {
     @EnvironmentObject private var store: CareStore
     @State private var noteDraft = ""
+    @State private var showingVisitPrep = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
                     localOnlyNotice
+                    visitPrepCard
                     careNotes
                     todaySummary
                     medicationStatus
@@ -20,6 +22,10 @@ struct CareCircleView: View {
             .navigationTitle("Care Circle")
             .inlineTitle()
         }
+        .sheet(isPresented: $showingVisitPrep) {
+            VisitPrepView()
+                .environmentObject(store)
+        }
     }
 
     private var localOnlyNotice: some View {
@@ -28,6 +34,21 @@ struct CareCircleView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var visitPrepCard: some View {
+        SectionCard(title: "Prepare for a care visit", systemImage: "doc.text") {
+            Text("Build a preview from only the local details you choose, then share it with the system share sheet. It is not a medical record or clinical interpretation.")
+                .font(.caption).foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Button {
+                showingVisitPrep = true
+            } label: {
+                Label("Choose information to include", systemImage: "square.and.arrow.up")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.borderedProminent)
         }
     }
 

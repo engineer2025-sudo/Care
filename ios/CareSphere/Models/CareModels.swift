@@ -1,7 +1,7 @@
 import Foundation
 
 // MARK: - Domain models shared across the app.
-// All user content persists locally (JSON in the app's Documents directory).
+// All user content persists locally in CareStore's protected Application Support JSON store.
 
 struct Routine: Identifiable, Codable, Equatable {
     var id = UUID()

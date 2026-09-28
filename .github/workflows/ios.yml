@@ -7,12 +7,25 @@ on:
   pull_request:
     paths: ['ios/**', '.github/workflows/ios.yml']
   workflow_dispatch:
+    inputs:
+      publish_mac_release:
+        description: Build and publish a new versioned Mac release after confirming the matching app version and tag
+        required: false
+        type: boolean
+        default: false
+      release_tag:
+        description: Release tag must exactly match the app's MARKETING_VERSION (for example mac-v2.2.0)
+        required: false
+        type: string
+        default: ""
 
 jobs:
   ios-build:
     name: Build CareSphere (SwiftUI · Swift · iOS)
     runs-on: macos-14
     timeout-minutes: 45
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -72,13 +85,13 @@ jobs:
             echo "::error title=Xcodebuild log tail::${LOG_TAIL:0:6000}"
           fi
 
-  mac-release:
-    name: Build & release CareSphere for Mac (.dmg)
+  mac-build:
+    name: Build CareSphere for Mac (.dmg)
     needs: ios-build
     runs-on: macos-14
     timeout-minutes: 45
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -94,6 +107,17 @@ jobs:
 
       - name: Generate Xcode project
         run: cd ios && xcodegen generate
+
+      - name: Read app version
+        id: app-version
+        run: |
+          VERSION="$(sed -nE 's/^[[:space:]]*MARKETING_VERSION:[[:space:]]*"([^"]+)".*/\1/p' ios/project.yml | head -1)"
+          if [[ -z "$VERSION" ]]; then
+            echo "::error::Could not read MARKETING_VERSION from ios/project.yml"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building CareSphere $VERSION"
 
       - name: Build Mac app (Release, ad-hoc signed)
         run: |
@@ -204,6 +228,8 @@ jobs:
           ls -lh CareSphere-Kokoro-Int8-En-v0.19.zip CareSphere-Kokoro-Int8-En-v0.19.zip.sha256
 
       - name: Package DMG + ZIP
+        env:
+          APP_VERSION: ${{ steps.app-version.outputs.version }}
         run: |
           set -Eeuo pipefail
           exec > >(tee /tmp/package.log) 2>&1
@@ -220,24 +246,23 @@ jobs:
           2. System Settings -> Privacy & Security -> scroll down -> "Open Anyway" -> Open.
           This app is ad-hoc signed (no paid Apple certificate), so Gatekeeper asks once.
           The build is verified in CI: signature, bundle integrity and a live launch test.
-          This update adds optional local models and reference libraries. They are NOT bundled in the DMG:
-          - Choose Download in Health Guide to fetch the ~1.1 GB Qwen GGUF model.
-          - Download the optional Kokoro int8 neural voice (~158 MB) from Settings; it runs offline.
-          - MedlinePlus XML can be downloaded separately inside the app.
-          - A Wikipedia ZIM stays in its existing Kiwix library; CareSphere queries a private local Kiwix server.
+          Optional local models and reference libraries are not bundled in the installer. Check the in-app descriptions for download sizes, licensing and storage requirements.
           EOF
           hdiutil create -volname "CareSphere" \
             -srcfolder staging \
             -ov -format UDZO \
-            CareSphere-2.1.0-mac.dmg
+            "CareSphere-${APP_VERSION}-mac.dmg"
           # Mac-native zip (preserves metadata/resource forks) as an
           # alternative download format.
-          ditto -c -k --keepParent --sequesterRsrc "$APP_PATH" CareSphere-2.1.0-mac.zip
-          ls -lh CareSphere-2.1.0-mac.dmg CareSphere-2.1.0-mac.zip
+          ditto -c -k --keepParent --sequesterRsrc "$APP_PATH" "CareSphere-${APP_VERSION}-mac.zip"
+          shasum -a 256 "CareSphere-${APP_VERSION}-mac.dmg" "CareSphere-${APP_VERSION}-mac.zip" > "CareSphere-${APP_VERSION}-mac.sha256"
+          ls -lh "CareSphere-${APP_VERSION}-mac.dmg" "CareSphere-${APP_VERSION}-mac.zip" "CareSphere-${APP_VERSION}-mac.sha256"
 
       - name: Verify integrity & smoke-test launch
+        env:
+          APP_VERSION: ${{ steps.app-version.outputs.version }}
         run: |
-          hdiutil attach CareSphere-2.1.0-mac.dmg -mountpoint /tmp/caremount -nobrowse
+          hdiutil attach "CareSphere-${APP_VERSION}-mac.dmg" -mountpoint /tmp/caremount -nobrowse
           APP="/tmp/caremount/CareSphere.app"
           echo "── Bundle contents ──"
           ls -la "$APP/Contents/MacOS/"
@@ -259,7 +284,7 @@ jobs:
           # The smoke-launched app can hold the mount busy — force-detach, non-fatal.
           hdiutil detach /tmp/caremount -force 2>/dev/null || true
           echo "── SHA-256 checksums ──"
-          shasum -a 256 CareSphere-2.1.0-mac.dmg CareSphere-2.1.0-mac.zip
+          shasum -a 256 "CareSphere-${APP_VERSION}-mac.dmg" "CareSphere-${APP_VERSION}-mac.zip"
 
       - name: Upload installers as workflow artifacts too
         if: always()
@@ -267,33 +292,12 @@ jobs:
         with:
           name: mac-installers
           path: |
-            CareSphere-2.1.0-mac.dmg
-            CareSphere-2.1.0-mac.zip
+            CareSphere-${{ steps.app-version.outputs.version }}-mac.dmg
+            CareSphere-${{ steps.app-version.outputs.version }}-mac.zip
+            CareSphere-${{ steps.app-version.outputs.version }}-mac.sha256
             CareSphere-Kokoro-Int8-En-v0.19.zip
             CareSphere-Kokoro-Int8-En-v0.19.zip.sha256
           if-no-files-found: ignore
-
-      - name: Publish to GitHub Releases
-        if: github.event_name != 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-        run: |
-          BODY="## 💚 CareSphere for Mac 2.1.0 — Local Intelligence"$'\n\n'"Adds an optional on-device Qwen2.5 1.5B GGUF assistant (llama.cpp), an offline MedlinePlus health-topic library, private Kiwix/ZIM search, a fully opaque Touch ID lock screen, and optional Kokoro int8 neural speech through Sherpa-ONNX. The ~158 MB Kokoro model is a separate opt-in download; Apple voices remain available. Includes the v2 onboarding, caregiver tools, BLE/Garmin vitals, Jitsi circles, medication reminders and sensory soundscapes."$'\n\n'"### ⚠️ First launch on macOS — one time only"$'\n'"1. Drag CareSphere into Applications and open it once (warning appears — click Done)."$'\n'"2. System Settings → Privacy & Security → scroll down → Open Anyway → Open."$'\n'"The app is ad-hoc signed; approve it once through macOS Privacy & Security. Do not disable Gatekeeper globally."$'\n\n'"### Optional downloads"$'\n'"Qwen GGUF (~1.1 GB), Kokoro int8 English TTS (~158 MB), and MedlinePlus data are opt-in and are not bundled in the installer. The Kokoro asset includes Apache-2.0 model and GPL-3.0 eSpeak-NG notices plus a SHA-256 file."$'\n\n'"### ✅ Integrity"$'\n'"CI mounts the DMG, strictly verifies the signature (no restricted entitlements), and smoke-launches the app on every build. SHA-256 checksums are printed in the Actions log."
-          if ! gh release view mac-v2.1.0 --repo "$REPO" >/dev/null 2>&1; then
-            OUT=$(gh release create mac-v2.1.0 \
-              --repo "$REPO" \
-              --target "$GITHUB_SHA" \
-              --title "CareSphere for Mac 2.1.0" \
-              --notes "$BODY" 2>&1) || { echo "::error::release create failed: ${OUT:0:340}"; exit 1; }
-          fi
-          ASSETS=("CareSphere-2.1.0-mac.dmg" "CareSphere-2.1.0-mac.zip")
-          if [[ -f "CareSphere-Kokoro-Int8-En-v0.19.zip" ]]; then
-            ASSETS+=("CareSphere-Kokoro-Int8-En-v0.19.zip" "CareSphere-Kokoro-Int8-En-v0.19.zip.sha256")
-          fi
-          OUT=$(gh release upload mac-v2.1.0 "${ASSETS[@]}" --repo "$REPO" --clobber 2>&1) || { echo "::error::release upload failed: ${OUT:0:340}"; exit 1; }
-          gh release edit mac-v2.1.0 --repo "$REPO" --notes "$BODY" >/dev/null 2>&1 || true
-          echo "✅ Release published: https://github.com/$REPO/releases/tag/mac-v2.1.0"
 
       - name: Upload mac build log
         if: always()
@@ -315,3 +319,101 @@ jobs:
             LOG_TAIL="$(tail -n 35 /tmp/package.log | tr '\r' ' ' | sed -e 's/%/%25/g' -e 's/:/%3A/g' -e 's/,/%2C/g' | awk '{printf "%s%%0A", $0}')"
             echo "::error title=DMG packaging log tail::${LOG_TAIL:0:6000}"
           fi
+
+  # Keep the write-capable token away from ordinary build jobs. Publication is
+  # opt-in, version-checked, checksum-verified and refuses all existing tags.
+  mac-publish:
+    name: Publish a new version-matched Mac release
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_mac_release == true
+    needs: mac-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read app version
+        id: app-version
+        run: |
+          VERSION="$(sed -nE 's/^[[:space:]]*MARKETING_VERSION:[[:space:]]*"([^"]+)".*/\1/p' ios/project.yml | head -1)"
+          if [[ -z "$VERSION" ]]; then
+            echo "::error::Could not read MARKETING_VERSION from ios/project.yml"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download verified Mac build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: mac-installers
+          path: mac-installers
+
+      - name: Validate version, release notes, and checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_VERSION: ${{ steps.app-version.outputs.version }}
+          REQUESTED_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          EXPECTED_TAG="mac-v${APP_VERSION}"
+          if [[ "$REQUESTED_TAG" != "$EXPECTED_TAG" ]]; then
+            echo "::error::Requested tag '$REQUESTED_TAG' must exactly match '$EXPECTED_TAG'."
+            exit 1
+          fi
+          NOTES_FILE="release-notes/${APP_VERSION}.md"
+          if [[ ! -s "$NOTES_FILE" ]]; then
+            echo "::error::Add reviewed, version-specific release notes at $NOTES_FILE before publishing."
+            exit 1
+          fi
+          REMOTE_TAG="$(git ls-remote origin "refs/tags/${REQUESTED_TAG}" "refs/tags/${REQUESTED_TAG}^{}")" || {
+            echo "::error::Could not verify the remote tag state. Refusing to publish."
+            exit 1
+          }
+          if [[ -n "$REMOTE_TAG" ]]; then
+            echo "::error::Tag $REQUESTED_TAG already exists. Refusing to reuse or move a version tag."
+            exit 1
+          fi
+          if gh release view "$REQUESTED_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::Release $REQUESTED_TAG already exists. Existing releases are immutable from this workflow."
+            exit 1
+          fi
+
+          APP_DMG="mac-installers/CareSphere-${APP_VERSION}-mac.dmg"
+          APP_ZIP="mac-installers/CareSphere-${APP_VERSION}-mac.zip"
+          APP_SHA="CareSphere-${APP_VERSION}-mac.sha256"
+          test -s "$APP_DMG" && test -s "$APP_ZIP" && test -s "mac-installers/$APP_SHA"
+          (cd mac-installers && sha256sum --check "$APP_SHA")
+
+          ASSETS=("$APP_DMG" "$APP_ZIP" "mac-installers/$APP_SHA")
+          KOKORO="mac-installers/CareSphere-Kokoro-Int8-En-v0.19.zip"
+          KOKORO_SHA="${KOKORO}.sha256"
+          if [[ -s "$KOKORO" ]]; then
+            if [[ ! -s "$KOKORO_SHA" ]]; then
+              echo "::error::Kokoro archive exists without its checksum file."
+              exit 1
+            fi
+            (cd mac-installers && sha256sum --check "$(basename "$KOKORO_SHA")")
+            ASSETS+=("$KOKORO" "$KOKORO_SHA")
+          fi
+
+          gh release create "$REQUESTED_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "CareSphere for Mac ${APP_VERSION}" \
+            --draft \
+            --notes-file "$NOTES_FILE"
+
+          TAG_REF="refs/tags/${REQUESTED_TAG}"
+          CREATED_TAG_STATE="$(git ls-remote origin "$TAG_REF" "${TAG_REF}^{}")" || {
+            echo "::error::Could not verify the newly created tag. Leaving the release unpublished."
+            exit 1
+          }
+          CREATED_TAG_COMMIT="$(printf '%s\\n' "$CREATED_TAG_STATE" | awk -v tag="$TAG_REF" '$2 == tag "^{}" { peeled = $1 } $2 == tag { direct = $1 } END { if (peeled != "") print peeled; else print direct }')"
+          if [[ "$CREATED_TAG_COMMIT" != "$GITHUB_SHA" ]]; then
+            echo "::error::New tag resolves to '$CREATED_TAG_COMMIT', not this verified build '$GITHUB_SHA'. Leaving the release unpublished."
+            exit 1
+          fi
+
+          gh release upload "$REQUESTED_TAG" "${ASSETS[@]}" --repo "$GITHUB_REPOSITORY"
+          gh release edit "$REQUESTED_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          echo "✅ Release published: https://github.com/$GITHUB_REPOSITORY/releases/tag/$REQUESTED_TAG"

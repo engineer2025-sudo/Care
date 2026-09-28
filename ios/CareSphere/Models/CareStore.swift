@@ -3,7 +3,7 @@ import Combine
 import UserNotifications
 
 /// Single source of truth for user content. Persists care data to JSON in the
-/// app's Documents directory. Network-backed features are opt-in and described
+/// app's private Application Support directory. Network-backed features are opt-in and described
 /// in their views; medication reminders are reconciled with iOS notifications.
 @MainActor
 final class CareStore: ObservableObject {
@@ -41,15 +41,16 @@ final class CareStore: ObservableObject {
     @Published var hasCompletedOnboarding: Bool { didSet { save() } }
     @Published var biometricEnabled: Bool { didSet { save() } }
     @Published var profile: CareProfile { didSet { save() } }
+    @Published private(set) var persistenceIssue: String?
 
     private let fileURL: URL
     private var observers: [NSObjectProtocol] = []
+    private var isErasingLocalData = false
 
     // MARK: Init / persistence
 
     init() {
-        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        fileURL = documents.appendingPathComponent("carestore.json")
+        fileURL = Self.careStoreURL()
 
         let box = Self.load(from: fileURL)
         displayName = box?.displayName ?? "Alex"
@@ -67,12 +68,7 @@ final class CareStore: ObservableObject {
         // Older stores did not carry an explicit confirmation. Preserve their
         // saved data, but pause its reminders until the user reviews it.
         medicationScheduleConfirmed = box?.medicationScheduleConfirmed ?? false
-        notes = box?.notes ?? [
-            CareNote(author: "Sample note · replace with your own",
-                     body: "Example only: a user could record a care-team update here. No clinician has reviewed this entry."),
-            CareNote(author: "Sample family note · local demo",
-                     body: "Example only: notes stay on this device and are not shared with family or a clinician."),
-        ]
+        notes = box?.notes ?? []
         moods = box?.moods ?? []
         emotionScore = box?.emotionScore ?? 0
         bestPattern = box?.bestPattern ?? 0
@@ -80,6 +76,8 @@ final class CareStore: ObservableObject {
         biometricEnabled = box?.biometricEnabled ?? false
         profile = box?.profile ?? CareProfile()
 
+        protectStoreDirectory()
+        protectExistingStoreFile()
         observeNotificationActions()
     }
 
@@ -87,13 +85,44 @@ final class CareStore: ObservableObject {
         observers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
+    /// Keep private care data in the app-support container. Migrate the legacy
+    /// Documents file once so existing users retain their notes and schedules.
+    private static func careStoreURL() -> URL {
+        let manager = FileManager.default
+        let support = manager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("CareSphere", isDirectory: true)
+        try? manager.createDirectory(
+            at: support,
+            withIntermediateDirectories: true,
+            attributes: [.posixPermissions: 0o700])
+        try? manager.setAttributes([.posixPermissions: 0o700], ofItemAtPath: support.path)
+
+        let destination = support.appendingPathComponent("carestore.json")
+        let legacy = manager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("carestore.json")
+        if !manager.fileExists(atPath: destination.path), manager.fileExists(atPath: legacy.path) {
+            do {
+                try manager.moveItem(at: legacy, to: destination)
+            } catch {
+                do {
+                    try manager.copyItem(at: legacy, to: destination)
+                    try manager.removeItem(at: legacy)
+                } catch {
+                    // Keep reading the legacy file rather than hiding the user's data.
+                    return legacy
+                }
+            }
+        }
+        return destination
+    }
+
     private static func load(from url: URL) -> PersistedBox? {
         guard let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONDecoder().decode(PersistedBox.self, from: data)
     }
 
-    private func save() {
-        let box = PersistedBox(
+    private func persistedBox() -> PersistedBox {
+        PersistedBox(
             displayName: displayName,
             voiceReminders: voiceReminders,
             voiceIdentifier: voiceIdentifier.isEmpty ? nil : voiceIdentifier,
@@ -107,8 +136,115 @@ final class CareStore: ObservableObject {
             hasCompletedOnboarding: hasCompletedOnboarding,
             biometricEnabled: biometricEnabled,
             profile: profile)
-        if let data = try? JSONEncoder().encode(box) {
-            try? data.write(to: fileURL, options: .atomic)
+    }
+
+    private func save() {
+        guard !isErasingLocalData else { return }
+        do {
+            let data = try JSONEncoder().encode(persistedBox())
+            try writePrivateFile(data, to: fileURL)
+            persistenceIssue = nil
+            protectStoreDirectory()
+        } catch {
+            persistenceIssue = "CareSphere could not save your care data to protected app storage."
+        }
+    }
+
+    private func protectStoreDirectory() {
+        #if os(macOS)
+        let expectedDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("CareSphere", isDirectory: true)
+        guard fileURL.deletingLastPathComponent().standardizedFileURL == expectedDirectory.standardizedFileURL else {
+            return // A migration fallback may still be reading Documents; never chmod that whole folder.
+        }
+        do {
+            try FileManager.default.setAttributes(
+                [.posixPermissions: 0o700],
+                ofItemAtPath: expectedDirectory.path)
+        } catch {
+            persistenceIssue = "CareSphere could not restrict access to its private data folder."
+        }
+        #endif
+    }
+
+    private func protectExistingStoreFile() {
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return }
+        do {
+            #if os(iOS)
+            try FileManager.default.setAttributes(
+                [.protectionKey: FileProtectionType.complete],
+                ofItemAtPath: fileURL.path)
+            #else
+            try FileManager.default.setAttributes(
+                [.posixPermissions: 0o600],
+                ofItemAtPath: fileURL.path)
+            #endif
+        } catch {
+            persistenceIssue = "CareSphere could not apply its private file-protection settings."
+        }
+    }
+
+    private func writePrivateFile(_ data: Data, to url: URL) throws {
+        #if os(iOS)
+        try data.write(to: url, options: [.atomic, .completeFileProtection])
+        #else
+        try data.write(to: url, options: .atomic)
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o600],
+            ofItemAtPath: url.path)
+        #endif
+    }
+
+    private struct CareDataExport: Encodable {
+        let app = "CareSphere"
+        let formatVersion = 1
+        let exportedAt: Date
+        let privacyNotice = "Contains sensitive personal and health-related information. Share only with people you trust."
+        let data: PersistedBox
+    }
+
+    /// Returns a complete, user-initiated JSON snapshot for the system file exporter.
+    func makeCareDataExport() throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        return try encoder.encode(CareDataExport(exportedAt: Date(), data: persistedBox()))
+    }
+
+    /// Removes private care data and pending medication notifications. System
+    /// notification permission and separately downloaded reference/model files remain.
+    func eraseAllLocalCareData() {
+        isErasingLocalData = true
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+
+        medicationScheduleConfirmed = false
+        medications = []
+        displayName = "Alex"
+        voiceReminders = false
+        voiceIdentifier = ""
+        routines = [
+            Routine(emoji: "💧", title: "Morning hydration"),
+            Routine(emoji: "🧩", title: "10-minute brain game"),
+            Routine(emoji: "☕", title: "Join a coffee circle"),
+            Routine(emoji: "🌿", title: "Evening stretch & wind-down"),
+        ]
+        notes = []
+        moods = []
+        emotionScore = 0
+        bestPattern = 0
+        hasCompletedOnboarding = false
+        biometricEnabled = false
+        profile = CareProfile()
+        isErasingLocalData = false
+
+        do {
+            try FileManager.default.removeItem(at: fileURL)
+            persistenceIssue = nil
+        } catch {
+            persistenceIssue = FileManager.default.fileExists(atPath: fileURL.path)
+                ? "CareSphere could not fully remove its local care-data file."
+                : nil
         }
     }
 
