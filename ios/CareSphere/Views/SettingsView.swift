@@ -247,14 +247,14 @@ struct SettingsView: View {
                 }
                 .disabled(localSpeech.isGenerating)
             } else if localSpeech.isDownloading {
-                ProgressView("Downloading and installing (~100 MB)…")
+                ProgressView("Downloading and installing (~158 MB)…")
                 Text("Keep CareSphere open. The extracted model needs about 250 MB of temporary free storage.")
                     .font(.caption2).foregroundStyle(.secondary)
             } else {
                 Button {
                     Task { await localSpeech.downloadModel() }
                 } label: {
-                    Label("Download Kokoro English voices (~100 MB)", systemImage: "arrow.down.circle.fill")
+                    Label("Download Kokoro English voices (~158 MB)", systemImage: "arrow.down.circle.fill")
                 }
                 .disabled(localSpeech.isGenerating)
                 Text("Optional Kokoro int8 weights. After download, speech generation runs offline; the model is not included in the app installer.")

@@ -66,7 +66,7 @@ final class KokoroSpeechService: NSObject, ObservableObject, AVAudioPlayerDelega
     func downloadModel() async {
         guard !isDownloading, !isGenerating else { return }
         isDownloading = true
-        statusMessage = "Downloading the optional Kokoro voice pack (~100 MB)…"
+        statusMessage = "Downloading the optional Kokoro voice pack (~158 MB)…"
         errorMessage = nil
         defer { isDownloading = false }
 

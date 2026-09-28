@@ -2,8 +2,8 @@
 
 **Proactive Senior Care · Isolation Prevention · Autism Support** — a multi-client platform with native Apple apps and an installable web PWA:
 
-- 📱 **iOS app (Swift/SwiftUI)** — [`ios/`](ios/README.md) · native source; no public App Store/TestFlight build. The 2.1 integration is still awaiting macOS CI verification.
-- 🖥️ **Mac app (.dmg)** — [download the latest published CareSphere 2.0.0](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.0.0/CareSphere-2.0.0-mac.dmg) · native SwiftUI on macOS 13+, Intel/Apple Silicon, Garmin BLE heart-rate pairing. **The 2.1 AI/medical-library/Kiwix/Kokoro features are not in this installer and are not released yet.**
+- 📱 **iOS app (Swift/SwiftUI)** — [`ios/`](ios/README.md) · native source; no public App Store, TestFlight, or signed `.ipa`. CI passes an unsigned generic iOS device compile check; it does not produce an installable iPhone build.
+- 🖥️ **Mac app (.dmg)** — [download CareSphere 2.1.0](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-2.1.0-mac.dmg) · [ZIP](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-2.1.0-mac.zip) · [release notes and optional assets](https://github.com/engineer2025-sudo/Care/releases/tag/mac-v2.1.0). Native SwiftUI for macOS 13+, Intel/Apple Silicon; includes the local health-guide features and Garmin BLE heart-rate pairing.
 - 🌐 **Web app (React + Vite)** — an installable PWA sharing real `meet.jit.si` rooms with family on other devices.
 
 > Live tabs: **Overview · Therapy & Sensory · Coffee Circles · Care Circle · Vitals & Telehealth**
@@ -24,10 +24,10 @@
 | 📲 **Installable PWA** | Web app manifest + icons + service worker (production builds). Seniors and families can install it to a home screen; routines still open offline. |
 | ♿ **Accessibility** | Text-size scaling (A / A+ / A++), high-contrast mode, `prefers-reduced-motion` support, ARIA roles/labels throughout, one-tap daily mood check-in. |
 | 🔒 **Privacy** | Web content persists in browser local storage. Native care data stays in the app container. The optional 1.5B GGUF assistant runs on-device; Kiwix search is sent only to a configured local/private host. |
-| 🧠 **Native Health Guide (2.1, pending release)** | The unreleased 2.1 source adds optional Qwen2.5 1.5B Instruct GGUF via `llama.cpp`, offline MedlinePlus references, and a local Kiwix/ZIM connector. No cloud AI endpoint. |
-| 🩺 **Offline medical references (2.1, pending release)** | The 2.1 source can download MedlinePlus XML from the U.S. National Library of Medicine after an explicit tap; it is not bundled and is not individualized medical advice. |
+| 🧠 **Native Health Guide (Mac 2.1.0)** | Optional Qwen2.5 1.5B Instruct GGUF via `llama.cpp`, local MedlinePlus references, and a private Kiwix/ZIM connector. Qwen weights are a separate opt-in download; questions are not sent to a cloud AI. |
+| 🩺 **Offline medical references (Mac 2.1.0)** | The app can download MedlinePlus XML from the U.S. National Library of Medicine after an explicit tap; it is not bundled and is not individualized medical advice. |
 | 🔐 **Biometric privacy** | Native Touch ID/Face ID replaces the root view with an opaque lock screen; private care content is not drawn behind the prompt. |
-| 🔊 **Native spoken prompts (2.1, pending release)** | Apple voices remain the default; the unreleased 2.1 source adds an optional int8 Kokoro English pack (~100 MB) and local Sherpa-ONNX synthesis. Audio is not uploaded. Scheduled iOS notifications still use system sounds when the app is closed. |
+| 🔊 **Native spoken prompts (Mac 2.1.0)** | Apple voices remain the default; the optional int8 Kokoro English pack (~158 MB compressed) enables local Sherpa-ONNX synthesis. Audio is not uploaded. Scheduled iOS notifications still use system sounds when the app is closed. |
 
 ## Feature tour
 
@@ -36,11 +36,11 @@
 - **Coffee Circles** — three real Jitsi room links plus an ad-hoc room; join embedded or in a new tab. No CareSphere host, schedule, attendance tracking, or moderation is configured; anyone with a link may join.
 - **Care Circle** — browser/device-local care notes and summaries of saved check-ins. The illustrative roster is sample content only; no account sync, clinician portal, family notifications, or shared backend is configured.
 - **Vitals & Telehealth** — BLE pairing, clearly-labeled source chips, live sparkline, spot-checks, CSV export, and one-tap Jitsi telehealth visit.
-- **Native Health Guide (2.1 development, not released)** — source-linked offline MedlinePlus search, optional Qwen2.5 1.5B on-device summaries, and a local Kiwix connection for an existing Wikipedia/ZIM file. The AI is educational only—not diagnosis, triage, a drug-interaction checker, or dosing advice.
+- **Native Health Guide (Mac 2.1.0)** — source-linked offline MedlinePlus search, optional Qwen2.5 1.5B on-device summaries, and a local Kiwix connection for an existing Wikipedia/ZIM file. The AI is educational only—not diagnosis, triage, a drug-interaction checker, or dosing advice.
 
 ## Download & install
 
-See the [download and setup guide](DOWNLOAD.md). The latest published Mac installer is **CareSphere 2.0.0**; the `mac-v2.1.0` release does not exist yet. The new 2.1 native features and Kokoro asset must first pass Mac CI and have their release assets verified. There is no public App Store/TestFlight iOS build.
+See the [download and setup guide](DOWNLOAD.md). The latest published Mac installer is **CareSphere 2.1.0**, released after both iOS-device and Mac CI passed; its optional Kokoro pack and checksum are separate release assets. There is no public App Store, TestFlight, or signed `.ipa` iOS build.
 
 ## Run the web app
 

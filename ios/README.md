@@ -1,13 +1,11 @@
 # 💚 CareSphere for iOS & Mac — native SwiftUI
 
-> **2.1.0 integration in progress — not yet released.** The current source adds an optional **on-device Qwen2.5 1.5B** assistant, offline **MedlinePlus references**, a private **Kiwix/Wikipedia ZIM connector**, an opaque full-window Touch ID/Face ID lock, and optional **Kokoro neural speech**. It must pass iOS and Mac CI before these features are downloadable.
->
-> The latest public installer is **CareSphere 2.0.0**. See the root [`DOWNLOAD.md`](../DOWNLOAD.md) for the verified current Mac links and accurate iPhone/Xcode limitations.
+> **CareSphere 2.1.0 for Mac is released and CI-verified.** It adds an optional **on-device Qwen2.5 1.5B** assistant, offline **MedlinePlus references**, a private **Kiwix/Wikipedia ZIM connector**, an opaque full-window Touch ID/Face ID lock, and optional **Kokoro neural speech**. See the root [`DOWNLOAD.md`](../DOWNLOAD.md) for Mac downloads and the iPhone/Xcode limitations.
 
 - 📱 **iOS:** native SwiftUI source, iOS 16+; no public App Store/TestFlight build.
-- 🖥️ **Mac:** [download the published CareSphere 2.0.0 `.dmg`](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.0.0/CareSphere-2.0.0-mac.dmg) · [ZIP](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.0.0/CareSphere-2.0.0-mac.zip) · [release notes](https://github.com/engineer2025-sudo/Care/releases/tag/mac-v2.0.0). The 2.1 additions below are not in this installer.
+- 🖥️ **Mac:** [download CareSphere 2.1.0 `.dmg`](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-2.1.0-mac.dmg) · [ZIP](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-2.1.0-mac.zip) · [release notes and optional assets](https://github.com/engineer2025-sudo/Care/releases/tag/mac-v2.1.0).
 
-## 2.1 integration target (not yet released)
+## CareSphere 2.1.0 for Mac
 
 ### On-device model — optional, not bundled
 
@@ -46,8 +44,8 @@ Binding to `0.0.0.0` lets devices on the network reach Kiwix. Use it only on tru
 
 - The lock **replaces the root view** with an opaque full-window screen. CareSphere data is not drawn or refreshed behind a Mac sheet while authentication is pending.
 - Authentication uses LocalAuthentication with device passcode fallback; the app locks after backgrounding.
-- Apple-installed English voices remain the zero-download default. Users can optionally download the official **Kokoro int8 English v0.19** pack (~100 MB) and choose among its 11 speakers. **Sherpa-ONNX** synthesizes speech offline on CPU; the app keeps the weights in private Application Support, excludes them from backup, and deletes the temporary WAV after playback.
-- The voice pack is intended to be a separate ZIP release asset, not bundled in the DMG/iOS app. The workflow is configured to verify the upstream archive SHA-256 and include the separate eSpeak-NG GPL-3.0 notice alongside the Apache-2.0 Kokoro license; this packaging and asset are not verified or published yet. The Sherpa-ONNX runtime is Apache-2.0.
+- Apple-installed English voices remain the zero-download default. Users can optionally download the official **Kokoro int8 English v0.19** pack (~158 MB compressed) and choose among its 11 speakers. **Sherpa-ONNX** synthesizes speech offline on CPU; the app keeps the weights in private Application Support, excludes them from backup, and deletes the temporary WAV after playback.
+- The voice pack is a separate [ZIP release asset](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-Kokoro-Int8-En-v0.19.zip), not bundled in the DMG/iOS app; its [SHA-256 file](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-Kokoro-Int8-En-v0.19.zip.sha256) is published alongside it. CI verifies the upstream archive checksum and the asset includes the eSpeak-NG GPL-3.0 notice and Apache-2.0 Kokoro license. Sherpa-ONNX is Apache-2.0.
 - Neural speech is available for in-app prompts and previews. iOS does not run this local model from a closed-app notification, so scheduled notifications continue to use the normal system notification sound. No generated audio is uploaded.
 
 ## Native feature map
@@ -85,7 +83,7 @@ The release DMG is ad-hoc signed, not Developer ID signed or notarized. On macOS
 
 ## CI
 
-`.github/workflows/ios.yml` is configured to compile an unsigned generic iOS device target and the native Mac Release target, verify the Mac signature, and package the DMG. The current llama.cpp XCFramework has no iOS Simulator slice, so simulator builds are not supported by this dependency. The Mac release job waits for the iOS build; if successful it checksum-verifies and packages the optional Kokoro asset before publishing. This 2.1 run and its assets still need to pass verification before the release can be considered available. The Mac target intentionally has no HealthKit entitlement to avoid the invalid ad-hoc signature issue seen in v1.
+`.github/workflows/ios.yml` compiles an unsigned generic iOS device target and builds the native Mac Release target. The iOS-device and Mac packaging, mounted-DMG signature verification, and launch smoke-check all passed in [CI run 36367502424](https://github.com/engineer2025-sudo/Care/actions/runs/36367502424), which published the 2.1.0 Mac release. The llama.cpp XCFramework has no iOS Simulator slice, so simulator builds are not supported by this dependency; there is still no signed iOS distribution. The Mac target intentionally has no HealthKit entitlement because restricted entitlements cannot be ad-hoc signed.
 
 ## Project layout
 
