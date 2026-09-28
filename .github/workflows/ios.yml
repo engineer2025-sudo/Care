@@ -212,12 +212,11 @@ jobs:
           # archive. Use ditto without ACLs/xattrs, normalize file access, then
           # re-sign the staged bundle before hdiutil reads it.
           ditto --noacl --noextattr "$APP_PATH" staging/CareSphere.app
-          chmod -R -N staging/CareSphere.app || true
-          chmod -R u+rwX,go+rX staging/CareSphere.app
+          test -d staging/CareSphere.app
+          ls -ldeO staging/CareSphere.app/Contents/Frameworks/onnxruntime.framework/Versions/A/A || true
           codesign --remove-signature staging/CareSphere.app 2>/dev/null || true
           codesign --force --deep --sign - --timestamp=none staging/CareSphere.app
           codesign --verify --deep --strict staging/CareSphere.app
-          ls -ldeO staging/CareSphere.app/Contents/Frameworks/onnxruntime.framework/Versions/A/A || true
           ln -s /Applications staging/Applications
           cat > staging/README-FIRST.txt <<'EOF'
           ⚠️  FIRST LAUNCH ON macOS — one-time, 20 seconds:
