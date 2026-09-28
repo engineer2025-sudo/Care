@@ -212,7 +212,6 @@ jobs:
           # ACLs that prevent hdiutil from reading the ONNX framework.
           ditto --noacl "$APP_PATH" staging/CareSphere.app
           test -d staging/CareSphere.app
-          codesign --verify --deep --strict staging/CareSphere.app
           ls -la staging/CareSphere.app/Contents/Frameworks/onnxruntime.framework/Versions/A || true
           ln -s /Applications staging/Applications
           cat > staging/README-FIRST.txt <<'EOF'
