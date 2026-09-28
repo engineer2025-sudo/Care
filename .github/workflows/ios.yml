@@ -213,7 +213,21 @@ jobs:
           # re-sign the staged bundle before hdiutil reads it.
           ditto --noacl --noextattr "$APP_PATH" staging/CareSphere.app
           test -d staging/CareSphere.app
-          ls -ldeO staging/CareSphere.app/Contents/Frameworks/onnxruntime.framework/Versions/A/A || true
+          ONNX_FRAMEWORK="staging/CareSphere.app/Contents/Frameworks/onnxruntime.framework"
+          echo "── ONNX framework payload ──"
+          plutil -extract CFBundleExecutable raw -o - "$ONNX_FRAMEWORK/Info.plist" 2>/dev/null || true
+          ls -la "$ONNX_FRAMEWORK/Versions/A" || true
+          ONNX_ALIAS="$ONNX_FRAMEWORK/Versions/A/A"
+          if [[ -L "$ONNX_ALIAS" && "$(readlink "$ONNX_ALIAS")" == "A" ]]; then
+            if [[ -f "$ONNX_FRAMEWORK/Versions/A/onnxruntime" ]]; then
+              echo "Replacing upstream self-referencing framework alias with its real sibling binary."
+              rm "$ONNX_ALIAS"
+              ln -s onnxruntime "$ONNX_ALIAS"
+            else
+              echo "::error::The ONNX framework contains a self-referencing A symlink and no onnxruntime binary."
+              exit 1
+            fi
+          fi
           codesign --remove-signature staging/CareSphere.app 2>/dev/null || true
           codesign --force --deep --sign - --timestamp=none staging/CareSphere.app
           codesign --verify --deep --strict staging/CareSphere.app
