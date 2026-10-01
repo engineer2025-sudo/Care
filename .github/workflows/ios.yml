@@ -299,6 +299,13 @@ jobs:
             CareSphere-Kokoro-Int8-En-v0.19.zip.sha256
           if-no-files-found: ignore
 
+      - name: Upload Mac app ZIP as a direct download
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          path: CareSphere-${{ steps.app-version.outputs.version }}-mac.zip
+          archive: false
+
       - name: Upload mac build log
         if: always()
         uses: actions/upload-artifact@v7
