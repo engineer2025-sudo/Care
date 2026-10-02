@@ -1,103 +1,70 @@
-# 💚 CareSphere for iOS & Mac — native SwiftUI
+# CareSphere for iOS
 
-> **CareSphere 2.1.0 for Mac is the latest public release.** It adds an optional **on-device Qwen2.5 1.5B** assistant, offline **MedlinePlus references**, a private **Kiwix/Wikipedia ZIM connector**, an opaque full-window Touch ID/Face ID lock, and optional **Kokoro neural speech**. See the root [`DOWNLOAD.md`](../DOWNLOAD.md) for Mac downloads and the iPhone/Xcode limitations.
->
-> **Development:** 2.2 privacy controls/storage hardening and the first 2.3 local visit-prep prototype are in progress. Neither has been released. See [`ROADMAP.md`](../ROADMAP.md).
+CareSphere's native SwiftUI target and native build pipeline are **iOS only**. Older macOS release artifacts are archived; there is no current Mac target. The separate web PWA remains in the repository. There is no public App Store, TestFlight, or signed `.ipa` build.
 
-- 📱 **iOS:** native SwiftUI source, iOS 16+; no public App Store/TestFlight build.
-- 🖥️ **Mac:** [download CareSphere 2.1.0 `.dmg`](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-2.1.0-mac.dmg) · [ZIP](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-2.1.0-mac.zip) · [release notes and optional assets](https://github.com/engineer2025-sudo/Care/releases/tag/mac-v2.1.0).
+## Build and install on a physical iPhone
 
-## CareSphere 2.1.0 for Mac
+The project uses XcodeGen and Swift Package Manager. The `llama.cpp` dependency does not provide an iOS Simulator slice, so use a connected iPhone for the native build.
 
-### On-device model — optional, not bundled
+```bash
+cd ios
+brew install xcodegen
+xcodegen generate
+open CareSphere.xcodeproj
+```
 
-- The **Health Guide** can run the open-weight **Qwen2.5 1.5B Instruct, Q4_K_M GGUF** through `llama.cpp` (`llama.swift`). Model weights are fetched only after the user chooses **Download**; the `.dmg`/app bundle does not include a gigabyte of weights.
-- The current GGUF is about **1.1 GB**. Expect additional memory use and slower CPU inference on older Intel Macs. First launch loads the model only when asked; CareSphere releases model memory after each answer.
-- A user can import a Qwen-family Instruct GGUF using the same ChatML prompt format. Other model families are not supported by this initial chat template.
-- The guide retrieves a few local reference passages and adds their actual source links to the answer card. The model is not a clinician and must not be used for diagnosis, emergency triage, drug-interaction checking or dose decisions. It intentionally refuses to guess when it cannot find a source.
-- Questions are not sent to a hosted AI. The only AI runtime is local `llama.cpp`; model downloads go directly to the cited model publisher after an explicit tap.
+In Xcode, select the **CareSphere** scheme and a connected iPhone, configure **Signing & Capabilities** with your Apple development team, then Run. See the root [`DOWNLOAD.md`](../DOWNLOAD.md) for the signing, first-launch, permission, and troubleshooting steps. HealthKit read/background-delivery capabilities depend on the signing team. Physical-device testing is still required.
 
-### Workouts and Garmin through Apple Health
+## Current native features
 
-- The iOS app requests **read-only** HealthKit access to heart rate, SpO₂, blood-pressure correlations, and workouts. It lists up to 25 recent `HKWorkout` summaries with duration, available distance/calories, and the HealthKit source app. CareSphere never writes Health data.
-- To include Garmin activities, sync the watch with Garmin Connect, then enable **Workouts** in Garmin Connect → More → Settings → Connect Apps → Apple Health. Garmin says its Health transfer pauses when Connect is closed, and that GPS tracks are not written to Health ([Garmin's instructions](https://support.garmin.com/en-US/?faq=lK5FPB9iPF5PXFkIpFlFPA)). CareSphere reads what Garmin Connect actually writes to Apple Health; it does not sign in to Garmin or fetch Garmin-only training load, recovery, or other proprietary metrics.
-- HealthKit does not reveal whether a user denied read access. An empty list may mean no saved workouts or that Workouts access/source sharing is off; the UI says so rather than claiming permission was granted.
-- On iOS, workout observer/background delivery is configured in the HealthKit entitlement and the screen refreshes on foreground. Delivery timing remains controlled by iOS and the signing profile; verify it on a real, properly signed iPhone. The ad-hoc Mac build cannot use HealthKit and does not directly connect to Garmin Connect.
+| Feature | Implementation and limits |
+|---|---|
+| 🫀 Vitals | Read-only Apple HealthKit heart rate, SpO₂, blood pressure, and workout summaries when available; live standard BLE Heart Rate service (`0x180D` / `0x2A37`), including supported Garmin broadcast mode. Source labels are shown. No fabricated readings. |
+| 🧠 Health Guide | Optional Qwen2.5 1.5B Instruct GGUF via `llama.cpp`; model is opt-in and not bundled. Source-linked MedlinePlus XML is downloaded only on request. An existing ZIM can be searched through a separately running local Kiwix bridge. The model is educational, not diagnosis, triage, a medication checker, or dosing advice. |
+| 🚦 Question safety gate | A narrow deterministic check handles possible self-harm and poisoning phrases before local retrieval/model inference. It is not a validated or complete detector. It avoids methods, lethality, and symptom details and offers local emergency/contact actions. |
+| 🫶 Support check-in | Optional Settings opt-in for a local prompt after live BLE readings stay above 110 BPM for 90 seconds while the app is foregrounded and unlocked; gaps over 15 seconds reset the interval. The prompt asks whether the person is moving and how they feel. Heart rate alone never labels a crisis or sends an alert. Overview also offers **I'm stressed**. |
+| 🌬️ Paced breathing | Three short guided cycles and a self-check. Breathing is not measured by camera, microphone, or another sensor. The person can stop or request help at any time. |
+| 💬 Caregiver / video | A saved contact can be prefilled in the iOS Messages composer; the person must review and tap Send. There is no remote caregiver account, push service, or delivery acknowledgement. Optional Jitsi video opens in-app; anyone with the room link may join. |
+| ☕ Social connection | Embedded Jitsi Meet rooms. CareSphere does not host or moderate rooms; verify participants before sharing private information. |
+| 💊 Medication reminders | Local UserNotifications based on a schedule the person enters and confirms. Reminders and taken/snoozed responses are self-reports, not prescription verification or proof of a dose. |
+| 🔊 Speech and sound | Apple voices by default; optional local Kokoro/Sherpa-ONNX speech. Soundscapes are generated on-device. Closed-app notifications use system notification sounds. |
+| 🧩 Activities and routines | Optional, non-clinical pattern/emoji activities, paced breathing, routines, and mood check-ins. These are not validated autism or dementia treatments and are not presented as therapy. |
+| ♿ Accessibility | Dynamic Type, accessibility labels, appearance and high-contrast choices, and reduced-motion settings. Review on-device behavior with VoiceOver and larger text before release. |
+| 🔐 Privacy | Care data is stored locally with AES-GCM 256-bit encryption and iOS file protection. HealthKit is read-only. Model/reference downloads are opt-in. Exports and sharing require an explicit user action. |
+| 🆘 Emergency actions | User-initiated phone links and a user-controlled share/message action. No silent caregiver notification or automatic emergency escalation. |
 
-### Medical reference database
+## Support-flow safety and privacy boundaries
 
-- **MedlinePlus Health Topics XML** from the U.S. National Library of Medicine can be downloaded inside the app (about 30 MB uncompressed). CareSphere discovers the latest XML link from MedlinePlus, parses topic titles and summaries, and stores the searchable index in the app's private Application Support directory.
-- The starter guide remains available offline before the full dataset is downloaded. Results include publisher and source links. MedlinePlus is general consumer-health information, not an individualized care plan.
-- MedlinePlus content is downloaded only when the user selects **Download** or **Update**. CareSphere does not bundle a stale or multi-gigabyte dataset.
+- Live heart-rate check-ins are disabled by default. When enabled, they use only fresh paired CoreBluetooth notifications while CareSphere is open; HealthKit history is not monitored. Exercise and other factors affect heart rate. The prompt is a wellness self-check, not a medical threshold or crisis inference.
+- The app does not scan social media, Messages, or other apps. The safety gate sees only the question a person enters in Health Guide.
+- Possible poisoning/self-harm questions get a short fixed response before reference search and model inference. A phrase list can miss messages; it cannot determine intent or provide clinical triage.
+- A caregiver text is not delivered until the user taps Send in Messages. Jitsi rooms are link-accessible and unmoderated. Do not place private health information in a room name or invitation.
+- No UI copy should promise that CareSphere or its AI prevents self-harm, provides clinical triage, or automatically contacts a caregiver.
 
-### Connect an existing Wikipedia / Kiwix archive
+See [`safety-support-flow.md`](safety-support-flow.md) for the detailed step sequence and behavior.
 
-CareSphere does **not** copy or ingest a multi-gigabyte `.zim` file. Instead, Kiwix serves and searches the ZIM in place, and CareSphere sends a query to the user's private/local server and uses the returned snippets as optional context.
+## Local Kiwix bridge
 
-On the Mac that holds the `.zim` file:
+The iOS app does not bundle a Wikipedia archive or GPL-3.0 CoreKiwix. To search an existing ZIM, run the user's separate Kiwix server on the same trusted private network; the archive remains in place. For example, on the computer that holds the ZIM:
 
 ```bash
 brew install kiwix-tools
 kiwix-serve --port=8080 --address=0.0.0.0 "/path/to/your-library.zim"
 ```
 
-Then open **Guide → Connect your Wikipedia ZIM**:
-
-- Mac app: `http://127.0.0.1:8080`; the server can instead bind to `127.0.0.1` for Mac-only use.
-- Content name: usually the `.zim` filename without `.zim` (as shown by Kiwix).
-- iPhone/iPad: bind Kiwix to `0.0.0.0` as in the command above, then use the Mac's private Wi-Fi address, such as `http://MacBook.local:8080`, with both devices on the same Wi-Fi.
-
-Binding to `0.0.0.0` lets devices on the network reach Kiwix. Use it only on trusted Wi-Fi, do not configure router port forwarding, and use the Mac firewall. CareSphere rejects non-local Kiwix hosts; it does not send the archive or search queries to Wikipedia or a cloud AI. The app needs local-network permission on iOS.
-
-### Touch ID / Face ID and speech
-
-- The lock **replaces the root view** with an opaque full-window screen. CareSphere data is not drawn or refreshed behind a Mac sheet while authentication is pending.
-- Authentication uses LocalAuthentication with device passcode fallback; the app locks after backgrounding.
-- Apple-installed English voices remain the zero-download default. Users can optionally download the official **Kokoro int8 English v0.19** pack (~158 MB compressed) and choose among its 11 speakers. **Sherpa-ONNX** synthesizes speech offline on CPU; the app keeps the weights in private Application Support, excludes them from backup, and deletes the temporary WAV after playback.
-- The voice pack is a separate [ZIP release asset](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-Kokoro-Int8-En-v0.19.zip), not bundled in the DMG/iOS app; its [SHA-256 file](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-Kokoro-Int8-En-v0.19.zip.sha256) is published alongside it. CI verifies the upstream archive checksum and the asset includes the eSpeak-NG GPL-3.0 notice and Apache-2.0 Kokoro license. Sherpa-ONNX is Apache-2.0.
-- Neural speech is available for in-app prompts and previews. iOS does not run this local model from a closed-app notification, so scheduled notifications continue to use the normal system notification sound. No generated audio is uploaded.
-
-## Native feature map
-
-| Feature | Implementation |
-|---|---|
-| 🫀 Wearable vitals & workouts | Read-only HealthKit vitals and up to 25 recent workout summaries; Garmin workouts arrive through Garmin Connect → Apple Health after the user enables Workouts sharing. CoreBluetooth standard Heart Rate service `0x180D` / characteristic `0x2A37` remains available for live BLE, including Garmin broadcast mode. No synthetic clinical readings. |
-| 🧠 Offline health guide | Optional Qwen2.5 1.5B GGUF via llama.cpp; retrieval-augmented summaries from local MedlinePlus and a private Kiwix server. |
-| 🩺 Reference library | Current MedlinePlus topic XML, parsed locally; source and publisher shown for retrieved records. |
-| 📚 Wikipedia ZIM | Search existing ZIM through Kiwix on a local/private network. The ZIM remains in its current location. |
-| ☕ Video | Jitsi Meet SDK on iOS and real `meet.jit.si` rooms, with macOS browser hand-off. |
-| 💊 Medication reminders | UserNotifications calendar triggers with **Taken / Snooze** actions. Daily self-check-ins reset at local midnight; the app records a user-entered schedule and never verifies a dose or prescription. |
-| 🔊 Spoken prompts | Apple AVSpeechSynthesizer voices by default; optional Kokoro int8 English TTS via Sherpa-ONNX, with local voice generation and playback. Closed-app notifications use system sounds. |
-| 🎧 Sensory soundscapes | Procedural on-device AVAudioEngine DSP; works without audio downloads. |
-| 🚨 Emergency | SOS, one-tap `tel:911`, and a user-confirmed Share sheet for optional GPS details. No automatic Care Circle push server is configured. |
-| 📝 Visit preparation (2.3 prototype) | Choose local profile, self-entered reminders, mood entries, notes and questions; preview the exact text and share only after tapping the system share sheet. No HealthKit observations are included yet. |
-| 🧩 Optional practice & routines | Non-clinical emoji/pattern games and paced breathing; custom daily routines with local-midnight resets and a daily mood check-in. |
-| 🔒 Privacy | The 2.2 development code migrates legacy care data into private Application Support, protects the iOS file with Complete File Protection, restricts Mac file/folder access to the current user, and adds explicit JSON export/erase controls. Optional Qwen/Kokoro weights and reference downloads remain separate; Kiwix search is restricted to the configured local/private host. |
-
-## Build & install on Apple devices
-
-For the full step-by-step guide to signing and installing the **CareSphere** iOS scheme on a connected iPhone, see [Install the native development build](../DOWNLOAD.md#install-the-native-development-build-on-your-iphone). The iOS scheme includes HealthKit; the ad-hoc Mac target deliberately does not. A personal Xcode team may need periodic re-signing, and HealthKit capability support depends on the signing team.
-
-On a real iPhone, grant only the permissions you use: Health, Bluetooth, notifications, contacts, microphone/camera for video, location for SOS, and local-network access if connecting to Kiwix. SPM resolves Jitsi with its ABI-matched Giphy 2.2.12 runtime, `llama.swift`, Sherpa-ONNX and ZIPFoundation. Keep the Giphy pin: Jitsi 13.1.1's binary expects the earlier `GPHContent.search` signature; later Giphy releases change it. Qwen/Kokoro model weights and the optional MedlinePlus database are separate, opt-in downloads.
-
-## First launch on Mac
-
-The release DMG is ad-hoc signed, not Developer ID signed or notarized. On macOS, drag the app to Applications, open it once and dismiss the warning, then go to **System Settings → Privacy & Security → Open Anyway → Open**. Proper notarization requires a paid Apple Developer account and Developer ID signing.
-
-## CI
-
-`.github/workflows/ios.yml` compiles an unsigned generic iOS device target and builds the native Mac Release target. The iOS-device and Mac packaging, mounted-DMG signature verification, and launch smoke-check all passed in [CI run 36367502424](https://github.com/engineer2025-sudo/Care/actions/runs/36367502424), which published the 2.1.0 Mac release. The llama.cpp XCFramework has no iOS Simulator slice, so simulator builds are not supported by this dependency; there is still no signed iOS distribution. The Mac target intentionally has no HealthKit entitlement because restricted entitlements cannot be ad-hoc signed.
+Use that computer's private address from **Guide → Connect your Wikipedia ZIM** on iPhone. Keep its firewall enabled, do not port-forward the server, and use trusted Wi-Fi only. CareSphere rejects non-local Kiwix hosts.
 
 ## Project layout
 
 ```text
 ios/
 ├── project.yml
+├── README.md
+├── safety-support-flow.md
 └── CareSphere/
-    ├── App/CareSphereApp.swift
-    ├── Models/                  # care data & local persistence
-    ├── Services/                # HealthKit, BLE, Llama, MedlinePlus, Kiwix,
-    │                             # notifications, speech, location, audio, motion
-    ├── Views/                    # tabs, onboarding, Health Guide, lock, SOS, etc.
-    └── Resources/Assets.xcassets
+    ├── App/       # SwiftUI app, dependencies, and live support presentation
+    ├── Models/    # care data and encrypted local persistence
+    ├── Services/  # HealthKit, BLE, local model, Kiwix, notifications, speech
+    ├── Views/     # tabs, onboarding, Guide, support flow, SOS, activities
+    └── Resources/ # app assets
 ```

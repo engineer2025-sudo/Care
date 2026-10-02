@@ -48,6 +48,7 @@ struct SettingsView: View {
                 medicationSection
                 securitySection
                 accessibilitySection
+                supportCheckInSection
                 neuralVoiceSection
                 notificationsSection
                 privacySection
@@ -259,6 +260,16 @@ struct SettingsView: View {
 
     private var accessibilitySection: some View {
         Section("Accessibility") {
+            Text("Choose an appearance or follow your device. Dynamic Type, increased contrast, and Reduce Motion also follow system accessibility settings; the options below add contrast or further reduce activity motion. Buttons include VoiceOver labels.")
+                .font(.caption2).foregroundStyle(.secondary)
+            Picker("Color appearance", selection: $store.colorAppearance) {
+                Text("Follow device").tag("system")
+                Text("Light").tag("light")
+                Text("Dark").tag("dark")
+            }
+            Toggle("Increase in-app contrast", isOn: $store.highContrast)
+                .accessibilityHint("Adds stronger outlines around section cards and status chips.")
+            Toggle("Reduce visual motion in activities", isOn: $store.reduceVisualMotion)
             Toggle("Spoken in-app prompts", isOn: $store.voiceReminders)
             Picker("Reminder voice", selection: $store.voiceIdentifier) {
                 Text("Automatic · best installed Apple voice").tag("")
@@ -287,11 +298,19 @@ struct SettingsView: View {
         }
     }
 
+    private var supportCheckInSection: some View {
+        Section("Support check-ins") {
+            Toggle("Offer heart-rate check-ins", isOn: $store.heartRateCheckInEnabled)
+            Text("Uses only a paired Bluetooth monitor while CareSphere is open and unlocked. It prompts after live heart rate stays above \(CareSupportCoordinator.promptThresholdBPM) BPM for \(Int(CareSupportCoordinator.sustainedDuration)) seconds. Activity can raise heart rate; the app asks how you feel and never calls or messages anyone automatically.")
+                .font(.caption2).foregroundStyle(.secondary)
+        }
+    }
+
     private var neuralVoiceSection: some View {
         Section("Open-source neural voice") {
             if localSpeech.isModelInstalled {
                 Label("Kokoro English voices are installed for offline use.", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(Color.emerald)
+                    .foregroundStyle(Color.emeraldText)
                 if localSpeech.isGenerating {
                     ProgressView("Generating speech on this device…")
                 }
@@ -348,7 +367,7 @@ struct SettingsView: View {
                 }
                 Spacer()
                 if notifications.authorizationStatus == .authorized {
-                    Image(systemName: "checkmark.seal.fill").foregroundStyle(Color.emerald)
+                    Image(systemName: "checkmark.seal.fill").foregroundStyle(Color.emeraldText)
                 } else {
                     Button("Enable") { notifications.requestAuthorization() }
                         .buttonStyle(.bordered)
@@ -366,19 +385,25 @@ struct SettingsView: View {
 
     private var privacySection: some View {
         Section("Privacy & data") {
-            Label("Your profile, routines, medications, notes, moods and scores stay in CareSphere's private app storage.", systemImage: "lock.shield")
-                .font(.caption)
+            if store.persistenceIssue == nil {
+                Label("Your profile, routines, medications, notes, moods and scores are encrypted on this device with AES-256-GCM. The key is stored in Keychain.", systemImage: "lock.shield")
+                    .font(.caption)
+            } else {
+                Label("CareSphere could not confirm that all saved data is protected. Review the storage warning above.", systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption).foregroundStyle(.orange)
+            }
             #if os(iOS)
-            Text("The care-data file uses iOS Complete File Protection while the device is locked. Touch ID / Face ID is an additional screen lock, not a separate encryption key.")
+            Text("The encrypted file also uses iOS Complete File Protection and is excluded from device backups; its Keychain key is available only while unlocked and is not migrated to another device. Older plaintext data is removed only after an encrypted copy is saved. Face ID / Touch ID is an additional app lock, not the encryption key.")
                 .font(.caption2).foregroundStyle(.secondary)
             #else
-            Text("The care-data file is restricted to your macOS user account (POSIX permissions 0600). The biometric screen lock is not a separate encryption key.")
+            Text("The encrypted file is restricted to your macOS user account (POSIX permissions 0600); the key is held in the user's login Keychain. The biometric screen lock is separate from the encryption key.")
                 .font(.caption2).foregroundStyle(.secondary)
             #endif
 
             Button(action: prepareCareDataExport) {
                 Label("Export my care data as JSON…", systemImage: "square.and.arrow.up")
             }
+            .disabled(!store.canExportCareData)
             Text("The system save sheet lets you choose where to place the export. It contains sensitive profile, medication and journal information; the exported copy is outside CareSphere's app-storage protections.")
                 .font(.caption2).foregroundStyle(.secondary)
 

@@ -98,7 +98,7 @@ struct CareCircleView: View {
         SectionCard(title: "Today at a glance", systemImage: "chart.bar.fill") {
             VStack(alignment: .leading, spacing: 8) {
                 insightRow("Routine check-ins", value: "\(store.routinesDone)/\(store.routines.count)", note: "marked complete today")
-                insightRow("Emotion-match score", value: "\(store.emotionScore)", note: "local game score")
+                insightRow("Activities", value: "Optional", note: "unscored; participation is not tracked")
                 insightRow(
                     "Medication check-ins",
                     value: store.configuredMedications.isEmpty ? "None" : store.medicationScheduleConfirmed ? "\(store.medsTaken)/\(store.configuredMedications.count)" : "Paused",
@@ -131,7 +131,7 @@ struct CareCircleView: View {
                 ForEach(store.configuredMedications) { medication in
                     HStack(spacing: 10) {
                         Image(systemName: medication.isTaken ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(medication.isTaken ? Color.emerald : Color.secondary)
+                            .foregroundStyle(medication.isTaken ? Color.emeraldText : Color.secondary)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(medication.shortName).font(.footnote.weight(.semibold))
                             Text("Scheduled \(medication.timeLabel)")

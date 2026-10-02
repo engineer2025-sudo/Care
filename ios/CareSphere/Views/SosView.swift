@@ -90,7 +90,6 @@ struct SosView: View {
             }
             #endif
         }
-        .preferredColorScheme(.dark)
         .presentationDetents([.large])
     }
 

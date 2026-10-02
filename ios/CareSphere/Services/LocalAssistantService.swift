@@ -4,9 +4,9 @@ import Combine
 @preconcurrency import LlamaSwift
 #endif
 
-/// Manages an optional GGUF model. Model weights are never bundled in the app:
+/// Manages an optional GGUF model. Model weights are never bundled in the app;
 /// users explicitly download or import them into Application Support, keeping
-/// the installer small and allowing the same CPU-capable runtime on Intel Macs.
+/// the iOS installer small and leaving model choice under user control.
 @MainActor
 final class LocalAssistantService: ObservableObject {
     static let recommendedModelName = "Qwen2.5 1.5B Instruct · Q4_K_M"
@@ -25,6 +25,7 @@ final class LocalAssistantService: ObservableObject {
 
     private let modelPathKey = "caresphere.localAssistant.modelPath"
     private let modelNameKey = "caresphere.localAssistant.modelName"
+    private var activeGenerationID: UUID?
 
     init() {
         if let savedPath = UserDefaults.standard.string(forKey: modelPathKey) {
@@ -114,35 +115,58 @@ final class LocalAssistantService: ObservableObject {
     }
 
     func ask(question: String, references: [HealthReference]) async {
+        let safeQuestion = String(question.trimmingCharacters(in: .whitespacesAndNewlines).prefix(500))
+        guard !safeQuestion.isEmpty else { return }
+        if let risk = CareQuestionSafety.classify(safeQuestion) {
+            presentSafetyResponse(for: risk)
+            return
+        }
         guard !isGenerating, !isDownloading, !isImporting else { return }
         generationErrorText = nil
         guard let modelURL else {
             errorText = "Install or import a GGUF model before asking the on-device assistant."
             return
         }
-        let safeQuestion = String(question.trimmingCharacters(in: .whitespacesAndNewlines).prefix(500))
-        guard !safeQuestion.isEmpty else { return }
 
+        let generationID = UUID()
+        activeGenerationID = generationID
         isGenerating = true
         errorText = nil
         response = ""
-        defer { isGenerating = false }
+        defer {
+            if activeGenerationID == generationID {
+                activeGenerationID = nil
+                isGenerating = false
+            }
+        }
 
         // Kokoro is also an on-device inference session. Release its cached ONNX
         // model before loading the much larger Qwen GGUF to conserve device RAM.
         await KokoroSpeechService.shared.releaseInferenceMemory()
+        guard activeGenerationID == generationID else { return }
 
         let prompt = Self.makePrompt(question: safeQuestion, references: references)
         do {
-            response = try await LocalLlamaRuntime.shared.complete(
+            let generated = try await LocalLlamaRuntime.shared.complete(
                 modelPath: modelURL.path,
                 prompt: prompt,
                 maximumNewTokens: 180)
+            guard activeGenerationID == generationID else { return }
+            response = generated
         } catch {
+            guard activeGenerationID == generationID else { return }
             let message = error.localizedDescription
             errorText = message
             generationErrorText = message
         }
+    }
+
+    func presentSafetyResponse(for risk: CareQuestionRisk) {
+        activeGenerationID = nil
+        isGenerating = false
+        errorText = nil
+        generationErrorText = nil
+        response = CareQuestionSafety.safeResponse(for: risk)
     }
 
     private static func makePrompt(question: String, references: [HealthReference]) -> String {
@@ -160,7 +184,7 @@ final class LocalAssistantService: ObservableObject {
         let safeQuestion = escapeSpecialTokens(question)
         let prompt = """
         <|im_start|>system
-        You are CareSphere's small, offline health-literacy helper. You are not a clinician and must not diagnose, triage, prescribe, interpret an individual test as a diagnosis, or recommend starting, stopping, skipping, or changing a medicine or dose. Use only the reference passages below for medical facts. If they do not answer the question, say so and suggest asking a licensed clinician or pharmacist. Never invent a citation or a source. Keep the answer calm, plain-language, and brief. If the user describes immediate danger or a life-threatening emergency, tell them to contact local emergency services now. This answer is educational only and not medical advice.
+        You are CareSphere's small, offline health-literacy helper. You are not a clinician and must not diagnose, triage, prescribe, interpret an individual test as a diagnosis, or recommend starting, stopping, skipping, or changing a medicine or dose. Use only the reference passages below for medical facts. If they do not answer the question, say so and suggest asking a licensed clinician or pharmacist. Never invent a citation or a source. Keep the answer calm, plain-language, and brief. If the user mentions self-harm, overdose, poisoning, or immediate danger, do not discuss lethality, amounts, symptoms, or methods; tell them to pause and contact local emergency services or a trusted person now. This answer is educational only and not medical advice.
         <|im_end|>
         <|im_start|>user
         Question: \(safeQuestion)

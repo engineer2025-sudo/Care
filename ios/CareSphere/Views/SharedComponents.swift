@@ -9,6 +9,17 @@ import AppKit
 // iOS uses UISystemBackground colors; macOS maps them to AppKit equivalents
 // so the same SwiftUI sources compile on both platforms.
 
+private struct CareSphereHighContrastKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var careSphereHighContrast: Bool {
+        get { self[CareSphereHighContrastKey.self] }
+        set { self[CareSphereHighContrastKey.self] = newValue }
+    }
+}
+
 extension Color {
     /// Outer card background.
     static let card = {
@@ -45,6 +56,7 @@ extension View {
 struct SectionCard<Content: View>: View {
     let title: String
     let systemImage: String
+    @Environment(\.careSphereHighContrast) private var highContrast
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -57,13 +69,19 @@ struct SectionCard<Content: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .background(Color.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(highContrast ? Color.primary.opacity(0.72) : .clear,
+                              lineWidth: highContrast ? 2 : 0)
+        }
     }
 }
 
 /// LIVE / SIMULATED / OFFLINE-style chip used on vitals cards.
 struct StatusChip: View {
     let text: String
-    var color: Color = .emerald
+    var color: Color = .emeraldText
+    @Environment(\.careSphereHighContrast) private var highContrast
 
     var body: some View {
         Text(text)
@@ -72,12 +90,17 @@ struct StatusChip: View {
             .padding(.vertical, 3)
             .background(color.opacity(0.18), in: Capsule())
             .foregroundStyle(color)
+            .overlay {
+                Capsule().strokeBorder(highContrast ? color : .clear,
+                                       lineWidth: highContrast ? 1.5 : 0)
+            }
     }
 }
 
 struct BigMetricButton<Label: View>: View {
     let title: String
     let subtitle: String
+    @Environment(\.careSphereHighContrast) private var highContrast
     @ViewBuilder var label: Label
     let action: () -> Void
 
@@ -95,6 +118,11 @@ struct BigMetricButton<Label: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
             .background(Color.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .strokeBorder(highContrast ? Color.primary.opacity(0.72) : .clear,
+                                  lineWidth: highContrast ? 2 : 0)
+            }
         }
         .buttonStyle(.plain)
     }

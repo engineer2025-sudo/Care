@@ -4,6 +4,7 @@ struct OverviewView: View {
     @EnvironmentObject private var store: CareStore
     @EnvironmentObject private var notifications: NotificationService
     @EnvironmentObject private var bluetooth: BluetoothHeartRateService
+    @EnvironmentObject private var support: CareSupportCoordinator
     @EnvironmentObject private var steps: StepCountService
     @State private var showRoutineEditor = false
     @State private var currentLocalDayKey = CareTime.dayKey()
@@ -67,7 +68,7 @@ struct OverviewView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label("\(greeting), \(store.displayName)", systemImage: "sparkles")
                 .font(.caption.weight(.bold))
-                .foregroundStyle(Color.emerald)
+                .foregroundStyle(Color.emeraldText)
             Text("Connected care for independent living")
                 .font(.title2.weight(.heavy))
             Text("Live Bluetooth heart-rate monitors, Apple Health summaries on iPhone, Jitsi video rooms, and optional sensory activities. Care notes stay on this device.")
@@ -76,7 +77,7 @@ struct OverviewView: View {
             if !store.personalizedTagline.isEmpty {
                 Text(store.personalizedTagline)
                     .font(.caption2.weight(.bold))
-                    .foregroundStyle(Color.emerald)
+                    .foregroundStyle(Color.emeraldText)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -89,13 +90,13 @@ struct OverviewView: View {
     private var metricsGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             BigMetricButton(title: "\(store.routinesDone)/\(store.routines.count)", subtitle: "Routine done today") {
-                Image(systemName: "checklist").foregroundStyle(Color.emerald)
+                Image(systemName: "checklist").foregroundStyle(Color.emeraldText)
             } action: {}
             BigMetricButton(title: bluetooth.bpm.map { "\($0) bpm" } ?? "Not paired", subtitle: "Heart-rate sensor") {
-                Image(systemName: "waveform.path.ecg").foregroundStyle(Color.emerald)
+                Image(systemName: "waveform.path.ecg").foregroundStyle(Color.emeraldText)
             } action: {}
-            BigMetricButton(title: "\(store.emotionScore) wins", subtitle: "Optional practice-game points") {
-                Image(systemName: "brain.head.profile").foregroundStyle(.indigo)
+            BigMetricButton(title: "Untimed", subtitle: "Optional activities · not scored") {
+                Image(systemName: "square.grid.2x2").foregroundStyle(Color.emeraldText)
             } action: {}
             BigMetricButton(
                 title: store.configuredMedications.isEmpty
@@ -131,6 +132,14 @@ struct OverviewView: View {
             Text(store.moodToday.map { "Today: feeling \(moodLabel($0.score).lowercased())" } ?? "How are you feeling right now?")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            Button {
+                support.begin(.selfReportedStress)
+            } label: {
+                Label("I'm stressed", systemImage: "wind")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 4)
+            }
+            .buttonStyle(.bordered)
         }
     }
 
@@ -220,10 +229,10 @@ struct OverviewView: View {
                                 Text(routine.title)
                                     .font(.subheadline.weight(.semibold))
                                     .strikethrough(routine.isDone)
-                                    .foregroundStyle(routine.isDone ? Color.emerald : .primary)
+                                    .foregroundStyle(routine.isDone ? Color.emeraldText : .primary)
                                 Spacer()
                                 Image(systemName: routine.isDone ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(routine.isDone ? Color.emerald : Color.secondary)
+                                    .foregroundStyle(routine.isDone ? Color.emeraldText : Color.secondary)
                             }
                             .padding(12)
                             .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -264,7 +273,7 @@ struct OverviewView: View {
                             } label: {
                                 Image(systemName: med.isTaken ? "checkmark.circle.fill" : "circle.dashed")
                                     .font(.title3)
-                                    .foregroundStyle(med.isTaken ? Color.emerald : Color.pink)
+                                    .foregroundStyle(med.isTaken ? Color.emeraldText : Color.pink)
                             }
                             .accessibilityLabel("Mark \(med.name) \(med.isTaken ? "not taken today" : "taken today")")
                             VStack(alignment: .leading, spacing: 2) {
@@ -330,7 +339,7 @@ private struct RoutineEditorView: View {
                                 if routine.isDone {
                                     Label("Done today", systemImage: "checkmark.circle.fill")
                                         .font(.caption)
-                                        .foregroundStyle(Color.emerald)
+                                        .foregroundStyle(Color.emeraldText)
                                         .labelStyle(.titleAndIcon)
                                 }
                                 Button(role: .destructive) {

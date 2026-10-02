@@ -39,7 +39,9 @@ export function normalizePersistedValue(key, value, fallback) {
     return {
       name: typeof value.name === 'string' ? value.name.slice(0, 24) : fallback.name,
       textScale: ['md', 'lg', 'xl'].includes(value.textScale) ? value.textScale : fallback.textScale,
+      theme: ['system', 'dark', 'light'].includes(value.theme) ? value.theme : fallback.theme,
       highContrast: typeof value.highContrast === 'boolean' ? value.highContrast : fallback.highContrast,
+      lowSensory: typeof value.lowSensory === 'boolean' ? value.lowSensory : fallback.lowSensory,
       voice: typeof value.voice === 'boolean' ? value.voice : fallback.voice,
     }
   }

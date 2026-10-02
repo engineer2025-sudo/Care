@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { isMedicationTakenToday, isRoutineDoneToday, localDayKey, normalizePersistedValue, parseCareStorage } from '../src/lib/careStorage.js'
 
 const defaults = {
-  settings: { name: 'Alex', textScale: 'md', highContrast: false, voice: false },
+  settings: { name: 'Alex', textScale: 'md', theme: 'system', highContrast: false, lowSensory: true, voice: false },
   routines: [],
   meds: [],
   medsConfirmed: false,
@@ -23,14 +23,18 @@ test('settings are shape-checked and bounded before React uses them', () => {
   const value = normalizePersistedValue('settings', {
     name: 'A'.repeat(100),
     textScale: 'huge',
+    theme: 'ultraviolet',
     highContrast: 'yes',
+    lowSensory: false,
     voice: true,
     unexpected: 'discard',
   }, defaults.settings)
 
   assert.equal(value.name.length, 24)
   assert.equal(value.textScale, 'md')
+  assert.equal(value.theme, 'system')
   assert.equal(value.highContrast, false)
+  assert.equal(value.lowSensory, false)
   assert.equal(value.voice, true)
   assert.equal('unexpected' in value, false)
 })

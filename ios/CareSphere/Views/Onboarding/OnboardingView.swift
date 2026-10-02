@@ -72,7 +72,7 @@ struct OnboardingView: View {
                 HStack {
                     Text("CareSphere Setup")
                         .font(.caption.weight(.heavy))
-                        .foregroundStyle(Color.emerald)
+                        .foregroundStyle(Color.emeraldText)
                     Spacer()
                     Text("Step \(step.rawValue + 1) of \(Step.allCases.count)")
                         .font(.caption2.weight(.semibold))
@@ -132,7 +132,6 @@ struct OnboardingView: View {
             .padding(24)
         }
         .background(backgroundGradient.ignoresSafeArea())
-        .preferredColorScheme(.dark)
         .onAppear {
             if meds.isEmpty { meds = store.medications }
             medicationScheduleConfirmed = store.medicationScheduleConfirmed
@@ -196,7 +195,7 @@ struct OnboardingView: View {
                 if let age = Calendar.current.dateComponents([.year], from: birthDate, to: Date()).year {
                     Label("That makes you \(age) — CareSphere will adapt font sizes and pacing for you.", systemImage: "sparkles")
                         .font(.caption)
-                        .foregroundStyle(Color.emerald)
+                        .foregroundStyle(Color.emeraldText)
                 }
             }
         }
@@ -220,7 +219,7 @@ struct OnboardingView: View {
                             Spacer()
                             Image(systemName: careMode == mode ? "checkmark.circle.fill" : "circle")
                                 .font(.title3)
-                                .foregroundStyle(careMode == mode ? Color.emerald : Color.secondary)
+                                .foregroundStyle(careMode == mode ? Color.emeraldText : Color.secondary)
                         }
                         .padding(16)
                         .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -406,7 +405,7 @@ struct OnboardingView: View {
                 HStack(spacing: 14) {
                     Image(systemName: wantsBiometrics ? "checkmark.circle.fill" : "circle")
                         .font(.title3)
-                        .foregroundStyle(wantsBiometrics ? Color.emerald : Color.secondary)
+                        .foregroundStyle(wantsBiometrics ? Color.emeraldText : Color.secondary)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Lock with \(BiometricService.biometryName)").font(.headline).foregroundStyle(.primary)
                         Text("App locks whenever it leaves the foreground").font(.caption).foregroundStyle(.secondary)
@@ -454,7 +453,7 @@ struct OnboardingView: View {
             HStack(spacing: 14) {
                 Image(systemName: icon)
                     .font(.title3)
-                    .foregroundStyle(Color.emerald)
+                    .foregroundStyle(Color.emeraldText)
                     .frame(width: 34)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.headline).foregroundStyle(.primary)
@@ -476,7 +475,7 @@ struct OnboardingView: View {
                 Circle().fill(Color.emerald.opacity(0.15)).frame(width: 140, height: 140)
                 Image(systemName: "checkmark.circle")
                     .font(.system(size: 64))
-                    .foregroundStyle(Color.emerald)
+                    .foregroundStyle(Color.emeraldText)
             }
             VStack(spacing: 8) {
                 Text("You're all set, \(store.displayName) 💚")
@@ -557,7 +556,7 @@ struct OnboardingView: View {
         VStack(spacing: 5) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(Color.emerald)
+                .foregroundStyle(Color.emeraldText)
             Text(label)
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)

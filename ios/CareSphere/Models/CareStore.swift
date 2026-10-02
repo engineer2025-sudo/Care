@@ -1,9 +1,10 @@
 import Foundation
 import Combine
+import CryptoKit
 import UserNotifications
 
-/// Single source of truth for user content. Persists care data to JSON in the
-/// app's private Application Support directory. Network-backed features are opt-in and described
+/// Single source of truth for user content. Persists AES-256-GCM-encrypted care
+/// data in the app's private Application Support directory. Network-backed features are opt-in and described
 /// in their views; medication reminders are reconciled with iOS notifications.
 @MainActor
 final class CareStore: ObservableObject {
@@ -40,19 +41,30 @@ final class CareStore: ObservableObject {
     // MARK: v2 — onboarding, profile & security
     @Published var hasCompletedOnboarding: Bool { didSet { save() } }
     @Published var biometricEnabled: Bool { didSet { save() } }
+    @Published var colorAppearance: String { didSet { save() } }
+    @Published var highContrast: Bool { didSet { save() } }
+    @Published var reduceVisualMotion: Bool { didSet { save() } }
+    @Published var heartRateCheckInEnabled: Bool { didSet { save() } }
     @Published var profile: CareProfile { didSet { save() } }
     @Published private(set) var persistenceIssue: String?
 
     private let fileURL: URL
+    private let legacyFileURLs: [URL]
+    private var encryptionKey: SymmetricKey?
+    private var persistenceCanWrite = true
     private var observers: [NSObjectProtocol] = []
     private var isErasingLocalData = false
 
     // MARK: Init / persistence
 
     init() {
-        fileURL = Self.careStoreURL()
-
-        let box = Self.load(from: fileURL)
+        let locations = Self.careStoreURLs()
+        fileURL = locations.encrypted
+        legacyFileURLs = locations.legacy
+        let initialStore = Self.load(encryptedURL: fileURL, legacyURLs: legacyFileURLs)
+        encryptionKey = initialStore.key
+        persistenceCanWrite = initialStore.canWrite
+        let box = initialStore.box
         displayName = box?.displayName ?? "Alex"
         voiceReminders = box?.voiceReminders ?? false
         voiceIdentifier = box?.voiceIdentifier ?? ""
@@ -74,13 +86,19 @@ final class CareStore: ObservableObject {
         bestPattern = box?.bestPattern ?? 0
         hasCompletedOnboarding = box?.hasCompletedOnboarding ?? false
         biometricEnabled = box?.biometricEnabled ?? false
+        let savedAppearance = box?.colorAppearance ?? "system"
+        colorAppearance = ["system", "light", "dark"].contains(savedAppearance) ? savedAppearance : "system"
+        highContrast = box?.highContrast ?? false
+        reduceVisualMotion = box?.reduceVisualMotion ?? false
+        heartRateCheckInEnabled = box?.heartRateCheckInEnabled ?? false
         profile = box?.profile ?? CareProfile()
+        persistenceIssue = initialStore.issue
 
         protectStoreDirectory()
         protectExistingStoreFile()
-        // Persist decoded legacy Boolean check-ins as day-keyed values so a
-        // later app launch cannot migrate yesterday's checkmark into today.
-        if box != nil { save() }
+        // Persist decoded legacy Boolean check-ins as day-keyed values and
+        // migrate older plaintext JSON only after an encrypted write succeeds.
+        if box != nil && initialStore.canWrite { save() }
         observeNotificationActions()
     }
 
@@ -88,9 +106,9 @@ final class CareStore: ObservableObject {
         observers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
-    /// Keep private care data in the app-support container. Migrate the legacy
-    /// Documents file once so existing users retain their notes and schedules.
-    private static func careStoreURL() -> URL {
+    /// Keep the new encrypted store in Application Support. Legacy plaintext
+    /// locations remain read-only until an authenticated encrypted copy is saved.
+    private static func careStoreURLs() -> (encrypted: URL, legacy: [URL]) {
         let manager = FileManager.default
         let support = manager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("CareSphere", isDirectory: true)
@@ -100,28 +118,45 @@ final class CareStore: ObservableObject {
             attributes: [.posixPermissions: 0o700])
         try? manager.setAttributes([.posixPermissions: 0o700], ofItemAtPath: support.path)
 
-        let destination = support.appendingPathComponent("carestore.json")
-        let legacy = manager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("carestore.json")
-        if !manager.fileExists(atPath: destination.path), manager.fileExists(atPath: legacy.path) {
-            do {
-                try manager.moveItem(at: legacy, to: destination)
-            } catch {
-                do {
-                    try manager.copyItem(at: legacy, to: destination)
-                    try manager.removeItem(at: legacy)
-                } catch {
-                    // Keep reading the legacy file rather than hiding the user's data.
-                    return legacy
-                }
-            }
-        }
-        return destination
+        let encrypted = support.appendingPathComponent("carestore.aesgcm")
+        let legacyCandidates = [
+            support.appendingPathComponent("carestore.json"),
+            manager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent("carestore.json"),
+        ]
+        let legacy = legacyCandidates.filter { manager.fileExists(atPath: $0.path) }
+        return (encrypted, legacy)
     }
 
-    private static func load(from url: URL) -> PersistedBox? {
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(PersistedBox.self, from: data)
+    private static func load(encryptedURL: URL, legacyURLs: [URL]) -> InitialStore {
+        let manager = FileManager.default
+        if manager.fileExists(atPath: encryptedURL.path) {
+            do {
+                guard let key = try SecureCareStorage.loadExistingKey() else {
+                    return InitialStore(box: nil, key: nil, canWrite: false,
+                                        issue: "The local encryption key is missing. Existing encrypted care data was left untouched.")
+                }
+                let ciphertext = try Data(contentsOf: encryptedURL)
+                let plaintext = try SecureCareStorage.open(ciphertext, using: key)
+                let box = try JSONDecoder().decode(PersistedBox.self, from: plaintext)
+                return InitialStore(box: box, key: key, canWrite: true, issue: nil)
+            } catch {
+                return InitialStore(box: nil, key: nil, canWrite: false,
+                                    issue: "CareSphere could not unlock its encrypted care-data file. The saved file was left untouched to avoid data loss.")
+            }
+        }
+
+        if let legacyURL = legacyURLs.first {
+            do {
+                let data = try Data(contentsOf: legacyURL)
+                let box = try JSONDecoder().decode(PersistedBox.self, from: data)
+                return InitialStore(box: box, key: nil, canWrite: true, issue: nil)
+            } catch {
+                return InitialStore(box: nil, key: nil, canWrite: false,
+                                    issue: "CareSphere could not read an older care-data file. The original file was left untouched.")
+            }
+        }
+        return InitialStore(box: nil, key: nil, canWrite: true, issue: nil)
     }
 
     private func persistedBox() -> PersistedBox {
@@ -138,18 +173,40 @@ final class CareStore: ObservableObject {
             bestPattern: bestPattern,
             hasCompletedOnboarding: hasCompletedOnboarding,
             biometricEnabled: biometricEnabled,
+            colorAppearance: colorAppearance,
+            highContrast: highContrast,
+            reduceVisualMotion: reduceVisualMotion,
+            heartRateCheckInEnabled: heartRateCheckInEnabled,
             profile: profile)
     }
 
     private func save() {
-        guard !isErasingLocalData else { return }
+        guard !isErasingLocalData, persistenceCanWrite else { return }
         do {
-            let data = try JSONEncoder().encode(persistedBox())
-            try writePrivateFile(data, to: fileURL)
+            let plaintext = try JSONEncoder().encode(persistedBox())
+            let key: SymmetricKey
+            if let encryptionKey {
+                key = encryptionKey
+            } else {
+                key = try SecureCareStorage.loadOrCreateKey()
+            }
+            let ciphertext = try SecureCareStorage.seal(plaintext, using: key)
+            try writePrivateFile(ciphertext, to: fileURL)
+            encryptionKey = key
             persistenceIssue = nil
             protectStoreDirectory()
+
+            // Remove old plaintext only after the authenticated encrypted file
+            // has been written successfully. A deletion failure is disclosed.
+            for legacyURL in legacyFileURLs where FileManager.default.fileExists(atPath: legacyURL.path) {
+                do {
+                    try FileManager.default.removeItem(at: legacyURL)
+                } catch {
+                    persistenceIssue = "Encrypted care data was saved, but an older unencrypted copy could not be removed."
+                }
+            }
         } catch {
-            persistenceIssue = "CareSphere could not save your care data to protected app storage."
+            persistenceIssue = "CareSphere could not encrypt or save care data. Existing files were kept to avoid data loss."
         }
     }
 
@@ -177,6 +234,8 @@ final class CareStore: ObservableObject {
             try FileManager.default.setAttributes(
                 [.protectionKey: FileProtectionType.complete],
                 ofItemAtPath: fileURL.path)
+            var protectedURL = fileURL
+            try protectedURL.setResourceValue(true, forKey: .isExcludedFromBackupKey)
             #else
             try FileManager.default.setAttributes(
                 [.posixPermissions: 0o600],
@@ -190,6 +249,8 @@ final class CareStore: ObservableObject {
     private func writePrivateFile(_ data: Data, to url: URL) throws {
         #if os(iOS)
         try data.write(to: url, options: [.atomic, .completeFileProtection])
+        var protectedURL = url
+        try protectedURL.setResourceValue(true, forKey: .isExcludedFromBackupKey)
         #else
         try data.write(to: url, options: .atomic)
         try FileManager.default.setAttributes(
@@ -206,8 +267,11 @@ final class CareStore: ObservableObject {
         let data: PersistedBox
     }
 
+    var canExportCareData: Bool { persistenceCanWrite }
+
     /// Returns a complete, user-initiated JSON snapshot for the system file exporter.
     func makeCareDataExport() throws -> Data {
+        guard persistenceCanWrite else { throw CareStoreError.storageUnavailable }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
@@ -238,17 +302,42 @@ final class CareStore: ObservableObject {
         bestPattern = 0
         hasCompletedOnboarding = false
         biometricEnabled = false
+        colorAppearance = "system"
+        highContrast = false
+        reduceVisualMotion = false
+        heartRateCheckInEnabled = false
         profile = CareProfile()
         isErasingLocalData = false
 
-        do {
-            try FileManager.default.removeItem(at: fileURL)
-            persistenceIssue = nil
-        } catch {
-            persistenceIssue = FileManager.default.fileExists(atPath: fileURL.path)
-                ? "CareSphere could not fully remove its local care-data file."
-                : nil
+        var couldNotErase = false
+        for url in [fileURL] + legacyFileURLs where FileManager.default.fileExists(atPath: url.path) {
+            do {
+                try FileManager.default.removeItem(at: url)
+            } catch {
+                couldNotErase = true
+            }
         }
+        do {
+            try SecureCareStorage.deleteKey()
+        } catch {
+            couldNotErase = true
+        }
+        encryptionKey = nil
+        persistenceCanWrite = true
+        persistenceIssue = couldNotErase
+            ? "CareSphere could not fully remove its local care data or encryption key."
+            : nil
+    }
+
+    private enum CareStoreError: Error {
+        case storageUnavailable
+    }
+
+    private struct InitialStore {
+        let box: PersistedBox?
+        let key: SymmetricKey?
+        let canWrite: Bool
+        let issue: String?
     }
 
     private struct PersistedBox: Codable {
@@ -267,6 +356,10 @@ final class CareStore: ObservableObject {
         // v2 fields decode as nil from v1 files and fall back to defaults.
         var hasCompletedOnboarding: Bool?
         var biometricEnabled: Bool?
+        var colorAppearance: String?
+        var highContrast: Bool?
+        var reduceVisualMotion: Bool?
+        var heartRateCheckInEnabled: Bool?
         var profile: CareProfile?
     }
 

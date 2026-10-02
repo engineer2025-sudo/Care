@@ -94,6 +94,19 @@ extension BluetoothHeartRateService: CBCentralManagerDelegate {
             self.statusMessage = "Could not connect\(error.map { ": \($0.localizedDescription)" } ?? ". Try pairing again.")"
         }
     }
+
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        DispatchQueue.main.async {
+            guard self.peripheral === peripheral else { return }
+            self.measurementCharacteristic = nil
+            self.bpm = nil
+            self.isConnected = false
+            self.statusMessage = self.shouldAutoConnect
+                ? "Connection lost — scanning to reconnect…"
+                : "Not connected — tap Pair to scan for heart-rate monitors."
+            if self.shouldAutoConnect { self.centralDidBecomePoweredOn() }
+        }
+    }
 }
 
 extension BluetoothHeartRateService: CBPeripheralDelegate {

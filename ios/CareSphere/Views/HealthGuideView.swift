@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct HealthGuideView: View {
     @EnvironmentObject private var assistant: LocalAssistantService
+    @EnvironmentObject private var careSupport: CareSupportCoordinator
     @StateObject private var library = MedicalLibraryService()
 
     @State private var question = ""
@@ -10,6 +11,7 @@ struct HealthGuideView: View {
     @State private var isSearching = false
     @State private var statusText: String?
     @State private var showModelImporter = false
+    @State private var searchGenerationID = UUID()
     @FocusState private var questionFocused: Bool
 
     private let quickQuestions = [
@@ -57,9 +59,9 @@ struct HealthGuideView: View {
             HStack {
                 Label("PRIVATE BY DESIGN", systemImage: "lock.shield.fill")
                     .font(.caption.weight(.heavy))
-                    .foregroundStyle(Color.emerald)
+                    .foregroundStyle(Color.emeraldText)
                 Spacer()
-                StatusChip(text: "ON DEVICE", color: .emerald)
+                StatusChip(text: "ON DEVICE", color: .emeraldText)
             }
             Text("A calmer way to find answers.")
                 .font(.title2.weight(.black))
@@ -85,7 +87,7 @@ struct HealthGuideView: View {
             if assistant.isModelInstalled {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(Color.emerald)
+                        .foregroundStyle(Color.emeraldText)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(assistant.installedModelLabel)
                             .font(.subheadline.weight(.bold))
@@ -138,7 +140,7 @@ struct HealthGuideView: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text("Small-model limits")
                     .font(.caption.weight(.bold))
-                Text("A 1.5B model can be slow on older Intel Macs and may make mistakes. First use loads about 1.1 GB of weights plus runtime memory. Imported files must be Qwen-family Instruct GGUF models using ChatML. This is an educational helper—not a clinician, diagnosis, or medication checker.")
+                Text("A 1.5B model can be slow on some iPhones and may make mistakes. First use loads about 1.1 GB of weights plus runtime memory. Imported files must be Qwen-family Instruct GGUF models using ChatML. This is an educational helper—not a clinician, diagnosis, or medication checker.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                 Link("Model card & Apache 2.0 license", destination: URL(string: "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF")!)
@@ -191,7 +193,7 @@ struct HealthGuideView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     Button {
-                        Task { await assistant.ask(question: question, references: references) }
+                        Task { await askLocalModelSafely(question: question, references: references) }
                     } label: {
                         Label("Retry local generation", systemImage: "arrow.clockwise")
                             .font(.caption.weight(.bold))
@@ -225,7 +227,7 @@ struct HealthGuideView: View {
                             Spacer(minLength: 6)
                             Image(systemName: "arrow.up.left")
                                 .font(.caption2.weight(.bold))
-                                .foregroundStyle(Color.emerald)
+                                .foregroundStyle(Color.emeraldText)
                         }
                         .padding(10)
                         .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -246,7 +248,7 @@ struct HealthGuideView: View {
                                 .font(.subheadline.weight(.bold))
                             Text(reference.publisher)
                                 .font(.caption2.weight(.semibold))
-                                .foregroundStyle(Color.emerald)
+                                .foregroundStyle(Color.emeraldText)
                         }
                         Spacer(minLength: 6)
                         if let url = URL(string: reference.url), !reference.url.isEmpty {
@@ -358,7 +360,7 @@ struct HealthGuideView: View {
                 if let message = library.kiwixConnectionMessage {
                     Text(message)
                         .font(.caption2)
-                        .foregroundStyle(message.hasPrefix("Connected") ? Color.emerald : .orange)
+                        .foregroundStyle(message.hasPrefix("Connected") ? Color.emeraldText : .orange)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -399,22 +401,50 @@ struct HealthGuideView: View {
 
     private func performSearchAndAsk(for rawQuestion: String) {
         let trimmed = rawQuestion.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, !isSearching, !assistant.isGenerating else { return }
+        guard !trimmed.isEmpty else { return }
         questionFocused = false
-        isSearching = true
         statusText = nil
+        if let risk = CareQuestionSafety.classify(trimmed) {
+            // Interrupt before reference search or model inference. Do not keep
+            // the sensitive question in the text field or send it to anyone.
+            searchGenerationID = UUID()
+            isSearching = false
+            references = []
+            question = ""
+            assistant.presentSafetyResponse(for: risk)
+            careSupport.begin(.urgentQuestion(risk))
+            return
+        }
+        guard !isSearching, !assistant.isGenerating else { return }
+        isSearching = true
+        let requestID = UUID()
+        searchGenerationID = requestID
         Task {
             let found = await library.search(trimmed)
+            guard searchGenerationID == requestID else { return }
             references = found
             if assistant.isModelInstalled {
-                await assistant.ask(question: trimmed, references: found)
+                await askLocalModelSafely(question: trimmed, references: found)
             } else {
                 statusText = found.isEmpty
                     ? "No matching passage found in the installed offline references."
                     : "Install a GGUF model to summarize these references offline."
             }
-            isSearching = false
+            if searchGenerationID == requestID { isSearching = false }
         }
+    }
+
+    private func askLocalModelSafely(question: String, references: [HealthReference]) async {
+        if let risk = CareQuestionSafety.classify(question) {
+            searchGenerationID = UUID()
+            isSearching = false
+            self.references = []
+            self.question = ""
+            assistant.presentSafetyResponse(for: risk)
+            careSupport.begin(.urgentQuestion(risk))
+            return
+        }
+        await assistant.ask(question: question, references: references)
     }
 }
 

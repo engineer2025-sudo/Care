@@ -26,7 +26,7 @@ struct AppLockView: View {
                         .frame(width: 120, height: 120)
                     Image(systemName: biometryName == "Face ID" ? "faceid" : biometryName == "Touch ID" ? "touchid" : "lock.fill")
                         .font(.system(size: 48))
-                        .foregroundStyle(Color.emerald)
+                        .foregroundStyle(Color.emeraldText)
                 }
                 VStack(spacing: 8) {
                     Text("CareSphere is locked")
@@ -63,7 +63,6 @@ struct AppLockView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.ink.ignoresSafeArea())
         .contentShape(Rectangle())
-        .preferredColorScheme(.dark)
         .onAppear { authenticate() }
     }
 

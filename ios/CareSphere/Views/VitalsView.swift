@@ -60,7 +60,7 @@ struct VitalsView: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 8) {
                     Image(systemName: bluetooth.isConnected ? "dot.radiowaves.left.and.right" : "bluetooth")
-                        .foregroundStyle(bluetooth.isConnected ? Color.emerald : Color.secondary)
+                        .foregroundStyle(bluetooth.isConnected ? Color.emeraldText : Color.secondary)
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
                             StatusChip(
@@ -117,19 +117,19 @@ struct VitalsView: View {
                     Text("On the watch: **Settings → Health & Wellness → Wrist Heart Rate → Broadcast Heart Rate** (Venu/vivoactive) or **Settings → Sensors & Accessories → Wrist Heart Rate → Broadcast Heart Rate** (Forerunner/Fenix).")
                         .font(.caption)
                 } icon: {
-                    Image(systemName: "1.circle.fill").foregroundStyle(Color.emerald)
+                    Image(systemName: "1.circle.fill").foregroundStyle(Color.emeraldText)
                 }
                 Label {
                     Text("Keep the watch on the broadcast screen nearby, then tap **Pair** above — it appears as a heart-rate monitor.")
                         .font(.caption)
                 } icon: {
-                    Image(systemName: "2.circle.fill").foregroundStyle(Color.emerald)
+                    Image(systemName: "2.circle.fill").foregroundStyle(Color.emeraldText)
                 }
                 Label {
                     Text("Live BPM streams here and into the sparkline. Turn off broadcast on the watch afterwards to save battery.")
                         .font(.caption)
                 } icon: {
-                    Image(systemName: "3.circle.fill").foregroundStyle(Color.emerald)
+                    Image(systemName: "3.circle.fill").foregroundStyle(Color.emeraldText)
                 }
             }
         }
@@ -161,7 +161,7 @@ struct VitalsView: View {
             }
 
             if !healthKit.canRequestAuthorization {
-                Label("Apple Health workout reading is available in the CareSphere iOS app. This ad-hoc Mac build has no HealthKit entitlement.",
+                Label("Apple Health workout readings are available on a supported iPhone or iPad.",
                       systemImage: "iphone")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -206,7 +206,7 @@ struct VitalsView: View {
             Link("Garmin's Apple Health instructions", destination: URL(string: "https://support.garmin.com/en-US/?faq=lK5FPB9iPF5PXFkIpFlFPA")!)
                 .font(.caption2.weight(.semibold))
             #else
-            Text("Garmin workouts must first be shared to Apple Health on iPhone. Direct Garmin-account syncing is not available in this Mac build.")
+            Text("Garmin workouts must first be shared to Apple Health on iPhone. Direct Garmin-account syncing is not available.")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -223,11 +223,11 @@ struct VitalsView: View {
     private var referenceRangeBanner: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: anyFlag ? "exclamationmark.triangle.fill" : hasAnyReading ? "checkmark.seal.fill" : "waveform.path.ecg")
-                .foregroundStyle(anyFlag ? Color.orange : hasAnyReading ? Color.emerald : Color.secondary)
+                .foregroundStyle(anyFlag ? Color.orange : hasAnyReading ? Color.emeraldText : Color.secondary)
             VStack(alignment: .leading, spacing: 3) {
                 Text(anyFlag ? "A reading is outside a broad reference band" : hasAnyReading ? "No displayed reading is outside these broad bands" : "No readings available to compare")
                     .font(.footnote.weight(.black))
-                Text("Informational only—not triage or a diagnosis. Broad examples: HR 50–110 bpm · SpO₂ ≥ 94% · BP < 140/90 mmHg. CareSphere does not send alerts or create a clinical summary; Apple Health sample freshness may vary.")
+                Text("Informational only—not triage or diagnosis. Broad examples: HR 50–110 bpm · SpO₂ ≥ 94% · BP < 140/90 mmHg. An optional check-in uses sustained live Bluetooth HR only; CareSphere does not send alerts or create a clinical summary.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -252,7 +252,7 @@ struct VitalsView: View {
             if series.count >= 2 {
                 Chart(series) { point in
                     LineMark(x: .value("Time", point.date), y: .value("BPM", point.bpm))
-                        .foregroundStyle(Color.emerald)
+                        .foregroundStyle(Color.emeraldText)
                         .interpolationMethod(.catmullRom)
                 }
                 .chartYAxis(.hidden)
@@ -376,7 +376,7 @@ private struct WorkoutSummaryRow: View {
             .font(.caption2.weight(.medium))
             .foregroundStyle(.secondary)
             HStack(spacing: 6) {
-                StatusChip(text: workout.sourceTag, color: workout.isGarminSource ? .emerald : .skyBlue)
+                StatusChip(text: workout.sourceTag, color: workout.isGarminSource ? .emeraldText : .skyBlue)
                 Text("via Apple Health · \(workout.sourceName)")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)

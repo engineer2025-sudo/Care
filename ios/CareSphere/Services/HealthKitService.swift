@@ -47,8 +47,7 @@ final class HealthKitService: NSObject, ObservableObject {
     private var observedSampleTypeIdentifiers = Set<String>()
     private var didInstallObservers = false
 
-    /// HealthKit is intentionally available only in the iOS target. The
-    /// distributed Mac build is ad-hoc signed and has no HealthKit entitlement.
+    /// HealthKit is available when running on a supported iPhone or iPad.
     var canRequestAuthorization: Bool {
         #if os(iOS)
         return HKHealthStore.isHealthDataAvailable()
@@ -62,7 +61,7 @@ final class HealthKitService: NSObject, ObservableObject {
         super.init()
 
         #if os(macOS)
-        statusMessage = "Apple Health is available only in the native iPhone/iPad app. This ad-hoc Mac build has no HealthKit entitlement; enable Garmin Connect sharing to Apple Health on iPhone first."
+        statusMessage = "Apple Health is available on a supported iPhone or iPad. Enable Garmin Connect sharing to Apple Health on iPhone first."
         #else
         guard HKHealthStore.isHealthDataAvailable() else {
             statusMessage = "Apple Health isn't available on this device."
@@ -93,7 +92,7 @@ final class HealthKitService: NSObject, ObservableObject {
 
     func requestAuthorization() {
         #if os(macOS)
-        statusMessage = "HealthKit is unavailable in this ad-hoc Mac build. On iPhone, enable Garmin Connect's Apple Health sharing and authorize CareSphere there."
+        statusMessage = "HealthKit is unavailable on this device. On iPhone, enable Garmin Connect's Apple Health sharing and authorize CareSphere there."
         #else
         guard HKHealthStore.isHealthDataAvailable() else {
             statusMessage = "Apple Health isn't available on this device."

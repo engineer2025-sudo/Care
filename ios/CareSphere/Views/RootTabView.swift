@@ -14,7 +14,7 @@ struct RootTabView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     Text("CareSphere")
                         .font(.headline.weight(.heavy))
-                        .foregroundStyle(Color.emerald)
+                        .foregroundStyle(Color.emeraldText)
                     Text("Senior care · isolation prevention · autism support")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -49,7 +49,7 @@ struct RootTabView: View {
                 OverviewView()
                     .tabItem { Label("Overview", systemImage: "house.fill") }
                 TherapyView()
-                    .tabItem { Label("Therapy", systemImage: "gamecontroller.fill") }
+                    .tabItem { Label("Activities", systemImage: "square.grid.2x2") }
                 CoffeeCirclesView()
                     .tabItem { Label("Circles", systemImage: "person.2.fill") }
                 CareCircleView()
@@ -60,7 +60,6 @@ struct RootTabView: View {
                     .tabItem { Label("Guide", systemImage: "sparkles") }
             }
         }
-        .preferredColorScheme(.dark)
         .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(isPresented: $showSOS) { SosView() }
     }

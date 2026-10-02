@@ -3,7 +3,7 @@ import {
   Heart, Shield, Brain, Sparkles, Video, Activity, Coffee, X, ExternalLink,
   Volume2, CheckCircle, Bluetooth, BluetoothConnected, Phone, PhoneCall,
   AlertTriangle, Wind, Gamepad2, Flame, TreePine, CloudRain, Waves, Send,
-  Bell, Pill, Calendar, Lock, Stethoscope, Timer, Award, Settings, Download,
+  Bell, Pill, Calendar, Lock, Stethoscope, Settings, Download,
   BellRing, Smile, Frown, Meh, Laugh, MapPin, User, FileText
 } from 'lucide-react'
 import { celebrate as celebrateConfetti } from './lib/celebrate'
@@ -11,7 +11,8 @@ import { soundEngine } from './lib/audio'
 import { connectHeartRateMonitor, startSimulatedHeartRateMonitor } from './lib/bluetooth'
 import { buildVisitBrief } from './lib/visitBrief'
 import { encodeCsv } from './lib/csv'
-import { STORAGE_KEY, RESET_LOCAL_DATA_EVENT, parseCareStorage, normalizePersistedValue, localDayKey, isRoutineDoneToday, isMedicationTakenToday } from './lib/careStorage'
+import { STORAGE_KEY, RESET_LOCAL_DATA_EVENT, normalizePersistedValue, localDayKey, isRoutineDoneToday, isMedicationTakenToday } from './lib/careStorage'
+import { CARE_STORAGE_SECURITY_EVENT, eraseCareStorage, getCareStorageCache, getCareStorageSecurityStatus, persistCareStorage } from './lib/secureCareStorage'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Platform detection — iPhone/iPad (incl. iPadOS desktop-mode UA) and whether
@@ -27,10 +28,9 @@ const isStandalone = window.navigator.standalone === true ||
 // are stored in this browser. Joining Jitsi, BLE pairing, SOS sharing, and
 // notification permissions are explicit external/device actions.
 // ─────────────────────────────────────────────────────────────────────────────
-function loadSaved() {
-  try { return parseCareStorage(localStorage.getItem(STORAGE_KEY)) } catch { return {} }
-}
-const saved = loadSaved()
+// main.jsx hydrates this shared cache with authenticated encrypted storage before
+// React mounts. Hooks keep a reference to the same object for export/reset flows.
+const saved = getCareStorageCache()
 
 // A browser storage event is delivered only to other tabs. Propagate erasures
 // across tabs without echoing ordinary writes back and forth.
@@ -59,7 +59,7 @@ function usePersisted(key, initial) {
       return
     }
     saved[key] = value
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)) } catch {}
+    void persistCareStorage(saved)
   }, [key, value, resetGeneration])
 
   useEffect(() => {
@@ -466,8 +466,9 @@ function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirm
   )
 }
 
-function SettingsModal({ open, onClose, settings, update, notifyState, enableNotifications, meds, setMeds, medsConfirmed, setMedsConfirmed, onExportData, onClearLocalData, localDataBytes }) {
+function SettingsModal({ open, onClose, settings, update, notifyState, enableNotifications, meds, setMeds, medsConfirmed, setMedsConfirmed, onExportData, onClearLocalData, localDataBytes, storageSecurity }) {
   const [confirmClear, setConfirmClear] = useState(false)
+  const [clearing, setClearing] = useState(false)
   const [privacyMessage, setPrivacyMessage] = useState('')
   useEffect(() => {
     if (!open) {
@@ -485,12 +486,14 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
       ? 'A private JSON export was downloaded. Review it before sharing; it contains sensitive information.'
       : 'The export could not be created in this browser.')
   }
-  const handleClear = () => {
-    const success = onClearLocalData()
+  const handleClear = async () => {
+    setClearing(true)
+    const success = await onClearLocalData()
+    setClearing(false)
     setConfirmClear(false)
     setPrivacyMessage(success
-      ? 'Saved CareSphere personal data was cleared from this browser.'
-      : 'This browser did not allow CareSphere to remove its saved data.')
+      ? 'Saved CareSphere data and its local encryption key were removed from this browser.'
+      : 'CareSphere could not fully remove its saved data or encryption key. Check this browser’s site storage before continuing.')
   }
   const Row = ({ label, hint, children }) => (
     <div className="flex items-center justify-between gap-4 py-3.5 border-b border-slate-800 last:border-0">
@@ -562,8 +565,25 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
           </div>
         </Row>
 
-        <Row label="High contrast" hint="Brightens grey text and borders for glare, ageing eyes, or cortical vision needs.">
+        <Row label="Color appearance" hint="Choose the device appearance, calm charcoal, or warm light. Contrast stays readable in each theme.">
+          <select
+            value={settings.theme || 'system'}
+            onChange={event => update({ theme: event.target.value })}
+            aria-label="Color appearance"
+            className="bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white"
+          >
+            <option value="system">Follow device</option>
+            <option value="dark">Calm charcoal</option>
+            <option value="light">Warm light</option>
+          </select>
+        </Row>
+
+        <Row label="High contrast" hint="Brightens grey text and borders; keep this on if it makes text easier to see.">
           <Toggle on={settings.highContrast} onClick={() => update({ highContrast: !settings.highContrast })} label="High contrast" />
+        </Row>
+
+        <Row label="Reduce visual movement" hint="Turns off confetti, pulsing decoration, and hover scaling. Activities remain untimed; you can change this any time.">
+          <Toggle on={settings.lowSensory} onClick={() => update({ lowSensory: !settings.lowSensory })} label="Reduce visual movement" />
         </Row>
 
         <Row label="Voice reminders" hint="Speaks medication and routine prompts aloud (browser speech synthesis).">
@@ -611,12 +631,15 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
             <div className="min-w-0 flex-1">
               <h4 id="privacy-data-title" className="text-sm font-bold text-white">Privacy & your data</h4>
               <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
-                CareSphere saves your entries in this browser profile ({formatBytes(localDataBytes)}). The web app does not encrypt localStorage; anyone with access to this unlocked browser profile may be able to read it. No CareSphere account or sync server is configured.
+                CareSphere saves your entries in this browser profile ({formatBytes(localDataBytes)}). When secure browser storage is available, saved data is encrypted with AES-256-GCM and its non-extractable key is kept in this origin’s IndexedDB.
+              </p>
+              <p className={`text-[11px] mt-2 leading-relaxed ${storageSecurity?.state === 'ready' ? 'text-emerald-200' : 'text-amber-200'}`} role={storageSecurity?.state === 'ready' ? 'status' : 'alert'}>
+                {storageSecurity?.message || 'Secure local storage status is not available.'} Encryption at rest does not protect data from scripts running in this page, malware, or someone using your unlocked browser profile. No CareSphere account or sync server is configured.
               </p>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <button onClick={handleExport} className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 px-3 py-2.5 text-xs font-bold text-white transition">
+            <button onClick={handleExport} disabled={storageSecurity?.state !== 'ready'} className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 px-3 py-2.5 text-xs font-bold text-white transition">
               <Download className="w-4 h-4 text-emerald-300" /> Download private JSON export
             </button>
             {!confirmClear ? (
@@ -627,11 +650,11 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
               <div className="sm:col-span-2 rounded-xl border border-rose-700/60 bg-rose-950/40 p-3 space-y-3" role="group" aria-labelledby="clear-care-data-title">
                 <div>
                   <h5 id="clear-care-data-title" className="text-xs font-bold text-rose-100">Erase this browser's CareSphere data?</h5>
-                  <p className="text-[11px] text-rose-200/80 mt-1">This removes your saved name, routines, medications, notes, mood history and game score, and clears temporary visit/vitals data in other open CareSphere tabs. It cannot be undone. Browser permissions, installed-app files and data in other browser profiles are not affected.</p>
+                  <p className="text-[11px] text-rose-200/80 mt-1">This removes your saved name, routines, medications, notes, mood history, and any activity points saved by an older version. It also clears temporary visit/vitals data in other open CareSphere tabs. It cannot be undone. Browser permissions, installed-app files and data in other browser profiles are not affected.</p>
                 </div>
                 <div className="flex justify-end gap-2">
                   <button onClick={() => setConfirmClear(false)} className="rounded-lg px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800">Cancel</button>
-                  <button onClick={handleClear} className="rounded-lg bg-rose-700 hover:bg-rose-600 px-3 py-2 text-xs font-bold text-white">Erase local data</button>
+                  <button onClick={handleClear} disabled={clearing} className="rounded-lg bg-rose-700 hover:bg-rose-600 disabled:opacity-60 px-3 py-2 text-xs font-bold text-white">{clearing ? 'Erasing…' : 'Erase local data'}</button>
                 </div>
               </div>
             )}
@@ -683,161 +706,157 @@ function SensorChip({ mode, label }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Therapy games
+// Optional, untimed activities. They are for shared practice and enjoyment,
+// never for diagnosing, treating, or measuring anyone's health.
 // ─────────────────────────────────────────────────────────────────────────────
-const EMOTIONS = [
+const FEELINGS = [
   { name: 'Happy', emoji: '😊' },
   { name: 'Calm', emoji: '😌' },
   { name: 'Excited', emoji: '🤩' },
   { name: 'Tired', emoji: '😴' },
+  { name: 'Not sure', emoji: '💭' },
 ]
+const FEELING_PICTURES = ['🙂', '😐', '😴', '😊']
 
-function EmotionMatch({ onPoint }) {
-  const [target, setTarget] = useState(EMOTIONS[0])
-  const [feedback, setFeedback] = useState('')
-  const [streak, setStreak] = useState(0)
+function EmotionMatch() {
+  const [pictureIndex, setPictureIndex] = useState(0)
+  const [choice, setChoice] = useState(null)
 
-  const pick = (emo) => {
-    if (emo.name === target.name) {
-      celebrateConfetti({ particleCount: 28, spread: 55, origin: { y: 0.7 } })
-      setStreak(s => s + 1)
-      setFeedback('✨ Great reading!')
-      onPoint()
-      setTimeout(() => {
-        setTarget(EMOTIONS[Math.floor(Math.random() * EMOTIONS.length)])
-        setFeedback('')
-      }, 850)
-    } else {
-      setFeedback('Almost — look again 💙')
-      setStreak(0)
-    }
+  const nextPicture = () => {
+    setPictureIndex(index => (index + 1) % FEELING_PICTURES.length)
+    setChoice(null)
   }
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
-          <Brain className="w-4 h-4 text-indigo-400" /> Emoji-matching practice
-        </div>
-        <span className="text-xs bg-indigo-500/15 text-indigo-300 px-2.5 py-1 rounded-full font-bold border border-indigo-500/30">
-          Streak {streak}
-        </span>
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
+        <Brain className="w-4 h-4 text-emerald-300" /> Feelings explorer
       </div>
-      <p className="text-xs text-slate-400 -mt-3">Optional emoji-matching practice. Real people show feelings in many different ways; this game is not an assessment.</p>
-      <div className="text-center py-5 bg-slate-950 rounded-2xl border border-slate-800">
-        <div className="text-5xl sm:text-6xl">{feedback ? '' : target.emoji}</div>
-        <div className={`text-xs font-bold mt-2 h-4 ${feedback.startsWith('✨') ? 'text-emerald-400' : 'text-slate-400'}`}>{feedback}</div>
+      <p className="text-sm text-slate-300 leading-relaxed">What might this person be feeling? Choose any word—or “Not sure.” These emoji are simplified illustrations, not rules for reading real people; there is no right answer or score.</p>
+      <div className="text-center py-5 bg-slate-950 rounded-2xl border border-slate-800" aria-live="polite">
+        <div className="text-5xl sm:text-6xl" aria-hidden="true">{FEELING_PICTURES[pictureIndex]}</div>
+        {choice && <p className="text-sm text-slate-300 mt-3 px-3">“{choice}” is one possibility. It is also okay not to know.</p>}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        {EMOTIONS.map((emo) => (
+        {FEELINGS.map(feeling => (
           <button
-            key={emo.name}
-            onClick={() => pick(emo)}
-            aria-label={`Option ${emo.name}`}
-            className="py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl text-3xl transition hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            key={feeling.name}
+            onClick={() => setChoice(feeling.name)}
+            aria-pressed={choice === feeling.name}
+            className="min-h-14 flex items-center justify-center gap-2 px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl text-base font-semibold transition focus:outline-none focus:ring-2 focus:ring-emerald-300"
           >
-            {emo.emoji}
+            <span aria-hidden="true" className="text-2xl">{feeling.emoji}</span>
+            <span>{feeling.name}</span>
           </button>
         ))}
       </div>
+      <button onClick={nextPicture} className="self-start px-4 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm">
+        Next picture
+      </button>
     </div>
   )
 }
 
-const PAD_STYLES = [
-  'from-emerald-500 to-teal-600',
-  'from-sky-500 to-blue-600',
-  'from-amber-500 to-orange-600',
-  'from-purple-500 to-fuchsia-600',
-]
-
-function PatternRecall() {
-  const [seq, setSeq] = useState([])
+function PatternRecall({ reduceVisualMotion }) {
+  const [sequence, setSequence] = useState([])
   const [step, setStep] = useState(0)
   const [lit, setLit] = useState(null)
-  const [phase, setPhase] = useState('idle') // idle | showing | input | wait | over
-  const [best, setBest] = usePersisted('bestPattern', 0)
+  const [phase, setPhase] = useState('idle') // idle | showing | input | ready | over
   const timers = useRef([])
 
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = [] }
   useEffect(() => clearTimers, [])
 
-  const rand = () => Math.floor(Math.random() * 4)
-
-  const play = (s) => {
+  const play = (items) => {
     clearTimers()
-    setPhase('showing'); setStep(0)
-    s.forEach((pad, i) => {
-      timers.current.push(setTimeout(() => setLit(pad), i * 950 + 400))
-      timers.current.push(setTimeout(() => setLit(null), i * 950 + 400 + 520))
+    setLit(null)
+    setPhase('showing')
+    setStep(0)
+    const systemPrefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    const slowVisuals = reduceVisualMotion || systemPrefersReducedMotion
+    const interval = slowVisuals ? 1800 : 1200
+    const highlightDuration = slowVisuals ? 1100 : 700
+    items.forEach((pad, index) => {
+      timers.current.push(setTimeout(() => setLit(pad), index * interval + 500))
+      timers.current.push(setTimeout(() => setLit(null), index * interval + 500 + highlightDuration))
     })
-    timers.current.push(setTimeout(() => setPhase('input'), s.length * 950 + 550))
+    timers.current.push(setTimeout(() => setPhase('input'), items.length * interval + 700))
   }
 
   const start = () => {
-    const s = [rand()]
-    setSeq(s)
-    play(s)
+    const firstSequence = [Math.floor(Math.random() * 4)]
+    setSequence(firstSequence)
+    play(firstSequence)
   }
 
-  const tap = (i) => {
+  const stop = () => {
+    clearTimers()
+    setLit(null)
+    setPhase('idle')
+  }
+
+  const tap = (index) => {
     if (phase !== 'input') return
-    setLit(i)
-    timers.current.push(setTimeout(() => setLit(null), 220))
-    if (seq[step] === i) {
-      if (step === seq.length - 1) {
-        const next = [...seq, rand()]
-        setSeq(next)
-        setPhase('wait')
-        if (next.length > best) setBest(next.length)
-        celebrateConfetti({ particleCount: 24, spread: 60, origin: { y: 0.65 } })
-        timers.current.push(setTimeout(() => play(next), 850))
-      } else {
-        setStep(step + 1)
-      }
-    } else {
+    if (sequence[step] !== index) {
+      setLit(null)
       setPhase('over')
+      return
+    }
+    setLit(index)
+    const systemPrefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    timers.current.push(setTimeout(() => setLit(null), (reduceVisualMotion || systemPrefersReducedMotion) ? 600 : 300))
+    if (step === sequence.length - 1) {
+      setSequence(items => [...items, Math.floor(Math.random() * 4)])
+      setPhase('ready')
+    } else {
+      setStep(current => current + 1)
     }
   }
 
   const banner = {
-    idle: 'Press start — I’ll flash a pattern, you repeat it.',
-    showing: '👀 Watch the pattern…',
-    input: 'Your turn — repeat the pattern!',
-    wait: 'Nice! Level up…',
-    over: `Round ended at level ${seq.length}. Try again?`,
+    idle: 'Start when you are ready. There is no timer.',
+    showing: 'Watch the pattern…',
+    input: 'Your turn — tap the numbered pads in order.',
+    ready: 'Pattern completed. Continue when you are ready.',
+    over: 'That is okay. Show the same pattern again, or stop.',
   }[phase]
+  const primaryLabel = {
+    idle: 'Start pattern',
+    showing: 'Stop activity',
+    input: 'Stop activity',
+    ready: 'Continue with a new pattern',
+    over: 'Show this pattern again',
+  }[phase]
+  const handlePrimary = () => {
+    if (phase === 'idle') start()
+    else if (phase === 'showing' || phase === 'input') stop()
+    else play(sequence)
+  }
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
-          <Gamepad2 className="w-4 h-4 text-emerald-400" /> Pattern Recall
-        </div>
-        <span className="text-xs bg-emerald-500/15 text-emerald-300 px-2.5 py-1 rounded-full font-bold border border-emerald-500/30 flex items-center gap-1">
-          <Award className="w-3.5 h-3.5" /> Best: {best}
-        </span>
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
+        <Gamepad2 className="w-4 h-4 text-emerald-300" /> Pattern Recall
       </div>
-      <p className="text-xs text-slate-400 -mt-3">A short pattern-matching game for optional practice. Your score is not a measure of memory or cognitive health.</p>
-      <div className="text-center text-xs font-bold text-slate-300 min-h-5">{banner}</div>
+      <p className="text-sm text-slate-300 leading-relaxed">An optional pattern activity. It is untimed, has no personal score, and is not a measure of memory or cognitive health. Reduce visual movement in Settings to slow each highlight.</p>
+      <p className="text-sm text-slate-200 min-h-11" role="status" aria-live="polite">{banner}</p>
       <div className="grid grid-cols-2 gap-3">
-        {PAD_STYLES.map((pad, i) => (
+        {[0, 1, 2, 3].map(index => (
           <button
-            key={i}
-            onClick={() => tap(i)}
+            key={index}
+            onClick={() => tap(index)}
             disabled={phase !== 'input'}
-            aria-label={`Pattern pad ${i + 1}`}
-            className={`h-20 sm:h-24 rounded-2xl bg-gradient-to-br ${pad} transition duration-150 ${
-              lit === i ? 'brightness-150 scale-[1.03] ring-4 ring-white/70' : 'opacity-70 hover:opacity-90'
-            } disabled:cursor-default focus:outline-none focus:ring-2 focus:ring-white/40`}
-          />
+            aria-label={`Pattern pad ${index + 1}`}
+            className={`min-h-20 sm:min-h-24 rounded-2xl border-2 border-slate-600 bg-slate-800 text-3xl font-bold transition ${
+              lit === index ? 'bg-emerald-500 text-slate-950 border-emerald-300' : 'text-slate-100'
+            } disabled:cursor-default focus:outline-none focus:ring-2 focus:ring-emerald-300`}
+          >
+            {index + 1}
+          </button>
         ))}
       </div>
-      <button
-        onClick={start}
-        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-2xl text-xs shadow-lg shadow-emerald-500/20 transition"
-      >
-        {phase === 'idle' || phase === 'over' ? '▶ Start / Restart' : `Level ${seq.length} in progress`}
+      <button onClick={handlePrimary} className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-2xl text-sm">
+        {primaryLabel}
       </button>
     </div>
   )
@@ -849,6 +868,165 @@ const SOUNDSCAPES = [
   { id: 'forest', name: 'Forest', icon: TreePine },
   { id: 'fire', name: 'Hearth', icon: Flame },
 ]
+
+const PICTURE_PAIRS = [
+  { pairId: 'cup', label: 'Cup', emoji: '☕' },
+  { pairId: 'book', label: 'Book', emoji: '📘' },
+  { pairId: 'plant', label: 'Plant', emoji: '🌿' },
+  { pairId: 'bird', label: 'Bird', emoji: '🐦' },
+]
+
+function makePictureDeck(pairCount) {
+  const cards = PICTURE_PAIRS.slice(0, pairCount).flatMap(picture => [
+    { ...picture, cardId: `${picture.pairId}-a` },
+    { ...picture, cardId: `${picture.pairId}-b` },
+  ])
+  for (let index = cards.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    ;[cards[index], cards[swapIndex]] = [cards[swapIndex], cards[index]]
+  }
+  return cards
+}
+
+function PicturePairs() {
+  const [pairCount, setPairCount] = useState(3)
+  const [cards, setCards] = useState(() => makePictureDeck(3))
+  const [opened, setOpened] = useState([])
+  const [matched, setMatched] = useState([])
+  const [status, setStatus] = useState('Choose two picture cards to look for a pair.')
+
+  const restart = (count = pairCount) => {
+    setCards(makePictureDeck(count))
+    setOpened([])
+    setMatched([])
+    setStatus('Choose two picture cards to look for a pair.')
+  }
+
+  const choosePairCount = event => {
+    const count = Number(event.target.value)
+    setPairCount(count)
+    restart(count)
+  }
+
+  const reveal = card => {
+    if (opened.length >= 2 || matched.includes(card.pairId) || opened.includes(card.cardId)) return
+    const nextOpened = [...opened, card.cardId]
+    setOpened(nextOpened)
+    if (nextOpened.length < 2) return
+
+    const first = cards.find(item => item.cardId === nextOpened[0])
+    if (first?.pairId === card.pairId) {
+      const nextMatched = [...matched, card.pairId]
+      setMatched(nextMatched)
+      setOpened([])
+      setStatus(nextMatched.length === pairCount
+        ? 'All pairs are visible. You can start again or choose a different number of pairs.'
+        : 'Pair found. Take your time with the next one.')
+    } else {
+      setStatus('These are different pictures. They will stay open until you choose “Hide cards.”')
+    }
+  }
+
+  const canHide = opened.length === 2 && !matched.includes(cards.find(item => item.cardId === opened[0])?.pairId)
+
+  return (
+    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 flex flex-col gap-5">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
+        <Gamepad2 className="w-4 h-4 text-emerald-300" /> Picture pairs
+      </div>
+      <p className="text-sm text-slate-300 leading-relaxed">Match familiar picture symbols at your own pace. There is no timer or score; unmatched cards stay visible until you choose to hide them. This is an optional game, not a memory test.</p>
+      <label className="flex items-center gap-3 text-sm font-semibold text-slate-200">
+        <span>Number of pairs</span>
+        <select value={pairCount} onChange={choosePairCount} className="bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 text-sm text-white">
+          <option value={2}>2 pairs</option>
+          <option value={3}>3 pairs</option>
+          <option value={4}>4 pairs</option>
+        </select>
+      </label>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {cards.map((card, index) => {
+          const isOpen = opened.includes(card.cardId) || matched.includes(card.pairId)
+          const isMatched = matched.includes(card.pairId)
+          return (
+            <button
+              key={card.cardId}
+              onClick={() => reveal(card)}
+              disabled={isMatched || opened.length === 2}
+              aria-pressed={isOpen}
+              aria-label={isOpen ? `${card.label}${isMatched ? ', pair found' : ''}` : `Hidden picture card ${index + 1}`}
+              className={`min-h-24 flex flex-col items-center justify-center gap-1 rounded-2xl border-2 px-2 py-3 text-center focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-default ${
+                isOpen ? 'bg-emerald-950 border-emerald-500 text-slate-100' : 'bg-slate-800 border-slate-600 text-slate-200 hover:bg-slate-700'
+              }`}
+            >
+              <span aria-hidden="true" className="text-3xl">{isOpen ? card.emoji : '▢'}</span>
+              <span className="text-sm font-semibold">{isOpen ? card.label : `Card ${index + 1}`}</span>
+            </button>
+          )
+        })}
+      </div>
+      <p className="text-sm text-slate-200 min-h-10" role="status" aria-live="polite">{status}</p>
+      <div className="flex flex-wrap gap-2">
+        {canHide && <button onClick={() => { setOpened([]); setStatus('Cards hidden. Choose two when you are ready.') }} className="px-4 py-2.5 bg-slate-800 border border-slate-600 text-slate-100 rounded-xl font-semibold text-sm">Hide cards</button>}
+        <button onClick={() => restart()} className="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm">Start over</button>
+      </div>
+    </div>
+  )
+}
+
+const PICTURE_STORIES = [
+  {
+    title: 'A seed grows',
+    steps: [
+      { label: 'Seed', emoji: '🫘' },
+      { label: 'Sprout', emoji: '🌱' },
+      { label: 'Flower', emoji: '🌼' },
+    ],
+  },
+  {
+    title: 'Wash hands',
+    steps: [
+      { label: 'Wet hands', emoji: '🚰' },
+      { label: 'Use soap', emoji: '🧼' },
+      { label: 'Rinse', emoji: '💧' },
+    ],
+  },
+]
+
+function PictureStory() {
+  const [storyIndex, setStoryIndex] = useState(0)
+  const [stepIndex, setStepIndex] = useState(0)
+  const story = PICTURE_STORIES[storyIndex]
+  const step = story.steps[stepIndex]
+
+  const chooseStory = event => {
+    setStoryIndex(Number(event.target.value))
+    setStepIndex(0)
+  }
+
+  return (
+    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 flex flex-col gap-5">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
+        <FileText className="w-4 h-4 text-emerald-300" /> Picture story
+      </div>
+      <p className="text-sm text-slate-300 leading-relaxed">Explore a short, predictable picture sequence. These are examples, not instructions—people’s routines and preferences differ. Move forward or back whenever you like.</p>
+      <label className="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-200">
+        <span>Choose a story</span>
+        <select value={storyIndex} onChange={chooseStory} className="bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 text-sm text-white">
+          {PICTURE_STORIES.map((item, index) => <option key={item.title} value={index}>{item.title}</option>)}
+        </select>
+      </label>
+      <div className="text-center py-5 bg-slate-950 rounded-2xl border border-slate-800" aria-live="polite">
+        <p className="text-xs text-slate-400">Picture {stepIndex + 1} of {story.steps.length}</p>
+        <div className="text-6xl my-3" aria-hidden="true">{step.emoji}</div>
+        <p className="text-lg font-bold text-slate-100">{step.label}</p>
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <button onClick={() => setStepIndex(index => Math.max(0, index - 1))} disabled={stepIndex === 0} className="px-4 py-2.5 bg-slate-800 border border-slate-600 text-slate-100 rounded-xl font-semibold text-sm disabled:opacity-50">Previous picture</button>
+        <button onClick={() => setStepIndex(index => (index + 1) % story.steps.length)} className="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm">{stepIndex === story.steps.length - 1 ? 'Start story again' : 'Next picture'}</button>
+      </div>
+    </div>
+  )
+}
 
 function Soundscapes() {
   const [playing, setPlaying] = useState(null)
@@ -944,31 +1122,31 @@ function BreathingCoach() {
   const phase = PHASES[phaseIdx]
 
   return (
-    <div className="bg-gradient-to-br from-teal-950 to-slate-900 border border-teal-500/30 rounded-3xl p-6 sm:p-7 flex flex-col gap-5">
+    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 flex flex-col gap-5">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-teal-300 font-extrabold">
-          <Wind className="w-4 h-4" /> Guided Breathing 4·4·6
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-emerald-300 font-extrabold">
+          <Wind className="w-4 h-4" /> Guided breathing
         </div>
-        <span className="text-xs bg-teal-500/15 text-teal-300 px-2.5 py-1 rounded-full font-bold border border-teal-500/30">
+        <span className="text-xs bg-emerald-950/60 text-emerald-200 px-2.5 py-1 rounded-full font-bold border border-emerald-500/30">
           {cycles} cycles
         </span>
       </div>
-      <p className="text-xs text-teal-100/60 -mt-3">A paced-breathing exercise, not treatment. The breath hold is optional—pause or stop if it feels uncomfortable.</p>
+      <p className="text-sm text-slate-300 leading-relaxed">A paced-breathing exercise, not treatment. The breath hold is optional—pause or stop if it feels uncomfortable.</p>
       <div className="flex-1 flex items-center justify-center py-4">
         <div className="relative w-36 h-36 flex items-center justify-center">
           <div
-            className={`absolute inset-0 rounded-full bg-teal-500/20 border-2 border-teal-400/60 transition-transform ease-in-out ${phase.scale}`}
+            className={`absolute inset-0 rounded-full bg-emerald-500/15 border-2 border-emerald-400/50 transition-transform ease-in-out ${phase.scale}`}
             style={{ transitionDuration: `${phase.seconds}s` }}
           />
           <div className="relative z-10 text-center">
-            <div className="text-3xl font-black text-white">{count}</div>
-            <div className="text-[11px] font-bold text-teal-300 uppercase tracking-widest">{running ? phase.name : 'Paused'}</div>
+            <div className="text-3xl font-black text-slate-100">{count}</div>
+            <div className="text-[11px] font-bold text-emerald-300 uppercase tracking-widest">{running ? phase.name : 'Paused'}</div>
           </div>
         </div>
       </div>
       <button
         onClick={toggle}
-        className="w-full bg-teal-600 hover:bg-teal-500 text-white font-black py-3 rounded-2xl text-xs shadow-lg shadow-teal-500/20 transition"
+        className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-2xl text-sm"
       >
         {running ? '⏸ Pause' : '▶ Begin session'}
       </button>
@@ -1159,6 +1337,12 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
   const [activeTab, setActiveTab] = useState('home')
+  const [storageSecurity, setStorageSecurity] = useState(() => getCareStorageSecurityStatus())
+  useEffect(() => {
+    const updateStatus = event => setStorageSecurity(event.detail || getCareStorageSecurityStatus())
+    window.addEventListener(CARE_STORAGE_SECURITY_EVENT, updateStatus)
+    return () => window.removeEventListener(CARE_STORAGE_SECURITY_EVENT, updateStatus)
+  }, [])
   const [videoSession, setVideoSession] = useState(null)
   const [sosOpen, setSosOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -1169,7 +1353,7 @@ export default function App() {
 
   // Settings (persisted)
   const [settings, setSettings] = usePersisted('settings', {
-    name: 'Alex', textScale: 'md', highContrast: false, voice: false,
+    name: 'Alex', textScale: 'md', theme: 'system', highContrast: false, lowSensory: true, voice: false,
   })
   const updateSettings = (patch) => setSettings(s => ({ ...s, ...patch }))
 
@@ -1178,7 +1362,24 @@ export default function App() {
     document.documentElement.dataset.textscale = settings.textScale
     if (settings.highContrast) document.documentElement.dataset.contrast = 'high'
     else delete document.documentElement.dataset.contrast
-  }, [settings.textScale, settings.highContrast])
+    document.documentElement.dataset.lowSensory = settings.lowSensory !== false ? 'true' : 'false'
+  }, [settings.textScale, settings.highContrast, settings.lowSensory])
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    const applyTheme = () => {
+      document.documentElement.dataset.theme = settings.theme === 'system'
+        ? (media.matches ? 'dark' : 'light')
+        : settings.theme
+    }
+    applyTheme()
+    if (media.addEventListener) media.addEventListener('change', applyTheme)
+    else media.addListener?.(applyTheme)
+    return () => {
+      if (media.removeEventListener) media.removeEventListener('change', applyTheme)
+      else media.removeListener?.(applyTheme)
+    }
+  }, [settings.theme])
 
   const [notifyState, setNotifyState] = useState(
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported',
@@ -1213,7 +1414,7 @@ export default function App() {
   const [noteDraft, setNoteDraft] = useState('')
   const [routineDraft, setRoutineDraft] = useState('')
   const [routineEditorOpen, setRoutineEditorOpen] = useState(false)
-  const [emotionScore, setEmotionScore] = usePersisted('emotionScore', 0)
+  const [emotionScore] = usePersisted('emotionScore', 0)
 
   const toggleRoutine = (id) => {
     const now = new Date()
@@ -1539,13 +1740,8 @@ export default function App() {
     }
   }
 
-  const clearLocalData = () => {
-    let storageCleared = true
-    try {
-      localStorage.removeItem(STORAGE_KEY)
-    } catch {
-      storageCleared = false
-    }
+  const clearLocalData = async () => {
+    const storageCleared = await eraseCareStorage()
     Object.keys(saved).forEach(key => delete saved[key])
     window.dispatchEvent(new CustomEvent(RESET_LOCAL_DATA_EVENT, { detail: { closeOverlays: false } }))
     return storageCleared
@@ -1595,7 +1791,7 @@ export default function App() {
 
   const tabs = [
     { id: 'home', label: 'Overview', icon: Sparkles },
-    { id: 'games', label: 'Therapy & Sensory', icon: Brain },
+    { id: 'games', label: 'Activities', icon: Gamepad2 },
     { id: 'buddies', label: 'Coffee Circles', icon: Coffee },
     { id: 'care', label: 'Care Circle', icon: Shield },
     { id: 'telehealth', label: 'Vitals & Telehealth', icon: Activity },
@@ -1612,16 +1808,15 @@ export default function App() {
       {/* Header */}
       <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 pb-4 safe-x ios-header">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center space-x-3 cursor-pointer shrink-0" onClick={() => setActiveTab('home')}>
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 text-xl shadow-lg shadow-emerald-500/20">💚</div>
+          <button type="button" aria-label="Go to Overview" className="flex items-center space-x-3 shrink-0 text-left" onClick={() => setActiveTab('home')}>
+            <div className="w-10 h-10 rounded-2xl bg-emerald-700 flex items-center justify-center text-white text-xl">💚</div>
             <div className="hidden sm:block">
               <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">CareSphere AI</span>
-                <span className="text-[10px] uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">Live</span>
+                <span className="font-extrabold text-lg tracking-tight text-emerald-300">CareSphere</span>
               </div>
-              <p className="text-[11px] text-slate-400">Senior care · isolation prevention · autism support</p>
+              <p className="text-[11px] text-slate-400">Senior care · autism support</p>
             </div>
-          </div>
+          </button>
 
           <nav className="hidden md:flex items-center space-x-1 bg-slate-800/80 p-1.5 rounded-2xl border border-slate-700/60" aria-label="Main navigation">
             {tabs.map((tab) => {
@@ -1629,7 +1824,10 @@ export default function App() {
               return (
                 <button
                   key={tab.id}
+                  type="button"
                   onClick={() => setActiveTab(tab.id)}
+                  aria-current={activeTab === tab.id ? 'page' : undefined}
+                  aria-pressed={activeTab === tab.id}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
                     activeTab === tab.id ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
                   }`}
@@ -1658,19 +1856,26 @@ export default function App() {
           </div>
         </div>
 
-        <div className="flex md:hidden overflow-x-auto pt-3 mt-3 space-x-2 border-t border-slate-800/80" aria-label="Mobile navigation">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                activeTab === tab.id ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <nav className="flex md:hidden overflow-x-auto pt-3 mt-3 gap-2 border-t border-slate-800/80" aria-label="Main navigation">
+          {tabs.map((tab) => {
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                aria-current={activeTab === tab.id ? 'page' : undefined}
+                aria-pressed={activeTab === tab.id}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+                  activeTab === tab.id ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300'
+                }`}
+              >
+                <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span>{tab.label}</span>
+              </button>
+            )
+          })}
+        </nav>
       </header>
 
       {/* iOS install tip — Safari requires manual Add to Home Screen */}
@@ -1738,9 +1943,9 @@ export default function App() {
                 <p className="text-xs text-slate-500 truncate">{hrStatus.mode === 'live' ? 'Live BLE stream' : 'Pair in Vitals & Telehealth'}</p>
               </div>
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-1.5">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Practice activity</div>
-                <div className="text-2xl font-black text-indigo-400">{emotionScore} points</div>
-                <p className="text-xs text-slate-500">Optional game points, not a progress measure</p>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Optional activities</div>
+                <div className="text-2xl font-black text-emerald-300">Untimed</div>
+                <p className="text-xs text-slate-500">No scores or progress tracking</p>
               </div>
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-1.5">
                 <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Medications</div>
@@ -1854,14 +2059,16 @@ export default function App() {
         {activeTab === 'games' && (
           <div className="space-y-8">
             <div>
-              <h2 className="text-2xl font-black text-white">Therapy & Sensory Studio</h2>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                Optional low-pressure games and sensory tools—not clinical therapy, treatment, or assessment. Skip or stop any activity that feels uncomfortable.
+              <h2 className="text-2xl font-black text-white">Activities & Sensory Tools</h2>
+              <p className="text-sm text-slate-400 mt-1 leading-relaxed">
+                Optional, self-paced activities for shared practice and enjoyment—not therapy, treatment, or assessment. No activity is timed or scored; skip or stop at any time.
               </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <EmotionMatch onPoint={() => setEmotionScore(s => s + 1)} />
-              <PatternRecall />
+              <EmotionMatch />
+              <PatternRecall reduceVisualMotion={settings.lowSensory} />
+              <PicturePairs />
+              <PictureStory />
               <Soundscapes />
               <BreathingCoach />
             </div>
@@ -1985,7 +2192,7 @@ export default function App() {
                   <h3 className="text-lg font-bold text-white">From this browser's saved entries</h3>
                   <ul className="space-y-2.5 text-xs text-indigo-200/90 leading-relaxed">
                     <li>• Routine completion: <span className="text-white font-bold">{routinesDone}/{routines.length}</span> today — consistency is the goal, not perfection.</li>
-                    <li>• Emotion-match game score: <span className="text-white font-bold">{emotionScore}</span> — practice activity only, not a clinical progress measure.</li>
+                    <li>• Activities: <span className="text-white font-bold">Optional and unscored</span> — participation is not tracked.</li>
                     <li>• Coffee-circle attendance: <span className="text-white font-bold">Not tracked</span> — no calendar or family-sync connection is configured.</li>
                     <li>• Mood check-ins logged: <span className="text-white font-bold">{moods.length}</span> — a gentle emotional pulse over time{moods.length ? ` (latest: feeling ${MOODS[moods[moods.length - 1].score - 1].label.toLowerCase()})` : ''}.</li>
                   </ul>
@@ -2226,6 +2433,7 @@ export default function App() {
         onExportData={exportLocalData}
         onClearLocalData={clearLocalData}
         localDataBytes={localDataBytes}
+        storageSecurity={storageSecurity}
       />
 
       {/* Toast stack */}

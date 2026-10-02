@@ -64,6 +64,7 @@ targets:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        # Reconfirm this declaration with Apple's export-compliance questionnaire after the CryptoKit AES-GCM change.
         ITSAppUsesNonExemptEncryption: false
         UIViewControllerBasedStatusBarAppearance: false
         UIBackgroundModes:
@@ -80,45 +81,6 @@ targets:
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
 
-  # ── Native Mac app (ships as .dmg) ──────────────────────────────────
-  # NOTE: no entitlements on purpose — restricted entitlements (e.g. HealthKit)
-  # cannot be ad-hoc signed; taskgated kills the app with "Invalid Signature".
-  # Garmin/BLE via CoreBluetooth needs no entitlement.
-  CareSphereMac:
-    type: application
-    platform: macOS
-    deploymentTarget:
-      macOS: "13.0"
-    sources:
-      - path: CareSphere
-    dependencies:
-      - package: LlamaSwift
-        product: LlamaSwift
-      - package: SherpaOnnx
-        product: sherpa-onnx
-      - package: ZIPFoundation
-    settings:
-      base:
-        PRODUCT_NAME: CareSphere
-        PRODUCT_BUNDLE_IDENTIFIER: org.caresphere.CareSphereMac
-        CODE_SIGN_IDENTITY: "-"
-        CODE_SIGN_ENTITLEMENTS: ""
-    info:
-      path: CareSphere-Mac-Info.plist
-      properties:
-        CFBundleDisplayName: CareSphere
-        CFBundleShortVersionString: "$(MARKETING_VERSION)"
-        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
-        LSApplicationCategoryType: public.app-category.healthcare-fitness
-        LSMinimumSystemVersion: "13.0"
-        NSHighResolutionCapable: true
-        ITSAppUsesNonExemptEncryption: false
-        NSBluetoothAlwaysUsageDescription: "CareSphere connects to Bluetooth heart-rate monitors — including Garmin watches broadcasting heart rate — to stream live vitals."
-        NSLocationWhenInUseUsageDescription: "CareSphere attaches your location to an emergency SOS alert so responders and family can find you."
-        NSLocalNetworkUsageDescription: "CareSphere searches a Kiwix offline library only on your private local network."
-        NSAppTransportSecurity:
-          NSAllowsLocalNetworking: true
-
 schemes:
   CareSphere:
     build:
@@ -126,9 +88,3 @@ schemes:
         CareSphere: all
     run:
       config: Debug
-  CareSphereMac:
-    build:
-      targets:
-        CareSphereMac: all
-    run:
-      config: Release

@@ -12,6 +12,20 @@
 html[data-textscale='lg'] { font-size: 17.5px; }
 html[data-textscale='xl'] { font-size: 19.5px; }
 
+/* Reduce optional visual effects without reducing essential focus/selection cues. */
+html[data-low-sensory='true'] {
+  scroll-behavior: auto !important;
+}
+html[data-low-sensory='true'] *,
+html[data-low-sensory='true'] *::before,
+html[data-low-sensory='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+html[data-low-sensory='true'] [class*='animate-'] { animation: none !important; }
+html[data-low-sensory='true'] [class*='hover:scale'] { transform: none !important; }
+
 /* ── Accessibility: high-contrast mode ──
    Brightens the low-contrast grey text/borders used across dark cards.
    Scope: CareSphere's slate utilities, applied after Tailwind so they win. */
@@ -19,10 +33,78 @@ html[data-contrast='high'] .text-slate-300 { color: #e2e8f0; }
 html[data-contrast='high'] .text-slate-400 { color: #cbd5e1; }
 html[data-contrast='high'] .text-slate-500 { color: #b6c2d4; }
 html[data-contrast='high'] .text-slate-600 { color: #9fb0c8; }
-html[data-contrast='high'] .border-slate-600 { border-color: #64748b; }
-html[data-contrast='high'] .border-slate-700 { border-color: #5b6b83; }
-html[data-contrast='high'] .border-slate-800 { border-color: #526078; }
+html[data-contrast='high'] .border-slate-600 { border-color: #899b8c; }
+html[data-contrast='high'] .border-slate-700 { border-color: #839587; }
+html[data-contrast='high'] .border-slate-800 { border-color: #7a8d7f; }
 html[data-contrast='high'] .placeholder-slate-500::placeholder { color: #94a3b8; }
+
+/* ── User-selectable warm-light palette ──
+   AASPIRE usability work recommends offering both light/dark and contrast
+   choices because no single palette suits every autistic or low-vision user. */
+html[data-theme='light'] { color-scheme: light; }
+html[data-theme='dark'] { color-scheme: dark; }
+html[data-theme='light'] body,
+html[data-theme='light'] .app-shell {
+  background-color: #f4f5ef !important;
+  color: #27352c !important;
+}
+html[data-theme='light'] [class*='bg-slate-950'] { background-color: #f4f5ef !important; }
+html[data-theme='light'] [class*='bg-slate-900'] { background-color: #fffefa !important; }
+html[data-theme='light'] [class*='bg-slate-800'] { background-color: #e9ede7 !important; }
+html[data-theme='light'] [class*='bg-slate-700'] { background-color: #dce3dc !important; }
+html[data-theme='light'] [class*='bg-gradient-to'] {
+  background-image: none !important;
+  background-color: #fffefa !important;
+}
+html[data-theme='light'] [class*='bg-emerald-950'] { background-color: #e7f0e8 !important; }
+html[data-theme='light'] [class*='bg-rose-950'] { background-color: #f7e9e8 !important; }
+html[data-theme='light'] [class*='bg-amber-950'] { background-color: #f5eedf !important; }
+html[data-theme='light'] [class*='bg-sky-950'] { background-color: #e8f0f3 !important; }
+html[data-theme='light'] [class*='bg-teal-950'] { background-color: #e8f1ed !important; }
+html[data-theme='light'] [class*='border-slate-800'] { border-color: #d5ddd5 !important; }
+html[data-theme='light'] [class*='border-slate-700'] { border-color: #c8d2c9 !important; }
+html[data-theme='light'] [class*='border-slate-600'] { border-color: #b5c2b7 !important; }
+html[data-theme='light'][data-contrast='high'] [class*='border-slate-800'] { border-color: #7a897c !important; }
+html[data-theme='light'][data-contrast='high'] [class*='border-slate-700'] { border-color: #697a6d !important; }
+html[data-theme='light'][data-contrast='high'] [class*='border-slate-600'] { border-color: #5b6b5e !important; }
+html[data-theme='light'] .text-white { color: #27352c !important; }
+html[data-theme='light'] [class*='bg-red-'].text-white,
+html[data-theme='light'] [class*='bg-rose-'].text-white,
+html[data-theme='light'] [class*='bg-emerald-600'].text-white,
+html[data-theme='light'] [class*='bg-emerald-700'].text-white,
+html[data-theme='light'] [class*='bg-sky-600'].text-white,
+html[data-theme='light'] [class*='bg-sky-700'].text-white,
+html[data-theme='light'] [class*='bg-teal-600'].text-white,
+html[data-theme='light'] [class*='bg-amber-600'].text-white,
+html[data-theme='light'] [class*='bg-purple-600'].text-white { color: #fff !important; }
+html[data-theme='light'] .text-slate-100 { color: #26342b !important; }
+html[data-theme='light'] .text-slate-200 { color: #35443a !important; }
+html[data-theme='light'] .text-slate-300 { color: #435349 !important; }
+html[data-theme='light'] .text-slate-400 { color: #4d5e52 !important; }
+html[data-theme='light'] .text-slate-500 { color: #56665a !important; }
+html[data-theme='light'] .text-slate-600 { color: #425248 !important; }
+html[data-theme='light'] [class*='text-emerald-200'],
+html[data-theme='light'] [class*='text-emerald-300'],
+html[data-theme='light'] [class*='text-emerald-400'] { color: #2e6542 !important; }
+html[data-theme='light'] [class*='text-sky-200'],
+html[data-theme='light'] [class*='text-sky-300'],
+html[data-theme='light'] [class*='text-sky-400'],
+html[data-theme='light'] [class*='text-cyan-300'],
+html[data-theme='light'] [class*='text-cyan-400'] { color: #245766 !important; }
+html[data-theme='light'] [class*='text-teal-100'],
+html[data-theme='light'] [class*='text-teal-300'] { color: #305b4d !important; }
+html[data-theme='light'] [class*='text-amber-200'],
+html[data-theme='light'] [class*='text-amber-300'],
+html[data-theme='light'] [class*='text-amber-400'] { color: #735319 !important; }
+html[data-theme='light'] [class*='text-rose-100'],
+html[data-theme='light'] [class*='text-rose-200'],
+html[data-theme='light'] [class*='text-rose-300'],
+html[data-theme='light'] [class*='text-rose-400'] { color: #7b3034 !important; }
+html[data-theme='light'] [class*='text-indigo-200'],
+html[data-theme='light'] [class*='text-indigo-300'],
+html[data-theme='light'] [class*='text-indigo-400'],
+html[data-theme='light'] [class*='text-purple-300'] { color: #51426d !important; }
+html[data-theme='light'] .placeholder-slate-500::placeholder { color: #56665a; opacity: 1; }
 
 /* ── Accessibility: respect reduced-motion preference ── */
 @media (prefers-reduced-motion: reduce) {
