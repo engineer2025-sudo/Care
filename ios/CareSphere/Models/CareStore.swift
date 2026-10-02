@@ -235,7 +235,9 @@ final class CareStore: ObservableObject {
                 [.protectionKey: FileProtectionType.complete],
                 ofItemAtPath: fileURL.path)
             var protectedURL = fileURL
-            try protectedURL.setResourceValue(true, forKey: .isExcludedFromBackupKey)
+            var resourceValues = URLResourceValues()
+            resourceValues.isExcludedFromBackup = true
+            try protectedURL.setResourceValues(resourceValues)
             #else
             try FileManager.default.setAttributes(
                 [.posixPermissions: 0o600],
@@ -250,7 +252,9 @@ final class CareStore: ObservableObject {
         #if os(iOS)
         try data.write(to: url, options: [.atomic, .completeFileProtection])
         var protectedURL = url
-        try protectedURL.setResourceValue(true, forKey: .isExcludedFromBackupKey)
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        try protectedURL.setResourceValues(resourceValues)
         #else
         try data.write(to: url, options: .atomic)
         try FileManager.default.setAttributes(
