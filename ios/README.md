@@ -17,6 +17,13 @@
 - The guide retrieves a few local reference passages and adds their actual source links to the answer card. The model is not a clinician and must not be used for diagnosis, emergency triage, drug-interaction checking or dose decisions. It intentionally refuses to guess when it cannot find a source.
 - Questions are not sent to a hosted AI. The only AI runtime is local `llama.cpp`; model downloads go directly to the cited model publisher after an explicit tap.
 
+### Workouts and Garmin through Apple Health
+
+- The iOS app requests **read-only** HealthKit access to heart rate, SpO₂, blood-pressure correlations, and workouts. It lists up to 25 recent `HKWorkout` summaries with duration, available distance/calories, and the HealthKit source app. CareSphere never writes Health data.
+- To include Garmin activities, sync the watch with Garmin Connect, then enable **Workouts** in Garmin Connect → More → Settings → Connect Apps → Apple Health. Garmin says its Health transfer pauses when Connect is closed, and that GPS tracks are not written to Health ([Garmin's instructions](https://support.garmin.com/en-US/?faq=lK5FPB9iPF5PXFkIpFlFPA)). CareSphere reads what Garmin Connect actually writes to Apple Health; it does not sign in to Garmin or fetch Garmin-only training load, recovery, or other proprietary metrics.
+- HealthKit does not reveal whether a user denied read access. An empty list may mean no saved workouts or that Workouts access/source sharing is off; the UI says so rather than claiming permission was granted.
+- On iOS, workout observer/background delivery is configured in the HealthKit entitlement and the screen refreshes on foreground. Delivery timing remains controlled by iOS and the signing profile; verify it on a real, properly signed iPhone. The ad-hoc Mac build cannot use HealthKit and does not directly connect to Garmin Connect.
+
 ### Medical reference database
 
 - **MedlinePlus Health Topics XML** from the U.S. National Library of Medicine can be downloaded inside the app (about 30 MB uncompressed). CareSphere discovers the latest XML link from MedlinePlus, parses topic titles and summaries, and stores the searchable index in the app's private Application Support directory.
@@ -54,7 +61,7 @@ Binding to `0.0.0.0` lets devices on the network reach Kiwix. Use it only on tru
 
 | Feature | Implementation |
 |---|---|
-| 🫀 Wearable vitals | HealthKit with consent; CoreBluetooth standard Heart Rate service `0x180D` / characteristic `0x2A37` for live BLE (including Garmin broadcast mode). No synthetic clinical readings. |
+| 🫀 Wearable vitals & workouts | Read-only HealthKit vitals and up to 25 recent workout summaries; Garmin workouts arrive through Garmin Connect → Apple Health after the user enables Workouts sharing. CoreBluetooth standard Heart Rate service `0x180D` / characteristic `0x2A37` remains available for live BLE, including Garmin broadcast mode. No synthetic clinical readings. |
 | 🧠 Offline health guide | Optional Qwen2.5 1.5B GGUF via llama.cpp; retrieval-augmented summaries from local MedlinePlus and a private Kiwix server. |
 | 🩺 Reference library | Current MedlinePlus topic XML, parsed locally; source and publisher shown for retrieved records. |
 | 📚 Wikipedia ZIM | Search existing ZIM through Kiwix on a local/private network. The ZIM remains in its current location. |

@@ -96,6 +96,7 @@ struct HealthGuideView: View {
                     Spacer()
                     Button("Remove", role: .destructive) { assistant.removeModel() }
                         .font(.caption.weight(.bold))
+                        .disabled(assistant.isGenerating)
                 }
             } else {
                 Text("Optional Qwen2.5 1.5B Instruct (Q4_K_M), an open-weights model. It is downloaded only when you choose; the app installer stays small.")
@@ -128,7 +129,7 @@ struct HealthGuideView: View {
                     .font(.caption2)
                     .tint(.emerald)
             }
-            if let error = assistant.errorText {
+            if let error = assistant.errorText, assistant.generationErrorText == nil {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
                     .font(.caption2)
                     .foregroundStyle(.orange)
@@ -179,6 +180,27 @@ struct HealthGuideView: View {
 
             if let statusText {
                 Text(statusText).font(.caption2).foregroundStyle(.secondary)
+            }
+            if let error = assistant.generationErrorText {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label(error, systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Your source results are still available. Retrying runs only the local model; it does not repeat the reference search.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Button {
+                        Task { await assistant.ask(question: question, references: references) }
+                    } label: {
+                        Label("Retry local generation", systemImage: "arrow.clockwise")
+                            .font(.caption.weight(.bold))
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSearching || assistant.isGenerating)
+                }
+                .padding(10)
+                .background(Color.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             if let error = library.kiwixSearchError {
                 Label("Wikipedia search: \(error)", systemImage: "wifi.exclamationmark")

@@ -57,7 +57,7 @@ Requires Node.js **20.19+** or **22.12+** (Vite 8). For real BLE pairing use Chr
 
 Web: React 18 · Vite 8 · Tailwind CSS 3 · Web Bluetooth / Web Audio / WebRTC / Notifications / Speech / Geolocation.
 
-Native: SwiftUI · HealthKit · CoreBluetooth · `llama.cpp` GGUF · Sherpa-ONNX/Kokoro offline TTS · ZIPFoundation · FoundationXML · UserNotifications · AVFoundation · LocalAuthentication · Kiwix local-search connector.
+Native (2.2 development source): SwiftUI · read-only HealthKit vitals/workouts (Garmin workouts via Apple Health on iPhone) · CoreBluetooth · `llama.cpp` GGUF · Sherpa-ONNX/Kokoro offline TTS · ZIPFoundation · FoundationXML · UserNotifications · AVFoundation · LocalAuthentication · Kiwix local-search connector.
 
 ## Versions 2.2 and 2.3
 

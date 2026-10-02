@@ -33,6 +33,7 @@ struct VitalsView: View {
                 VStack(spacing: 16) {
                     sensorBar
                     garminCard
+                    workoutsCard
                     referenceRangeBanner
                     heartRateCard
                     spo2Card
@@ -44,6 +45,9 @@ struct VitalsView: View {
             .background(Color.ink)
             .navigationTitle("Vitals & Telehealth")
             .inlineTitle()
+            .onAppear {
+                if healthKit.hasRequestedAuthorization { healthKit.refreshAll() }
+            }
             .onReceive(bluetooth.$bpm.compactMap { $0 }) { value in
                 series.append(VitalsPoint(date: Date(), bpm: Double(value)))
                 if series.count > 60 { series.removeFirst() }
@@ -77,18 +81,22 @@ struct VitalsView: View {
                 }
                 Divider()
                 HStack(spacing: 8) {
-                    Image(systemName: "heart.text.square.fill")
-                        .foregroundStyle(healthKit.isAuthorized ? Color.pink : Color.secondary)
+                    Image(systemName: healthKit.hasRequestedAuthorization ? "heart.text.square.fill" : "heart.text.square")
+                        .foregroundStyle(healthKit.hasRequestedAuthorization ? Color.pink : Color.secondary)
                     VStack(alignment: .leading, spacing: 2) {
-                        StatusChip(text: healthKit.isAuthorized ? "HEALTHKIT ON" : "HEALTHKIT OFF",
-                                   color: healthKit.isAuthorized ? .pink : .gray)
+                        StatusChip(text: healthKit.hasRequestedAuthorization ? "READ REQUESTED" : "HEALTHKIT OFF",
+                                   color: healthKit.hasRequestedAuthorization ? .pink : .gray)
                         Text(healthKit.statusMessage).font(.caption2).foregroundStyle(.secondary)
                     }
                     Spacer()
-                    Button("Enable") { healthKit.requestAuthorization() }
-                        .buttonStyle(.bordered)
-                        .font(.caption.weight(.bold))
-                        .disabled(healthKit.isAuthorized)
+                    Button(healthKit.canRequestAuthorization
+                           ? (healthKit.hasRequestedAuthorization ? "Review" : "Enable")
+                           : "iPhone only") {
+                        healthKit.requestAuthorization()
+                    }
+                    .buttonStyle(.bordered)
+                    .font(.caption.weight(.bold))
+                    .disabled(!healthKit.canRequestAuthorization)
                 }
             }
         }
@@ -120,6 +128,91 @@ struct VitalsView: View {
                 } icon: {
                     Image(systemName: "3.circle.fill").foregroundStyle(Color.emerald)
                 }
+            }
+        }
+    }
+
+    private var workoutsCard: some View {
+        SectionCard(title: "Recent workouts", systemImage: "figure.run") {
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    StatusChip(text: "READ-ONLY · APPLE HEALTH", color: .skyBlue)
+                    Text("CareSphere reads workout summaries; it never writes or edits Health records.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 4)
+                Button {
+                    healthKit.refreshWorkouts()
+                } label: {
+                    if healthKit.isLoadingWorkouts {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Label("Refresh", systemImage: "arrow.clockwise")
+                            .font(.caption.weight(.bold))
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(!healthKit.canRequestAuthorization || !healthKit.hasRequestedAuthorization || healthKit.isLoadingWorkouts)
+                .accessibilityLabel("Refresh workouts from Apple Health")
+            }
+
+            if !healthKit.canRequestAuthorization {
+                Label("Workout reading is available in the iPhone app. This ad-hoc Mac build has no HealthKit entitlement.",
+                      systemImage: "iphone")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if !healthKit.hasRequestedAuthorization {
+                Label("Tap Enable above to request Health access. You can choose which categories to share.",
+                      systemImage: "hand.tap")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if healthKit.isLoadingWorkouts && healthKit.workouts.isEmpty {
+                ProgressView("Checking Apple Health…")
+                    .font(.caption)
+                    .tint(.emerald)
+            } else if healthKit.workouts.isEmpty {
+                Label("No workouts are visible yet. HealthKit hides read-permission decisions, so check CareSphere's Workouts access and confirm a workout exists in Apple Health.",
+                      systemImage: "figure.run")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                VStack(spacing: 9) {
+                    ForEach(healthKit.workouts) { workout in
+                        WorkoutSummaryRow(workout: workout)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.2), value: healthKit.workouts.count)
+            }
+
+            if let error = healthKit.workoutQueryError {
+                Label("Apple Health could not load workouts: \(error)", systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            #if os(iOS)
+            Text("Garmin setup: Garmin Connect → More → Settings → Connect Apps → Apple Health → Connect with Apple Health. Allow Workouts, then keep Garmin Connect open while the watch syncs; Garmin says Health transfer pauses when Connect closes. Apple Health receives workout summaries, not Garmin GPS tracks.")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
+            Link("Garmin's Apple Health instructions", destination: URL(string: "https://support.garmin.com/en-US/?faq=lK5FPB9iPF5PXFkIpFlFPA")!)
+                .font(.caption2.weight(.semibold))
+            #else
+            Text("Garmin workouts must first be shared to Apple Health on iPhone. Direct Garmin-account syncing is not available in this Mac build.")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
+            #endif
+
+            if let refreshedAt = healthKit.lastWorkoutRefresh {
+                Text("Last checked at \(refreshedAt.formatted(date: .omitted, time: .shortened))")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
         }
     }
@@ -235,6 +328,64 @@ struct VitalsView: View {
 
 extension Color {
     static let skyBlue = Color(red: 0.29, green: 0.65, blue: 0.93)
+}
+
+private struct WorkoutSummaryRow: View {
+    let workout: HealthWorkoutSummary
+
+    private var durationLabel: String {
+        let totalSeconds = max(0, Int(workout.duration.rounded()))
+        let hours = totalSeconds / 3_600
+        let minutes = (totalSeconds % 3_600) / 60
+        if hours > 0 { return "\(hours) hr \(minutes) min" }
+        if totalSeconds < 60 { return "<1 min" }
+        return "\(minutes) min"
+    }
+
+    private var distanceLabel: String? {
+        guard let meters = workout.distanceMeters, meters > 0 else { return nil }
+        let formatter = MeasurementFormatter()
+        formatter.unitStyle = .short
+        formatter.unitOptions = .naturalScale
+        return formatter.string(from: Measurement(value: meters, unit: UnitLength.meters))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack(alignment: .firstTextBaseline) {
+                Label(workout.activity, systemImage: "figure.run")
+                    .font(.subheadline.weight(.bold))
+                Spacer(minLength: 8)
+                Text(workout.startDate.formatted(date: .abbreviated, time: .shortened))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.trailing)
+            }
+            HStack(spacing: 12) {
+                Label(durationLabel, systemImage: "clock")
+                if let distanceLabel {
+                    Label(distanceLabel, systemImage: "arrow.left.and.right")
+                }
+                if let calories = workout.activeEnergyKilocalories, calories > 0 {
+                    Label("\(Int(calories.rounded())) kcal", systemImage: "flame")
+                }
+            }
+            .font(.caption2.weight(.medium))
+            .foregroundStyle(.secondary)
+            HStack(spacing: 6) {
+                StatusChip(text: workout.sourceTag, color: workout.isGarminSource ? .emerald : .skyBlue)
+                Text("via Apple Health · \(workout.sourceName)")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
 }
 
 extension HealthKitService {

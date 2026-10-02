@@ -50,6 +50,9 @@ struct CareSphereApp: App {
                 steps.start()
             }
             .onChange(of: scenePhase) { phase in
+                if phase == .active && healthKit.hasRequestedAuthorization {
+                    healthKit.refreshAll()
+                }
                 // Lock after the app is actually backgrounded. LocalAuthentication
                 // may make a scene inactive while its own system prompt is visible.
                 if phase == .background {

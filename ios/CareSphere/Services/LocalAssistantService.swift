@@ -21,6 +21,7 @@ final class LocalAssistantService: ObservableObject {
     @Published private(set) var isGenerating = false
     @Published private(set) var response = ""
     @Published private(set) var errorText: String?
+    @Published private(set) var generationErrorText: String?
 
     private let modelPathKey = "caresphere.localAssistant.modelPath"
     private let modelNameKey = "caresphere.localAssistant.modelName"
@@ -54,6 +55,7 @@ final class LocalAssistantService: ObservableObject {
         guard !isDownloading, !isImporting else { return }
         isDownloading = true
         errorText = nil
+        generationErrorText = nil
         defer { isDownloading = false }
 
         do {
@@ -81,6 +83,7 @@ final class LocalAssistantService: ObservableObject {
         guard !isDownloading, !isImporting else { return }
         isImporting = true
         errorText = nil
+        generationErrorText = nil
         defer { isImporting = false }
 
         do {
@@ -105,11 +108,14 @@ final class LocalAssistantService: ObservableObject {
         installedModelLabel = "No local model installed"
         response = ""
         errorText = nil
+        generationErrorText = nil
         UserDefaults.standard.removeObject(forKey: modelPathKey)
         UserDefaults.standard.removeObject(forKey: modelNameKey)
     }
 
     func ask(question: String, references: [HealthReference]) async {
+        guard !isGenerating, !isDownloading, !isImporting else { return }
+        generationErrorText = nil
         guard let modelURL else {
             errorText = "Install or import a GGUF model before asking the on-device assistant."
             return
@@ -117,14 +123,14 @@ final class LocalAssistantService: ObservableObject {
         let safeQuestion = String(question.trimmingCharacters(in: .whitespacesAndNewlines).prefix(500))
         guard !safeQuestion.isEmpty else { return }
 
-        // Kokoro is also an on-device inference session. Release its cached ONNX
-        // model before loading the much larger Qwen GGUF to conserve device RAM.
-        await KokoroSpeechService.shared.releaseInferenceMemory()
-
         isGenerating = true
         errorText = nil
         response = ""
         defer { isGenerating = false }
+
+        // Kokoro is also an on-device inference session. Release its cached ONNX
+        // model before loading the much larger Qwen GGUF to conserve device RAM.
+        await KokoroSpeechService.shared.releaseInferenceMemory()
 
         let prompt = Self.makePrompt(question: safeQuestion, references: references)
         do {
@@ -133,7 +139,9 @@ final class LocalAssistantService: ObservableObject {
                 prompt: prompt,
                 maximumNewTokens: 180)
         } catch {
-            errorText = error.localizedDescription
+            let message = error.localizedDescription
+            errorText = message
+            generationErrorText = message
         }
     }
 
@@ -142,14 +150,15 @@ final class LocalAssistantService: ObservableObject {
             let title = escapeSpecialTokens(reference.title)
             let excerpt = escapeSpecialTokens(String(reference.excerpt.prefix(850)))
             let publisher = escapeSpecialTokens(reference.publisher)
-            return "[\(index + 1)] \(title) — \(publisher)\n\(excerpt)\nSource: \(reference.url)"
+            let sourceURL = escapeSpecialTokens(reference.url)
+            return "[\(index + 1)] \(title) — \(publisher)\n\(excerpt)\nSource: \(sourceURL)"
         }.joined(separator: "\n\n")
         let sourceText = passages.isEmpty
             ? "No matching reference passages were found. Say that you could not find a source; do not guess medical facts."
             : passages
 
         let safeQuestion = escapeSpecialTokens(question)
-        return """
+        let prompt = """
         <|im_start|>system
         You are CareSphere's small, offline health-literacy helper. You are not a clinician and must not diagnose, triage, prescribe, interpret an individual test as a diagnosis, or recommend starting, stopping, skipping, or changing a medicine or dose. Use only the reference passages below for medical facts. If they do not answer the question, say so and suggest asking a licensed clinician or pharmacist. Never invent a citation or a source. Keep the answer calm, plain-language, and brief. If the user describes immediate danger or a life-threatening emergency, tell them to contact local emergency services now. This answer is educational only and not medical advice.
         <|im_end|>
@@ -161,6 +170,9 @@ final class LocalAssistantService: ObservableObject {
         <|im_end|>
         <|im_start|>assistant
         """
+        // Qwen2.5's ChatML template requires a newline after the assistant role
+        // before generation. Swift multiline strings omit the closing newline.
+        return prompt.hasSuffix("\n") ? prompt : prompt + "\n"
     }
 
     private static func escapeSpecialTokens(_ text: String) -> String {
@@ -250,7 +262,12 @@ private enum LocalAssistantError: LocalizedError {
     case runtimeUnavailable
     case modelLoadFailed
     case promptTooLong
-    case generationFailed
+    case promptEvaluationFailed(String)
+    case tokenEvaluationFailed(String)
+    case logitsUnavailable
+    case invalidLogits
+    case tokenPieceUnavailable
+    case emptyResponse
 
     var errorDescription: String? {
         switch self {
@@ -266,8 +283,16 @@ private enum LocalAssistantError: LocalizedError {
             return "The GGUF model could not be loaded. It may be incompatible with this device or model format."
         case .promptTooLong:
             return "The question and references are too long for this local model. Try a shorter question."
-        case .generationFailed:
-            return "The model could not generate a response. Try again with a shorter question."
+        case .promptEvaluationFailed(let code):
+            return "llama.cpp could not evaluate the prompt (\(code)). The device may be low on memory, or the model may not match the Qwen ChatML format."
+        case .tokenEvaluationFailed(let code):
+            return "llama.cpp stopped while generating (\(code)). Close memory-heavy apps and retry; if it continues, reinstall the recommended Qwen2.5 model."
+        case .logitsUnavailable, .invalidLogits:
+            return "The local model did not return usable token scores. Reinstall the recommended Qwen2.5 Instruct model and try again."
+        case .tokenPieceUnavailable:
+            return "The local model returned an unreadable token. Check that the installed GGUF is a supported Qwen Instruct model."
+        case .emptyResponse:
+            return "The model returned no visible text. The prompt now uses the Qwen2.5 ChatML assistant prefix; retry, or reinstall the recommended model if this continues."
         }
     }
 }
@@ -334,38 +359,56 @@ private actor LocalLlamaRuntime {
             batch.logits[index] = 0
         }
         batch.logits[Int(batch.n_tokens) - 1] = 1
-        guard llama_decode(context, batch) == 0 else {
-            throw LocalAssistantError.generationFailed
+        let promptDecodeStatus = llama_decode(context, batch)
+        guard promptDecodeStatus == 0 else {
+            throw LocalAssistantError.promptEvaluationFailed(String(describing: promptDecodeStatus))
         }
 
         var currentPosition = batch.n_tokens
         var generated = ""
         let vocabularySize = Int(llama_vocab_n_tokens(vocabulary))
+        guard vocabularySize > 0 else { throw LocalAssistantError.invalidLogits }
         let endToken = llama_vocab_eos(vocabulary)
         let generationLimit = min(maximumNewTokens, Int(contextParameters.n_ctx) - Int(tokenCount) - 2)
 
         for _ in 0..<max(0, generationLimit) {
             guard let logits = llama_get_logits_ith(context, batch.n_tokens - 1) else {
-                throw LocalAssistantError.generationFailed
+                throw LocalAssistantError.logitsUnavailable
             }
             var bestToken = llama_token(0)
-            var bestLogit = logits[0]
-            if vocabularySize > 1 {
-                for tokenIndex in 1..<vocabularySize where logits[tokenIndex] > bestLogit {
-                    bestLogit = logits[tokenIndex]
-                    bestToken = llama_token(tokenIndex)
-                }
+            var bestLogit = -Float.greatestFiniteMagnitude
+            for tokenIndex in 0..<vocabularySize {
+                let logit = logits[tokenIndex]
+                guard logit.isFinite, logit > bestLogit else { continue }
+                bestLogit = logit
+                bestToken = llama_token(tokenIndex)
             }
+            guard bestLogit.isFinite else { throw LocalAssistantError.invalidLogits }
             if bestToken == endToken { break }
 
             var pieceBuffer = [CChar](repeating: 0, count: 64)
-            let pieceLength = llama_token_to_piece(
+            var pieceLength = llama_token_to_piece(
                 vocabulary,
                 bestToken,
                 &pieceBuffer,
                 Int32(pieceBuffer.count),
                 0,
                 true)
+            // llama.cpp returns the negative required capacity when a token's
+            // byte piece does not fit. Grow the buffer rather than silently
+            // dropping that token and ending with an empty response.
+            while pieceLength < 0 && pieceBuffer.count < 16_384 {
+                let requiredCapacity = min(Int(-pieceLength), 16_384)
+                pieceBuffer = [CChar](repeating: 0, count: max(pieceBuffer.count * 2, requiredCapacity))
+                pieceLength = llama_token_to_piece(
+                    vocabulary,
+                    bestToken,
+                    &pieceBuffer,
+                    Int32(pieceBuffer.count),
+                    0,
+                    true)
+            }
+            guard pieceLength >= 0 else { throw LocalAssistantError.tokenPieceUnavailable }
             if pieceLength > 0 {
                 let bytes = pieceBuffer.prefix(Int(pieceLength)).map { UInt8(bitPattern: $0) }
                 let piece = String(decoding: bytes, as: UTF8.self)
@@ -382,8 +425,9 @@ private actor LocalLlamaRuntime {
             }
             batch.logits[0] = 1
             currentPosition += 1
-            guard llama_decode(context, batch) == 0 else {
-                throw LocalAssistantError.generationFailed
+            let tokenDecodeStatus = llama_decode(context, batch)
+            guard tokenDecodeStatus == 0 else {
+                throw LocalAssistantError.tokenEvaluationFailed(String(describing: tokenDecodeStatus))
             }
         }
 
@@ -391,7 +435,7 @@ private actor LocalLlamaRuntime {
             .replacingOccurrences(of: "<|im_end|>", with: "")
             .replacingOccurrences(of: "<|endoftext|>", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleaned.isEmpty else { throw LocalAssistantError.generationFailed }
+        guard !cleaned.isEmpty else { throw LocalAssistantError.emptyResponse }
         return cleaned
     }
 }

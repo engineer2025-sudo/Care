@@ -400,7 +400,7 @@ struct SettingsView: View {
 
             Label("The Qwen assistant and optional Kokoro voice run on this device; questions and generated audio are not sent to a cloud AI. Kiwix searches go only to the private/local server address you enter.", systemImage: "cpu")
                 .font(.caption)
-            Label("MedlinePlus content and optional model weights are downloaded only when you choose. HealthKit access is explicit, and vitals retain their true source labels.", systemImage: "heart.text.square")
+            Label("MedlinePlus content and optional model weights are downloaded only when you choose. HealthKit access is explicit and read-only; workouts appear only if Apple Health can see them, and readings retain their true source labels.", systemImage: "heart.text.square")
                 .font(.caption)
         }
     }
@@ -411,7 +411,11 @@ struct SettingsView: View {
         Section("About") {
             LabeledContent("Version", value: appVersionLabel)
             LabeledContent("Video", value: "Jitsi Meet SDK · meet.jit.si")
-            LabeledContent("Health", value: "HealthKit + CoreBluetooth")
+            #if os(iOS)
+            LabeledContent("Health", value: "Read-only HealthKit vitals/workouts + CoreBluetooth")
+            #else
+            LabeledContent("Health", value: "CoreBluetooth · Apple Health is iPhone-only")
+            #endif
             VStack(alignment: .leading, spacing: 4) {
                 Text("Built on Apple's native stacks")
                     .font(.caption.weight(.bold))

@@ -45,6 +45,7 @@ targets:
       path: CareSphere.entitlements
       properties:
         com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.background-delivery: true
     info:
       path: CareSphere-iOS-Info.plist
       properties:
@@ -63,8 +64,7 @@ targets:
         NSMotionUsageDescription: "CareSphere counts your daily steps to encourage gentle, healthy movement."
         NSCameraUsageDescription: "CareSphere uses the camera for video coffee circles and telehealth visits."
         NSMicrophoneUsageDescription: "CareSphere uses the microphone for video coffee circles and telehealth visits."
-        NSHealthShareUsageDescription: "CareSphere reads your heart rate, blood oxygen and blood pressure from Apple Health so you and your care circle can spot trends early."
-        NSHealthUpdateUsageDescription: "CareSphere can save vitals you record in the app to Apple Health."
+        NSHealthShareUsageDescription: "CareSphere reads heart rate, blood oxygen, blood pressure, and workout summaries from Apple Health after you approve. It never writes health data."
         NSBluetoothAlwaysUsageDescription: "CareSphere connects to Bluetooth heart-rate monitors — including Garmin watches broadcasting heart rate — to stream live vitals."
         NSLocationWhenInUseUsageDescription: "CareSphere attaches your location to an emergency SOS alert so responders and family can find you."
         NSLocalNetworkUsageDescription: "CareSphere searches a Kiwix offline library only on your private local network."
@@ -104,8 +104,6 @@ targets:
         LSMinimumSystemVersion: "13.0"
         NSHighResolutionCapable: true
         ITSAppUsesNonExemptEncryption: false
-        NSHealthShareUsageDescription: "CareSphere reads heart rate and blood pressure from Apple Health so you and your care circle can spot trends early."
-        NSHealthUpdateUsageDescription: "CareSphere can save vitals you record in the app to Apple Health."
         NSBluetoothAlwaysUsageDescription: "CareSphere connects to Bluetooth heart-rate monitors — including Garmin watches broadcasting heart rate — to stream live vitals."
         NSLocationWhenInUseUsageDescription: "CareSphere attaches your location to an emergency SOS alert so responders and family can find you."
         NSLocalNetworkUsageDescription: "CareSphere searches a Kiwix offline library only on your private local network."

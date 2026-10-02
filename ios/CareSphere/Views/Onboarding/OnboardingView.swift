@@ -436,11 +436,11 @@ struct OnboardingView: View {
                 action: { notifications.requestAuthorization() })
             #if os(iOS)
             permissionRow(
-                icon: "heart.text.square.fill", title: "Apple Health vitals",
-                status: healthKit.isAuthorized ? "Enabled ✓" : "Tap Continue to allow",
+                icon: "heart.text.square.fill", title: "Apple Health vitals & workouts",
+                status: healthKit.hasRequestedAuthorization ? "Requested · check Health settings if empty" : "Tap Continue to request read access",
                 action: { healthKit.requestAuthorization() })
             #endif
-            Text("CareSphere reads heart rate, blood oxygen and blood pressure only — and never writes anything without asking.")
+            Text("CareSphere requests read-only heart rate, blood oxygen, blood pressure and workout summaries. It never writes Health data. Apple does not let apps verify whether read access was allowed.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
