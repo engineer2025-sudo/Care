@@ -327,8 +327,8 @@ struct HealthGuideView: View {
     }
 
     private var kiwixCard: some View {
-        SectionCard(title: "Connect your Wikipedia ZIM", systemImage: "books.vertical") {
-            Text("Your 6.9 GB archive is not copied into CareSphere. Kiwix indexes the existing .zim file locally; CareSphere sends searches only to the private server address below and adds matching snippets to the model context.")
+        SectionCard(title: "Wikipedia ZIM · Kiwix server", systemImage: "books.vertical") {
+            Text("This build does not include a ZIM reader: keep your 6.9 GB archive where it is and run Kiwix Server separately. CareSphere sends searches only to the private server address below; it does not bundle or copy the archive.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
