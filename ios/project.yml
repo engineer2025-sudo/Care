@@ -6,7 +6,14 @@ options:
 packages:
   JitsiMeetSDK:
     url: https://github.com/jitsi/jitsi-meet-ios-sdk-releases
-    from: 13.1.1
+    exactVersion: "13.1.1"
+  # JitsiMeetSDK 13.1.1 was built against this Giphy binary interface. The
+  # upstream Jitsi SPM manifest uses a lower-bound, which can otherwise resolve
+  # Giphy 2.3.x; that version changes the GPHContent.search signature, so the
+  # symbol Jitsi needs is missing and dyld aborts at launch on a physical iPhone.
+  Giphy:
+    url: https://github.com/Giphy/giphy-ios-sdk
+    exactVersion: "2.2.12"
   LlamaSwift:
     url: https://github.com/mattt/llama.swift
     from: 2.10549.0
@@ -22,7 +29,7 @@ settings:
     SWIFT_VERSION: "5.9"
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "2.2.0"
-    CURRENT_PROJECT_VERSION: "4"
+    CURRENT_PROJECT_VERSION: "5"
     DEVELOPMENT_TEAM: ""
 
 targets:
@@ -36,6 +43,8 @@ targets:
       - path: CareSphere
     dependencies:
       - package: JitsiMeetSDK
+      - package: Giphy
+        product: GiphyUISDK
       - package: LlamaSwift
         product: LlamaSwift
       - package: SherpaOnnx

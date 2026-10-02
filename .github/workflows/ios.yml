@@ -55,6 +55,31 @@ jobs:
           xcodebuild -resolvePackageDependencies \
             -project CareSphere.xcodeproj -scheme CareSphere 2>&1 | tee /tmp/spm.log | tail -20
 
+      - name: Verify Jitsi/Giphy ABI-compatible package resolution
+        run: |
+          RESOLVED_FILE="$(find ios -name Package.resolved -print -quit)"
+          if [[ -z "$RESOLVED_FILE" ]]; then
+            echo "::error::SwiftPM did not write Package.resolved after dependency resolution"
+            exit 1
+          fi
+          python3 - "$RESOLVED_FILE" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as package_file:
+              resolved = json.load(package_file)
+          versions = [
+              pin["state"].get("version")
+              for pin in resolved.get("pins", [])
+              if pin.get("identity") == "giphy-ios-sdk"
+          ]
+          if versions != ["2.2.12"]:
+              raise SystemExit(
+                  f"Expected Jitsi-compatible Giphy 2.2.12, got {versions or 'no Giphy pin'}"
+              )
+          print("✅ JitsiMeetSDK resolves Giphy 2.2.12 (ABI-compatible)")
+          PY
+
       - name: Build (compile check, unsigned iOS device target)
         run: |
           set -o pipefail

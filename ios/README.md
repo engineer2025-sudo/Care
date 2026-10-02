@@ -78,7 +78,7 @@ Binding to `0.0.0.0` lets devices on the network reach Kiwix. Use it only on tru
 
 For the full step-by-step guide to signing and installing the **CareSphere** iOS scheme on a connected iPhone, see [Install the native development build](../DOWNLOAD.md#install-the-native-development-build-on-your-iphone). The iOS scheme includes HealthKit; the ad-hoc Mac target deliberately does not. A personal Xcode team may need periodic re-signing, and HealthKit capability support depends on the signing team.
 
-On a real iPhone, grant only the permissions you use: Health, Bluetooth, notifications, contacts, microphone/camera for video, location for SOS, and local-network access if connecting to Kiwix. SPM resolves Jitsi, `llama.swift`, Sherpa-ONNX and ZIPFoundation. Qwen/Kokoro model weights and the optional MedlinePlus database are separate, opt-in downloads.
+On a real iPhone, grant only the permissions you use: Health, Bluetooth, notifications, contacts, microphone/camera for video, location for SOS, and local-network access if connecting to Kiwix. SPM resolves Jitsi with its ABI-matched Giphy 2.2.12 runtime, `llama.swift`, Sherpa-ONNX and ZIPFoundation. Keep the Giphy pin: Jitsi 13.1.1's binary expects the earlier `GPHContent.search` signature; later Giphy releases change it. Qwen/Kokoro model weights and the optional MedlinePlus database are separate, opt-in downloads.
 
 ## First launch on Mac
 
