@@ -62,7 +62,7 @@ final class HealthKitService: NSObject, ObservableObject {
         super.init()
 
         #if os(macOS)
-        statusMessage = "Apple Health workouts are available in the iPhone app. This ad-hoc Mac build has no HealthKit entitlement; Garmin data must first be shared to Apple Health on iPhone."
+        statusMessage = "Apple Health is available only in the native iPhone/iPad app. This ad-hoc Mac build has no HealthKit entitlement; enable Garmin Connect sharing to Apple Health on iPhone first."
         #else
         guard HKHealthStore.isHealthDataAvailable() else {
             statusMessage = "Apple Health isn't available on this device."

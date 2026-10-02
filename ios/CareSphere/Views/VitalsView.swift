@@ -84,14 +84,17 @@ struct VitalsView: View {
                     Image(systemName: healthKit.hasRequestedAuthorization ? "heart.text.square.fill" : "heart.text.square")
                         .foregroundStyle(healthKit.hasRequestedAuthorization ? Color.pink : Color.secondary)
                     VStack(alignment: .leading, spacing: 2) {
-                        StatusChip(text: healthKit.hasRequestedAuthorization ? "READ REQUESTED" : "HEALTHKIT OFF",
-                                   color: healthKit.hasRequestedAuthorization ? .pink : .gray)
+                        StatusChip(
+                            text: healthKit.canRequestAuthorization
+                                ? (healthKit.hasRequestedAuthorization ? "READ REQUESTED" : "READY · NOT ENABLED")
+                                : "iOS ONLY",
+                            color: healthKit.hasRequestedAuthorization ? .pink : healthKit.canRequestAuthorization ? .skyBlue : .gray)
                         Text(healthKit.statusMessage).font(.caption2).foregroundStyle(.secondary)
                     }
                     Spacer()
                     Button(healthKit.canRequestAuthorization
                            ? (healthKit.hasRequestedAuthorization ? "Review" : "Enable")
-                           : "iPhone only") {
+                           : "iOS app") {
                         healthKit.requestAuthorization()
                     }
                     .buttonStyle(.bordered)
@@ -158,7 +161,7 @@ struct VitalsView: View {
             }
 
             if !healthKit.canRequestAuthorization {
-                Label("Workout reading is available in the iPhone app. This ad-hoc Mac build has no HealthKit entitlement.",
+                Label("Apple Health workout reading is available in the CareSphere iOS app. This ad-hoc Mac build has no HealthKit entitlement.",
                       systemImage: "iphone")
                     .font(.caption)
                     .foregroundStyle(.secondary)

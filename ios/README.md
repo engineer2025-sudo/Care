@@ -74,18 +74,11 @@ Binding to `0.0.0.0` lets devices on the network reach Kiwix. Use it only on tru
 | 🧩 Optional practice & routines | Non-clinical emoji/pattern games and paced breathing; custom daily routines with local-midnight resets and a daily mood check-in. |
 | 🔒 Privacy | The 2.2 development code migrates legacy care data into private Application Support, protects the iOS file with Complete File Protection, restricts Mac file/folder access to the current user, and adds explicit JSON export/erase controls. Optional Qwen/Kokoro weights and reference downloads remain separate; Kiwix search is restricted to the configured local/private host. |
 
-## Build & run (Mac with Xcode)
+## Build & install on Apple devices
 
-```bash
-cd ios
-brew install xcodegen        # once
-xcodegen generate
-open CareSphere.xcodeproj
-```
+For the full step-by-step guide to signing and installing the **CareSphere** iOS scheme on a connected iPhone, see [Install the native development build](../DOWNLOAD.md#install-the-native-development-build-on-your-iphone). The iOS scheme includes HealthKit; the ad-hoc Mac target deliberately does not. A personal Xcode team may need periodic re-signing, and HealthKit capability support depends on the signing team.
 
-Choose the **CareSphere** scheme for iOS or **CareSphereMac** for macOS. SPM resolves Jitsi, `llama.swift`, Sherpa-ONNX and ZIPFoundation. Qwen/Kokoro model weights and the optional MedlinePlus database are separate, opt-in downloads.
-
-On a real iPhone, grant only the permissions you use: Health, Bluetooth, notifications, contacts, microphone/camera for video, location for SOS, and local-network access if connecting to Kiwix. A Mac ad-hoc build uses BLE for live vitals; HealthKit remains unavailable in the ad-hoc Mac target because restricted entitlements require proper signing.
+On a real iPhone, grant only the permissions you use: Health, Bluetooth, notifications, contacts, microphone/camera for video, location for SOS, and local-network access if connecting to Kiwix. SPM resolves Jitsi, `llama.swift`, Sherpa-ONNX and ZIPFoundation. Qwen/Kokoro model weights and the optional MedlinePlus database are separate, opt-in downloads.
 
 ## First launch on Mac
 

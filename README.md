@@ -2,7 +2,7 @@
 
 **Proactive Senior Care · Isolation Prevention · Autism Support** — a multi-client platform with native Apple apps and an installable web PWA:
 
-- 📱 **iOS app (Swift/SwiftUI)** — [`ios/`](ios/README.md) · native source; no public App Store, TestFlight, or signed `.ipa`. CI passes an unsigned generic iOS device compile check; it does not produce an installable iPhone build.
+- 📱 **iOS app (Swift/SwiftUI)** — native iOS source; no public App Store, TestFlight, or signed `.ipa` yet. [Build and install it on your iPhone with Xcode](DOWNLOAD.md#install-the-native-development-build-on-your-iphone).
 - 🖥️ **Mac app (.dmg)** — [download CareSphere 2.1.0](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-2.1.0-mac.dmg) · [ZIP](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-2.1.0-mac.zip) · [release notes and optional assets](https://github.com/engineer2025-sudo/Care/releases/tag/mac-v2.1.0). Native SwiftUI for macOS 13+, Intel/Apple Silicon; includes the local health-guide features and Garmin BLE heart-rate pairing.
 - 🌐 **Web app (React + Vite)** — an installable PWA sharing real `meet.jit.si` rooms with family on other devices.
 

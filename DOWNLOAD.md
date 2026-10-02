@@ -21,13 +21,28 @@ The app requires macOS 13 or later. The installer is ad-hoc signed; it is not De
 
 ## iPhone / iPad
 
-There is **no public App Store, TestFlight, or signed `.ipa` download**. CareSphere for iOS is a native SwiftUI app, not a web wrapper, and must be built and signed from Xcode on a Mac. CI successfully compiles an unsigned generic iOS device target; that is a compile check, not an installable signed iPhone app. The current llama.cpp binary package has no iOS Simulator slice, so a simulator build is not supported by this dependency.
+There is **no public App Store, TestFlight, or signed `.ipa` download** yet. CareSphere for iOS is a native SwiftUI app (not the Mac DMG or a web wrapper). The iOS target already includes HealthKit read access; the Mac build deliberately has no HealthKit entitlement. CI compiles the iOS target unsigned, so it is a compile check—not an app you can install by opening the artifact on your phone. A simulator build is also unavailable with the current llama.cpp package.
 
-To run a development build on a real iPhone:
+### Install the native development build on your iPhone
 
-1. Install Xcode and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
-2. From the repository root, run `cd ios && xcodegen generate`, then open `CareSphere.xcodeproj`.
-3. Select the **CareSphere** scheme, choose your iPhone, configure your signing team, connect the device, and press **Run**. Xcode package resolution needs internet access. HealthKit capabilities may require an eligible paid Apple Developer team.
+You need a Mac, Xcode, your iPhone, and a cable (wireless device debugging can be enabled later). Keep the phone unlocked and tap **Trust This Computer** if prompted.
+
+1. Install Xcode from the Mac App Store. Install XcodeGen in Terminal: `brew install xcodegen`.
+2. Clone the development branch on your Mac (or use your existing checkout), then generate/open the native project:
+   ```bash
+   git clone --branch arena/01a0626b-care https://github.com/engineer2025-sudo/Care.git
+   cd Care/ios
+   xcodegen generate
+   open CareSphere.xcodeproj
+   ```
+3. In Xcode, choose the **CareSphere** scheme—not **CareSphereMac**—and select your connected iPhone as the run destination.
+4. Select the **CareSphere** target → **Signing & Capabilities**. Turn on **Automatically manage signing** and select your Apple development team. If Xcode says the bundle identifier is unavailable, set a unique identifier under **General → Identity**.
+5. Press **Run** (⌘R). Wait for Xcode to resolve the Swift packages on the first build. If the iPhone requests **Developer Mode**, enable it under **Settings → Privacy & Security**, restart, and confirm. If iOS asks you to trust the developer, follow the on-device prompt.
+6. Finish CareSphere onboarding. On the permissions step, tap the Apple Health row to request read-only access, or open **Vitals → Enable**. Review the requested categories in Apple Health if no records appear.
+
+The project requests HealthKit plus background delivery, so Xcode signing must support those capabilities. A free **Personal Team** can install development apps on a registered iPhone, but Apple says its provisioning expires after 7 days, requiring a rebuild and reinstall. HealthKit/background-delivery entitlement availability depends on the team; if Xcode reports that your team or provisioning profile does not support HealthKit, you need an eligible Apple Developer team. [Apple's account guide](https://developer.apple.com/help/account/basics/about-your-developer-account) explains Personal Team provisioning limits and membership requirements.
+
+Apple Health is available on iPhone/iPad only—not in the Mac DMG. CareSphere asks for permission but cannot tell whether HealthKit read access was denied; an empty list may also mean no matching Health records exist. Garmin workouts must first sync from Garmin Connect to Apple Health on the iPhone. The current simulator limitation and unsigned CI compile check are documented in the [iOS build notes](ios/README.md).
 
 ## Optional 2.1.0 Mac features and setup
 
