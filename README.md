@@ -14,13 +14,13 @@
 
 | Area | How it actually works |
 |---|---|
-| 🫀 **Wearable vitals** | "Pair heart-rate monitor" uses the **Web Bluetooth API** and subscribes to the standard **Bluetooth SIG Heart Rate profile (service `0x180D`, characteristic `0x2A37`)** — the same GATT profile exposed by Polar, Wahoo, and Apple-Watch-bridged straps. BPM values arrive as real GATT notifications and plot on a live sparkline. When the browser can't do Web Bluetooth (Safari/Firefox/iOS) or nothing is paired, CareSphere streams **clearly-labeled** physiologically-plausible data (`LIVE BLE` vs `SIMULATED` chips on every card — never faking "clinical"). |
-| 🩺 **Measurement flows** | The web SpO₂/BP animations are **simulated demonstrations**, not sensor readings (shown with `SIMULATED` source labels). Real SpO₂/BP values require a compatible device and supported HealthKit data; no cuff or optical sensor is emulated as clinical hardware. |
+| 🫀 **Wearable vitals** | "Pair real monitor" uses the **Web Bluetooth API** and subscribes to the standard **Bluetooth SIG Heart Rate profile (service `0x180D`, characteristic `0x2A37`)**. BPM values arrive as real GATT notifications and plot on a live sparkline. Canceling or failing to pair shows no reading; a separate **Start labeled demo** button is required to generate `SIMULATED` sample data. `LIVE BLE` and `SIMULATED` remain distinct on every card and export. |
+| 🩺 **Measurement flows** | The web SpO₂/BP cards generate **simulated examples only**, not sensor readings. This web app has no connected SpO₂/BP sensor path; the native iPhone app can display readings only when Apple Health supplies them. No cuff or optical sensor is emulated as clinical hardware. |
 | ☕ **Video coffee circles** | Real [meet.jit.si](https://meet.jit.si) Jitsi rooms load in-app. They have no CareSphere host, schedule, attendance tracking, or moderation; anyone with a link may join. Verify participants before sharing private health information. |
 | 🔔 **Medication reminders** | After you review and confirm your entered schedule, the open page checks every 15 s and can raise an in-app toast, browser notification, and spoken prompt. Browser delivery varies by platform; this web app cannot reliably schedule while the browser is closed. |
 | 🎧 **Sensory soundscapes** | Rain, ocean, forest, and hearth are **synthesized live with the Web Audio API** — filtered noise beds, LFO swells, procedurally scheduled birdsong and crackle transients. No audio files, works offline. |
 | 🚨 **Emergency SOS** | Real **`tel:911`** dial link, optional GPS coordinates, and a user-confirmed share-sheet/clipboard message. No automatic Care Circle push backend is configured; the app never claims a message was sent or acknowledged. |
-| 📊 **Vitals export** | One-click CSV preserves real BLE readings separately from clearly labeled simulated SpO₂/BP spot-checks. It is a data export—not a clinical record or diagnosis. |
+| 📊 **Vitals export** | One-click, CSV-escaped export preserves real BLE readings separately from clearly labeled simulated SpO₂/BP examples. It is a data export—not a clinical record or diagnosis. |
 | 📲 **Installable PWA** | Web app manifest + icons + service worker (production builds). Seniors and families can install it to a home screen; routines still open offline. |
 | ♿ **Accessibility** | Text-size scaling (A / A+ / A++), high-contrast mode, `prefers-reduced-motion` support, ARIA roles/labels throughout, one-tap daily mood check-in. |
 | 🔒 **Privacy** | Web data is stored in browser localStorage (not encrypted by CareSphere), with explicit JSON export and erase controls. The 2.2 native development code stores care data in protected Application Support with iOS file protection and owner-only Mac permissions, and adds explicit JSON export/erase controls; physical-device verification remains pending. The optional 1.5B GGUF assistant runs on-device; Kiwix search is sent only to a configured local/private host. |
@@ -31,11 +31,11 @@
 
 ## Feature tour
 
-- **Overview** — greeting, day-at-a-glance metrics, daily mood check-in (saved + 14-day history dots), predictable-routine checklist, and today's medications with the next due dose.
-- **Therapy & Sensory** — Emotion Recognition match (autism emotional-literacy training), Pattern Recall (working-memory game with persisted best score), Web-Audio soundscapes, and a guided 4·4·6 breathing coach.
+- **Overview** — greeting, day-at-a-glance metrics, daily mood check-in (saved + 14-day history dots), user-customizable routines with daily resets, and today's medication self-check-ins.
+- **Therapy & Sensory** — optional, non-clinical emoji and pattern games, Web Audio soundscapes, and paced breathing with clear stop/comfort guidance.
 - **Coffee Circles** — three real Jitsi room links plus an ad-hoc room; join embedded or in a new tab. No CareSphere host, schedule, attendance tracking, or moderation is configured; anyone with a link may join.
 - **Care Circle** — browser/device-local care notes and summaries of saved check-ins, plus a user-selected visit-prep text brief. It previews exactly which notes, self-reports, medication reminders and source-labeled vitals will be included; simulated readings require an explicit choice and remain labeled. The illustrative roster is sample content only; no account sync, clinician portal, family notifications, or shared backend is configured.
-- **Vitals & Telehealth** — BLE pairing, clearly-labeled source chips, live sparkline, spot-checks, CSV export, and one-tap Jitsi telehealth visit.
+- **Vitals & Telehealth** — real BLE pairing, a separate explicitly labeled demo stream, source chips, live sparkline, generated sample values, RFC-escaped CSV export, and one-tap Jitsi visit.
 - **Native Health Guide (Mac 2.1.0)** — source-linked offline MedlinePlus search, optional Qwen2.5 1.5B on-device summaries, and a local Kiwix connection for an existing Wikipedia/ZIM file. The AI is educational only—not diagnosis, triage, a drug-interaction checker, or dosing advice.
 
 ## Download & install
@@ -47,7 +47,7 @@ See the [download and setup guide](DOWNLOAD.md). The latest published Mac instal
 ```bash
 npm install
 npm run dev      # http://localhost:3000
-npm test         # visit-brief privacy/source-label tests
+npm test         # storage, daily check-in, CSV, and visit-brief tests
 npm run build    # production bundle + PWA in dist/
 ```
 

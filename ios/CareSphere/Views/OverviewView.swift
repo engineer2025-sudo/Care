@@ -5,6 +5,8 @@ struct OverviewView: View {
     @EnvironmentObject private var notifications: NotificationService
     @EnvironmentObject private var bluetooth: BluetoothHeartRateService
     @EnvironmentObject private var steps: StepCountService
+    @State private var showRoutineEditor = false
+    @State private var currentLocalDayKey = CareTime.dayKey()
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -34,10 +36,29 @@ struct OverviewView: View {
             .onAppear {
                 store.refreshMedicationReminders()
             }
+            .task {
+                while !Task.isCancelled {
+                    let now = Date()
+                    let boundary = Calendar.current.nextDate(
+                        after: now,
+                        matching: DateComponents(hour: 0, minute: 0, second: 1),
+                        matchingPolicy: .nextTime,
+                        repeatedTimePolicy: .first,
+                        direction: .forward) ?? now.addingTimeInterval(60)
+                    let delay = max(1, boundary.timeIntervalSinceNow)
+                    try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                    guard !Task.isCancelled else { return }
+                    currentLocalDayKey = CareTime.dayKey()
+                }
+            }
             .onChange(of: notifications.authorizationStatus) { status in
                 if status == .authorized || status == .provisional {
                     store.refreshMedicationReminders()
                 }
+            }
+            .sheet(isPresented: $showRoutineEditor) {
+                RoutineEditorView()
+                    .environmentObject(store)
             }
         }
     }
@@ -49,7 +70,7 @@ struct OverviewView: View {
                 .foregroundStyle(Color.emerald)
             Text("Connected care for independent living")
                 .font(.title2.weight(.heavy))
-            Text("Live Apple Health & Bluetooth vitals, real Jitsi video rooms you can join with family, and sensory therapy games. Care notes stay on this device.")
+            Text("Live Bluetooth heart-rate monitors, Apple Health summaries on iPhone, Jitsi video rooms, and optional sensory activities. Care notes stay on this device.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             if !store.personalizedTagline.isEmpty {
@@ -73,7 +94,7 @@ struct OverviewView: View {
             BigMetricButton(title: bluetooth.bpm.map { "\($0) bpm" } ?? "Not paired", subtitle: "Heart-rate sensor") {
                 Image(systemName: "waveform.path.ecg").foregroundStyle(Color.emerald)
             } action: {}
-            BigMetricButton(title: "\(store.emotionScore) wins", subtitle: "Therapy engagement") {
+            BigMetricButton(title: "\(store.emotionScore) wins", subtitle: "Optional practice-game points") {
                 Image(systemName: "brain.head.profile").foregroundStyle(.indigo)
             } action: {}
             BigMetricButton(
@@ -83,7 +104,7 @@ struct OverviewView: View {
                 subtitle: store.configuredMedications.isEmpty
                     ? "No medication schedule"
                     : store.medicationScheduleConfirmed
-                        ? store.nextDueMedication.map { "Next: \($0.shortName) at \($0.timeLabel)" } ?? "All doses marked taken ✓"
+                        ? store.nextDueMedication.map { "Next: \($0.shortName) at \($0.timeLabel)" } ?? "All check-ins marked today ✓"
                         : "Reminders paused · confirm in Settings") {
                 Image(systemName: "pills.fill").foregroundStyle(.pink)
             } action: {}
@@ -165,29 +186,54 @@ struct OverviewView: View {
 
     private var routinesCard: some View {
         SectionCard(title: "Predictable daily routine", systemImage: "calendar") {
-            VStack(spacing: 8) {
-                ForEach(store.routines) { routine in
-                    Button {
-                        store.toggleRoutine(routine)
-                        celebrate()
-                    } label: {
-                        HStack {
-                            Text(routine.emoji)
-                            Text(routine.title)
-                                .font(.subheadline.weight(.semibold))
-                                .strikethrough(routine.isDone)
-                                .foregroundStyle(routine.isDone ? Color.emerald : .primary)
-                            Spacer()
-                            Image(systemName: routine.isDone ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(routine.isDone ? Color.emerald : Color.secondary)
+            HStack {
+                Text("Check off what feels right today. Your list resets each local day.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                Button {
+                    showRoutineEditor = true
+                } label: {
+                    Label("Edit", systemImage: "slider.horizontal.3")
+                        .font(.caption.weight(.bold))
+                }
+                .buttonStyle(.bordered)
+                .accessibilityLabel("Add or remove daily routines")
+            }
+
+            if store.routines.isEmpty {
+                Text("No routines yet. Add a few gentle reminders that work for you.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(store.routines) { routine in
+                        Button {
+                            store.toggleRoutine(routine)
+                            celebrate()
+                        } label: {
+                            HStack {
+                                Text(routine.emoji)
+                                Text(routine.title)
+                                    .font(.subheadline.weight(.semibold))
+                                    .strikethrough(routine.isDone)
+                                    .foregroundStyle(routine.isDone ? Color.emerald : .primary)
+                                Spacer()
+                                Image(systemName: routine.isDone ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(routine.isDone ? Color.emerald : Color.secondary)
+                            }
+                            .padding(12)
+                            .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         }
-                        .padding(12)
-                        .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
+        .id(currentLocalDayKey)
     }
 
     private var medicationsCard: some View {
@@ -214,13 +260,13 @@ struct OverviewView: View {
                             Button {
                                 store.toggleMedication(med)
                                 if !med.isTaken { celebrate() }
-                                SpeechService.shared.speak("Dose recorded. Thank you.", enabled: store.voiceReminders, voiceIdentifier: store.voiceIdentifier)
+                                SpeechService.shared.speak("Dose check-in saved.", enabled: store.voiceReminders, voiceIdentifier: store.voiceIdentifier)
                             } label: {
                                 Image(systemName: med.isTaken ? "checkmark.circle.fill" : "circle.dashed")
                                     .font(.title3)
                                     .foregroundStyle(med.isTaken ? Color.emerald : Color.pink)
                             }
-                            .accessibilityLabel("Mark \(med.name) \(med.isTaken ? "not taken" : "taken")")
+                            .accessibilityLabel("Mark \(med.name) \(med.isTaken ? "not taken today" : "taken today")")
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(med.name)
                                     .font(.subheadline.weight(.bold))
@@ -231,7 +277,7 @@ struct OverviewView: View {
                                     .foregroundStyle(.secondary)
                             }
                             Spacer()
-                            StatusChip(text: med.isTaken ? "Taken" : "Due", color: med.isTaken ? .gray : .pink)
+                            StatusChip(text: med.isTaken ? "Marked today" : "Not marked", color: med.isTaken ? .gray : .pink)
                         }
                         .padding(12)
                         .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -239,6 +285,9 @@ struct OverviewView: View {
                 }
             }
             if store.medicationScheduleConfirmed {
+                Text("Check-ins are self-reported, reset at local midnight, and do not verify that a dose was taken.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
                 Label {
                     Text(notifications.authorizationStatus == .authorized || notifications.authorizationStatus == .provisional
                          ? "Scheduled iOS reminders use the system sound when the app is closed."
@@ -250,5 +299,91 @@ struct OverviewView: View {
                 .foregroundStyle(.secondary)
             }
         }
+    }
+}
+
+private struct RoutineEditorView: View {
+    @EnvironmentObject private var store: CareStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var title = ""
+    @State private var emoji = "✨"
+
+    private var canAdd: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && store.routines.count < 24
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Your routines") {
+                    if store.routines.isEmpty {
+                        Text("No routines yet. Add a reminder that fits your day.")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(store.routines) { routine in
+                            HStack(spacing: 10) {
+                                Text(routine.emoji)
+                                    .font(.title3)
+                                Text(routine.title)
+                                    .lineLimit(2)
+                                Spacer(minLength: 8)
+                                if routine.isDone {
+                                    Label("Done today", systemImage: "checkmark.circle.fill")
+                                        .font(.caption)
+                                        .foregroundStyle(Color.emerald)
+                                        .labelStyle(.titleAndIcon)
+                                }
+                                Button(role: .destructive) {
+                                    store.removeRoutine(id: routine.id)
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .frame(width: 36, height: 36)
+                                }
+                                .buttonStyle(.borderless)
+                                .accessibilityLabel("Remove \(routine.title)")
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
+                    if store.routines.count >= 24 {
+                        Text("You can save up to 24 routines.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Section("Add a routine") {
+                    HStack {
+                        TextField("Emoji", text: $emoji)
+                            .frame(width: 68)
+                            .accessibilityLabel("Routine emoji")
+                        TextField("Routine name", text: $title)
+                            .accessibilityLabel("Routine name")
+                    }
+                    Button {
+                        guard canAdd else { return }
+                        store.addRoutine(title: title, emoji: emoji)
+                        title = ""
+                        emoji = "✨"
+                    } label: {
+                        Label("Add to my routine", systemImage: "plus.circle.fill")
+                    }
+                    .disabled(!canAdd)
+                }
+
+                Section {
+                    Text("Routine check-ins are stored on this device. A checkmark resets at local midnight; it is a personal checklist, not proof of an activity.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Customize routine")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .frame(minWidth: 320, minHeight: 360)
     }
 }

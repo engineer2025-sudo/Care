@@ -1,3 +1,5 @@
+import { isMedicationTakenToday } from './careStorage.js'
+
 const DEFAULT_MOOD_LABELS = {
   1: 'Struggling',
   2: 'Low',
@@ -33,6 +35,11 @@ export function buildVisitBrief({
     const date = new Date(value)
     return Number.isNaN(date.valueOf()) ? String(value || 'Date not recorded') : date.toLocaleString()
   }
+  const noteDateLabel = value => {
+    if (!value || value === 'Just now') return 'Date not recorded'
+    const date = new Date(value)
+    return Number.isNaN(date.valueOf()) ? String(value) : date.toLocaleString()
+  }
   const liveRecords = hrRecords.filter(record => record.source === 'LIVE_BLE').slice(-20)
   const simulatedRecords = hrRecords.filter(record => record.source !== 'LIVE_BLE').slice(-20)
   const lines = [
@@ -47,7 +54,10 @@ export function buildVisitBrief({
     lines.push('MEDICATION REMINDERS (user-entered; not pharmacy-verified)')
     lines.push(`Schedule reviewed in CareSphere: ${medsConfirmed ? 'Yes' : 'No — schedule is unconfirmed and reminders are paused.'}`)
     if (meds.length === 0) lines.push('No medication reminders are saved.')
-    meds.forEach(med => lines.push(`- ${med.name || 'Unnamed entry'} · ${med.time || 'time not set'}${medsConfirmed ? (med.taken ? ' · marked taken by user' : ' · not marked taken') : ''}`))
+    meds.forEach(med => {
+      const markedTakenToday = isMedicationTakenToday(med, now)
+      lines.push(`- ${med.name || 'Unnamed entry'} · ${med.time || 'time not set'}${medsConfirmed ? (markedTakenToday ? ' · marked taken by user today' : ' · not marked taken today') : ''}`)
+    })
     lines.push('')
   }
   if (includeMoods) {
@@ -62,7 +72,7 @@ export function buildVisitBrief({
   if (includeNotes) {
     lines.push('CARE NOTES (user-entered; not clinician-verified)')
     if (notes.length === 0) lines.push('No care notes are saved.')
-    notes.slice(0, 50).forEach(note => lines.push(`- ${note.date || 'Date not recorded'} · ${note.author || 'Author not recorded'}: ${note.note || ''}`))
+    notes.slice(0, 50).forEach(note => lines.push(`- ${noteDateLabel(note.date)} · ${note.author || 'Author not recorded'}: ${note.note || ''}`))
     lines.push('')
   }
   if (includeLiveVitals) {

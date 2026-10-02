@@ -445,7 +445,7 @@ struct SettingsView: View {
             return "Denied — enable in system Settings → Notifications → CareSphere."
         default:
             return store.configuredMedications.isEmpty
-                ? "Add a verified schedule, confirm it, and allow notifications to use reminders."
+                ? "Add a personal schedule, review each entry against your current instructions, and allow notifications to use reminders."
                 : "No reminders are active until permission and schedule confirmation are both in place."
         }
     }

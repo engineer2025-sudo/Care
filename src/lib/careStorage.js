@@ -3,6 +3,23 @@ export const RESET_LOCAL_DATA_EVENT = 'caresphere:reset-local-data'
 
 const PERSISTED_KEYS = new Set(['settings', 'routines', 'meds', 'medsConfirmed', 'notes', 'moods', 'emotionScore', 'bestPattern'])
 const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value)
+const isDayKey = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+
+/** A stable local-calendar day key for daily routines and medication check-ins. */
+export function localDayKey(date = new Date()) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export function isRoutineDoneToday(routine, date = new Date()) {
+  return routine?.completedOn === localDayKey(date)
+}
+
+export function isMedicationTakenToday(medication, date = new Date()) {
+  return medication?.takenOn === localDayKey(date)
+}
 
 /** Parse only the known CareSphere storage keys; ignore malformed or foreign data. */
 export function parseCareStorage(raw) {
@@ -30,7 +47,9 @@ export function normalizePersistedValue(key, value, fallback) {
     return value.slice(0, 200).filter(isRecord).map((item, index) => ({
       id: typeof item.id === 'string' ? item.id.slice(0, 120) : Number.isSafeInteger(item.id) ? item.id : `routine-${index}`,
       text: typeof item.text === 'string' ? item.text.slice(0, 240) : '',
-      done: item.done === true,
+      // Migrate the legacy Boolean as today's check-in once; new data expires
+      // naturally at the next local calendar day.
+      completedOn: isDayKey(item.completedOn) ? item.completedOn : item.done === true ? localDayKey() : null,
     }))
   }
   if (key === 'meds' && Array.isArray(value)) {
@@ -38,7 +57,8 @@ export function normalizePersistedValue(key, value, fallback) {
       id: typeof item.id === 'string' ? item.id.slice(0, 120) : Number.isSafeInteger(item.id) ? item.id : `medication-${index}`,
       name: typeof item.name === 'string' ? item.name.slice(0, 160) : '',
       time: typeof item.time === 'string' ? item.time.slice(0, 32) : '',
-      taken: item.taken === true,
+      // Legacy taken flags are kept for today only, then stop suppressing reminders.
+      takenOn: isDayKey(item.takenOn) ? item.takenOn : item.taken === true ? localDayKey() : null,
     }))
   }
   if (key === 'notes' && Array.isArray(value)) {

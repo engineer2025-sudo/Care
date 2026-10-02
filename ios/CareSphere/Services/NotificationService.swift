@@ -59,7 +59,9 @@ final class NotificationService: NSObject, ObservableObject {
                 center.removePendingNotificationRequests(withIdentifiers: medicationIDs)
 
                 guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
-                for med in meds where !med.isTaken && !med.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                // Keep one repeating calendar request per confirmed schedule.
+                // A taken check-in is day-specific and must not cancel tomorrow's alert.
+                for med in meds where !med.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     var comps = DateComponents()
                     comps.hour = med.hour
                     comps.minute = med.minute

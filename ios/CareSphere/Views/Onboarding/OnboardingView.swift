@@ -162,7 +162,7 @@ struct OnboardingView: View {
                 Text("Welcome to CareSphere")
                     .font(.largeTitle.weight(.heavy))
                     .multilineTextAlignment(.center)
-                Text("A calm companion for independent living — wearable vitals, video coffee circles, medication rhythms and sensory therapy, all yours.")
+                Text("A calm companion for independent living — wearable vitals, video coffee circles, medication reminders and optional sensory activities.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -289,7 +289,7 @@ struct OnboardingView: View {
                 }
                 .toggleStyle(.switch)
             } else {
-                Text("No medications entered. You can add a verified schedule later in Settings.")
+                Text("No medications entered. You can add a personal reminder schedule later in Settings and review each entry against your current instructions.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -336,7 +336,7 @@ struct OnboardingView: View {
 
     private var routinesPage: some View {
         VStack(alignment: .leading, spacing: 18) {
-            pageHeader("Daily rhythm", "Predictable routines lower anxiety. Pick the anchors for each day.", systemImage: "calendar.badge.checkmark")
+            pageHeader("Daily rhythm", "Choose a few checklist reminders that fit your day. Check-ins reset each local day and are not proof of an activity.", systemImage: "calendar.badge.checkmark")
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach($routines) { $routine in

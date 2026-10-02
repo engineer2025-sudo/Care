@@ -66,12 +66,12 @@ Binding to `0.0.0.0` lets devices on the network reach Kiwix. Use it only on tru
 | 🩺 Reference library | Current MedlinePlus topic XML, parsed locally; source and publisher shown for retrieved records. |
 | 📚 Wikipedia ZIM | Search existing ZIM through Kiwix on a local/private network. The ZIM remains in its current location. |
 | ☕ Video | Jitsi Meet SDK on iOS and real `meet.jit.si` rooms, with macOS browser hand-off. |
-| 💊 Medication reminders | UserNotifications calendar triggers with **Taken / Snooze** actions. The app records the schedule the user enters; it does not check a prescription. |
+| 💊 Medication reminders | UserNotifications calendar triggers with **Taken / Snooze** actions. Daily self-check-ins reset at local midnight; the app records a user-entered schedule and never verifies a dose or prescription. |
 | 🔊 Spoken prompts | Apple AVSpeechSynthesizer voices by default; optional Kokoro int8 English TTS via Sherpa-ONNX, with local voice generation and playback. Closed-app notifications use system sounds. |
 | 🎧 Sensory soundscapes | Procedural on-device AVAudioEngine DSP; works without audio downloads. |
 | 🚨 Emergency | SOS, one-tap `tel:911`, and a user-confirmed Share sheet for optional GPS details. No automatic Care Circle push server is configured. |
 | 📝 Visit preparation (2.3 prototype) | Choose local profile, self-entered reminders, mood entries, notes and questions; preview the exact text and share only after tapping the system share sheet. No HealthKit observations are included yet. |
-| 🧩 Therapy & routines | SwiftUI emotion recognition, pattern recall, breathing coach, daily mood check-in and predictable routines. |
+| 🧩 Optional practice & routines | Non-clinical emoji/pattern games and paced breathing; custom daily routines with local-midnight resets and a daily mood check-in. |
 | 🔒 Privacy | The 2.2 development code migrates legacy care data into private Application Support, protects the iOS file with Complete File Protection, restricts Mac file/folder access to the current user, and adds explicit JSON export/erase controls. Optional Qwen/Kokoro weights and reference downloads remain separate; Kiwix search is restricted to the configured local/private host. |
 
 ## Build & run (Mac with Xcode)

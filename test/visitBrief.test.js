@@ -31,6 +31,34 @@ test('labels medication schedule as unconfirmed and self-entered', () => {
   assert.doesNotMatch(brief, /marked taken by user/)
 })
 
+test('visit brief reports only a same-day medication self-report as taken', () => {
+  const fixedNow = new Date()
+  const today = `${fixedNow.getFullYear()}-${String(fixedNow.getMonth() + 1).padStart(2, '0')}-${String(fixedNow.getDate()).padStart(2, '0')}`
+  const brief = buildVisitBrief({
+    meds: [
+      { name: 'Today medicine', time: '8:00 AM', takenOn: today },
+      { name: 'Older medicine', time: '9:00 AM', takenOn: '2000-01-01' },
+    ],
+    medsConfirmed: true,
+    includeMeds: true,
+    now: fixedNow,
+  })
+
+  assert.match(brief, /Today medicine · 8:00 AM · marked taken by user today/)
+  assert.match(brief, /Older medicine · 9:00 AM · not marked taken today/)
+})
+
+test('legacy relative note timestamps are not exported as if they were current', () => {
+  const brief = buildVisitBrief({
+    notes: [{ date: 'Just now', author: 'Me', note: 'Older saved note' }],
+    includeNotes: true,
+    now: fixedNow,
+  })
+
+  assert.match(brief, /Date not recorded · Me: Older saved note/)
+  assert.doesNotMatch(brief, /Just now/)
+})
+
 test('live BLE selection never silently includes simulated heart-rate records', () => {
   const brief = buildVisitBrief({
     hrRecords: [

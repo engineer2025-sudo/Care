@@ -5,6 +5,11 @@ struct TherapyView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
+                    Text("Optional practice and sensory tools—not clinical therapy, treatment, or assessment. Skip or stop any activity that feels uncomfortable.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 4)
                     EmotionMatchCard()
                     PatternRecallCard()
                     SoundscapesCard()
@@ -19,7 +24,7 @@ struct TherapyView: View {
     }
 }
 
-// MARK: - Emotion Recognition (autism emotional-literacy training)
+// MARK: - Optional emotion-label matching activity
 
 private let emotions: [(name: String, emoji: String)] = [
     ("Happy", "😊"), ("Calm", "😌"), ("Excited", "🤩"), ("Tired", "😴"),
@@ -32,7 +37,10 @@ struct EmotionMatchCard: View {
     @State private var streak = 0
 
     var body: some View {
-        SectionCard(title: "Emotion Recognition", systemImage: "brain.head.profile") {
+        SectionCard(title: "Emoji-matching practice", systemImage: "brain.head.profile") {
+            Text("Optional emoji-matching practice. Real people show feelings in many different ways; this game is not an assessment.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             HStack {
                 Text("Which face shows **\(target.name)**?")
                     .font(.footnote)
@@ -85,7 +93,7 @@ struct EmotionMatchCard: View {
     }
 }
 
-// MARK: - Pattern Recall (working-memory training)
+// MARK: - Optional pattern-matching game
 
 struct PatternRecallCard: View {
     @EnvironmentObject private var store: CareStore
@@ -101,6 +109,9 @@ struct PatternRecallCard: View {
 
     var body: some View {
         SectionCard(title: "Pattern Recall", systemImage: "gamecontroller.fill") {
+            Text("A short pattern-matching game for optional practice. Your score is not a measure of memory or cognitive health.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             HStack {
                 Text(banner)
                     .font(.footnote.weight(.semibold))
@@ -198,7 +209,7 @@ struct SoundscapesCard: View {
 
     var body: some View {
         SectionCard(title: "Sensory Soundscapes", systemImage: "speaker.wave.2.fill") {
-            Text("Generated live on-device with AVAudioEngine — noise shaping, LFO swells, procedural birdsong and crackle. Gentle on sensory sensitivities; works offline.")
+            Text("Generated live on-device with AVAudioEngine and works offline. Audio preferences vary; start at a comfortable device volume and stop anytime.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
@@ -254,7 +265,7 @@ struct BreathingCard: View {
 
     var body: some View {
         SectionCard(title: "Guided Breathing 4·4·6", systemImage: "wind") {
-            Text("Down-regulates anxiety and sensory overload — used before social calls, transitions, and bedtime.")
+            Text("A paced-breathing exercise, not treatment. The breath hold is optional—pause or stop if it feels uncomfortable.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             HStack {

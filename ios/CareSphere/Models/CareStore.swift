@@ -78,6 +78,9 @@ final class CareStore: ObservableObject {
 
         protectStoreDirectory()
         protectExistingStoreFile()
+        // Persist decoded legacy Boolean check-ins as day-keyed values so a
+        // later app launch cannot migrate yesterday's checkmark into today.
+        if box != nil { save() }
         observeNotificationActions()
     }
 
@@ -317,6 +320,20 @@ final class CareStore: ObservableObject {
         if let index = routines.firstIndex(where: { $0.id == routine.id }) {
             routines[index].isDone.toggle()
         }
+    }
+
+    /// Add a small, predictable user-defined routine to today's checklist.
+    func addRoutine(title: String, emoji: String = "✨") {
+        let cleanedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedTitle.isEmpty, routines.count < 24 else { return }
+        let cleanedEmoji = emoji.trimmingCharacters(in: .whitespacesAndNewlines)
+        routines.append(Routine(
+            emoji: String((cleanedEmoji.isEmpty ? "✨" : cleanedEmoji).prefix(2)),
+            title: String(cleanedTitle.prefix(80))))
+    }
+
+    func removeRoutine(id: UUID) {
+        routines.removeAll { $0.id == id }
     }
 
     func toggleMedication(_ medication: Medication) {

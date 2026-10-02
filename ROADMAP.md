@@ -1,6 +1,6 @@
 # CareSphere 2.2 and 2.3 development plan
 
-**Status (2026-09-27):** CareSphere for Mac 2.1.0 is the latest public release. Versions 2.2 and 2.3 are development work only; neither has been built as a release candidate or published. The 2.1.0 download remains unchanged.
+**Status (2026-10-01):** CareSphere for Mac 2.1.0 remains the latest public release. Versions 2.2 and 2.3 are development work only; neither is being published by this change. The 2.1.0 download remains unchanged.
 
 ## Product direction from a current competitor review
 
@@ -22,9 +22,13 @@ CareSphere should complement—not claim to replace—official health records, a
 - [x] Native HealthKit read path requests workouts alongside vitals, lists up to 25 recent workout summaries, and refreshes through observer/background delivery. Garmin workouts are supported through Garmin Connect → Apple Health, not a direct Garmin API; Garmin Connect must complete its Health transfer, and it does not write GPS tracks.
 - [x] Local assistant generation now supplies the Qwen2.5 ChatML assistant prefix with its required newline, grows the token-output buffer safely, preserves source results, and exposes stage-specific llama.cpp failures with local-only retry. Validate generation on a real device with the optional model installed before calling the user-reported failure closed.
 - [x] Release safety: ordinary development pushes build CI artifacts only. A release now requires an explicit manual workflow dispatch, a version-matching tag, version-specific reviewed notes, and a tag/release that does not already exist. The workflow no longer clobbers the public 2.1.0 release.
+- [x] Daily check-ins are local-day scoped in web and native: routine completion and medication self-reports reset at local midnight, old Boolean records migrate safely, and marking a medicine taken no longer cancels its next-day system notification. The native overview refreshes at the next local day boundary.
+- [x] Personal routines can be added/removed in both clients (up to 24 in the native editor and web checklist); reminders remain personal checklists, not proof of activity.
+- [x] Web BLE pairing cancellation/failure and unsupported browsers no longer start fabricated heart-rate streams; sample data requires a separate explicit demo action. Disconnect handlers are cleaned up, stale live values clear on disconnect, simulated SpO₂/BP examples are excluded from live-range messaging, and CSV exports escape commas/quotes/newlines.
+- [x] UI/performance pass: restore browser pinch-zoom, add Escape-closing and dialog semantics, defer the confetti bundle until first use while respecting reduced motion, stabilize toast callbacks, bound offline asset caching, and display actual note timestamps instead of leaving `Just now` forever.
 - [ ] Verify the native changes in actual iOS-device and Mac builds, test HealthKit/Garmin delivery on a signed physical iPhone, test file migration/export/erase on physical Apple devices and supported browsers, and complete a data-retention review.
 - [x] Licensing decision: keep the current local Kiwix server bridge and avoid linking the GPL-3.0 `CoreKiwix` framework or changing CareSphere's licensing. Wikipedia is therefore **not** built into this version; the existing ZIM stays where it is and still requires a separately running local Kiwix server. Revisit only if a compatible alternative or a licensing change is approved.
-- [ ] Continue the accessibility/UI pass: larger touch targets, clearer care-state hierarchy, readable empty states, and consistent high-contrast/reduced-motion behavior.
+- [ ] Continue accessibility review on supported devices: add and test modal focus trapping/restoration, screen-reader navigation, larger native Dynamic Type behavior, and high-contrast/reduced-motion details. Escape-to-close is implemented in the web dialogs, but keyboard and assistive-technology testing remains.
 
 **Security boundary:** biometrics are a screen lock, not a separately derived encryption key. The web app's localStorage is not encrypted; users should secure their device/browser profile. Downloaded exports are outside app protections. Clearing CareSphere care data does not revoke OS permissions or delete separately downloaded AI/reference files.
 
