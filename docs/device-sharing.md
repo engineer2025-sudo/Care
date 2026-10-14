@@ -97,3 +97,10 @@ The package contains 38 Swift and 27 JVM test cases. Native host-machine live-so
 Three extra pure validation tests on each native platform cover compatible advertised/resolved address matching, public/ambiguous/unsupported endpoint rejection and safe bounded labels. The Android CI also builds a separate **test APK**, which creates independent real platform publisher/browser instances, resolves a real DNS-SD result, transfers and decrypts an encrypted test snapshot over the resulting address, and verifies Stop. It does not inject a fake peer into the app’s device list. The test APK and its synthetic records are not part of the installable app APK.
 
 Final build/run references are in each download’s `BUILD_VERIFICATION.json`. Emulator publication/discovery on one virtual device is not proof of discovery between physical phones. Repeat all three physical phone pairings, in both directions, on a private router and hotspot before relying on this feature.
+
+### Current discovery release CI
+
+- iPhone 3.4 (11), including the final focus/lifecycle changes: https://github.com/engineer2025-sudo/Care/actions/runs/38654306971
+- Android 1.4 (5), including raw instrumentation-result verification and emulator-only safety guard: https://github.com/engineer2025-sudo/Care/actions/runs/38655163288
+
+Both runs completed successfully. The earlier Android run exposed a test-wrapper output-format issue after a successful native discovery test; a subsequent emulator lost its ADB connection before the new checks. Neither failed run is used for the downloadable APK. The final run passed the full required flow without skipping the discovery test.
