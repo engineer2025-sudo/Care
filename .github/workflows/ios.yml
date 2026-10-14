@@ -2,7 +2,7 @@ name: iOS Build
 
 on:
   push:
-    branches: [arena/01a0626b-care, main]
+    branches: ['arena/**', main]
     paths: ['ios/**', '.github/workflows/ios.yml']
   pull_request:
     paths: ['ios/**', '.github/workflows/ios.yml']
@@ -18,9 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
       - name: Select newest installed Xcode
         run: |
           ls -d /Applications/Xcode*.app | sort -V
@@ -29,8 +26,16 @@ jobs:
           sudo xcode-select -s "$LATEST_XCODE"
           xcodebuild -version
 
-      - name: Generate Xcode project
-        run: cd ios && xcodegen generate
+      - name: Validate checked-in project and assets
+        run: python3 ios/scripts/check_project.py
+
+      - name: Test activity logic (no network or iPhone required)
+        run: |
+          set -o pipefail
+          swift test --package-path ios/ActivityKit 2>&1 | tee /tmp/activity-tests.log
+
+      - name: Check shared Xcode project
+        run: plutil -lint ios/CareSphere.xcodeproj/project.pbxproj ios/CareSphere-iOS-Info.plist ios/CareSphere.entitlements
 
       - name: Show toolchain
         run: |
@@ -88,10 +93,28 @@ jobs:
           path: /tmp/*.log
           if-no-files-found: ignore
 
+      - name: Archive open-in-Xcode source
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: CareSphere-Xcode-Source
+          path: |
+            ios/CareSphere/
+            ios/ActivityKit/Package.swift
+            ios/ActivityKit/Sources/
+            ios/ActivityKit/Tests/
+            ios/CareSphere.xcodeproj/
+            ios/CareSphere-iOS-Info.plist
+            ios/CareSphere.entitlements
+            ios/project.yml
+            ios/README.md
+            ios/scripts/
+          retention-days: 14
+
       - name: Surface errors as annotations
         if: failure()
         run: |
-          grep -hE "\.swift:[0-9]+:[0-9]+: error:" /tmp/spm.log /tmp/xcodebuild.log 2>/dev/null | sort -u | head -25 | while IFS= read -r line; do
+          grep -hE "\.swift:[0-9]+:[0-9]+: error:" /tmp/activity-tests.log /tmp/spm.log /tmp/xcodebuild.log 2>/dev/null | sort -u | head -25 | while IFS= read -r line; do
             echo "::error::${line:0:380}"
           done
           if [[ -s /tmp/xcodebuild.log ]]; then

@@ -1,12 +1,16 @@
 import SwiftUI
 
 struct OverviewView: View {
+    @EnvironmentObject private var navigation: CareNavigation
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var store: CareStore
     @EnvironmentObject private var notifications: NotificationService
     @EnvironmentObject private var bluetooth: BluetoothHeartRateService
     @EnvironmentObject private var support: CareSupportCoordinator
     @EnvironmentObject private var steps: StepCountService
     @State private var showRoutineEditor = false
+    @State private var showMedicationSettings = false
     @State private var currentLocalDayKey = CareTime.dayKey()
 
     private var greeting: String {
@@ -18,21 +22,23 @@ struct OverviewView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    hero
-                    metricsGrid
-                    moodCheckIn
-                    #if os(iOS)
-                    stepsCard
-                    #endif
-                    routinesCard
-                    medicationsCard
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 20) {
+                        hero
+                        metricsGrid(proxy: proxy)
+                        moodCheckIn
+                        routinesCard.id("routines")
+                        medicationsCard.id("medications")
+                        #if os(iOS)
+                        stepsCard
+                        #endif
+                    }
+                    .carePagePadding()
                 }
-                .padding()
             }
             .background(Color.ink)
-            .navigationTitle("Overview")
+            .navigationTitle("Today")
             .inlineTitle()
             .onAppear {
                 store.refreshMedicationReminders()
@@ -57,6 +63,10 @@ struct OverviewView: View {
                     store.refreshMedicationReminders()
                 }
             }
+            .onChange(of: scenePhase) { phase in
+                if phase == .active { currentLocalDayKey = CareTime.dayKey() }
+            }
+            .sheet(isPresented: $showMedicationSettings) { SettingsView(initialSection: .medications) }
             .sheet(isPresented: $showRoutineEditor) {
                 RoutineEditorView()
                     .environmentObject(store)
@@ -65,56 +75,59 @@ struct OverviewView: View {
     }
 
     private var hero: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("\(greeting), \(store.displayName)", systemImage: "sparkles")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(Color.emeraldText)
-            Text("Connected care for independent living")
-                .font(.title2.weight(.heavy))
-            Text("Live Bluetooth heart-rate monitors, Apple Health summaries on iPhone, Jitsi video rooms, and optional sensory activities. Care notes stay on this device.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-            if !store.personalizedTagline.isEmpty {
-                Text(store.personalizedTagline)
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(Color.emeraldText)
+        VStack(alignment: .leading, spacing: 12) {
+            Text(Date(), format: .dateTime.weekday(.wide).month(.abbreviated).day())
+                .font(.subheadline.weight(.medium)).foregroundStyle(Color.emeraldText)
+            Text("\(greeting), \(store.displayName.isEmpty ? "friend" : store.displayName).")
+                .font(.largeTitle.weight(.bold))
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
+            Text("A little structure, a moment of calm, or a familiar face. Choose what feels right today.")
+                .font(.body).foregroundStyle(.secondary)
+            Button { navigation.selectedTab = .activities } label: {
+                Label("Find an activity", systemImage: "square.grid.2x2")
+                    .frame(maxWidth: .infinity, minHeight: 44)
             }
+            .buttonStyle(.borderedProminent)
+            Button { navigation.selectedTab = .connect } label: {
+                Label("Connect with someone", systemImage: "person.2")
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .buttonStyle(.bordered)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .background(
-            LinearGradient(colors: [.teal.opacity(0.35), .emerald.opacity(0.18)], startPoint: .topLeading, endPoint: .bottomTrailing),
-            in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Color.emerald.opacity(0.09), in: RoundedRectangle(cornerRadius: 24))
     }
 
-    private var metricsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            BigMetricButton(title: "\(store.routinesDone)/\(store.routines.count)", subtitle: "Routine done today") {
-                Image(systemName: "checklist").foregroundStyle(Color.emeraldText)
-            } action: {}
-            BigMetricButton(title: bluetooth.bpm.map { "\($0) bpm" } ?? "Not paired", subtitle: "Heart-rate sensor") {
-                Image(systemName: "waveform.path.ecg").foregroundStyle(Color.emeraldText)
-            } action: {}
-            BigMetricButton(title: "Untimed", subtitle: "Optional activities · not scored") {
-                Image(systemName: "square.grid.2x2").foregroundStyle(Color.emeraldText)
-            } action: {}
-            BigMetricButton(
-                title: store.configuredMedications.isEmpty
-                    ? "None"
-                    : store.medicationScheduleConfirmed ? "\(store.medsTaken)/\(store.configuredMedications.count)" : "Review",
-                subtitle: store.configuredMedications.isEmpty
-                    ? "No medication schedule"
-                    : store.medicationScheduleConfirmed
-                        ? store.nextDueMedication.map { "Next: \($0.shortName) at \($0.timeLabel)" } ?? "All check-ins marked today ✓"
-                        : "Reminders paused · confirm in Settings") {
-                Image(systemName: "pills.fill").foregroundStyle(.pink)
-            } action: {}
+    private func metricsGrid(proxy: ScrollViewProxy) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Today at a glance").font(.headline).accessibilityAddTraits(.isHeader)
+            LazyVGrid(columns: typeSize.isAccessibilitySize ? [GridItem(.flexible())] : [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                BigMetricButton(title: "\(store.routinesDone) of \(store.routines.count)", subtitle: "My daily routine") {
+                    Image(systemName: "checklist").foregroundStyle(Color.emeraldText)
+                } action: { proxy.scrollTo("routines", anchor: .top) }
+                BigMetricButton(title: bluetooth.bpm.map { "\($0) bpm" } ?? "Not connected", subtitle: "Bluetooth heart rate") {
+                    Image(systemName: "waveform.path.ecg").foregroundStyle(Color.emeraldText)
+                } action: {
+                    navigation.healthPage = .vitals
+                    navigation.selectedTab = .health
+                }
+                BigMetricButton(title: "11 activities", subtitle: "Explore at your pace") {
+                    Image(systemName: "square.grid.2x2").foregroundStyle(Color.emeraldText)
+                } action: { navigation.selectedTab = .activities }
+                BigMetricButton(
+                    title: store.configuredMedications.isEmpty ? "Set up" : store.medicationScheduleConfirmed ? "\(store.medsTaken) of \(store.configuredMedications.count)" : "Review",
+                    subtitle: "Medication check-ins") {
+                    Image(systemName: "pills").foregroundStyle(.pink)
+                } action: { proxy.scrollTo("medications", anchor: .top) }
+            }
         }
     }
 
     private var moodCheckIn: some View {
-        SectionCard(title: "Daily mood check-in", systemImage: "face.smiling") {
-            HStack(spacing: 10) {
+        SectionCard(title: "How are you feeling?", systemImage: "face.smiling") {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: typeSize.isAccessibilitySize ? 130 : 82))], spacing: 10) {
                 ForEach(1...5, id: \.self) { score in
                     moodButton(score: score)
                 }
@@ -147,10 +160,14 @@ struct OverviewView: View {
         let selected = store.moodToday?.score == score
         return Button {
             store.setMood(score: score)
-            celebrate()
+            if !store.reduceVisualMotion { celebrate() }
         } label: {
-            Text(moodEmoji(score))
-                .font(.title2)
+            VStack(spacing: 8) {
+                Text(moodEmoji(score)).font(.title).accessibilityHidden(true)
+                Text(moodLabel(score)).font(.subheadline.weight(.medium))
+                    .fixedSize(horizontal: false, vertical: true)
+                if selected { Image(systemName: "checkmark.circle.fill").accessibilityHidden(true) }
+            }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
                 .background(selected ? Color.yellow.opacity(0.22) : Color.cardInner,
@@ -159,7 +176,9 @@ struct OverviewView: View {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .strokeBorder(selected ? Color.yellow.opacity(0.7) : .clear, lineWidth: 2))
         }
+        .buttonStyle(.plain)
         .accessibilityLabel("Feeling \(moodLabel(score))")
+        .accessibilityValue(selected ? "Selected" : "")
     }
 
     private func moodEmoji(_ score: Int) -> String {
@@ -175,7 +194,7 @@ struct OverviewView: View {
     #if os(iOS)
     private var stepsCard: some View {
         SectionCard(title: "Today's steps", systemImage: "figure.walk") {
-            HStack {
+            VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("\(steps.todaySteps)")
                         .font(.system(size: 32, weight: .black))
@@ -186,7 +205,7 @@ struct OverviewView: View {
                 Spacer()
                 ProgressView(value: Double(min(steps.todaySteps, store.profile.dailyStepGoal)),
                              total: Double(max(store.profile.dailyStepGoal, 1)))
-                    .frame(width: 130)
+                    .frame(maxWidth: .infinity)
                     .tint(.emerald)
             }
         }
@@ -194,7 +213,7 @@ struct OverviewView: View {
     #endif
 
     private var routinesCard: some View {
-        SectionCard(title: "Predictable daily routine", systemImage: "calendar") {
+        SectionCard(title: "My daily routine", systemImage: "calendar") {
             HStack {
                 Text("Check off what feels right today. Your list resets each local day.")
                     .font(.caption)
@@ -222,7 +241,7 @@ struct OverviewView: View {
                     ForEach(store.routines) { routine in
                         Button {
                             store.toggleRoutine(routine)
-                            celebrate()
+                            if !store.reduceVisualMotion { celebrate() }
                         } label: {
                             HStack {
                                 Text(routine.emoji)
@@ -246,7 +265,12 @@ struct OverviewView: View {
     }
 
     private var medicationsCard: some View {
-        SectionCard(title: "Today's medications", systemImage: "bell.badge.fill") {
+        SectionCard(title: "Today's medications", systemImage: "pills") {
+            Button { showMedicationSettings = true } label: {
+                Label(store.configuredMedications.isEmpty ? "Add a medication reminder" : "Manage my schedule", systemImage: "plus.circle")
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            }
+            .buttonStyle(.bordered)
             VStack(spacing: 8) {
                 if store.configuredMedications.isEmpty {
                     Text("No schedule yet. Add only medicines and times confirmed by your care team in Settings.")
@@ -268,11 +292,12 @@ struct OverviewView: View {
                         HStack(spacing: 12) {
                             Button {
                                 store.toggleMedication(med)
-                                if !med.isTaken { celebrate() }
+                                if !med.isTaken && !store.reduceVisualMotion { celebrate() }
                                 SpeechService.shared.speak("Dose check-in saved.", enabled: store.voiceReminders, voiceIdentifier: store.voiceIdentifier)
                             } label: {
                                 Image(systemName: med.isTaken ? "checkmark.circle.fill" : "circle.dashed")
-                                    .font(.title3)
+                                    .font(.title2)
+                                    .frame(minWidth: 44, minHeight: 44)
                                     .foregroundStyle(med.isTaken ? Color.emeraldText : Color.pink)
                             }
                             .accessibilityLabel("Mark \(med.name) \(med.isTaken ? "not taken today" : "taken today")")
@@ -393,6 +418,6 @@ private struct RoutineEditorView: View {
                 }
             }
         }
-        .frame(minWidth: 320, minHeight: 360)
+
     }
 }

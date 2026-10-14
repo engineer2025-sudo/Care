@@ -16,7 +16,7 @@ struct CareCircleView: View {
                     medicationStatus
                     emergencyContact
                 }
-                .padding()
+                .carePagePadding()
             }
             .background(Color.ink)
             .navigationTitle("Care Circle")
@@ -55,21 +55,26 @@ struct CareCircleView: View {
     private var careNotes: some View {
         SectionCard(title: "Care notes · local only", systemImage: "square.and.pencil") {
             HStack(spacing: 10) {
-                TextField("Add a private care note…", text: $noteDraft)
+                TextField("Add a private care note…", text: $noteDraft, axis: .vertical)
+                    .lineLimit(2...6)
+                    .accessibilityLabel("New private care note")
                     .textFieldStyle(.roundedBorder)
-                    .font(.footnote)
+                    .font(.body)
                 Button {
                     store.addNote(author: "You (\(store.displayName))", body: noteDraft)
                     noteDraft = ""
                     celebrate()
                 } label: {
-                    Image(systemName: "paperplane.fill")
-                        .padding(10)
+                    Text("Save").frame(minWidth: 44, minHeight: 44)
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(noteDraft.trimmingCharacters(in: .whitespaces).isEmpty)
             }
 
+            if store.notes.isEmpty {
+                Text("No notes yet. Save a question, update, or reminder for your next visit.")
+                    .foregroundStyle(.secondary).padding(.vertical, 12)
+            }
             ForEach(store.notes) { note in
                 VStack(alignment: .leading, spacing: 3) {
                     HStack {

@@ -70,7 +70,7 @@ final class CareStore: ObservableObject {
         voiceIdentifier = box?.voiceIdentifier ?? ""
         routines = box?.routines ?? [
             Routine(emoji: "💧", title: "Morning hydration"),
-            Routine(emoji: "🧩", title: "10-minute brain game"),
+            Routine(emoji: "🧩", title: "Choose an activity I enjoy"),
             Routine(emoji: "☕", title: "Join a coffee circle"),
             Routine(emoji: "🌿", title: "Evening stretch & wind-down"),
         ]
@@ -89,7 +89,7 @@ final class CareStore: ObservableObject {
         let savedAppearance = box?.colorAppearance ?? "system"
         colorAppearance = ["system", "light", "dark"].contains(savedAppearance) ? savedAppearance : "system"
         highContrast = box?.highContrast ?? false
-        reduceVisualMotion = box?.reduceVisualMotion ?? false
+        reduceVisualMotion = box?.reduceVisualMotion ?? true
         heartRateCheckInEnabled = box?.heartRateCheckInEnabled ?? false
         profile = box?.profile ?? CareProfile()
         persistenceIssue = initialStore.issue
@@ -296,7 +296,7 @@ final class CareStore: ObservableObject {
         voiceIdentifier = ""
         routines = [
             Routine(emoji: "💧", title: "Morning hydration"),
-            Routine(emoji: "🧩", title: "10-minute brain game"),
+            Routine(emoji: "🧩", title: "Choose an activity I enjoy"),
             Routine(emoji: "☕", title: "Join a coffee circle"),
             Routine(emoji: "🌿", title: "Evening stretch & wind-down"),
         ]

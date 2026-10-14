@@ -15,7 +15,7 @@ struct CoffeeCirclesView: View {
                     openCircleButton
                     explanation
                 }
-                .padding()
+                .carePagePadding()
             }
             .background(Color.ink)
             .navigationTitle("Coffee Circles")
@@ -28,7 +28,7 @@ struct CoffeeCirclesView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Isolation prevention, one cup at a time")
+            Text("A familiar face, a shared moment")
                 .font(.title3.weight(.heavy))
             Text("These buttons open real meet.jit.si rooms shared with the web app. They have no CareSphere host, schedule, attendance tracking, or moderation; anyone with a room link can join. Share only with people you trust. You'll appear as \(store.displayName).")
                 .font(.footnote)
@@ -77,6 +77,7 @@ struct CoffeeCirclesView: View {
                         .padding(.vertical, 12)
                         .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
+                .accessibilityLabel("Open \(circle.title) in browser")
             }
         }
         .padding(16)

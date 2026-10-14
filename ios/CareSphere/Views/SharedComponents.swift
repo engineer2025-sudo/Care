@@ -62,8 +62,9 @@ struct SectionCard<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label(title, systemImage: systemImage)
-                .font(.subheadline.weight(.bold))
+                .font(.headline)
                 .foregroundStyle(.primary)
+                .accessibilityAddTraits(.isHeader)
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -107,13 +108,18 @@ struct BigMetricButton<Label: View>: View {
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 6) {
-                label
+                HStack {
+                    label
+                    Spacer()
+                    Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary).accessibilityHidden(true)
+                }
                 Text(title)
-                    .font(.title2.weight(.black))
+                    .font(.title3.weight(.bold))
                     .foregroundStyle(.primary)
                 Text(subtitle)
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -143,4 +149,14 @@ func hapticWarning() {
 
 func hapticError() {
     HapticsService.error()
+}
+
+
+extension View {
+    /// A readable column on iPad and comfortable margins on compact iPhones.
+    func carePagePadding() -> some View {
+        self.padding(16)
+            .frame(maxWidth: 900)
+            .frame(maxWidth: .infinity, alignment: .center)
+    }
 }

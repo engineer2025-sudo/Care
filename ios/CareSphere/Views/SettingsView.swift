@@ -23,6 +23,8 @@ private struct CareDataExportDocument: FileDocument {
 }
 
 struct SettingsView: View {
+    enum SectionDestination: Hashable { case medications }
+    var initialSection: SectionDestination? = nil
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: CareStore
     @EnvironmentObject private var notifications: NotificationService
@@ -42,10 +44,11 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
+            ScrollViewReader { proxy in
             Form {
                 profileSection
                 emergencySection
-                medicationSection
+                medicationSection.id(SectionDestination.medications)
                 securitySection
                 accessibilitySection
                 supportCheckInSection
@@ -53,6 +56,10 @@ struct SettingsView: View {
                 notificationsSection
                 privacySection
                 aboutSection
+            }
+            .onAppear {
+                if let initialSection { proxy.scrollTo(initialSection, anchor: .top) }
+            }
             }
             .navigationTitle("Settings")
             .inlineTitle()

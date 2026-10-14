@@ -4,6 +4,8 @@ options:
   createIntermediateGroups: true
 
 packages:
+  CareActivityKit:
+    path: ActivityKit
   JitsiMeetSDK:
     url: https://github.com/jitsi/jitsi-meet-ios-sdk-releases
     exactVersion: "13.1.1"
@@ -16,20 +18,20 @@ packages:
     exactVersion: "2.2.12"
   LlamaSwift:
     url: https://github.com/mattt/llama.swift
-    from: 2.10549.0
+    exactVersion: "2.10549.0"
   SherpaOnnx:
     url: https://github.com/k2-fsa/sherpa-onnx.git
-    from: 1.13.8
+    exactVersion: "1.13.8"
   ZIPFoundation:
     url: https://github.com/weichsel/ZIPFoundation.git
-    from: 0.9.20
+    exactVersion: "0.9.20"
 
 settings:
   base:
-    SWIFT_VERSION: "5.9"
+    SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
-    MARKETING_VERSION: "2.2.0"
-    CURRENT_PROJECT_VERSION: "5"
+    MARKETING_VERSION: "2.3.0"
+    CURRENT_PROJECT_VERSION: "6"
     DEVELOPMENT_TEAM: ""
 
 targets:
@@ -42,6 +44,7 @@ targets:
     sources:
       - path: CareSphere
     dependencies:
+      - package: CareActivityKit
       - package: JitsiMeetSDK
       - package: Giphy
         product: GiphyUISDK
@@ -76,7 +79,7 @@ targets:
         NSMicrophoneUsageDescription: "CareSphere uses the microphone for video coffee circles and telehealth visits."
         NSHealthShareUsageDescription: "CareSphere reads heart rate, blood oxygen, blood pressure, and workout summaries from Apple Health after you approve. It never writes health data."
         NSBluetoothAlwaysUsageDescription: "CareSphere connects to Bluetooth heart-rate monitors — including Garmin watches broadcasting heart rate — to stream live vitals."
-        NSLocationWhenInUseUsageDescription: "CareSphere attaches your location to an emergency SOS alert so responders and family can find you."
+        NSLocationWhenInUseUsageDescription: "CareSphere includes your location only when you choose to share SOS details. Nothing is sent automatically."
         NSLocalNetworkUsageDescription: "CareSphere searches a Kiwix offline library only on your private local network."
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
