@@ -1,8 +1,16 @@
-# CareSphere for iPhone — 3.1
+# CareSphere for iPhone — 3.2
 
 Open **CareSphere.xcodeproj** directly. No XcodeGen, remote Swift packages, binary SDKs, or model downloads are needed to build the app. The only package is `ActivityKit/`, included locally.
 
-## New in 3.1.0 (8)
+## New in 3.2.0 (9)
+
+Personal support tools in the header: Simple Mode, visual routines, communication cards and installed-voice speech, personal photos/conversation/matching, trusted contacts, comfort settings, appointment questions/follow-ups, routine undo, retained-note recovery, encrypted backup/restore, interest prompts and optional Apple Intelligence drafting with human review.
+
+**Device sharing needs no backend.** Select notes/routines, create an encrypted `.caretransfer` file, and send it through AirDrop/the share sheet or Files. Preview/select before importing on another CareSphere device. Existing records are not overwritten. No live synchronization or remote revocation is claimed. [Sharing guide](../docs/device-sharing.md) · [tools and limitations](../docs/personal-tools.md).
+
+CI now runs 30 Swift tests, including Web Crypto-to-Swift transfer decryption, tamper/wrong-passphrase checks and UTF-8 payload limits. Physical AirDrop and Apple Intelligence still need hardware validation.
+
+## Previously added in 3.1.0 (8)
 
 - Save favorites privately and filter the 11-activity library.
 - Search, edit and confirm deletion of care notes. Edits retain the original date, show an updated date and refresh the on-device text sentiment label; this label is not a clinical assessment.

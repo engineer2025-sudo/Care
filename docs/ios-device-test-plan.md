@@ -1,4 +1,4 @@
-# iPhone acceptance checklist — CareSphere 3.1
+# iPhone acceptance checklist — CareSphere 3.2
 
 A passing compile is not a passing device test. Fill this out on the intended iPhone before demonstrating or distributing the app. Never use real medication or emergency actions just to test UI.
 
@@ -10,7 +10,7 @@ A passing compile is not a passing device test. Fill this out on the intended iP
 - [ ] Open the full folder with the included local package; compile, sign, install, and launch. No remote package retrieval should occur.
 - [ ] On a clean install, use **Explore first · set up later**. No camera, microphone, motion, health, or notification permission should be needed to play games.
 - [ ] Repeat with guided setup; large text can scroll each step; birth date can remain absent; voice reminders do not turn on based on age.
-- [ ] Settings version shows 3.1.0 (8).
+- [ ] Settings version shows 3.2.0 (9).
 
 ## Layout and navigation
 
@@ -73,3 +73,15 @@ Record iPhone model, iOS version, Xcode version, build commit, checks passed/fai
 - [ ] Test no-device timeout, denied/off Bluetooth, missing service, subscription failure, and disconnect. Reconnect is an explicit user action.
 - [ ] Stop sensor updates: the current BLE value should clear after 15 seconds; historical Apple Health readings retain their own source label.
 - [ ] In SOS, preview the text before opening the share sheet. Add/remove location; reopening SOS should not automatically include a cached fix. Never call an emergency number for testing.
+
+## Personal tools and backend-free transfer
+
+- [ ] Toggle Simple Mode; all three destinations work; restore full navigation.
+- [ ] Create a visual routine with a chosen photo; start, read, pause, advance, skip and end. Backgrounding never starts speech automatically.
+- [ ] Add/display/speak/clear a custom communication phrase using an installed voice.
+- [ ] Import/remove a personal photo, play matching and revisit after restart. Do not infer identities from photos.
+- [ ] Add a consenting contact; cancel call/message/video handoffs. Do not call emergency numbers.
+- [ ] Save an appointment question, priority, follow-up and export only after reviewing.
+- [ ] Delete/restore a note and undo a routine change. Create an encrypted backup, reject an incorrect password, preview/cancel, then restore test data only.
+- [ ] Select a note/routine, prepare a transfer, AirDrop/save it, open it on another actual device, reject an incorrect password, preview/select/import and reject repeat receipt of the same item. Check Android/web recipients too.
+- [ ] On eligible enabled hardware, generate each AI draft type from deliberately selected text; cancel/background/discard; edit and explicitly save. Original notes must remain unchanged.

@@ -4,16 +4,21 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 ## This release — October 14, 2026
 
+**Personal support tools:** Simple Mode, visual routines, communication cards, personal photo conversation/matching, comfort preferences, trusted contacts, appointment questions, routine undo, note recovery, encrypted backup/restore, interest prompts, optional first-use guidance and native iPhone AI drafting.
+
+**No backend:** selected notes/routines transfer as encrypted files using AirDrop, Quick Share, another chosen app or saved files. The receiving CareSphere previews and selectively imports copies. No automatic sync, built-in phone-to-phone Bluetooth pairing, remote revocation, or fabricated connection status. [Sharing instructions and protocol](docs/device-sharing.md) · [feature guide and limits](docs/personal-tools.md)
+
+
 - **All three platforms:** searchable activity libraries, private favorites, searchable/editable care notes and confirmed deletion.
-- **iPhone 3.1.0 (8):** favorite filtering, note-edit discard protection and updated timestamps. Existing encrypted care data migrates without a reset.
-- **Android 1.1.0 (2):** system/light/dark appearance, native themed dialogs, live search that retains the keyboard, and a two-row navigation layout at large font sizes.
-- **Web 1.1.0:** 11 optional activities, one focused session at a time, five added supported-choice/conversation activities, note-edit discard protection and verified offline reopening after the first completed installation.
+- **iPhone 3.2.0 (9):** favorite filtering, note-edit discard protection and updated timestamps. Existing encrypted care data migrates without a reset.
+- **Android 1.2.0 (3):** system/light/dark appearance, native themed dialogs, live search that retains the keyboard, and a two-row navigation layout at large font sizes.
+- **Web 1.2.0:** 11 optional activities, one focused session at a time, five added supported-choice/conversation activities, note-edit discard protection and verified offline reopening after the first completed installation.
 
 Downloads are documented in [DOWNLOAD.md](DOWNLOAD.md). See [release verification](docs/release-2026-10-14.md) and [web deployment](docs/web-deployment.md).
 
 ## Native apps
 
-| | iPhone 3.1 | Android 1.1 |
+| | iPhone 3.2 | Android 1.2 |
 |---|---|---|
 | Project | `ios/CareSphere.xcodeproj` | `android/` in Android Studio |
 | Minimum OS | iOS 16 | Android 8 / API 26 |
@@ -22,7 +27,7 @@ Downloads are documented in [DOWNLOAD.md](DOWNLOAD.md). See [release verificatio
 | Heart rate | Real BLE; optional dated/source-labeled Apple Health history | Real standard BLE monitor only |
 | Other vitals | Optional read-only Apple Health records | No oxygen/BP/Health Connect integration; no substitute values |
 | AI | Apple's Foundation Models on eligible iOS 26+ devices, explicitly optional | No AI; Apple Intelligence is not available on Android |
-| Speech | Installed Apple voices | No speech feature in this release |
+| Speech | Installed Apple voices | Installed offline TTS voices where available |
 | Video | Explicit browser handoff | Explicit browser handoff |
 | Privacy | Encrypted local care storage, iOS file protection, optional biometric lock | AES-256-GCM local storage with Android Keystore; backup disabled |
 | Distribution | Source ZIP, own Xcode signing; no signed IPA/TestFlight | Debug-signed development APK; not a Play Store release |

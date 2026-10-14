@@ -514,7 +514,14 @@ class MainActivity : Activity() {
         }
         card("Privacy & local data") { c ->
             text("Care notes, routines, name, and today's mood are encrypted with AES-GCM using a key in Android Keystore. System backup is disabled. No analytics, ad SDKs, account, or background health monitoring. Shared exports are no longer protected by CareSphere.", parent = c)
-            button("Review & export my data", c) { confirm("Export private data?", "The export includes your name, routines, mood, and notes. Share only with a recipient you trust.\n\n${data.json.toString(2)}") { share(data.json.toString(2)) } }.isEnabled = data.canWrite
+            button("Review & export basic care data", c) {
+                val basic = JSONObject()
+                listOf("name", "routines", "done", "day", "mood", "notes").forEach { key -> if(data.json.has(key)) basic.put(key, data.json.get(key)) }
+                val exported = basic.toString(2)
+                if(exported.length > 150000) {
+                    message("This text export is too large for the Android share sheet. Use the encrypted backup in My support tools to save your full data, or Device sharing for selected notes and routines.")
+                } else confirm("Export unencrypted basic data?", "Includes your name, daily routines, mood and notes. Personal photos, contacts, other support tools and recently deleted notes are excluded; use an encrypted backup for those. Share only with someone you trust. Preview (first 10,000 characters):\n\n${exported.take(10000)}") { share(exported) }
+            }.isEnabled = data.canWrite
             button("Erase all local data", c) { confirm("Erase everything?", "This permanently removes your saved care information and encryption key from this app. Copies you previously shared cannot be removed.") { monitor.disconnect(); data.erase(); settings = false; tab = 0; render() } }
         }
         card("About this Android release") { c ->

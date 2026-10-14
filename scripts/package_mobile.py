@@ -46,7 +46,7 @@ parser.add_argument('--android-run', required=True)
 parser.add_argument('--web-run', required=True)
 args = parser.parse_args()
 ios = verified_run(args.ios_run, 'ios')
-android = verified_run(args.android_run, 'android')
+android = verified_run(args.android_run, 'android', 'scripts/android_smoke.py')
 web = verified_run(args.web_run, *WEB_PATHS)
 # Build from the exact verified sources; no stale dist/ is packaged.
 subprocess.run(['npm', 'ci'], cwd=ROOT, check=True)
@@ -77,24 +77,27 @@ with zipfile.ZipFile(apk_path) as z:
 paths = [ROOT / p for p in command('git', 'ls-files', 'ios', 'android').splitlines()]
 paths += [ROOT / p for p in ['DOWNLOAD.md', 'docs/signing-troubleshooting.md',
     'docs/ios-device-test-plan.md', 'docs/activities-and-accessibility.md', 'docs/release-2026-10-14.md',
-    'docs/web-deployment.md', 'scripts/android_smoke.py']]
+    'docs/web-deployment.md', 'docs/device-sharing.md', 'docs/personal-tools.md', 'scripts/android_smoke.py']]
 # Refuse to silently label a later version using this release's metadata.
 project = (ROOT/'ios/CareSphere.xcodeproj/project.pbxproj').read_text()
-assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.1.0'}
-assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'8'}
+assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.2.0'}
+assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'9'}
 gradle = (ROOT/'android/app/build.gradle.kts').read_text()
-assert re.search(r'versionName\s*=\s*"1\.1\.0"', gradle)
-assert re.search(r'versionCode\s*=\s*2\b', gradle)
-assert json.loads((ROOT/'package.json').read_text())['version'] == '1.1.0'
+assert re.search(r'versionName\s*=\s*"1\.2\.0"', gradle)
+assert re.search(r'versionCode\s*=\s*3\b', gradle)
+assert json.loads((ROOT/'package.json').read_text())['version'] == '1.2.0'
 manifest = {
     'source_commit': command('git','rev-parse','HEAD').strip(),
-    'ios': {'version':'3.1.0 (8)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
+    'ios': {'version':'3.2.0 (9)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
         'unsigned_device_build': True, 'healthkit_build': True, 'simulator_launch': True,
-        'tests':25, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
-    'android': {'version':'1.1.0 (2)', 'ci':android['url'], 'tested_commit':android['headSha'],
-        'tests':13, 'lint':'passed', 'apk_signing_verified_in_ci':True,
+        'tests':30, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
+    'android': {'version':'1.2.0 (3)', 'ci':android['url'], 'tested_commit':android['headSha'],
+        'tests':19, 'lint':'passed', 'apk_signing_verified_in_ci':True,
         'emulator_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
         'apk_sha256':digest, 'apk_bytes':len(apk)},
+    'device_sharing': {'app_backend_required':False, 'mode':'encrypted file snapshots',
+        'web_to_android_emulator_import':'passed', 'physical_nearby_delivery_tested':False,
+        'built_in_phone_pairing':False, 'automatic_sync':False, 'remote_revocation':False},
     'compiled_source_comparison_excludes': ['ios/README.md', 'android/README.md'],
     'files': {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
 }
@@ -127,12 +130,21 @@ not full iOS feature parity. See android/README.md and ios/README.md for exact s
 
 VALIDATION
 See BUILD_VERIFICATION.json for successful CI runs and file hashes.
-iOS 3.1.0 (8): 25 logic/preference/packet tests; standard device, HealthKit and Simulator builds; launch.
-Android 1.1.0 (2): 13 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark and large text.
+iOS 3.2.0 (9): 30 logic/preference/packet/transfer tests; standard device, HealthKit and Simulator builds; launch.
+Android 1.2.0 (3): 19 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
 Real-device BLE, actual Apple Intelligence responses, accessibility with users, and
 Mac signing remain manual acceptance work. No clinical effectiveness is claimed.
 
-The separate CareSphere-Web.zip contains web 1.1.0 source and a built website.
+PERSONAL SUPPORT + DEVICE SHARING
+Simple Mode, visual routines, communication cards, personal photo activities,
+contacts, appointment questions, comfort preferences, recovery/backup and interest
+prompts are in My support tools. Optional AI drafting is native iPhone-only.
+No backend is needed: select notes/routines, prepare an encrypted transfer and use
+AirDrop/Quick Share/the system share sheet or save the file. Receive through the
+file picker, unlock, preview, then choose copies to import. Tell the recipient the
+passphrase separately. No built-in Bluetooth pairing, live sync or remote revocation.
+Read docs/device-sharing.md and docs/personal-tools.md before using these features.
+The separate CareSphere-Web.zip contains web 1.2.0 source and a built website.
 START_HERE.txt and DOWNLOAD.md explain installation. No slide deck is included.
 '''
 archive = out / 'CareSphere-Mobile.zip'
@@ -154,23 +166,23 @@ with tempfile.TemporaryDirectory() as tmp, zipfile.ZipFile(archive) as z:
         assert (z.getinfo('CareSphere-Mobile/'+executable).external_attr >> 16) & 0o100
 # Separate web download: source + a ready-to-host production directory.
 web_paths = [ROOT / p for p in command('git', 'ls-files', *WEB_PATHS).splitlines()]
-web_paths += [ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md']
+web_paths += [ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md', ROOT/'docs/device-sharing.md', ROOT/'docs/personal-tools.md']
 web_files = {str(p.relative_to(ROOT)):p for p in web_paths}
 web_files.update({'production/'+str(p.relative_to(ROOT/'dist')):p for p in (ROOT/'dist').rglob('*') if p.is_file()})
 web_manifest = {
-    'version':'1.1.0', 'source_commit':command('git','rev-parse','HEAD').strip(),
+    'version':'1.2.0', 'source_commit':command('git','rev-parse','HEAD').strip(),
     'ci':web['url'], 'tested_commit':web['headSha'],
-    'unit_tests':25, 'browser_tests':16, 'offline_production_tests':1,
+    'unit_tests':32, 'browser_tests':23, 'offline_production_tests':1,
     'audit_known_vulnerabilities':0, 'audit_date':'2026-10-14',
     'production_build':'rebuilt locally from verified source with the locked dependencies',
     'node':command('node','--version').strip(),
-    'physical_ble_tested':False,
+    'physical_ble_tested':False, 'physical_nearby_delivery_tested':False, 'app_backend_required':False,
     'files':{name:hashlib.sha256(p.read_bytes()).hexdigest() for name,p in web_files.items()},
 }
 web_archive = out/'CareSphere-Web.zip'
 with zipfile.ZipFile(web_archive, 'w', zipfile.ZIP_DEFLATED) as z:
     for name, path in web_files.items(): z.write(path, 'CareSphere-Web/'+name)
-    z.writestr('CareSphere-Web/START_HERE.txt', """CARESPHERE WEB 1.1.0
+    z.writestr('CareSphere-Web/START_HERE.txt', """CARESPHERE WEB 1.2.0
 
 DEVELOP: Node.js 20.19+ or 22.12+, then npm ci and npm run dev.
 HOST: Upload the CONTENTS of production/ to a static HTTPS site's root.
@@ -181,6 +193,11 @@ mood check-ins, user-confirmed medication schedules, and real BLE where supporte
 No health readings or pretend contacts are generated. Not a medical device.
 Offline features require a completed first online installation. Video and links
 need internet. Installation and Bluetooth support depend on the browser/OS.
+My support tools includes personal routines/photos/communication, questions,
+recovery/backup and backend-free device sharing. Select notes/routines, protect
+an encrypted file with a passphrase, then use the share sheet or save/send it.
+Receive through the file picker, unlock and preview before importing. Copies
+cannot be remotely revoked. Read docs/device-sharing.md and docs/personal-tools.md.
 Native iPhone/Android projects are in the separate CareSphere-Mobile.zip.
 
 BUILD_VERIFICATION.json lists successful CI and hashes of source/production files.

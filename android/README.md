@@ -1,8 +1,16 @@
-# CareSphere for Android — 1.1
+# CareSphere for Android — 1.2
 
 Native Kotlin/Android Views app. Android 8+ (API 26), JDK 17, Gradle 8.9, Android SDK 35. Open this folder in Android Studio; no project-generation or Node toolchain needed. First Gradle sync requires internet for the Android build tools and Kotlin/JUnit. No third-party runtime UI, health, video, analytics, or AI SDK is bundled.
 
-## New in 1.1.0 (2)
+## New in 1.2.0 (3)
+
+Open **My support tools** on Today for Simple Mode, visual routines, communication cards and offline installed-voice speech, personal photos/conversation/matching, trusted contacts, appointment questions/follow-ups, note recovery, encrypted Android backup/restore and interest prompts. Routine changes can be undone. There is still no Apple Intelligence substitute.
+
+**Device sharing is backend-free.** Create an encrypted `.caretransfer` file from selected notes/routines, then choose Quick Share or another app in the system share sheet. Receive through the document picker, preview and selectively merge. No built-in phone-to-phone Bluetooth pairing, automatic synchronization or remote revocation is claimed. The read-only transfer provider grants temporary access only to deliberately shared encrypted files. The app still has no internet permission.
+
+[Sharing instructions](../docs/device-sharing.md) · [tool guide](../docs/personal-tools.md). Crypto tests decrypt an actual Web Crypto fixture; the emulator also checks the system file picker and imported note. Physical Quick Share delivery still needs devices.
+
+## Previously added in 1.1.0 (2)
 
 Activity search and private favorites; note search/editing with preserved creation dates and edited dates; system/light/dark appearance; themed dialogs; Bluetooth and app-permission settings shortcuts. Large text uses two rows of navigation so no destination disappears offscreen. Search updates results without rebuilding the focused input.
 
@@ -29,7 +37,7 @@ No Health Connect, cloud Garmin sync, blood oxygen/pressure integrations, medica
 # APK: app/build/outputs/apk/debug/app-debug.apk
 ```
 
-CI builds the APK, runs 13 activity/preference/packet tests and Android lint. Debug APKs are installable, but debuggable and not production releases. Android Studio maintains its own local debug signing key; hosted CI debug certificates can change between runs. Never commit a private production signing key. See [installation guide](../DOWNLOAD.md).
+CI builds the APK, runs 19 activity/preference/packet/backup/transfer tests and Android lint. Debug APKs are installable, but debuggable and not production releases. Android Studio maintains its own local debug signing key; hosted CI debug certificates can change between runs. Never commit a private production signing key. See [installation guide](../DOWNLOAD.md).
 
 ## Manual acceptance checklist (not completed by compilation)
 

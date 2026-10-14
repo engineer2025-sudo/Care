@@ -1,4 +1,4 @@
-# Web 1.1 — run, host and verify
+# Web 1.2 — run, host and verify
 
 ## Local development
 
@@ -29,7 +29,7 @@ Keep a stable HTTPS origin if people need their existing local data. A different
 
 ```sh
 npx playwright install chromium
-npm run test:ui       # 16 interaction/responsive tests against development server
+npm run test:ui       # 23 interaction/responsive tests against development server
 npm run build
 npm run test:offline  # first-install + encrypted note reopening in production preview
 npm audit --audit-level=moderate
@@ -40,3 +40,7 @@ The offline test verifies the actual built app, not only a service-worker file. 
 After deploying, visit online until installation finishes, close/reopen offline and check your own routine or note and an activity. Video, external sources and downloads need connectivity. Initial registration can be blocked by browser policy/storage restrictions; don't promise offline support before checking that target browser.
 
 Chrome/Edge support varies by OS. Web Bluetooth requires a compatible browser and physical standard Heart Rate monitor. Safari on iPhone does not offer the Web Bluetooth integration: use native iOS instead. PWA installation availability is browser-dependent. No hosted URL, clinical certification or app-store approval is provided by this source package.
+
+## No application backend
+
+Device sharing uses encrypted files and the operating system's share sheet or a download. There is no `/api/shares`, database, invite relay or account service to deploy. The receiving browser can unlock, preview and import while offline after the app is loaded. Backups and transfers are separate formats; see `device-sharing.md`.
