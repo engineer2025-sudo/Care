@@ -17,3 +17,11 @@ test-results/
 **/xcuserdata/
 **/*.xcuserstate
 DerivedData/
+
+# Native Android generated state and private signing material
+android/.gradle/
+android/.kotlin/
+android/local.properties
+android/**/build/
+android/**/*.jks
+android/**/*.keystore
