@@ -19,7 +19,7 @@ export function normalizeSupport(v = {}) {
     plans: rows(v.plans,30).map(p => ({ id:text(p.id,100), title:text(p.title,120), steps: rows(p.steps,40).map(s => ({id:text(s.id,100),text:text(s.text),photoId:text(s.photoId,100)})).filter(s=>s.text) })).filter(p=>p.id && p.title && p.steps.length),
     photos: rows(v.photos,10).map(p => ({id:text(p.id,100),caption:text(p.caption,120),url:typeof p.url === 'string' && p.url.length < 180000 && /^data:image\/(jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(p.url) ? p.url : ''})).filter(p=>p.id && p.url),
     questions: rows(v.questions,100).map(q => ({id:text(q.id,100),text:text(q.text,1000),priority:q.priority===true,done:q.done===true,followup:text(q.followup,2000)})).filter(q=>q.id && q.text),
-    trash: rows(v.trash,100).filter(n=>Number.isFinite(n.deletedAt) && n.deletedAt > Date.now()-30*86400000 && n.deletedAt <= Date.now()).map(n=>({id:text(n.id,120),note:text(n.note,10000),date:text(n.date,80),author:text(n.author,120),deletedAt:n.deletedAt})).filter(n=>n.id && n.note),
+    trash: rows(v.trash,100).filter(n=>Number.isFinite(n.deletedAt) && n.deletedAt > Date.now()-30*86400000 && n.deletedAt <= Date.now()).map(n=>({id:Number.isSafeInteger(n.id)?n.id:text(n.id,120),note:text(n.note,10000),date:text(n.date,80),author:text(n.author,120),deletedAt:n.deletedAt,...(typeof n.editedAt==='string'&&!Number.isNaN(new Date(n.editedAt).valueOf())?{editedAt:n.editedAt}:{})})).filter(n=>(Number.isSafeInteger(n.id)||!!n.id) && n.note),
     receivedItems: Array.isArray(v.receivedItems) ? [...new Set(v.receivedItems.filter(x=>typeof x==='string' && x.length<=200))].slice(-2000) : [],
   }
 }
