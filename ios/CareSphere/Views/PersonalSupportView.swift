@@ -44,6 +44,16 @@ struct PersonalSupportView: View {
     @State private var transferBusy = false
     @State private var transferGeneration = UUID()
     @State private var confirmTransfer = false
+    @State private var nearbyHost = LocalTransferHost()
+    @State private var nearbyReceiver = LocalTransferReceiver()
+    @State private var nearbyGeneration = UUID()
+    @State private var nearbyBusy = false
+    @State private var offeredAddress = ""
+    @State private var offeredCode = ""
+    @State private var receiveAddress = ""
+    @State private var receiveCode = ""
+    @State private var networkAddress = ""
+    @State private var nearbyStatus = ""
     private let sections = ["Start here", "Visual routines", "Communication", "My photos", "My people", "Comfort", "Appointments", "Recovery & backup", "Interest activities", "Apple Intelligence", "Device sharing"]
     private let phrases = ["I need a break", "It is too loud", "Please explain again", "Yes", "No", "I would like help"]
     private let packs = ["Nature": ["What do you notice outside?", "Would you choose a garden, beach or forest?", "Point to something that grows."], "Music": ["What sounds do you enjoy?", "Would you like music or quiet?", "Tell a story about a song, or skip."], "Familiar objects": ["What makes a place comfortable?", "Which object do you like nearby?", "Describe a familiar everyday task."]]
@@ -56,9 +66,9 @@ struct PersonalSupportView: View {
             }
             .navigationTitle("My support tools")
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-            .onChange(of: section) { _ in draft = ""; detail = ""; third = ""; shown = ""; status = ""; password = ""; transferPassword = ""; transferGeneration = UUID(); transferBusy = false; incomingTransfer = nil; planID = nil; assistant.clearResponse(); SpeechService.shared.stop() }
-            .onDisappear { transferPassword = ""; transferGeneration = UUID(); assistant.clearResponse(); SpeechService.shared.stop() }
-            .onChange(of: phase) { value in if value != .active { SpeechService.shared.stop(); assistant.clearResponse(); paused = true } }
+            .onChange(of: section) { _ in stopNearby(); draft = ""; detail = ""; third = ""; shown = ""; status = ""; password = ""; transferPassword = ""; transferGeneration = UUID(); transferBusy = false; incomingTransfer = nil; planID = nil; assistant.clearResponse(); SpeechService.shared.stop() }
+            .onDisappear { stopNearby(); transferPassword = ""; transferGeneration = UUID(); assistant.clearResponse(); SpeechService.shared.stop() }
+            .onChange(of: phase) { value in if value == .background { stopNearby() }; if value != .active { SpeechService.shared.stop(); assistant.clearResponse(); paused = true } }
             .onChange(of: selectedPhoto) { item in Task { await loadPhoto(item) } }
             .onChange(of: assistant.response) { reviewed = $0 }
             .confirmationDialog("Open another app?", isPresented: Binding(get: { pendingURL != nil }, set: { if !$0 { pendingURL = nil } })) {
@@ -152,10 +162,10 @@ struct PersonalSupportView: View {
     private var deviceSharing: some View {
         Section("Device-to-device · no backend") {
             Text("1. Select notes or routines and prepare an encrypted file. 2. Send using AirDrop, another app, or Save to Files. 3. On the other device open CareSphere → My support tools → Device sharing, choose the received file and preview before importing.")
-            Text("Nearby options depend on your system. This is not built-in Bluetooth pairing or automatic sync. For iPhone-to-Android, use a compatible file-transfer app or cable. An app you choose may use its own cloud. Copies cannot be remotely revoked.")
+            Text("Use direct local Wi-Fi / hotspot transfer below for iPhone or Android, or use the system share sheet. This is not Bluetooth pairing or automatic sync. Other sharing apps may use their own cloud. Copies cannot be remotely revoked.")
             SecureField("Transfer passphrase · 12+ characters", text: $transferPassword)
-                .onChange(of: transferPassword) { _ in incomingTransfer = nil; transferGeneration = UUID(); transferBusy = false; if let url = transferURL { try? FileManager.default.removeItem(at: url) }; transferURL = nil }
-                .onChange(of: selectedRecords) { _ in if let url = transferURL { try? FileManager.default.removeItem(at: url) }; transferURL = nil }
+                .onChange(of: transferPassword) { _ in stopNearby(); incomingTransfer = nil; transferGeneration = UUID(); transferBusy = false; if let url = transferURL { try? FileManager.default.removeItem(at: url) }; transferURL = nil }
+                .onChange(of: selectedRecords) { _ in stopNearby(); if let url = transferURL { try? FileManager.default.removeItem(at: url) }; transferURL = nil }
             Text("Tell the recipient the passphrase separately. No recovery is possible. Photos, medicines, measurements and encryption keys are excluded.")
             ForEach(transferableRecords) { record in
                 Toggle("\(record.type): \(record.text)", isOn: Binding(get: { selectedRecords.contains(record.id) }, set: { value in if value { selectedRecords.insert(record.id) } else { selectedRecords.remove(record.id) } }))
@@ -164,9 +174,10 @@ struct PersonalSupportView: View {
             if transferBusy { ProgressView("Protecting your data…") }
             if let url = transferURL {
                 ShareLink("Send encrypted file · AirDrop / share sheet", item: url)
-                Button("Clear prepared file") { try? FileManager.default.removeItem(at: url); transferURL = nil }
+                Button("Clear prepared file") { stopNearby(); try? FileManager.default.removeItem(at: url); transferURL = nil }
             }
-            Button("Receive: choose a transfer file") { incomingTransfer = nil; importTransferFile = true }.disabled(transferBusy || transferPassword.count < 12)
+            nearbyControls
+            Button("Receive: choose a transfer file") { stopNearby(); incomingTransfer = nil; importTransferFile = true }.disabled(transferBusy || transferPassword.count < 12)
             if let payload = incomingTransfer {
                 Text("Preview received copies. Not verified clinical information. Existing records are never replaced.").font(.headline)
                 ForEach(payload.records) { record in
@@ -181,7 +192,86 @@ struct PersonalSupportView: View {
             }
         }
     }
+    private var nearbyControls: some View {
+        Group {
+            Text("Connect nearby · iPhone or Android").font(.headline)
+            Text("Join the same Wi-Fi, or join the other phone's hotspot. Internet is not needed. Keep both apps open. Enter the sender's address and 8-digit code; there is no automatic device discovery. Allow Local Network when asked.")
+            if !nearbyStatus.isEmpty { Text(nearbyStatus).accessibilityAddTraits(.updatesFrequently) }
+            if transferURL != nil {
+                let addresses = LocalTransferWire.addresses()
+                if addresses.count > 1 {
+                    Picker("Sending network address", selection: $networkAddress) {
+                        Text("Choose network").tag("")
+                        ForEach(addresses, id: \.self) { Text($0).tag($0) }
+                    }
+                }
+                Button("Offer to a nearby device") { offerNearby() }.disabled(nearbyBusy || !offeredAddress.isEmpty)
+            }
+            if !offeredAddress.isEmpty {
+                Text("Device address: \(offeredAddress)").textSelection(.enabled)
+                Text("Connection code: \(offeredCode)").font(.title2.monospacedDigit()).textSelection(.enabled)
+                Text("Offer expires after five minutes or when you leave/background this screen. The code is not the encryption passphrase. Tell the recipient both separately from any public channel.")
+            }
+            TextField("Sender address · e.g. 192.168.1.5:12345", text: $receiveAddress)
+                .textInputAutocapitalization(.never).autocorrectionDisabled().disabled(nearbyBusy)
+            TextField("Sender's 8-digit connection code", text: $receiveCode)
+                .keyboardType(.numberPad).disabled(nearbyBusy)
+            Button("Connect and receive encrypted copy") { receiveNearby() }
+                .disabled(nearbyBusy || transferBusy || transferPassword.count < 12 || receiveAddress.isEmpty || receiveCode.count != 8)
+            if nearbyBusy { ProgressView("Connecting locally…") }
+            if nearbyBusy || !offeredAddress.isEmpty { Button("Stop nearby connection") { stopNearby(); nearbyStatus = "Local connection stopped. Received copies cannot be recalled." } }
+            Text("If a guest network blocks other devices, try a private hotspot or use the encrypted-file option. A connection failure never imports records.").font(.caption)
+        }
+    }
+    private func stopNearby() {
+        nearbyGeneration = UUID(); nearbyHost.stop(); nearbyReceiver.cancel()
+        nearbyBusy = false; offeredAddress = ""; offeredCode = ""; nearbyStatus = ""
+    }
+    private func offerNearby() {
+        stopNearby()
+        do {
+            guard let file = transferURL else { return }
+            let choices = LocalTransferWire.addresses()
+            guard let address = choices.count == 1 ? choices.first : choices.first(where: { $0 == networkAddress }) else {
+                nearbyStatus = "Join a private Wi-Fi or hotspot. If several network addresses are listed, choose the one used by the other phone."; return
+            }
+            let contents = try Data(contentsOf: file), generation = nearbyGeneration
+            nearbyBusy = true
+            nearbyHost.start(contents: contents, address: address, ready: { result in
+                guard nearbyGeneration == generation else { return }; nearbyBusy = false
+                switch result {
+                case .success(let info): offeredAddress = info.0; offeredCode = info.1; nearbyStatus = "Offering only the prepared encrypted copy on your local network. This is not confirmation of delivery."
+                case .failure: nearbyStatus = "Could not offer locally. Check Wi-Fi and Local Network permission in Settings, then retry."
+                }
+            }, ended: {
+                guard nearbyGeneration == generation else { return }
+                nearbyBusy = false; offeredAddress = ""; offeredCode = ""; nearbyStatus = "Local offer ended. Start a new offer to try again."
+            })
+        } catch { nearbyBusy = false; nearbyStatus = "Could not read the prepared encrypted file. Prepare it again." }
+    }
+    private func receiveNearby() {
+        stopNearby(); incomingTransfer = nil; incomingRecords = []
+        let generation = nearbyGeneration, pass = transferPassword
+        nearbyBusy = true
+        nearbyReceiver.receive(address: receiveAddress, code: receiveCode) { result in
+            guard nearbyGeneration == generation else { return }
+            switch result {
+            case .failure:
+                nearbyBusy = false; nearbyStatus = "Could not connect. Check the address and code, same Wi-Fi/hotspot, Local Network permission and that the sender's offer is still open. Nothing was imported."
+            case .success(let bytes):
+                Task {
+                    let opened = await Task.detached { Result { try DeviceTransfer.open(bytes, password: pass) } }.value
+                    guard nearbyGeneration == generation else { return }; nearbyBusy = false
+                    switch opened {
+                    case .success(let payload): incomingTransfer = payload; nearbyStatus = "Received and unlocked locally. Review and select copies below. Nothing has been imported."
+                    case .failure: nearbyStatus = "Received bytes could not be unlocked. Check the passphrase with the sender. Nothing was imported."
+                    }
+                }
+            }
+        }
+    }
     private func prepareTransfer() {
+        stopNearby()
         let payload = TransferPayload(records: transferableRecords.filter { selectedRecords.contains($0.id) })
         let pass = transferPassword; let generation = UUID(); transferGeneration = generation; transferBusy = true
         Task {

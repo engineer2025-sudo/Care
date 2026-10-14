@@ -38,7 +38,7 @@
 	<key>NSHealthShareUsageDescription</key>
 	<string>CareSphere reads heart rate, blood oxygen, blood pressure, and workout summaries from Apple Health after you approve. It never writes health data.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>CareSphere searches a Kiwix offline library only on your private local network.</string>
+	<string>CareSphere transfers only selected encrypted records directly between nearby phones on your private Wi-Fi or hotspot, and can search a local Kiwix library. No hosted server is used for device transfers.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>CareSphere includes your location only when you choose to share SOS details. Nothing is sent automatically.</string>
 	<key>NSMicrophoneUsageDescription</key>

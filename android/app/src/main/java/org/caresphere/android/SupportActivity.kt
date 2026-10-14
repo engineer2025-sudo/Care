@@ -34,6 +34,13 @@ class SupportActivity : Activity() {
     private var busy = false
     private var transferFile: java.io.File? = null
     private var receivedTransfer: JSONObject? = null
+    private var nearbyHost: LocalTransferHost? = null
+    private var nearbyReceiver: LocalTransferReceiver? = null
+    private var nearbyGeneration = UUID.randomUUID()
+    private var nearbyBusy = false
+    private var nearbyOffer: Pair<String,String>? = null
+    private var nearbyStatus = ""
+    private var foreground = false
     private var pairs = false
     private val revealed = mutableListOf<Int>()
     private val matched = mutableSetOf<Int>()
@@ -63,8 +70,9 @@ class SupportActivity : Activity() {
     }
     override fun onCreate(state:Bundle?) {super.onCreate(state);data=CareData(this);section=state?.getString("section")?:"Start here";render()}
     override fun onSaveInstanceState(out:Bundle){super.onSaveInstanceState(out);out.putString("section",section)}
-    override fun onStop(){super.onStop();tts?.stop();pendingSpeech=null;paused=true}
-    override fun onDestroy(){tts?.shutdown();password?.fill('\u0000');backupBytes?.fill(0);super.onDestroy()}
+    override fun onResume(){super.onResume();foreground=true;if(section=="Device sharing")render()}
+    override fun onStop(){foreground=false;stopNearby();super.onStop();tts?.stop();pendingSpeech=null;paused=true}
+    override fun onDestroy(){stopNearby();tts?.shutdown();password?.fill('\u0000');backupBytes?.fill(0);super.onDestroy()}
     private fun say(value:String){
         pendingSpeech=value
         if(tts==null){tts=TextToSpeech(this){status->if(status==TextToSpeech.SUCCESS){val voice=tts?.voices?.firstOrNull{!it.isNetworkConnectionRequired && it.locale.language==java.util.Locale.getDefault().language};if(voice!=null){tts?.voice=voice;speechReady=true;pendingSpeech?.let{say(it)}}else message("No matching installed offline voice. The phrase stays visible.")}else message("Speech is unavailable. The phrase stays visible.")};return}
@@ -74,7 +82,7 @@ class SupportActivity : Activity() {
     private fun render(){
         val scroll=ScrollView(this);page=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(dp(20),dp(16),dp(20),dp(28));setBackgroundColor(bg)};scroll.addView(page);setContentView(scroll)
         scroll.setOnApplyWindowInsetsListener{v,insets->if(android.os.Build.VERSION.SDK_INT>=30){val bars=insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime());v.setPadding(bars.left,bars.top,bars.right,bars.bottom)};insets};scroll.requestApplyInsets()
-        text("My support tools",28f);button("Back to CareSphere"){finish()};button("Choose a tool · $section"){dialog().setItems(sections.toTypedArray()){_,i->tts?.stop();section=sections[i];phrase="";planId=null;render()}.show()}
+        text("My support tools",28f);button("Back to CareSphere"){finish()};button("Choose a tool · $section"){dialog().setItems(sections.toTypedArray()){_,i->stopNearby();tts?.stop();section=sections[i];phrase="";planId=null;render()}.show()}
         data.error?.let{text(it)}
         when(section){
             "Start here"->{text("Try activities without a profile. Add only the tools you want. Permissions are requested when needed.");button("Choose comfort settings"){section="Comfort";render()};button("Make a visual routine"){section="Visual routines";render()};button("Finish introduction"){save("introduced",true);message("These tools stay available from Today.")}}
@@ -154,7 +162,7 @@ class SupportActivity : Activity() {
     private fun deviceSharing(){
         text("Device-to-device · no backend",24f)
         text("Select notes or routines, protect a file with a passphrase, then choose Quick Share or another app in the Android share sheet. On the receiving device open CareSphere → My support tools → Device sharing and choose the received file.")
-        text("Nearby options depend on your system. This is not built-in Bluetooth pairing or live sync. For iPhone-to-Android use a compatible file-transfer app or cable. An app you choose may use its own cloud. You cannot remotely revoke copies. Tell the recipient the passphrase separately. Medicines, measurements, photos and backup keys are excluded.")
+        text("Use direct local Wi-Fi / hotspot transfer below for iPhone or Android, or use the system share sheet. This is not Bluetooth pairing or live sync. An app you choose may use its own cloud. You cannot remotely revoke copies. Tell the recipient the passphrase separately. Medicines, measurements, photos and backup keys are excluded.")
         button("Select records to send"){
             if(busy)return@button
             val records=transferableRecords();if(records.isEmpty()){message("Add your own note or routine first. No sample records are supplied.");return@button}
@@ -170,7 +178,7 @@ class SupportActivity : Activity() {
                                 JSONObject().put("format","CareSphere Transfer").put("version",1).put("iterations",310000).put("salt",Base64.getEncoder().encodeToString(sealed.salt)).put("iv",Base64.getEncoder().encodeToString(sealed.iv)).put("ciphertext",Base64.getEncoder().encodeToString(sealed.ciphertext)).toString()
                             };runOnUiThread {busy=false;if(!isFinishing&&!isDestroyed)result.onSuccess {raw->runCatching{
                                 val dir=java.io.File(cacheDir,"transfers").apply{mkdirs()};dir.listFiles()?.filter{System.currentTimeMillis()-it.lastModified()>86400000}?.forEach{it.delete()}
-                                transferFile?.delete();transferFile=java.io.File(dir,UUID.randomUUID().toString()+".caretransfer").apply{writeText(raw)};render();message("Encrypted transfer prepared. Choose Send encrypted file. Nothing leaves automatically.")
+                                stopNearby();transferFile?.delete();transferFile=java.io.File(dir,UUID.randomUUID().toString()+".caretransfer").apply{writeText(raw)};render();message("Encrypted transfer prepared. Choose Send encrypted file. Nothing leaves automatically.")
                             }.onFailure{message("Could not save the protected transfer. Check device storage.")}}.onFailure{message("Cannot prepare this transfer. Choose up to 100 notes/routines; notes up to 4,000 characters, routine titles up to 240.")} }
                             }.start()
                         }
@@ -184,9 +192,11 @@ class SupportActivity : Activity() {
                 send.clipData=ClipData.newRawUri("CareSphere encrypted transfer",uri)
                 runCatching{startActivity(Intent.createChooser(send,"Choose nearby sharing or another app"))}.onFailure{message("No file-sharing app is available. Nothing was sent.")}
             }
-            button("Clear prepared file"){file.delete();transferFile=null;render()}
+            button("Clear prepared file"){stopNearby();file.delete();transferFile=null;render()}
         }
+        nearbyControls()
         button("Receive: choose a transfer file"){
+            stopNearby()
             if(busy)return@button
             form("Unlock a CareSphere transfer",listOf("Passphrase" to ""),true){v->require(v[0].length>=12);password?.fill('\u0000');password=v[0].toCharArray();receivedTransfer=null
                 runCatching{startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE),613)}.onFailure{password?.fill('\u0000');password=null;message("No file picker available.")}
@@ -209,6 +219,70 @@ class SupportActivity : Activity() {
             }
             button("Cancel import"){receivedTransfer=null;render()}
         }
+    }
+    private fun stopNearby() {
+        nearbyGeneration=UUID.randomUUID();nearbyHost?.close();nearbyHost=null;nearbyReceiver?.close();nearbyReceiver=null
+        nearbyBusy=false;nearbyOffer=null;nearbyStatus=""
+    }
+    private fun unlockTransfer(raw:String, pass:String):JSONObject {
+        require(raw.toByteArray(Charsets.UTF_8).size<=LocalTransferWire.LIMIT)
+        val envelope=JSONObject(raw)
+        require(envelope.getString("format")=="CareSphere Transfer"&&envelope.getInt("version")==1&&envelope.getInt("iterations")==310000)
+        val encrypted=TransferCrypto.Envelope(Base64.getDecoder().decode(envelope.getString("salt")),Base64.getDecoder().decode(envelope.getString("iv")),Base64.getDecoder().decode(envelope.getString("ciphertext")))
+        return JSONObject(String(TransferCrypto.open(encrypted,pass),Charsets.UTF_8)).also{checkTransfer(it)}
+    }
+    private fun nearbyControls() {
+        text("Connect nearby · iPhone or Android",24f)
+        text("Join the same Wi-Fi or join the other phone's hotspot. Internet is not needed. Keep both apps open. Enter the sender's address and 8-digit code; there is no automatic device discovery.")
+        if(nearbyStatus.isNotEmpty())text(nearbyStatus)
+        transferFile?.takeIf{it.exists()}?.let { file ->
+            button("Offer to a nearby device") {
+                if(nearbyBusy||busy)return@button
+                val addresses=runCatching{LocalTransferWire.addresses()}.getOrDefault(emptyList())
+                if(addresses.isEmpty()){message("Join a private Wi-Fi or hotspot, then try again.");return@button}
+                if(addresses.size==1)offerNearby(file,addresses[0])
+                else dialog().setTitle("Choose the sending network address").setItems(addresses.toTypedArray()){_,i->offerNearby(file,addresses[i])}.show()
+            }.isEnabled=!nearbyBusy&&nearbyOffer==null
+        }
+        nearbyOffer?.let { info ->
+            text("Device address: ${info.first}");text("Connection code: ${info.second}",24f)
+            text("This offers only the prepared encrypted copy, not confirmation of delivery. It stops after five minutes or when you leave/background this screen. Tell the recipient the code and encryption passphrase privately; they are different.")
+        }
+        button("Connect to a nearby device") {
+            if(nearbyBusy||busy)return@button
+            form("Sender connection details",listOf("Device address" to "","8-digit connection code" to "")){fields->
+                LocalTransferWire.endpoint(fields[0],fields[1])
+                form("Unlock nearby copy",listOf("Passphrase" to ""),true){secrets->
+                    require(secrets[0].length>=12);stopNearby();receivedTransfer=null
+                    val pass=secrets[0].toCharArray();val generation=nearbyGeneration
+                    val receiver=LocalTransferReceiver();nearbyReceiver=receiver;nearbyBusy=true;nearbyStatus="Connecting locally…";render()
+                    Thread { val result=runCatching { unlockTransfer(String(receiver.receive(fields[0],fields[1]),Charsets.UTF_8),String(pass)) }
+                        pass.fill('\u0000')
+                        runOnUiThread { if(nearbyGeneration==generation&&foreground&&!isFinishing&&!isDestroyed) {
+                            nearbyBusy=false;nearbyReceiver=null
+                            result.onSuccess{receivedTransfer=it;nearbyStatus="Received and unlocked locally. Review and select copies below. Nothing has been imported."}
+                                .onFailure{nearbyStatus="Could not connect or unlock. Check the address, code and passphrase, same Wi-Fi/hotspot, and that the sender's offer is still open. Nothing was imported."}
+                            render()
+                        } }
+                    }.start()
+                }
+            }
+        }.isEnabled=!nearbyBusy&&!busy
+        if(nearbyBusy||nearbyOffer!=null)button("Stop nearby connection"){stopNearby();nearbyStatus="Local connection stopped. Received copies cannot be recalled.";render()}
+        text("If a guest network blocks other devices, try a private hotspot or use the encrypted-file option. A connection failure never imports records.")
+    }
+    private fun offerNearby(file:java.io.File,address:String) {
+        stopNearby();val generation=nearbyGeneration;val host=LocalTransferHost();nearbyHost=host;nearbyBusy=true;nearbyStatus="Starting local offer…";render()
+        Thread {
+            val result=runCatching{require(file.length()<=LocalTransferWire.LIMIT);host.start(file.readBytes(),address) {
+                runOnUiThread { if(nearbyGeneration==generation&&foreground&&!isFinishing&&!isDestroyed) {
+                    nearbyOffer=null;nearbyBusy=false;nearbyStatus="Local offer ended. Start a new offer to try again.";render()
+                } }
+            }}
+            runOnUiThread { if(nearbyGeneration==generation&&foreground&&!isFinishing&&!isDestroyed) {
+                nearbyBusy=false;result.onSuccess{nearbyOffer=it;nearbyStatus="Local offer ready."}.onFailure{host.close();nearbyStatus="Could not offer locally. Check Wi-Fi or hotspot and try again."};render()
+            } else host.close() }
+        }.start()
     }
     private fun recovery(){
         text("Recently deleted notes · 30 days",24f)

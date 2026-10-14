@@ -7,7 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <!-- No internet permission: only explicit browser/share handoffs can leave the app. -->
+    <!-- Android requires INTERNET for direct local sockets; the transfer validates private IPv4 only. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application android:allowBackup="false" android:fullBackupContent="false"
         android:label="CareSphere" android:icon="@drawable/ic_care" android:theme="@style/AppTheme"
         android:supportsRtl="true" android:usesCleartextTraffic="false">

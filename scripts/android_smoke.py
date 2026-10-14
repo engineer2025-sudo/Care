@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Exercise the actual debug APK in a CI emulator; never pair or call services."""
 import subprocess
+import http.server
+import threading
 import sys
 import traceback
 import time
@@ -172,8 +174,49 @@ tap('Import selected copies')
 tap('Back to CareSphere')
 tap('Care')
 find('Browser transfer test note')
-tap('Today')
+# Exercise the actual local socket receiver against a bounded, test-only LAN peer.
+# 10.0.2.2 is the emulator's private address for the CI host, not a public service.
+class LocalPeer(http.server.BaseHTTPRequestHandler):
+    protocol_version = 'HTTP/1.1'
+    def do_GET(self):
+        if self.path != '/care/12345678':
+            self.send_error(403)
+            return
+        body = Path('android/app/src/test/resources/browser-transfer.caretransfer').read_bytes()
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Content-Length', str(len(body)))
+        self.send_header('Connection', 'close')
+        self.end_headers()
+        self.wfile.write(body)
+    def log_message(self, *args):
+        pass
+peer = http.server.ThreadingHTTPServer(('127.0.0.1', 0), LocalPeer)
+threading.Thread(target=peer.serve_forever, daemon=True).start()
+try:
+    tap('Today')
+    tap('My support tools')
+    tap('Choose a tool · Start here')
+    tap('Device sharing')
+    tap('Connect to a nearby device')
+    tap('Device address')
+    adb('shell','input','text',f'10.0.2.2:{peer.server_port}')
+    tap('8-digit connection code')
+    adb('shell','input','text','12345678')
+    tap('Continue')
+    tap('Passphrase')
+    adb('shell','input','text','cross%sdevice%stest%sphrase')
+    tap('Continue')
+    find('Preview received copies')
+    tap('routine: Browser transfer test routine')
+    tap('Import selected copies')
+    tap('Back to CareSphere')
+    tap('Today')
+    find('Browser transfer test routine')
+finally:
+    peer.shutdown()
+    peer.server_close()
 adb('shell','am','force-stop',package)
 # Leave the emulator with an empty installation, not a saved test routine.
 adb('shell','pm','clear',package)
-print('PASS: installed APK, empty state, user routine persistence, activity choice, real-only empty vitals, empty notes, favorites persistence, note editing/delete cancellation, dark appearance, large-text navigation, communication cards, and real web-to-Android encrypted file preview/import.')
+print('PASS: installed APK, empty state, user routine persistence, activity choice, real-only empty vitals, empty notes, favorites persistence, note editing/delete cancellation, dark appearance, large-text navigation, communication cards, and real web-to-Android encrypted file preview/import, and direct local socket receive/unlock/selective import.')
