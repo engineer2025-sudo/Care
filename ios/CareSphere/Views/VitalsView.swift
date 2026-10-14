@@ -60,15 +60,32 @@ struct VitalsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Label("Bluetooth heart-rate monitor", systemImage: "waveform.path.ecg")
                     .font(.headline)
-                StatusChip(text: bluetooth.isConnected ? "LIVE BLE" : "NOT CONNECTED",
+                StatusChip(text: bluetooth.bpm != nil ? "LIVE BLE" : bluetooth.isConnected ? "CONNECTED · WAITING" : "NOT CONNECTED",
                            color: bluetooth.isConnected ? .emeraldText : .secondary)
                 if let name = bluetooth.sensorName { Text(name).font(.subheadline.weight(.medium)) }
                 Text(bluetooth.statusMessage).font(.subheadline).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                Button(bluetooth.isConnected ? "Disconnect monitor" : "Pair a heart-rate monitor") {
-                    bluetooth.isConnected ? bluetooth.disconnect() : bluetooth.pair()
+                if bluetooth.isPairing {
+                    ForEach(bluetooth.candidates) { candidate in
+                        Button { bluetooth.connect(to: candidate) } label: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Label(candidate.name, systemImage: "waveform.path.ecg")
+                                    .font(.body.weight(.semibold))
+                                Text("Device ending \(candidate.shortID) · tap to connect")
+                                    .font(.footnote)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    Button("Cancel pairing") { bluetooth.cancelPairing() }
+                        .buttonStyle(.bordered).controlSize(.large)
+                } else {
+                    Button(bluetooth.isConnected ? "Disconnect monitor" : "Pair a heart-rate monitor") {
+                        bluetooth.isConnected ? bluetooth.disconnect() : bluetooth.pair()
+                    }
+                    .buttonStyle(.bordered).controlSize(.large)
                 }
-                .buttonStyle(.bordered).controlSize(.large)
 
                 Divider().padding(.vertical, 4)
                 Label("Apple Health", systemImage: "heart.text.square")
