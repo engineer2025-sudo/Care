@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import ImageIO
 import UniformTypeIdentifiers
 import CryptoKit
 import CommonCrypto
@@ -206,7 +207,7 @@ struct PersonalSupportView: View {
                 if paused { Text("Take your time."); Button("Continue") { paused = false } }
                 else {
                     Text(plan.steps[step]).font(.title2)
-                    if let photo = store.personalSupport.photos.first(where: { $0.id == plan.photoID }), let image = UIImage(data: photo.jpeg) { Image(uiImage: image).resizable().scaledToFit().accessibilityLabel(photo.caption) }
+                    if let photo = store.personalSupport.photos.first(where: { $0.id == plan.photoID }), let image = supportImage(photo.jpeg) { Image(uiImage: image).resizable().scaledToFit().accessibilityLabel(photo.caption) }
                     Button("Read this step") { say(plan.steps[step]) }
                     Button("Done / next") { advance(plan) }
                     Button("Skip") { advance(plan) }
@@ -238,7 +239,7 @@ struct PersonalSupportView: View {
             PhotosPicker("Choose one photo", selection: $selectedPhoto, matching: .images).disabled(store.personalSupport.photos.count >= 10)
             if !store.personalSupport.photos.isEmpty {
                 let photo = store.personalSupport.photos[photoIndex % store.personalSupport.photos.count]
-                if let image = UIImage(data: photo.jpeg) { Image(uiImage: image).resizable().scaledToFit().accessibilityLabel(photo.caption) }
+                if let image = supportImage(photo.jpeg) { Image(uiImage: image).resizable().scaledToFit().accessibilityLabel(photo.caption) }
                 Text(photo.caption); Text("What do you notice? Share, point, listen or skip.")
                 Button("Next photo") { photoIndex += 1 }
                 NavigationLink("Photo matching") { PersonalPhotoPairs(photos: Array(store.personalSupport.photos.prefix(store.personalSupport.choices))) }.disabled(store.personalSupport.photos.count < 2)
@@ -249,7 +250,7 @@ struct PersonalSupportView: View {
     @MainActor private func loadPhoto(_ item: PhotosPickerItem?) async {
         do {
             guard let item, let bytes = try await item.loadTransferable(type: Data.self), bytes.count < 10_000_000,
-                  let image = UIImage(data: bytes), image.size.width > 0, image.size.height > 0 else { status = "Choose a readable photo under 10 MB."; return }
+                  let image = supportImage(bytes), image.size.width > 0, image.size.height > 0 else { status = "Choose a readable photo under 10 MB."; return }
             let scale = min(1, 512 / max(image.size.width, image.size.height))
             let format = UIGraphicsImageRendererFormat(); format.scale = 1
             let resized = UIGraphicsImageRenderer(size: CGSize(width: image.size.width * scale, height: image.size.height * scale), format: format).image { _ in image.draw(in: CGRect(origin: .zero, size: CGSize(width: image.size.width * scale, height: image.size.height * scale))) }
@@ -338,7 +339,7 @@ private struct PersonalPhotoPairs: View {
                             revealed.append(index)
                             if revealed.count == 2, revealed[0] % photos.count == revealed[1] % photos.count { matched.formUnion(revealed); revealed = [] }
                         } label: {
-                            if revealed.contains(index) || matched.contains(index), let image = UIImage(data: photos[index % photos.count].jpeg) { Image(uiImage: image).resizable().scaledToFit().accessibilityLabel(photos[index % photos.count].caption) }
+                            if revealed.contains(index) || matched.contains(index), let image = supportImage(photos[index % photos.count].jpeg) { Image(uiImage: image).resizable().scaledToFit().accessibilityLabel(photos[index % photos.count].caption) }
                             else { Text("Card \(index + 1)").frame(minHeight: 80) }
                         }.disabled(matched.contains(index))
                     }
@@ -376,4 +377,15 @@ private struct SupportBackupFile: FileDocument {
     init(data: Data) { self.data = data }
     init(configuration: ReadConfiguration) throws { data = configuration.file.regularFileContents ?? Data() }
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { FileWrapper(regularFileWithContents: data) }
+}
+
+// Downsample during decoding instead of allocating the full camera image.
+private func supportImage(_ data: Data) -> UIImage? {
+    guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+          let image = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: 512
+          ] as CFDictionary) else { return nil }
+    return UIImage(cgImage: image)
 }

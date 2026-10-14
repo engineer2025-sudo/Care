@@ -26,7 +26,7 @@ def find(label, timeout=35):
         if candidates:
             return next((n for n in candidates if n.attrib.get('clickable') == 'true'), candidates[0])
         attempts += 1
-        if any(n.attrib.get('resource-id') == 'android:id/parentPanel' for n in tree.iter('node')):
+        if any(n.attrib.get('resource-id') == 'android:id/parentPanel' for n in tree.iter('node')) and not any(n.attrib.get('class') == 'android.widget.ListView' for n in tree.iter('node')):
             time.sleep(.5)
             continue
         # Find off-screen content using the actual display dimensions, not a
@@ -127,7 +127,41 @@ tap('Care')
 find('Remember appointment and questions')
 adb('shell','settings','put','system','font_scale','1.0')
 tap('Today')
+tap('My support tools')
+tap('Choose a tool · Start here')
+tap('Communication')
+tap('I need a break')
+find('Speak this phrase')
+# Do not synthesize audio or contact anyone in unattended CI.
+tap('Clear / stop')
+tap('Choose a tool · Communication')
+tap('Device sharing')
+adb('push','android/app/src/test/resources/browser-transfer.caretransfer','/sdcard/Download/CareSphere-test.caretransfer')
+tap('Receive: choose a transfer file')
+tap('Passphrase')
+time.sleep(1)
+adb('shell','input','text','cross%sdevice%stest%sphrase')
+tap('Continue')
+# ACTION_OPEN_DOCUMENT starts in Recents. Use its navigation drawer for Downloads.
+try:
+    tap('Show roots')
+    tap('Downloads')
+except AssertionError:
+    # Some platform images open Downloads directly.
+    pass
+tap('CareSphere-test.caretransfer')
+find('Unlocked locally. Nothing is saved until you select records and import.')
+tap('OK')
+find('Preview received copies')
+tap('note: Browser transfer test note')
+tap('Import selected copies')
+find('Imported selected copies. Existing records were not replaced.')
+tap('OK')
+tap('Back to CareSphere')
+tap('Care')
+find('Browser transfer test note')
+tap('Today')
 adb('shell','am','force-stop',package)
 # Leave the emulator with an empty installation, not a saved test routine.
 adb('shell','pm','clear',package)
-print('PASS: installed APK, empty state, user routine persistence, activity choice, real-only empty vitals, empty notes, favorites persistence, note editing/delete cancellation, dark appearance, large-text navigation.')
+print('PASS: installed APK, empty state, user routine persistence, activity choice, real-only empty vitals, empty notes, favorites persistence, note editing/delete cancellation, dark appearance, large-text navigation, communication cards, and real web-to-Android encrypted file preview/import.')
