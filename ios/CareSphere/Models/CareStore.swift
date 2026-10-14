@@ -65,15 +65,10 @@ final class CareStore: ObservableObject {
         encryptionKey = initialStore.key
         persistenceCanWrite = initialStore.canWrite
         let box = initialStore.box
-        displayName = box?.displayName ?? "Alex"
+        displayName = box?.displayName ?? ""
         voiceReminders = box?.voiceReminders ?? false
         voiceIdentifier = box?.voiceIdentifier ?? ""
-        routines = box?.routines ?? [
-            Routine(emoji: "💧", title: "Morning hydration"),
-            Routine(emoji: "🧩", title: "Choose an activity I enjoy"),
-            Routine(emoji: "☕", title: "Join a coffee circle"),
-            Routine(emoji: "🌿", title: "Evening stretch & wind-down"),
-        ]
+        routines = box?.routines ?? []
         // Never prefill medication names or times. Fresh users configure only
         // their own schedule during onboarding; no demo drug creates reminders.
         medications = box?.medications ?? []
@@ -291,15 +286,10 @@ final class CareStore: ObservableObject {
 
         medicationScheduleConfirmed = false
         medications = []
-        displayName = "Alex"
+        displayName = ""
         voiceReminders = false
         voiceIdentifier = ""
-        routines = [
-            Routine(emoji: "💧", title: "Morning hydration"),
-            Routine(emoji: "🧩", title: "Choose an activity I enjoy"),
-            Routine(emoji: "☕", title: "Join a coffee circle"),
-            Routine(emoji: "🌿", title: "Evening stretch & wind-down"),
-        ]
+        routines = []
         notes = []
         moods = []
         emotionScore = 0

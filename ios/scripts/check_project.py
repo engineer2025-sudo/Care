@@ -11,6 +11,10 @@ root = Path(__file__).resolve().parents[1]
 project = root / 'CareSphere.xcodeproj'
 text = (project / 'project.pbxproj').read_text()
 errors = []
+if 'XCRemoteSwiftPackageReference' in text:
+    errors.append('Remote packages are forbidden in the portable native build')
+if plistlib.loads((root / 'CareSphere.entitlements').read_bytes()):
+    errors.append('Standard build must not require optional HealthKit provisioning')
 for source in (root / 'CareSphere').rglob('*.swift'):
     if f'path = "{source.name}";' not in text and f'path = {source.name};' not in text:
         errors.append(f'Source missing from Xcode project: {source.relative_to(root)}')

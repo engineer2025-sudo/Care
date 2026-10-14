@@ -45,11 +45,6 @@
 	<string>CareSphere uses the microphone for video coffee circles and telehealth visits.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>CareSphere counts your daily steps to encourage gentle, healthy movement.</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>audio</string>
-		<string>voip</string>
-	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

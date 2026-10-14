@@ -120,16 +120,6 @@
 			isa = "PBXBuildFile";
 			fileRef = 23700BC17BED1C6177FAB932;
 		};
-		AD8E4C34E58F92D86E2400EF = {
-			isa = "PBXFileReference";
-			lastKnownFileType = "sourcecode.swift";
-			path = "KokoroSpeechService.swift";
-			sourceTree = "<group>";
-		};
-		3F7CFB6791DBF7EED2379A09 = {
-			isa = "PBXBuildFile";
-			fileRef = AD8E4C34E58F92D86E2400EF;
-		};
 		DC9B1CDF41CF78A57261895B = {
 			isa = "PBXFileReference";
 			lastKnownFileType = "sourcecode.swift";
@@ -218,7 +208,6 @@
 				271725EE4192CA327ED1EB84,
 				799C9F2392F7350C10B72E01,
 				23700BC17BED1C6177FAB932,
-				AD8E4C34E58F92D86E2400EF,
 				DC9B1CDF41CF78A57261895B,
 				44AC2373A3B29E0377239375,
 				DDCD3AABC18B50063CE75C1A,
@@ -503,91 +492,6 @@
 			isa = "PBXBuildFile";
 			productRef = 66AF8D181C9E8213A1C5F4BA;
 		};
-		C061C8877ABE9E010420A6B7 = {
-			isa = "XCRemoteSwiftPackageReference";
-			repositoryURL = "https://github.com/jitsi/jitsi-meet-ios-sdk-releases";
-			requirement = {
-				kind = "exactVersion";
-				version = "13.1.1";
-			};
-		};
-		40C36BC848460D827B2A3510 = {
-			isa = "XCSwiftPackageProductDependency";
-			package = C061C8877ABE9E010420A6B7;
-			productName = "JitsiMeetSDK";
-		};
-		4E1AE5F65EC6854360606BD7 = {
-			isa = "PBXBuildFile";
-			productRef = 40C36BC848460D827B2A3510;
-		};
-		F830C780B9D530804A3CFA99 = {
-			isa = "XCRemoteSwiftPackageReference";
-			repositoryURL = "https://github.com/Giphy/giphy-ios-sdk";
-			requirement = {
-				kind = "exactVersion";
-				version = "2.2.12";
-			};
-		};
-		A7E580005A903AC5F609E575 = {
-			isa = "XCSwiftPackageProductDependency";
-			package = F830C780B9D530804A3CFA99;
-			productName = "GiphyUISDK";
-		};
-		E9775BEEC4D59BD7AE999B66 = {
-			isa = "PBXBuildFile";
-			productRef = A7E580005A903AC5F609E575;
-		};
-		4D63A3F24BBA82FD00F91C94 = {
-			isa = "XCRemoteSwiftPackageReference";
-			repositoryURL = "https://github.com/mattt/llama.swift";
-			requirement = {
-				kind = "exactVersion";
-				version = "2.10549.0";
-			};
-		};
-		355201795F9287B52495A3DF = {
-			isa = "XCSwiftPackageProductDependency";
-			package = 4D63A3F24BBA82FD00F91C94;
-			productName = "LlamaSwift";
-		};
-		D4CD3D1AACC1F2DF84E6B340 = {
-			isa = "PBXBuildFile";
-			productRef = 355201795F9287B52495A3DF;
-		};
-		185110A46C69EF9228BAE13E = {
-			isa = "XCRemoteSwiftPackageReference";
-			repositoryURL = "https://github.com/k2-fsa/sherpa-onnx.git";
-			requirement = {
-				kind = "exactVersion";
-				version = "1.13.8";
-			};
-		};
-		324FDBDA29DFBB811110221B = {
-			isa = "XCSwiftPackageProductDependency";
-			package = 185110A46C69EF9228BAE13E;
-			productName = "sherpa-onnx";
-		};
-		08EB1009B22BA0D223E7AD1A = {
-			isa = "PBXBuildFile";
-			productRef = 324FDBDA29DFBB811110221B;
-		};
-		32A0993700949694F9B8F852 = {
-			isa = "XCRemoteSwiftPackageReference";
-			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
-			requirement = {
-				kind = "exactVersion";
-				version = "0.9.20";
-			};
-		};
-		F1A6B365A116CD7BA9554CDF = {
-			isa = "XCSwiftPackageProductDependency";
-			package = 32A0993700949694F9B8F852;
-			productName = "ZIPFoundation";
-		};
-		8DE46B10F59977DA7E1EA2CE = {
-			isa = "PBXBuildFile";
-			productRef = F1A6B365A116CD7BA9554CDF;
-		};
 		BCE16DD0260827ECF338C787 = {
 			isa = "PBXSourcesBuildPhase";
 			buildActionMask = "2147483647";
@@ -600,7 +504,6 @@
 				ED0E6E6ECF0EFFEA765A0BF5,
 				1CA333539915E5587C3E3E74,
 				5D2895C51CAAC388599C1AC4,
-				3F7CFB6791DBF7EED2379A09,
 				5EF73BDA4BCFDAAC626D540B,
 				B47AE4C8A8AFAF027FB9CD3D,
 				16ACE03E9D40BFAD12EBDD33,
@@ -642,11 +545,6 @@
 			buildActionMask = "2147483647";
 			files = (
 				C6FEBDB0F0A823C4A55CE520,
-				4E1AE5F65EC6854360606BD7,
-				E9775BEEC4D59BD7AE999B66,
-				D4CD3D1AACC1F2DF84E6B340,
-				08EB1009B22BA0D223E7AD1A,
-				8DE46B10F59977DA7E1EA2CE,
 			);
 			runOnlyForDeploymentPostprocessing = "0";
 		};
@@ -672,18 +570,40 @@
 			};
 			name = "Debug";
 		};
+		AAAAAAAAAAAAAAAAAAAAAA01 = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = "NO";
+				CLANG_ENABLE_MODULES = "YES";
+				CLANG_ENABLE_OBJC_ARC = "YES";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = "YES";
+				ENABLE_STRICT_OBJC_MSGSEND = "YES";
+				GCC_C_LANGUAGE_STANDARD = "gnu17";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = "YES";
+				GCC_WARN_UNDECLARED_SELECTOR = "YES";
+				IPHONEOS_DEPLOYMENT_TARGET = "16.0";
+				SDKROOT = "iphoneos";
+				SWIFT_VERSION = "5.0";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
+				ONLY_ACTIVE_ARCH = "YES";
+				ENABLE_TESTABILITY = "YES";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
+			};
+			name = "Debug-HealthKit";
+		};
 		A0D76D2121E95BDABD0D281A = {
 			isa = "XCBuildConfiguration";
 			buildSettings = {
 				SWIFT_VERSION = "5.0";
 				CODE_SIGN_STYLE = "Automatic";
-				MARKETING_VERSION = "2.3.0";
-				CURRENT_PROJECT_VERSION = "6";
+				MARKETING_VERSION = "3.0.0";
+				CURRENT_PROJECT_VERSION = "7";
 				DEVELOPMENT_TEAM = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.caresphere.CareSphere";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				SUPPORTED_PLATFORMS = "iphoneos";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = "NO";
 				CODE_SIGN_ENTITLEMENTS = "CareSphere.entitlements";
 				INFOPLIST_FILE = "CareSphere-iOS-Info.plist";
@@ -697,6 +617,33 @@
 				ENABLE_PREVIEWS = "YES";
 			};
 			name = "Debug";
+		};
+		AAAAAAAAAAAAAAAAAAAAAA02 = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) CARE_HEALTHKIT";
+				SWIFT_VERSION = "5.0";
+				CODE_SIGN_STYLE = "Automatic";
+				MARKETING_VERSION = "3.0.0";
+				CURRENT_PROJECT_VERSION = "7";
+				DEVELOPMENT_TEAM = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.caresphere.CareSphere";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = "NO";
+				CODE_SIGN_ENTITLEMENTS = "CareSphere-HealthKit.entitlements";
+				INFOPLIST_FILE = "CareSphere-iOS-Info.plist";
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "AccentColor";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SWIFT_EMIT_LOC_STRINGS = "YES";
+				ENABLE_PREVIEWS = "YES";
+			};
+			name = "Debug-HealthKit";
 		};
 		D55A472A54FF4167B59A18AC = {
 			isa = "XCBuildConfiguration";
@@ -725,13 +672,13 @@
 			buildSettings = {
 				SWIFT_VERSION = "5.0";
 				CODE_SIGN_STYLE = "Automatic";
-				MARKETING_VERSION = "2.3.0";
-				CURRENT_PROJECT_VERSION = "6";
+				MARKETING_VERSION = "3.0.0";
+				CURRENT_PROJECT_VERSION = "7";
 				DEVELOPMENT_TEAM = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.caresphere.CareSphere";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				SUPPORTED_PLATFORMS = "iphoneos";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = "NO";
 				CODE_SIGN_ENTITLEMENTS = "CareSphere.entitlements";
 				INFOPLIST_FILE = "CareSphere-iOS-Info.plist";
@@ -750,6 +697,7 @@
 			isa = "XCConfigurationList";
 			buildConfigurations = (
 				9B02B6EDC3ACD0D0A45EB8D7,
+				AAAAAAAAAAAAAAAAAAAAAA01,
 				D55A472A54FF4167B59A18AC,
 			);
 			defaultConfigurationIsVisible = "0";
@@ -759,6 +707,7 @@
 			isa = "XCConfigurationList";
 			buildConfigurations = (
 				A0D76D2121E95BDABD0D281A,
+				AAAAAAAAAAAAAAAAAAAAAA02,
 				EBFFE960C1756AF59B02152E,
 			);
 			defaultConfigurationIsVisible = "0";
@@ -779,11 +728,6 @@
 			name = "CareSphere";
 			packageProductDependencies = (
 				66AF8D181C9E8213A1C5F4BA,
-				40C36BC848460D827B2A3510,
-				A7E580005A903AC5F609E575,
-				355201795F9287B52495A3DF,
-				324FDBDA29DFBB811110221B,
-				F1A6B365A116CD7BA9554CDF,
 			);
 			productName = "CareSphere";
 			productReference = 38A007151ABE87CC01A5B6E9;
@@ -800,7 +744,7 @@
 						ProvisioningStyle = "Automatic";
 						SystemCapabilities = {
 							com.apple.HealthKit = {
-								enabled = "1";
+								enabled = "0";
 							};
 						};
 					};
@@ -817,11 +761,6 @@
 			mainGroup = E50290A24C49A459B43487C5;
 			packageReferences = (
 				F26C3580C7227E1E6EAE929D,
-				C061C8877ABE9E010420A6B7,
-				F830C780B9D530804A3CFA99,
-				4D63A3F24BBA82FD00F91C94,
-				185110A46C69EF9228BAE13E,
-				32A0993700949694F9B8F852,
 			);
 			productRefGroup = FBDC4F23F93125BBEEAE800C;
 			projectDirPath = "";

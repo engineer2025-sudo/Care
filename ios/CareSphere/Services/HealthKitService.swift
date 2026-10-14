@@ -49,7 +49,7 @@ final class HealthKitService: NSObject, ObservableObject {
 
     /// HealthKit is available when running on a supported iPhone or iPad.
     var canRequestAuthorization: Bool {
-        #if os(iOS)
+        #if os(iOS) && CARE_HEALTHKIT
         return HKHealthStore.isHealthDataAvailable()
         #else
         return false
@@ -63,8 +63,8 @@ final class HealthKitService: NSObject, ObservableObject {
         #if os(macOS)
         statusMessage = "Apple Health is available on a supported iPhone or iPad. Enable Garmin Connect sharing to Apple Health on iPhone first."
         #else
-        guard HKHealthStore.isHealthDataAvailable() else {
-            statusMessage = "Apple Health isn't available on this device."
+        guard canRequestAuthorization else {
+            statusMessage = "Apple Health is optional. To enable it, use the CareSphere-HealthKit scheme with an eligible signing team. Bluetooth works in the standard build."
             return
         }
         statusMessage = hasRequestedAuthorization
@@ -94,8 +94,8 @@ final class HealthKitService: NSObject, ObservableObject {
         #if os(macOS)
         statusMessage = "HealthKit is unavailable on this device. On iPhone, enable Garmin Connect's Apple Health sharing and authorize CareSphere there."
         #else
-        guard HKHealthStore.isHealthDataAvailable() else {
-            statusMessage = "Apple Health isn't available on this device."
+        guard canRequestAuthorization else {
+            statusMessage = "Apple Health is optional. To enable it, use the CareSphere-HealthKit scheme with an eligible signing team. Bluetooth works in the standard build."
             return
         }
         // Read-only by design. In particular, workoutType is requested here so
@@ -256,9 +256,6 @@ final class HealthKitService: NSObject, ObservableObject {
 
     private func observe(_ type: HKQuantityType) {
         guard observedSampleTypeIdentifiers.insert(type.identifier).inserted else { return }
-        #if os(iOS)
-        store.enableBackgroundDelivery(for: type, frequency: .immediate) { _, _ in }
-        #endif
         let query = HKObserverQuery(sampleType: type, predicate: nil) { [weak self] _, completion, error in
             guard let self, error == nil else {
                 completion()
@@ -287,9 +284,6 @@ final class HealthKitService: NSObject, ObservableObject {
     private func observeWorkouts() {
         let type = HKObjectType.workoutType()
         guard observedSampleTypeIdentifiers.insert(type.identifier).inserted else { return }
-        #if os(iOS)
-        store.enableBackgroundDelivery(for: type, frequency: .immediate) { _, _ in }
-        #endif
         let query = HKObserverQuery(sampleType: type, predicate: nil) { [weak self] _, completion, error in
             guard let self, error == nil else {
                 completion()

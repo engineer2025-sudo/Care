@@ -139,7 +139,7 @@ struct VisitPrepView: View {
                 }
 
                 Section("Limitations") {
-                    Text("This prototype includes only the selected local profile name, user-entered medication reminders, mood self-reports, notes, and your questions. It does not include HealthKit readings, a clinician-verified medication list, or simulated vitals, and it does not provide diagnosis or treatment advice.")
+                    Text("This prototype includes only the selected local profile name, user-entered medication reminders, mood self-reports, notes, and your questions. It does not include HealthKit readings, a clinician-verified medication list, or automatic vital-sign summaries, and it does not provide diagnosis or treatment advice.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }

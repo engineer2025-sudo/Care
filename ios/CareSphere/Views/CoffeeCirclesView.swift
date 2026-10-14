@@ -64,7 +64,7 @@ struct CoffeeCirclesView: View {
                 Button {
                     activeCircle = circle
                 } label: {
-                    Label("Join in app", systemImage: "video.fill")
+                    Label("Review & join", systemImage: "video.fill")
                         .font(.subheadline.weight(.black))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 11)
@@ -104,7 +104,7 @@ struct CoffeeCirclesView: View {
         VStack(alignment: .leading, spacing: 6) {
             Label("How the video works", systemImage: "lightbulb.fill")
                 .font(.subheadline.weight(.bold))
-            Text("Calls run on Jitsi Meet using encrypted WebRTC transport. CareSphere embeds the Jitsi SDK but does not host, schedule, or moderate rooms. Anyone with a room link may join, so verify participants before sharing private health details. Camera and microphone permission prompts appear only when you enable them.")
+            Text("Calls run on Jitsi Meet using encrypted WebRTC transport. CareSphere opens the provider in your browser and does not host, schedule, or moderate rooms. The provider may require sign-in to start a room. Anyone with a room link may join, so verify participants before sharing private health details. Camera and microphone permission prompts appear only when you enable them.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

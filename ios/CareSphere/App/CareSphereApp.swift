@@ -15,7 +15,6 @@ struct CareSphereApp: App {
     @StateObject private var steps = StepCountService()
     @StateObject private var localAssistant = LocalAssistantService()
     @StateObject private var careSupport = CareSupportCoordinator()
-    @StateObject private var kokoroSpeech = KokoroSpeechService.shared
 
     @Environment(\.scenePhase) private var scenePhase
     @State private var isLocked = false
@@ -53,7 +52,6 @@ struct CareSphereApp: App {
             .environmentObject(steps)
             .environmentObject(localAssistant)
             .environmentObject(careSupport)
-            .environmentObject(kokoroSpeech)
             .preferredColorScheme(preferredColorScheme)
             .environment(\.careSphereHighContrast, store.highContrast)
             .tint(.emerald)
@@ -88,6 +86,7 @@ struct CareSphereApp: App {
             }
             .onChange(of: scenePhase) { phase in
                 careSupport.setAppActive(phase == .active)
+                if phase == .active { localAssistant.refreshAvailability() }
                 if phase == .active && steps.hasStarted { steps.start() }
                 if phase == .active && healthKit.hasRequestedAuthorization {
                     healthKit.refreshAll()
@@ -96,8 +95,8 @@ struct CareSphereApp: App {
                 // may make a scene inactive while its own system prompt is visible.
                 if phase == .background {
                     careSupport.finish()
-                    KokoroSpeechService.shared.stopPlayback()
-                    Task { await KokoroSpeechService.shared.releaseInferenceMemory() }
+                    localAssistant.cancel()
+                    SpeechService.shared.stop()
                 }
                 if store.hasCompletedOnboarding && store.biometricEnabled && phase == .background {
                     isLocked = true

@@ -1,5 +1,4 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct HealthGuideView: View {
     @EnvironmentObject private var assistant: LocalAssistantService
@@ -10,7 +9,6 @@ struct HealthGuideView: View {
     @State private var references: [HealthReference] = []
     @State private var isSearching = false
     @State private var statusText: String?
-    @State private var showModelImporter = false
     @State private var searchGenerationID = UUID()
     @FocusState private var questionFocused: Bool
 
@@ -40,17 +38,9 @@ struct HealthGuideView: View {
             .background(Color.ink)
             .navigationTitle("Health Guide")
             .inlineTitle()
-            .fileImporter(
-                isPresented: $showModelImporter,
-                allowedContentTypes: [.item],
-                allowsMultipleSelection: false) { result in
-                    guard case .success(let urls) = result, let url = urls.first else { return }
-                    let hasSecurityScope = url.startAccessingSecurityScopedResource()
-                    Task {
-                        await assistant.importModel(from: url)
-                        if hasSecurityScope { url.stopAccessingSecurityScopedResource() }
-                    }
-                }
+            .onAppear { assistant.refreshAvailability() }
+            .onDisappear { assistant.cancel() }
+
         }
     }
 
@@ -65,7 +55,7 @@ struct HealthGuideView: View {
             }
             Text("A calmer way to find answers.")
                 .font(.title2.weight(.black))
-            Text("Search trusted health references offline. If you install a small language model, it can summarize the passages locally—your questions are not sent to an AI service.")
+            Text("Search built-in general references offline. On supported devices, Apple Intelligence can summarize matching passages locally. It is optional and may make mistakes.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             HStack(spacing: 8) {
@@ -83,78 +73,16 @@ struct HealthGuideView: View {
     }
 
     private var modelCard: some View {
-        SectionCard(title: "On-device language model", systemImage: "cpu") {
-            if assistant.isModelInstalled {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(Color.emeraldText)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(assistant.installedModelLabel)
-                            .font(.subheadline.weight(.bold))
-                        Text(["Local GGUF model", assistant.installedModelSize].compactMap { $0 }.joined(separator: " · "))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button("Remove", role: .destructive) { assistant.removeModel() }
-                        .font(.caption.weight(.bold))
-                        .disabled(assistant.isGenerating)
-                }
-            } else {
-                Text("Optional: Qwen2.5 1.5B Instruct (Q4_K_M). Allow 1.5 GB free space and use Wi-Fi if preferred. Activities and reference search work without this download.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 10) {
-                    Button {
-                        assistant.downloadRecommendedModel()
-                    } label: {
-                        Label(assistant.errorText == nil ? "Download · ~1.1 GB" : "Retry download · ~1.1 GB", systemImage: "arrow.down.circle.fill")
-                            .font(.caption.weight(.heavy))
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(assistant.isDownloading || assistant.isImporting)
-
-                    Button {
-                        showModelImporter = true
-                    } label: {
-                        Label("Import GGUF", systemImage: "folder.badge.plus")
-                            .font(.caption.weight(.bold))
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(assistant.isDownloading || assistant.isImporting)
-                }
+        SectionCard(title: "Apple Intelligence", systemImage: "sparkles") {
+            StatusChip(text: assistant.isAvailable ? "AVAILABLE ON DEVICE" : "NOT AVAILABLE", color: assistant.isAvailable ? .emeraldText : .secondary)
+            Text(assistant.availabilityMessage).font(.body).fixedSize(horizontal: false, vertical: true)
+            Text("Optional reference summaries using Apple's Foundation Models framework. Requires iOS 26+ and compatible hardware. No account, API key, or third-party model download. No care notes, medications, or sensor data are sent to the model automatically.")
+                .font(.footnote).foregroundStyle(.secondary)
+            Button("Check availability again") { assistant.refreshAvailability() }
+                .buttonStyle(.bordered).controlSize(.large)
+            if assistant.isGenerating {
+                Button("Cancel summary") { assistant.cancel() }.buttonStyle(.bordered)
             }
-
-            if assistant.isDownloading {
-                ProgressView(value: assistant.downloadProgress) {
-                    Text(assistant.downloadStatus ?? "Starting download…")
-                }
-                .tint(.emerald)
-                Button("Cancel download") { assistant.cancelModelDownload() }
-                    .buttonStyle(.bordered).controlSize(.large)
-            } else if assistant.isImporting {
-                ProgressView("Copying model into private storage…")
-            } else if let status = assistant.downloadStatus {
-                Text(status).font(.subheadline).foregroundStyle(.secondary)
-            }
-            if let error = assistant.errorText, assistant.generationErrorText == nil {
-                Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption2)
-                    .foregroundStyle(.orange)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Small-model limits")
-                    .font(.caption.weight(.bold))
-                Text("A 1.5B model can be slow on some iPhones and may make mistakes. First use loads about 1.1 GB of weights plus runtime memory. Imported files must be Qwen-family Instruct GGUF models using ChatML. This is an educational helper—not a clinician, diagnosis, or medication checker.")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                Link("Model card & Apache 2.0 license", destination: URL(string: "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF")!)
-                    .font(.caption2.weight(.semibold))
-            }
-            .padding(12)
-            .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
     }
 
@@ -176,9 +104,9 @@ struct HealthGuideView: View {
                     if isSearching || assistant.isGenerating {
                         ProgressView().tint(.white)
                     } else {
-                        Image(systemName: assistant.isModelInstalled ? "sparkles" : "magnifyingglass")
+                        Image(systemName: assistant.isAvailable ? "sparkles" : "magnifyingglass")
                     }
-                    Text(assistant.isModelInstalled ? "Search sources & ask on device" : "Search local references")
+                    Text(assistant.isAvailable ? "Search & summarize with Apple Intelligence" : "Search local references")
                         .font(.subheadline.weight(.heavy))
                 }
                 .frame(maxWidth: .infinity)
@@ -395,7 +323,7 @@ struct HealthGuideView: View {
 
     private var safetyCard: some View {
         SectionCard(title: "Important safety boundary", systemImage: "cross.case") {
-            Text("CareSphere is not a medical device and cannot diagnose, triage, check drug interactions, or recommend a dose. The language model is small and may be wrong. For an emergency, call local emergency services; in the U.S., call 911.")
+            Text("CareSphere is not a medical device and cannot diagnose, triage, check drug interactions, or recommend a dose. AI summaries may be wrong. For an emergency, call local emergency services; in the U.S., call 911.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -423,6 +351,7 @@ struct HealthGuideView: View {
             return
         }
         guard !isSearching, !assistant.isGenerating else { return }
+        assistant.clearResponse()
         isSearching = true
         let requestID = UUID()
         searchGenerationID = requestID
@@ -430,12 +359,12 @@ struct HealthGuideView: View {
             let found = await library.search(trimmed)
             guard searchGenerationID == requestID else { return }
             references = found
-            if assistant.isModelInstalled {
+            if assistant.isAvailable {
                 await askLocalModelSafely(question: trimmed, references: found)
             } else {
                 statusText = found.isEmpty
                     ? "No matching passage found in the installed offline references."
-                    : "Install a GGUF model to summarize these references offline."
+                    : "Read the sources below. Apple Intelligence summaries are unavailable on this device right now."
             }
             if searchGenerationID == requestID { isSearching = false }
         }

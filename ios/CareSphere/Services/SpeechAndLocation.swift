@@ -3,7 +3,7 @@ import AVFoundation
 import CoreLocation
 
 /// Spoken medication/routine prompts. Speech synthesis and installed voice data
-/// stay on-device; users can choose an Apple voice or an optional Kokoro neural voice.
+/// stay on-device; users can choose an installed Apple voice.
 final class SpeechService {
     static let shared = SpeechService()
     private let synthesizer = AVSpeechSynthesizer()
@@ -31,21 +31,6 @@ final class SpeechService {
     func speak(_ text: String, enabled: Bool, voiceIdentifier: String? = nil) {
         guard enabled else { return }
 
-        if let voiceIdentifier,
-           voiceIdentifier.hasPrefix("kokoro:"),
-           let speakerID = Int(voiceIdentifier.dropFirst("kokoro:".count)),
-           KokoroSpeaker.english.contains(where: { $0.id == speakerID }) {
-            synthesizer.stopSpeaking(at: .immediate)
-            Task { @MainActor in
-                let localSpeech = KokoroSpeechService.shared
-                localSpeech.stopPlayback()
-                await localSpeech.speak(text, speakerID: speakerID)
-            }
-            return
-        }
-
-        // Switching back to an Apple voice should stop any active neural audio.
-        Task { @MainActor in KokoroSpeechService.shared.stopPlayback() }
         let utterance = AVSpeechUtterance(string: text)
         utterance.rate = 0.46          // slower, senior-friendly cadence
         utterance.pitchMultiplier = 1.0
@@ -53,6 +38,8 @@ final class SpeechService {
         synthesizer.stopSpeaking(at: .immediate)
         synthesizer.speak(utterance)
     }
+
+    func stop() { synthesizer.stopSpeaking(at: .immediate) }
 
     private func selectedVoice(identifier: String?) -> AVSpeechSynthesisVoice? {
         if let identifier, !identifier.isEmpty,

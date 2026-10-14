@@ -28,7 +28,6 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: CareStore
     @EnvironmentObject private var notifications: NotificationService
-    @EnvironmentObject private var localSpeech: KokoroSpeechService
 
     #if os(iOS)
     @State private var contactPickerShown = false
@@ -52,7 +51,6 @@ struct SettingsView: View {
                 securitySection
                 accessibilitySection
                 supportCheckInSection
-                neuralVoiceSection
                 notificationsSection
                 privacySection
                 aboutSection
@@ -286,13 +284,7 @@ struct SettingsView: View {
                             .tag(voice.identifier)
                     }
                 }
-                if localSpeech.isModelInstalled {
-                    Section("Kokoro · local neural voices") {
-                        ForEach(KokoroSpeaker.english) { speaker in
-                            Text(speaker.displayName).tag(speaker.selection)
-                        }
-                    }
-                }
+
             }
             Text("Speech is generated on this device. In-app prompts and previews can use the selected voice; scheduled notifications still use the normal system notification sound when CareSphere is closed.")
                 .font(.caption2).foregroundStyle(.secondary)
@@ -301,7 +293,6 @@ struct SettingsView: View {
             } label: {
                 Label("Preview selected voice", systemImage: "play.circle")
             }
-            .disabled(localSpeech.isGenerating)
         }
     }
 
@@ -313,65 +304,6 @@ struct SettingsView: View {
         }
     }
 
-    private var neuralVoiceSection: some View {
-        Section("Open-source neural voice") {
-            if localSpeech.isModelInstalled {
-                Label("Kokoro English voices are installed for offline use.", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(Color.emeraldText)
-                if localSpeech.isGenerating {
-                    ProgressView("Generating speech on this device…")
-                }
-                Button(role: .destructive) {
-                    Task {
-                        await localSpeech.removeModel()
-                        if store.voiceIdentifier.hasPrefix("kokoro:") {
-                            store.voiceIdentifier = ""
-                        }
-                    }
-                } label: {
-                    Label("Remove Kokoro voice pack", systemImage: "trash")
-                }
-                .disabled(localSpeech.isGenerating)
-            } else if localSpeech.isDownloading {
-                if localSpeech.isInstalling {
-                    ProgressView("Installing voice files…")
-                } else {
-                    ProgressView(value: localSpeech.downloadProgress) {
-                        Text("Downloading optional voice pack…")
-                    }
-                }
-                Button("Cancel download") { localSpeech.cancelDownload() }
-                    .frame(minHeight: 44)
-                Text("Keep CareSphere open. Allow about 250 MB free space. Apple voices work without this download.")
-                    .font(.footnote).foregroundStyle(.secondary)
-            } else {
-                Button {
-                    localSpeech.downloadModel()
-                } label: {
-                    Label(localSpeech.errorMessage == nil ? "Download Kokoro English voices (~158 MB)" : "Retry voice download (~158 MB)", systemImage: "arrow.down.circle.fill")
-                }
-                .disabled(localSpeech.isGenerating)
-                Text("Optional Kokoro int8 weights. After download, speech generation runs offline; the model is not included in the app installer.")
-                    .font(.caption2).foregroundStyle(.secondary)
-            }
-
-            if let message = localSpeech.statusMessage {
-                Text(message).font(.caption).foregroundStyle(.secondary)
-            }
-            if let error = localSpeech.errorMessage {
-                Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption).foregroundStyle(.orange)
-            }
-            Link("Model and Sherpa-ONNX project details", destination: URL(string: "https://github.com/k2-fsa/sherpa-onnx")!)
-                .font(.caption)
-            Link("eSpeak-NG license (GPL-3.0)", destination: URL(string: "https://github.com/espeak-ng/espeak-ng/blob/1.52.0/COPYING")!)
-                .font(.caption)
-            Text("Kokoro weights are Apache-2.0; its included eSpeak-NG pronunciation data has a separate GPL-3.0 license. The voice pack contains both notices. Synthetic voices are not a substitute for a clinician or emergency service.")
-                .font(.caption2).foregroundStyle(.secondary)
-        }
-    }
-
-    // MARK: Notifications
 
     private var notificationsSection: some View {
         Section("Notifications") {
@@ -427,7 +359,7 @@ struct SettingsView: View {
             } label: {
                 Label("Erase all saved care data…", systemImage: "trash")
             }
-            Text("Erasing removes saved care data and pending medication notifications, then returns you to onboarding. Notification permission and separately downloaded Qwen, Kokoro, MedlinePlus and external Kiwix files are not removed.")
+            Text("Erasing removes saved care data and pending medication notifications, then returns you to onboarding. Notification permission and downloaded MedlinePlus and external Kiwix files are not removed.")
                 .font(.caption2).foregroundStyle(.secondary)
 
             if let message = privacyActionMessage {
@@ -438,9 +370,9 @@ struct SettingsView: View {
                     .font(.caption).foregroundStyle(.orange)
             }
 
-            Label("The Qwen assistant and optional Kokoro voice run on this device; questions and generated audio are not sent to a cloud AI. Kiwix searches go only to the private/local server address you enter.", systemImage: "cpu")
+            Label("Apple Intelligence summaries and installed Apple speech voices run on this device; questions are not sent to a cloud AI. Kiwix searches go only to the private/local server address you enter.", systemImage: "cpu")
                 .font(.caption)
-            Label("MedlinePlus content and optional model weights are downloaded only when you choose. HealthKit access is explicit and read-only; workouts appear only if Apple Health can see them, and readings retain their true source labels.", systemImage: "heart.text.square")
+            Label("MedlinePlus content is downloaded only when you choose. HealthKit access is explicit and read-only; workouts appear only if Apple Health can see them, and readings retain their true source labels.", systemImage: "heart.text.square")
                 .font(.caption)
         }
     }
@@ -450,7 +382,7 @@ struct SettingsView: View {
     private var aboutSection: some View {
         Section("About") {
             LabeledContent("Version", value: appVersionLabel)
-            LabeledContent("Video", value: "Jitsi Meet SDK · meet.jit.si")
+            LabeledContent("Video", value: "Browser handoff · meet.jit.si")
             #if os(iOS)
             LabeledContent("Health", value: "Read-only HealthKit vitals/workouts + CoreBluetooth")
             #else
@@ -459,7 +391,7 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Built on Apple's native stacks")
                     .font(.caption.weight(.bold))
-                Text("SwiftUI · HealthKit · CoreBluetooth · UserNotifications · LocalAuthentication (Touch ID / Face ID) · CoreHaptics · NaturalLanguage · CoreMotion · AVAudioEngine · AVSpeechSynthesizer · Sherpa-ONNX + optional Kokoro TTS · ZIPFoundation · CoreLocation · MapKit · Swift Charts · Contacts · llama.cpp (optional local GGUF) · FoundationXML (MedlinePlus)")
+                Text("SwiftUI · HealthKit · CoreBluetooth · UserNotifications · LocalAuthentication (Touch ID / Face ID) · CoreHaptics · NaturalLanguage · CoreMotion · AVAudioEngine · AVSpeechSynthesizer · CoreLocation · MapKit · Swift Charts · Contacts · Foundation Models (optional Apple Intelligence) · FoundationXML (MedlinePlus)")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

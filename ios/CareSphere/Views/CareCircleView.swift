@@ -30,7 +30,7 @@ struct CareCircleView: View {
 
     private var localOnlyNotice: some View {
         SectionCard(title: "Private to this device", systemImage: "iphone.gen3") {
-            Text("Care notes and check-ins are saved locally. This build has no family-sync, clinician portal, or push-alert server. Starter notes, if present, are sample content—not messages from real people.")
+            Text("Care notes and check-ins are saved locally. This build has no family-sync, clinician portal, or push-alert server.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)

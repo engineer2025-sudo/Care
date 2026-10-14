@@ -6,34 +6,20 @@ options:
 packages:
   CareActivityKit:
     path: ActivityKit
-  JitsiMeetSDK:
-    url: https://github.com/jitsi/jitsi-meet-ios-sdk-releases
-    exactVersion: "13.1.1"
-  # JitsiMeetSDK 13.1.1 was built against this Giphy binary interface. The
-  # upstream Jitsi SPM manifest uses a lower-bound, which can otherwise resolve
-  # Giphy 2.3.x; that version changes the GPHContent.search signature, so the
-  # symbol Jitsi needs is missing and dyld aborts at launch on a physical iPhone.
-  Giphy:
-    url: https://github.com/Giphy/giphy-ios-sdk
-    exactVersion: "2.2.12"
-  LlamaSwift:
-    url: https://github.com/mattt/llama.swift
-    exactVersion: "2.10549.0"
-  SherpaOnnx:
-    url: https://github.com/k2-fsa/sherpa-onnx.git
-    exactVersion: "1.13.8"
-  ZIPFoundation:
-    url: https://github.com/weichsel/ZIPFoundation.git
-    exactVersion: "0.9.20"
+
+configs:
+  Debug: debug
+  Release: release
+  Debug-HealthKit: debug
 
 settings:
   base:
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
-    MARKETING_VERSION: "2.3.0"
-    CURRENT_PROJECT_VERSION: "6"
+    MARKETING_VERSION: "3.0.0"
+    CURRENT_PROJECT_VERSION: "7"
     DEVELOPMENT_TEAM: ""
-    SUPPORTED_PLATFORMS: iphoneos
+    SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
 
 targets:
   # ── iPhone / iPad app ────────────────────────────────────────────────
@@ -46,19 +32,14 @@ targets:
       - path: CareSphere
     dependencies:
       - package: CareActivityKit
-      - package: JitsiMeetSDK
-      - package: Giphy
-        product: GiphyUISDK
-      - package: LlamaSwift
-        product: LlamaSwift
-      - package: SherpaOnnx
-        product: sherpa-onnx
-      - package: ZIPFoundation
+    settings:
+      configs:
+        Debug-HealthKit:
+          CODE_SIGN_ENTITLEMENTS: CareSphere-HealthKit.entitlements
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) CARE_HEALTHKIT"
     entitlements:
       path: CareSphere.entitlements
-      properties:
-        com.apple.developer.healthkit: true
-        com.apple.developer.healthkit.background-delivery: true
+      properties: {}
     info:
       path: CareSphere-iOS-Info.plist
       properties:
@@ -71,9 +52,6 @@ targets:
         # Reconfirm this declaration with Apple's export-compliance questionnaire after the CryptoKit AES-GCM change.
         ITSAppUsesNonExemptEncryption: false
         UIViewControllerBasedStatusBarAppearance: false
-        UIBackgroundModes:
-          - audio
-          - voip
         NSFaceIDUsageDescription: "CareSphere locks your health data behind Touch ID / Face ID."
         NSMotionUsageDescription: "CareSphere counts your daily steps to encourage gentle, healthy movement."
         NSCameraUsageDescription: "CareSphere uses the camera for video coffee circles and telehealth visits."
@@ -92,3 +70,9 @@ schemes:
         CareSphere: all
     run:
       config: Debug
+  CareSphere-HealthKit:
+    build:
+      targets:
+        CareSphere: all
+    run:
+      config: Debug-HealthKit
