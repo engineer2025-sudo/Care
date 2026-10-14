@@ -44,6 +44,7 @@ struct PersonalSupportView: View {
     @State private var transferBusy = false
     @State private var transferGeneration = UUID()
     @State private var confirmTransfer = false
+    @FocusState private var nearbyCodeFocused: Bool
     @StateObject private var nearbyAdvertisement = NearbyAdvertisement()
     @StateObject private var nearbyDiscovery = NearbyDiscovery()
     @State private var nearbyHost = LocalTransferHost()
@@ -222,14 +223,14 @@ struct PersonalSupportView: View {
             if !nearbyDiscovery.status.isEmpty { Text(nearbyDiscovery.status).accessibilityAddTraits(.updatesFrequently) }
             ForEach(nearbyDiscovery.peers) { peer in
                 Button("Choose \(peer.name) · \(peer.address)") {
-                    receiveAddress = peer.address; receiveCode = ""; nearbyDiscovery.stop()
+                    receiveAddress = peer.address; receiveCode = ""; nearbyDiscovery.stop(); nearbyCodeFocused = true
                     nearbyStatus = "Address selected. Enter the code shown on that phone and the separately agreed passphrase. Nothing has connected or imported yet."
                 }
             }
             TextField("Sender address · e.g. 192.168.1.5:12345", text: $receiveAddress)
                 .textInputAutocapitalization(.never).autocorrectionDisabled().disabled(nearbyBusy)
             TextField("Sender's 8-digit connection code", text: $receiveCode)
-                .keyboardType(.numberPad).disabled(nearbyBusy)
+                .keyboardType(.numberPad).focused($nearbyCodeFocused).disabled(nearbyBusy)
             Button("Connect and receive encrypted copy") { receiveNearby() }
                 .disabled(nearbyBusy || transferBusy || transferPassword.count < 12 || receiveAddress.isEmpty || receiveCode.count != 8)
             if nearbyBusy { ProgressView("Connecting locally…") }
@@ -238,7 +239,7 @@ struct PersonalSupportView: View {
         }
     }
     private func stopNearby() {
-        nearbyGeneration = UUID(); nearbyHost.stop(); nearbyReceiver.cancel(); nearbyDiscovery.stop(); nearbyAdvertisement.stop()
+        nearbyCodeFocused = false; nearbyGeneration = UUID(); nearbyHost.stop(); nearbyReceiver.cancel(); nearbyDiscovery.stop(); nearbyAdvertisement.stop()
         nearbyBusy = false; offeredAddress = ""; offeredCode = ""; nearbyStatus = ""
     }
     private func offerNearby() {

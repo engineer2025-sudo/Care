@@ -222,7 +222,7 @@ finally:
 adb('shell','am','force-stop',package)
 # Separate test APK; no test publisher, fixture or debug switch is shipped in the app.
 adb('install','-r','android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk')
-result = adb('shell','am','instrument','-w',package+'.test/'+package+'.NearbySmokeInstrumentation')
+result = adb('shell','am','instrument','-w','-r',package+'.test/'+package+'.NearbySmokeInstrumentation')
 print(result)
 assert 'PASS: native DNS-SD publish/discover/resolve' in result and 'INSTRUMENTATION_CODE: -1' in result, result
 adb('uninstall',package+'.test')

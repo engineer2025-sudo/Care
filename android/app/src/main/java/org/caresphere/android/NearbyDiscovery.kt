@@ -77,7 +77,10 @@ class NearbyDiscovery(context: Context, private val changed: () -> Unit) {
         val listener = object: NsdManager.DiscoveryListener {
             private var stopRetried = false
             override fun onDiscoveryStarted(type: String) {}
-            override fun onDiscoveryStopped(type: String) {}
+            override fun onDiscoveryStopped(type: String) { handler.post {
+                if(discovery !== this) return@post
+                stopSearch(); status = "Nearby search stopped. Search again or enter an address manually."; changed()
+            } }
             override fun onStartDiscoveryFailed(type: String, errorCode: Int) { failed() }
             override fun onStopDiscoveryFailed(type: String, errorCode: Int) { handler.post { if(!stopRetried) { stopRetried = true; runCatching { system().stopServiceDiscovery(this) } } } }
             private fun failed() { handler.post {

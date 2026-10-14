@@ -64,7 +64,10 @@ class SupportActivity : Activity() {
     private fun confirm(body:String,action:()->Unit) { dialog().setMessage(body).setNegativeButton("Cancel",null).setPositiveButton("Continue"){_,_->action()}.show() }
     private fun form(title:String, labels:List<Pair<String,String>>, passwordField:Boolean=false, action:(List<String>)->Unit) {
         val box=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(dp(20),0,dp(20),0)}
-        val fields=labels.map{(label,value)->EditText(ContextThemeWrapper(this,if(dark)android.R.style.Theme_Material else android.R.style.Theme_Material_Light)).apply{hint=label;contentDescription=label;setText(value);minLines=1;maxLines=6;filters=arrayOf(android.text.InputFilter.LengthFilter(if(passwordField)1024 else 4000));if(passwordField)inputType=android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD;box.addView(this)}}
+        val fields=labels.map{(label,value)->EditText(ContextThemeWrapper(this,if(dark)android.R.style.Theme_Material else android.R.style.Theme_Material_Light)).apply{hint=label;contentDescription=label;setText(value);minLines=1;maxLines=6;filters=arrayOf(android.text.InputFilter.LengthFilter(if(passwordField)1024 else 4000));if(passwordField)inputType=android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD;
+            if(label=="8-digit connection code"){inputType=android.text.InputType.TYPE_CLASS_NUMBER;filters=arrayOf(android.text.InputFilter.LengthFilter(8));setSingleLine(true)}
+            if(label=="Device address"){inputType=android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI;filters=arrayOf(android.text.InputFilter.LengthFilter(21));setSingleLine(true)}
+            box.addView(this)}}
         val scroll=ScrollView(this);scroll.addView(box)
         val d=dialog().setTitle(title).setView(scroll).setNegativeButton("Cancel",null).setPositiveButton("Continue",null).create()
         d.setOnShowListener{d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener{try{action(fields.map{it.text.toString()});d.dismiss()}catch(_:IllegalArgumentException){fields.first().error="Check the fields. Enter a title/text and valid details."}}};d.show()
@@ -262,7 +265,7 @@ class SupportActivity : Activity() {
     }
     private fun connectNearby(address:String="") {
         if(nearbyBusy||busy)return
-        nearbyDiscovery.stopSearch()
+        nearbyDiscovery.stopSearch();render()
             form("Sender connection details",listOf("Device address" to address,"8-digit connection code" to "")){fields->
                 LocalTransferWire.endpoint(fields[0],fields[1])
                 form("Unlock nearby copy",listOf("Passphrase" to ""),true){secrets->

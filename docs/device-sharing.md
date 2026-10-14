@@ -4,24 +4,32 @@ CareSphere transfers **selected notes and routines as encrypted snapshots**. No 
 
 ## Direct connection inside the native apps — all three phone combinations
 
-Available in iPhone **3.3.0 (10)** and Android **1.3.0 (4)**, for iPhone ↔ iPhone, Android ↔ Android and iPhone ↔ Android. Both phones need the current native app. The browser keeps the file workflow below because browsers cannot use this native socket listener.
+Available in iPhone **3.4.0 (11)** and Android **1.4.0 (5)**, for iPhone ↔ iPhone, Android ↔ Android and iPhone ↔ Android. Both phones need the current native app. The browser keeps the file workflow below because browsers cannot use this native socket listener.
 
 1. Connect both phones to the **same private Wi-Fi**, or enable a phone's personal hotspot and join it from the other phone. Configure Wi-Fi/hotspot in system Settings; CareSphere does not turn it on or pair radios automatically. Internet service is not required by this transfer protocol; hotspot availability still depends on the phone/OS/carrier.
 2. On the sender, open **My support tools → Device sharing**, select notes/routines, enter a unique encryption passphrase and prepare the encrypted copy.
 3. Choose **Offer to a nearby device**. If multiple network interfaces are listed, choose the address on the receiving phone's network. Allow iPhone **Local Network** permission when asked.
-4. The sender displays a **device address** (private IPv4 and port) and **eight-digit connection code**. Keep this screen open. The receiver enters those details in **Connect to a nearby device** (iPhone: **Connect and receive encrypted copy**) and supplies the encryption passphrase. The code and passphrase are different. Tell them privately; neither is an identity certificate.
+4. The sender displays a generic **CareSphere offer label**, a **device address** (private IPv4 and port) and **eight-digit connection code**. Keep this screen open. On the receiver, tap **Find nearby devices** and select the label shown on the sender. This fills the address but does not connect, unlock or import. Enter the sender’s connection code and the separately agreed encryption passphrase, then continue. If the offer does not appear, enter its address/code in **Connect to a nearby device** (iPhone: **Connect and receive encrypted copy**). The code and passphrase are different. Tell them privately; neither is an identity certificate.
 5. The recipient reviews the unlocked notes/routines and selects **Import selected copies**. Receiving bytes alone does not save care records. Existing data is not replaced, and previously received records remain marked as imported.
 6. Choose **Stop nearby connection** when finished. The offer also stops after five minutes, after the request limit, or when you leave/background the sharing screen. Restarting generates a new connection code. No connection is remembered between launches.
 
-This is a **manual address-and-code connection**, not automatic device discovery. No router configuration, port forwarding, external website or separate transfer app is required. Guest/public Wi-Fi may isolate devices; VPNs or hotspot restrictions can also block them. Try a private hotspot or the encrypted-file fallback. IPv6-only networks are not supported by this first direct-connection version.
+Discovery is a foreground **Find nearby devices** action, not continuous scanning or automatic pairing. It stops after one minute, on **Stop searching**, or when you leave/background the tool. The sender advertises only while offering. A list entry is not proof of the sender’s identity or successful delivery. Manual address-and-code connection remains available. No router configuration, port forwarding, external website or separate transfer app is required. Guest/public Wi-Fi may isolate devices; VPNs or hotspot restrictions can also block them. Try a private hotspot or the encrypted-file fallback. IPv6-only networks are not supported by this first direct-connection version.
 
 ### Transport privacy and limits
 
 - Only the deliberately prepared encrypted `.caretransfer` bytes are served; no arbitrary files, care database, passphrase, photos or local encryption key are exposed.
 - The listener binds one selected private IPv4 interface on a random high port. The receiver only accepts canonical RFC1918 IPv4 literals and explicit high ports—no public IPs, hostnames, redirects, user-info or arbitrary paths.
 - HTTP framing is unencrypted on the local link; **care contents are separately end-to-end passphrase-encrypted using the format below**. A network observer can see addresses, the connection code, transfer size and encrypted bytes. Use a unique, strong passphrase and a trusted private network. The connection code is an extra access gate, not encryption or proof of identity.
-- At most 16 accepted connections per offer, bounded headers (4 KiB), a 1 MB envelope limit, connection timeouts and a five-minute offer lifetime. No background service or multicast scan runs. Stopping cannot recall bytes already received.
+- At most 16 accepted connections per offer, bounded headers (4 KiB), a 1 MB envelope limit, connection timeouts and a five-minute offer lifetime. No background sharing service runs. Multicast discovery runs only during an explicitly started search or active offer. Stopping cannot recall bytes already received.
 - Android now declares `INTERNET` because Android requires it for local sockets too. This feature does not contact an internet backend. iPhone requests Local Network access only when networking is used. Other optional features, such as external video handoffs, retain their own internet requirements.
+
+### Nearby discovery protocol and privacy
+
+Native apps use the standard DNS-SD/Bonjour service **`_care-xfer._tcp.`** on the local network. The sender advertises a random generic `CareSphere-…` instance name, its listening port, and TXT fields `v=1` and `ipv4=<bound private IPv4>`. No care text, profile name, connection code or encryption passphrase is placed in those fields. The operating system may also expose its usual local hostname/network metadata; prefer trusted private Wi-Fi rather than a public network.
+
+The recipient accepts at most 32 service candidates per search. It accepts a result only if the version is supported, the advertised private IPv4 also occurs in the service’s resolved addresses, and the port is a valid high port. Display labels are bounded and control/bidirectional characters are removed. TXT results are never treated as trusted identity or permission to connect. Lost services are removed; all results are cleared when search stops. Routers/hotspots that block multicast can prevent discovery even when manually addressed transfer works. IPv6-only results are excluded; use a supported private IPv4 network or file sharing.
+
+No multicast support library or third-party discovery SDK is included. iPhone uses Foundation Bonjour with a declared Local Network purpose/service type; Android uses the platform NsdManager. Legacy Android may let an OS-owned name-resolution request finish after Stop; its late result is discarded and cannot reconnect or import.
 
 ## Encrypted-file fallback — native apps and web
 
@@ -75,10 +83,17 @@ Native tests cover the shared HTTP framing, public/ambiguous address rejection, 
 Actual phone-to-phone transfers in **both directions for each of the three pairings**, Wi-Fi/hotspot discovery and routing, Local Network denial/recovery, screen locking, five-minute expiry, router isolation, AirDrop and Quick Share still need physical-device acceptance testing. There is no fake “paired” or “delivered” status. The native iOS build and Simulator launch do not prove physical sharing or Apple Intelligence model availability.
 
 
-### Release CI references
+### Previous direct-transfer baseline CI references
 
 - iPhone native builds, package suite and Simulator launch: https://github.com/engineer2025-sudo/Care/actions/runs/38650593353
 - Android native suite, lint, signing and required emulator file/LAN receive-import flow: https://github.com/engineer2025-sudo/Care/actions/runs/38650593358
 - Unchanged web application checks: https://github.com/engineer2025-sudo/Care/actions/runs/38632018619
 
-The package contains 35 Swift and 24 JVM test cases. Native host-machine live-socket cases explicitly skip if the runner has no private IPv4 interface; the Android emulator LAN import is a required, non-optional smoke step. Passing CI does not replace the physical pairing matrix above.
+The package contains 38 Swift and 27 JVM test cases. Native host-machine live-socket cases explicitly skip if the runner has no private IPv4 interface; the Android emulator LAN import is a required, non-optional smoke step. Passing CI does not replace the physical pairing matrix above.
+
+
+### Discovery validation
+
+Three extra pure validation tests on each native platform cover compatible advertised/resolved address matching, public/ambiguous/unsupported endpoint rejection and safe bounded labels. The Android CI also builds a separate **test APK**, which creates independent real platform publisher/browser instances, resolves a real DNS-SD result, transfers and decrypts an encrypted test snapshot over the resulting address, and verifies Stop. It does not inject a fake peer into the app’s device list. The test APK and its synthetic records are not part of the installable app APK.
+
+Final build/run references are in each download’s `BUILD_VERIFICATION.json`. Emulator publication/discovery on one virtual device is not proof of discovery between physical phones. Repeat all three physical phone pairings, in both directions, on a private router and hotspot before relying on this feature.

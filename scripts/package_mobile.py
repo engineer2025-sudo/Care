@@ -45,8 +45,8 @@ parser.add_argument('--ios-run', required=True)
 parser.add_argument('--android-run', required=True)
 parser.add_argument('--web-run', required=True)
 args = parser.parse_args()
-ios = verified_run(args.ios_run, 'ios')
-android = verified_run(args.android_run, 'android', 'scripts/android_smoke.py')
+ios = verified_run(args.ios_run, 'ios', '.github/workflows/ios.yml')
+android = verified_run(args.android_run, 'android', 'scripts/android_smoke.py', '.github/workflows/android.yml')
 web = verified_run(args.web_run, *WEB_PATHS)
 release_commit = command('git', 'rev-parse', 'HEAD').strip()
 # Build from the exact verified sources; no stale dist/ is packaged.
@@ -81,25 +81,26 @@ paths += [ROOT / p for p in ['DOWNLOAD.md', 'docs/signing-troubleshooting.md',
     'docs/web-deployment.md', 'docs/device-sharing.md', 'docs/personal-tools.md', 'scripts/android_smoke.py']]
 # Refuse to silently label a later version using this release's metadata.
 project = (ROOT/'ios/CareSphere.xcodeproj/project.pbxproj').read_text()
-assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.3.0'}
-assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'10'}
+assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.4.0'}
+assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'11'}
 gradle = (ROOT/'android/app/build.gradle.kts').read_text()
-assert re.search(r'versionName\s*=\s*"1\.3\.0"', gradle)
-assert re.search(r'versionCode\s*=\s*4\b', gradle)
+assert re.search(r'versionName\s*=\s*"1\.4\.0"', gradle)
+assert re.search(r'versionCode\s*=\s*5\b', gradle)
 assert json.loads((ROOT/'package.json').read_text())['version'] == '1.2.0'
 manifest = {
     'source_commit': command('git','rev-parse','HEAD').strip(),
-    'ios': {'version':'3.3.0 (10)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
+    'ios': {'version':'3.4.0 (11)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
         'unsigned_device_build': True, 'healthkit_build': True, 'simulator_launch': True,
-        'tests':35, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
-    'android': {'version':'1.3.0 (4)', 'ci':android['url'], 'tested_commit':android['headSha'],
-        'tests':24, 'lint':'passed', 'apk_signing_verified_in_ci':True,
+        'tests':38, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
+    'android': {'version':'1.4.0 (5)', 'ci':android['url'], 'tested_commit':android['headSha'],
+        'tests':27, 'lint':'passed', 'apk_signing_verified_in_ci':True,
         'emulator_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
         'apk_sha256':digest, 'apk_bytes':len(apk)},
     'device_sharing': {'app_backend_required':False, 'mode':'native direct LAN plus encrypted-file snapshots',
         'web_to_android_emulator_import':'passed', 'physical_nearby_delivery_tested':False,
         'bluetooth_phone_pairing':False, 'hosted_backend_required':False, 'temporary_phone_listener':True, 'native_manual_lan_connection':True,
-        'automatic_device_discovery':False, 'android_emulator_lan_receive_import':'passed', 'automatic_sync':False, 'remote_revocation':False},
+        'opt_in_local_discovery':True, 'discovery_protocol':'DNS-SD _care-xfer._tcp.',
+        'android_nsd_instrumentation':'passed', 'physical_cross_device_discovery_tested':False, 'android_emulator_lan_receive_import':'passed', 'automatic_sync':False, 'remote_revocation':False},
     'compiled_source_comparison_excludes': ['ios/README.md', 'android/README.md'],
     'files': {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
 }
@@ -132,8 +133,8 @@ not full iOS feature parity. See android/README.md and ios/README.md for exact s
 
 VALIDATION
 See BUILD_VERIFICATION.json for successful CI runs and file hashes.
-iOS 3.3.0 (10): 35 logic/preference/packet/transfer/LAN tests; standard device, HealthKit and Simulator builds; launch.
-Android 1.3.0 (4): 24 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
+iOS 3.4.0 (11): 38 logic/preference/packet/transfer/LAN/discovery tests; standard device, HealthKit and Simulator builds; launch.
+Android 1.4.0 (5): 27 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
 Real-device BLE, actual Apple Intelligence responses, accessibility with users, and
 Mac signing remain manual acceptance work. No clinical effectiveness is claimed.
 
@@ -144,7 +145,9 @@ prompts are in My support tools. Optional AI drafting is native iPhone-only.
 No hosted backend is needed: select notes/routines and prepare an encrypted copy.
 Native phones: join the same private Wi-Fi/hotspot, choose Offer to a nearby device,
 then enter its address and eight-digit code inside the receiving app. Keep both
-apps open. The encryption passphrase is separate. There is no automatic discovery.
+apps open. Choose Find nearby devices to select the sender label instead of typing
+its address. The encryption passphrase is separate. Discovery is opt-in; labels
+are not verified identities and no records are automatically imported.
 Alternatively use AirDrop/Quick Share/the system share sheet or save the file. Receive through the
 file picker, unlock, preview, then choose copies to import. Tell the recipient the
 passphrase separately. No built-in Bluetooth pairing, live sync or remote revocation.
@@ -215,7 +218,7 @@ with zipfile.ZipFile(web_archive) as z:
         assert hashlib.sha256(z.read('CareSphere-Web/'+path)).hexdigest() == sha
 # Refuse a release if another edit/commit raced the build or archive creation.
 assert command('git','rev-parse','HEAD').strip() == release_commit, 'Source commit changed during packaging; run again.'
-checked = ['ios', 'android', 'scripts/android_smoke.py', *WEB_PATHS,
+checked = ['ios', 'android', 'scripts/android_smoke.py', '.github/workflows/ios.yml', '.github/workflows/android.yml', *WEB_PATHS,
     ':(exclude)ios/README.md', ':(exclude)android/README.md']
 assert not command('git','status','--porcelain','--',*checked).strip(), 'Source changed during packaging; run again.'
 for p in [apk_path,archive,web_archive]:

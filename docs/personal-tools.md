@@ -15,7 +15,7 @@ Find **My support tools** on the web/Android Today screen and in the iPhone head
 | Interest activities | Nature, music and familiar-object conversation packs. Nine extra prompts, with explicit next/skip and no recording of answers; not a clinical activity program. |
 | First-use guidance | Optional Start here tool with activity/comfort/routine routes. Existing iPhone onboarding remains. Permissions remain feature-triggered, not prerequisites for trying activities. |
 | Apple Intelligence drafting | Native iPhone only, on eligible enabled iOS 26+ hardware: simplify selected wording, propose neutral appointment questions or format the user's everyday steps. Preview/edit and explicitly save as a new note. No diagnosis, medication changes or fabricated model fallback. |
-| Cross-device sharing | Backend-free encrypted file snapshots on all three platforms, with selected notes/routines and preview/merge on receipt. Native iPhone/Android apps can connect directly on private Wi-Fi or a hotspot using an address and eight-digit code; all platforms retain OS share sheets/saved-file delivery. No built-in phone-to-phone Bluetooth pairing, live sync or remote revocation. See device-sharing.md. |
+| Cross-device sharing | Backend-free encrypted file snapshots on all three platforms, with selected notes/routines and preview/merge on receipt. Native iPhone/Android apps can connect directly on private Wi-Fi or a hotspot using opt-in nearby-device discovery (with manual address fallback) and an eight-digit code; all platforms retain OS share sheets/saved-file delivery. No built-in phone-to-phone Bluetooth pairing, live sync or remote revocation. See device-sharing.md. |
 
 ## Recovery safeguards
 

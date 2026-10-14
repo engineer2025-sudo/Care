@@ -73,6 +73,10 @@ public final class NearbyDiscovery: NSObject, ObservableObject, NetServiceBrowse
         services.removeAll(); peers = []; scanning = false; status = ""
     }
     private func key(_ service: NetService) -> String { service.domain + "|" + service.type + "|" + service.name }
+    public func netServiceBrowserDidStopSearch(_ browser: NetServiceBrowser) {
+        guard browser === self.browser else { return }
+        stop(); status = "Nearby search stopped. Search again or enter an address manually."
+    }
     public func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
         guard browser === self.browser, service.domain == "local.", service.type == NearbyService.type,
               services.count < 32, services[key(service)] == nil else { return }
