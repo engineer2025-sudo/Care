@@ -1,13 +1,25 @@
 // CareSphere service worker — private, same-origin offline app shell.
 // Navigations are network-first; hashed assets are cache-first. No third-party
 // requests or user-export downloads are cached by this worker.
-const SHELL_CACHE = 'caresphere-shell-v2'
-const ASSET_CACHE = 'caresphere-assets-v2'
+const SHELL_CACHE = 'caresphere-shell-v3'
+const ASSET_CACHE = 'caresphere-assets-v3'
 const SHELL_URL = new URL('/', self.location.origin).href
 const MAX_ASSETS = 80
 
 self.addEventListener('install', event => {
-  event.waitUntil(self.skipWaiting())
+  event.waitUntil((async () => {
+    // Precache the actual build entry points on the first visit, before claiming
+    // offline readiness. No personal records or cross-origin requests are cached.
+    const response = await fetch(new Request(SHELL_URL, { cache: 'reload' }))
+    if (!response.ok) throw new Error('App shell unavailable')
+    const html = await response.clone().text()
+    const assets = [...html.matchAll(/(?:src|href)=["'](\/assets\/[^"']+)["']/g)].map(match => match[1])
+    if (!assets.length) throw new Error('No built application assets found')
+    const cache = await caches.open(ASSET_CACHE)
+    await cache.addAll([...new Set([...assets, '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'])])
+    await (await caches.open(SHELL_CACHE)).put(SHELL_URL, response)
+    await self.skipWaiting()
+  })())
 })
 
 self.addEventListener('activate', event => {
@@ -62,7 +74,10 @@ self.addEventListener('fetch', event => {
 
   event.respondWith((async () => {
     const cache = await caches.open(ASSET_CACHE)
-    const cached = await cache.match(request)
+    // Immutable, public, same-origin assets can be requested with different
+    // Origin headers (module crossorigin vs install fetch). Vite/CDNs may emit
+    // Vary: Origin; do not let that prevent offline retrieval of the same bytes.
+    const cached = await cache.match(request, { ignoreVary: true })
     if (cached) return cached
     const response = await fetch(request)
     await cacheAsset(request, response)

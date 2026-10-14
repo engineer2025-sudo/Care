@@ -1,7 +1,8 @@
+import { normalizeFavorites } from './activityLibrary.js'
 export const STORAGE_KEY = 'caresphere.v1'
 export const RESET_LOCAL_DATA_EVENT = 'caresphere:reset-local-data'
 
-const PERSISTED_KEYS = new Set(['settings', 'routines', 'meds', 'medsConfirmed', 'notes', 'moods', 'emotionScore', 'bestPattern'])
+const PERSISTED_KEYS = new Set(['settings', 'routines', 'meds', 'medsConfirmed', 'notes', 'moods', 'emotionScore', 'bestPattern', 'favoriteActivities'])
 const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value)
 const isDayKey = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 
@@ -34,6 +35,7 @@ export function parseCareStorage(raw) {
 
 /** Bound and type-check values restored from editable browser storage. */
 export function normalizePersistedValue(key, value, fallback) {
+  if (key === 'favoriteActivities') return normalizeFavorites(value)
   if (key === 'settings') {
     if (!isRecord(value)) return fallback
     return {
@@ -69,6 +71,7 @@ export function normalizePersistedValue(key, value, fallback) {
       date: typeof item.date === 'string' ? item.date.slice(0, 80) : 'Date not recorded',
       author: typeof item.author === 'string' ? item.author.slice(0, 120) : 'Author not recorded',
       note: typeof item.note === 'string' ? item.note.slice(0, 10000) : '',
+      ...(typeof item.editedAt === 'string' && !Number.isNaN(new Date(item.editedAt).valueOf()) ? { editedAt: item.editedAt } : {}),
     }))
   }
   if (key === 'moods' && Array.isArray(value)) {

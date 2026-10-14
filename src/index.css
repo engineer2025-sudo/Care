@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
 @layer base {
   body {
@@ -340,3 +339,32 @@ html[data-theme='light'] .summary-icon.amber { background: #f4eddf; color: #7c61
   .settings-heading { top: -1.75rem; margin: -1.75rem -1.75rem .5rem; padding: 1rem 1.75rem; }
 }
 button:has(> svg:only-child) { min-width: 44px; }
+
+/* A consistent library and writing surface across large text and small screens. */
+.library-intro { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.5rem; border-radius: 1.5rem; background: color-mix(in srgb, #467655 16%, transparent); border: 1px solid #46765566; }
+.eyebrow { color: #9fc1aa; font-size: .7rem; letter-spacing: .14em; font-weight: 800; margin-bottom: .65rem; }
+.library-offline { color: #c4dacb; font-size: .8rem; border: 1px solid #46765588; border-radius: 2rem; padding: .5rem .8rem; }
+.library-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; color: #d7ded7; }
+.library-filters > label:first-child { flex-basis: 16rem; }
+.library-input { width: 100%; min-width: 0; min-height: 3rem; padding: .7rem .9rem; border: 1px solid #4a5a4e; border-radius: .85rem; background: #202b24; color: #f4f6f2; font-size: 1rem; }
+.library-input.pl-11 { padding-left: 2.75rem; }
+.library-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1rem; }
+.library-tile { display: flex; flex-direction: column; gap: .9rem; border: 1px solid #4a5a4e; border-radius: 1.35rem; padding: 1.25rem; background: #202b24; }
+.library-symbol { display: grid; place-items: center; width: 3rem; height: 3rem; font-size: 1.8rem; border-radius: .9rem; background: #365f4544; color: #c4dacb; }
+.library-primary, .library-secondary, .library-choice, .library-favorite { min-height: 2.75rem; display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border-radius: .8rem; padding: .65rem 1rem; font-weight: 650; font-size: .9rem; white-space: normal; }
+.library-primary { color: #fff; background: #376f4c; }
+.library-secondary, .library-choice { border: 1px solid #4a5a4e; background: #2e3b32; color: #e8ece6; }
+.library-favorite { color: #c4dacb; border: 1px solid transparent; }
+.library-favorite[aria-pressed='true'] { background: #365f4544; border-color: #467655; }
+.library-choice { width: 100%; font-size: 1.1rem; justify-content: flex-start; padding: 1rem; }
+.library-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.5rem; border: 1px dashed #4a5a4e; border-radius: 1rem; color: #d7ded7; }
+.library-modal-backdrop { position: fixed; inset: 0; z-index: 90; background: #07140ed9; display: grid; place-items: center; padding: 1rem; }
+.library-session { width: min(100%, 48rem); max-height: calc(100dvh - 2rem); overflow: auto; overscroll-behavior: contain; padding: 1.25rem; border-radius: 1.5rem; background: #131b16; color: #e8ece6; display: flex; flex-direction: column; gap: 1.25rem; border: 1px solid #4a5a4e; }
+.library-session.max-w-xl { max-width: 36rem; }
+.care-note-item { display: flex; flex-direction: column; gap: .75rem; padding: 1rem; background: #2e3b3266; border: 1px solid #4a5a4e; border-radius: 1rem; }
+html[data-theme='light'] .library-input, html[data-theme='light'] .library-tile, html[data-theme='light'] .library-session { background: #fff; color: #1c2e24; border-color: #c3cec4; }
+html[data-theme='light'] .library-secondary, html[data-theme='light'] .library-choice, html[data-theme='light'] .care-note-item { background: #eef3eb; color: #1c2e24; border-color: #c3cec4; }
+html[data-theme='light'] .library-favorite, html[data-theme='light'] .eyebrow, html[data-theme='light'] .library-offline, html[data-theme='light'] .library-symbol { color: #28553a; }
+html[data-theme='light'] .library-empty, html[data-theme='light'] .library-filters { color: #344d3b; }
+html[data-contrast='high'] .library-tile, html[data-contrast='high'] .library-input, html[data-contrast='high'] .care-note-item { border: 2px solid currentColor; }
+@media(max-width: 400px) { .library-session { padding: .8rem; } .library-modal-backdrop { padding: .5rem; } .library-filters > label { width: 100%; } }

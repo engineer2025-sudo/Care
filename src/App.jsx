@@ -6,6 +6,9 @@ import {
   Bell, Pill, Calendar, Lock, Stethoscope, Settings, Download,
   BellRing, Smile, Frown, Meh, Laugh, MapPin, User, FileText, ArrowRight, ChevronRight, Sun, Check, Plus
 } from 'lucide-react'
+import ActivityLibrary from './components/ActivityLibrary'
+import CareNotes from './components/CareNotes'
+import { toggleFavorite } from './lib/activityLibrary'
 import { useDialog } from './hooks/useDialog'
 import { celebrate as celebrateConfetti } from './lib/celebrate'
 import { soundEngine } from './lib/audio'
@@ -1089,7 +1092,6 @@ function Soundscapes() {
 
 const PHASES = [
   { name: 'Breathe in', seconds: 4, scale: 'scale-100' },
-  { name: 'Hold', seconds: 4, scale: 'scale-100' },
   { name: 'Breathe out', seconds: 6, scale: 'scale-[0.55]' },
 ]
 
@@ -1132,7 +1134,7 @@ function BreathingCoach() {
           {cycles} cycles
         </span>
       </div>
-      <p className="text-sm text-slate-300 leading-relaxed">A paced-breathing exercise, not treatment. The breath hold is optional—pause or stop if it feels uncomfortable.</p>
+      <p className="text-sm text-slate-300 leading-relaxed">A paced-breathing exercise, not treatment. Breathe in for 4 seconds and out for 6, without a hold. Follow your own comfortable rhythm and pause or stop at any time.</p>
       <div className="flex-1 flex items-center justify-center py-4">
         <div className="relative w-36 h-36 flex items-center justify-center">
           <div
@@ -1405,8 +1407,8 @@ export default function App() {
   const [meds, setMeds] = usePersisted('meds', [])
   const [medsConfirmed, setMedsConfirmed] = usePersisted('medsConfirmed', false)
   const [notes, setNotes] = usePersisted('notes', [])
+  const [favorites, setFavorites] = usePersisted('favoriteActivities', [])
   const [moods, setMoods] = usePersisted('moods', [])
-  const [noteDraft, setNoteDraft] = useState('')
   const [routineDraft, setRoutineDraft] = useState('')
   const [routineEditorOpen, setRoutineEditorOpen] = useState(false)
   const [emotionScore] = usePersisted('emotionScore', 0)
@@ -1443,16 +1445,6 @@ export default function App() {
       : medication))
     if (!wasTaken) celebrateConfetti({ particleCount: 18 })
   }
-  const postNote = (e) => {
-    e.preventDefault()
-    if (!noteDraft.trim()) return
-    setNotes(ns => [{
-      id: Date.now(), date: new Date().toISOString(), author: `You (${settings.name})`, note: noteDraft.trim(),
-    }, ...ns])
-    setNoteDraft('')
-    pushToast({ kind: 'success', title: 'Note saved', body: 'Saved in this browser only; no Care Circle sync server is connected.' })
-  }
-
   // ── Medication reminder engine ──
   // Checks every 15 s whether a scheduled dose is due, then raises a toast,
   // an optional browser notification, and an optional spoken prompt.
@@ -1596,7 +1588,6 @@ export default function App() {
   }, [])
 
   const clearTransientCareData = ({ closeOverlays = false } = {}) => {
-    setNoteDraft('')
     setRoutineDraft('')
     setRoutineEditorOpen(false)
     disconnectHr()
@@ -2015,14 +2006,17 @@ export default function App() {
                 Optional, self-paced activities for shared practice and enjoyment—not therapy, treatment, or assessment. No activity is timed or scored; skip or stop at any time.
               </p>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <EmotionMatch />
-              <PatternRecall reduceVisualMotion={settings.lowSensory} />
-              <PicturePairs />
-              <PictureStory />
-              <Soundscapes />
-              <BreathingCoach />
-            </div>
+            <ActivityLibrary favorites={favorites} onToggleFavorite={id => setFavorites(current => toggleFavorite(id, current))} renderActivity={id => {
+              switch (id) {
+                case 'feelings': return <EmotionMatch />
+                case 'patternRecall': return <PatternRecall reduceVisualMotion={settings.lowSensory} />
+                case 'picturePairs': return <PicturePairs />
+                case 'pictureStory': return <PictureStory />
+                case 'soundscapes': return <Soundscapes />
+                case 'breathing': return <BreathingCoach />
+                default: return null
+              }
+            }} />
           </div>
         )}
 
@@ -2033,7 +2027,7 @@ export default function App() {
               <div>
                 <h1 className="text-2xl font-black text-white">Coffee Circles — Isolation Prevention</h1>
                 <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                  These buttons open real <span className="text-emerald-300 font-semibold">meet.jit.si</span> rooms — join embedded or in a full tab. Rooms are public links with no scheduled host, attendance count, or CareSphere moderation. Share only with people you trust; no installs or accounts required. You'll appear as <span className="text-white font-semibold">{settings.name}</span>.
+                  These buttons open real <span className="text-emerald-300 font-semibold">meet.jit.si</span> rooms — join embedded or in a full tab. Rooms are public links with no scheduled host, attendance count, or CareSphere moderation. Share only with people you trust; the provider may require sign-in to start a room. You'll appear as <span className="text-white font-semibold">{settings.name}</span>.
                 </p>
               </div>
               <button
@@ -2107,34 +2101,7 @@ export default function App() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 space-y-5">
-                <h3 className="text-lg font-bold text-white">Care notes · local only</h3>
-                <form onSubmit={postNote} className="flex gap-3">
-                  <input
-                    type="text"
-                    value={noteDraft}
-                    onChange={(e) => setNoteDraft(e.target.value)}
-                    placeholder="Add a note stored in this browser…"
-                    aria-label="New care note"
-                    className="min-w-0 flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                  />
-                  <button type="submit" disabled={!noteDraft.trim()} className="disabled:opacity-40 bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-3 rounded-2xl text-xs shadow transition flex items-center gap-1.5">
-                    <Send className="w-3.5 h-3.5" /> Save
-                  </button>
-                </form>
-                <div className="space-y-3">
-                  {notes.length === 0 && <p className="text-sm text-slate-400 py-6 text-center">No care notes yet. Save a question, update, or reminder for your next visit.</p>}
-                  {notes.map((n) => (
-                    <div key={n.id} className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 space-y-1">
-                      <div className="flex items-center justify-between text-xs font-bold text-slate-300 gap-2">
-                        <span>{n.author}</span>
-                        <span className="text-slate-500 font-normal shrink-0">{formatCareDate(n.date)}</span>
-                      </div>
-                      <p className="text-xs text-slate-300 leading-relaxed">{n.note}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <CareNotes notes={notes} setNotes={setNotes} displayName={settings.name} />
 
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-indigo-950 to-purple-950 border border-indigo-500/30 rounded-3xl p-6 space-y-3.5">
