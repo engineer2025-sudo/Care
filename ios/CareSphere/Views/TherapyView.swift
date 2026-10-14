@@ -361,13 +361,17 @@ struct PictureStoryCard: View {
 struct SoundscapesCard: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var playing: SoundScapeEngine.SoundId?
+    @State private var audioError: String?
     private let engine = SoundScapeEngine.shared
 
     var body: some View {
         SectionCard(title: "Sensory Soundscapes", systemImage: "speaker.wave.2.fill") {
-            Text("Generated live on-device with AVAudioEngine and works offline. Audio preferences vary; start at a comfortable device volume and stop anytime.")
+            Text("Generated on-device and available offline. Start at a comfortable volume. Sound respects Silent mode; you can stop anytime.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            if let audioError {
+                Text(audioError).font(.subheadline).foregroundStyle(.secondary)
+            }
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 ForEach(SoundScapeEngine.SoundId.allCases) { sound in
                     soundscapeButton(sound)
@@ -383,12 +387,15 @@ struct SoundscapesCard: View {
     private func soundscapeButton(_ sound: SoundScapeEngine.SoundId) -> some View {
         let active = playing == sound
         return Button {
+            audioError = nil
             if active {
                 engine.stop()
                 playing = nil
-            } else {
-                engine.play(sound)
+            } else if engine.play(sound) {
                 playing = sound
+            } else {
+                playing = nil
+                audioError = "Audio could not start. Check your audio output and try again. Other activities remain available."
             }
         } label: {
             HStack(spacing: 8) {

@@ -59,11 +59,18 @@ final class SoundScapeEngine {
 
     // MARK: Public control
 
-    func play(_ sound: SoundId) {
+    @discardableResult
+    func play(_ sound: SoundId) -> Bool {
         stateLock.lock()
         currentSound = sound
         stateLock.unlock()
-        startEngineIfNeeded()
+        guard startEngineIfNeeded() else {
+            stateLock.lock()
+            currentSound = nil
+            stateLock.unlock()
+            return false
+        }
+        return true
     }
 
     func stop() {
@@ -79,26 +86,34 @@ final class SoundScapeEngine {
 
     // MARK: Engine
 
-    private func startEngineIfNeeded() {
-        guard !isRunning else { return }
-        #if os(iOS)
-        try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
-        try? AVAudioSession.sharedInstance().setActive(true)
-        #endif
-
-        guard let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1) else { return }
-        let source = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
-            guard let self else { return noErr }
-            self.render(Int(frameCount), into: audioBufferList)
-            return noErr
-        }
-        engine.attach(source)
-        engine.connect(source, to: engine.mainMixerNode, format: format)
+    private func startEngineIfNeeded() -> Bool {
+        if engine.isRunning { return true }
         do {
+            #if os(iOS)
+            try AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+            #endif
+
+            // Stopping AVAudioEngine retains its attached nodes. Reusing the
+            // source prevents each Play/Stop cycle from adding another stream.
+            if !sourceInstalled {
+                guard let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1) else { return false }
+                let source = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
+                    guard let self else { return noErr }
+                    self.render(Int(frameCount), into: audioBufferList)
+                    return noErr
+                }
+                engine.attach(source)
+                engine.connect(source, to: engine.mainMixerNode, format: format)
+                sourceInstalled = true
+            }
             try engine.start()
             isRunning = true
+            return true
         } catch {
             isRunning = false
+            engine.stop()
+            return false
         }
     }
 
@@ -147,7 +162,7 @@ final class SoundScapeEngine {
                         chirpNotesLeft = 2 + Int(rand() * 1.5 + 1.5)   // 2–4 notes
                         chirpBase = 2200 + rand() * 900
                         framesToNextNote = 0
-                        framesToNextChirp = Int(sampleRate * (2.2 + rand() * 4.8))
+                        framesToNextChirp = Int(sampleRate * (2.2 + (rand() + 1) * 2.4))
                     }
                 }
                 if chirpNotesLeft > 0 {
@@ -168,7 +183,7 @@ final class SoundScapeEngine {
             case .fire:
                 brown = (brown + 0.022 * white) * 0.996
                 out = brown * 2.6
-                if rand() < 1.0 / 9000.0 {
+                if (rand() + 1) * 0.5 < 1.0 / 9000.0 {
                     crackleEnv = 1
                     crackleFreq = 1200 + (rand() + 1) * 1200
                 }
