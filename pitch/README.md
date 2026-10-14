@@ -20,9 +20,11 @@ Everything needed to record the 3-minute submission video.
 
 The deck follows the arc investors and judges expect — hook → problem → status quo → solution → demo →
 differentiation → audience → privacy/why now → how it's built → hardest problem → traction & roadmap → close — and
-the design rules that separate good pitch decks from bad ones: one idea per slide, the headline *is* the
-takeaway, ≤ ~35 words of body text, big type (headlines 36–62 pt, body ≥ 14 pt), real product screenshots instead
-of decoration, a source on every statistic, contact details on the first slide, and a close that asks for something.
+the design rules that separate good pitch decks from bad ones (Kawasaki's 10/20/30 rule, YC/Sequoia guidance):
+one idea per slide, the headline *is* the takeaway, ≤ ~40 words per slide and ~560 in the whole deck, big type
+(headlines 40–64 pt, body ≥ 17 pt, only source lines smaller), real product screenshots instead of decoration,
+a source on every statistic, contact details on the first slide, and a close that asks for something. Everything
+trimmed from the slides lives in the speaker notes, so the narration loses nothing.
 
 | # | Slide | Headline |
 |---|---|---|
