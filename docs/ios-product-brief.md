@@ -88,3 +88,13 @@ All eleven work without model downloads or an internet connection after the app 
 7. Proposed co-design and evaluation with autistic people, people living with dementia, caregivers, and qualified clinicians.
 
 Use real native screenshots only after running the app. Do not present the web preview or an illustrative mockup as an iPhone screenshot.
+
+## Follow-up usability and reliability pass
+
+- Optional Qwen and Kokoro downloads now show transfer progress and have Cancel/retry controls. Model replacement uses an atomic replacement path; canceled/failed operations report their state rather than claiming success.
+- Voice-pack extraction is moved off the main UI thread and supports cancellation. Optional downloads remain subject to network, storage, and third-party availability; end-to-end device tests are still required.
+- Bluetooth discovery now lists monitors for explicit selection instead of silently connecting to the first advertisement. Pairing can be canceled, searches/connection attempts time out, and notification subscription must succeed before the UI reports a connection.
+- Live BLE readings are cleared after 15 seconds without a fresh sample. The app's existing display range remains 21–249 BPM; an unsupported value is not shown as a current reading.
+- SOS is scrollable at large text sizes, previews the exact outgoing text, and requires a fresh per-presentation choice to include location. It does not claim that a message was sent or that a medical profile is attached.
+- Native CI for commit `48e2691` passed on macOS: [build run](https://github.com/engineer2025-sudo/Care/actions/runs/38508968464).
+- The deck is now intended for a **Congressional App Challenge 2026 video**. See [the submission/video plan](cac-2026-video-plan.md), especially the required AI-use disclosure and student-contribution information.

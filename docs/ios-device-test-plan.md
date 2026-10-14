@@ -53,3 +53,14 @@ A passing compile is not a passing device test. Fill this out on the intended iP
 - [ ] Open SOS and cancel. **Do not dial emergency numbers as a test.** Use a consenting non-emergency recipient for any message/video testing.
 
 Record iPhone model, iOS version, Xcode version, build commit, checks passed/failed, and reproducible issues. Clinical benefit, usability with target users, and App Store review require separate work.
+
+## Follow-up checks: downloads, pairing, and explicit sharing
+
+- [ ] Cancel a model/voice download partway through; ensure controls return to retry-ready state and no success is claimed.
+- [ ] Retry on a working connection; verify downloaded bytes/progress, low-storage feedback, and actual offline inference/speech after installation.
+- [ ] Cancel voice extraction while the UI remains responsive. Apple voices should remain available.
+- [ ] With two monitors nearby, confirm scanning connects to neither until you choose one. Check device-name/identifier labels.
+- [ ] Cancel pairing during scan/connection; late callbacks must not connect or display a reading afterward.
+- [ ] Test no-device timeout, denied/off Bluetooth, missing service, subscription failure, and disconnect. Reconnect is an explicit user action.
+- [ ] Stop sensor updates: the current BLE value should clear after 15 seconds; historical Apple Health readings retain their own source label.
+- [ ] In SOS, preview the text before opening the share sheet. Add/remove location; reopening SOS should not automatically include a cached fix. Never call an emergency number for testing.
