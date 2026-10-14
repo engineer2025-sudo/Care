@@ -13,9 +13,12 @@ ROOT = Path(__file__).resolve().parent
 SHOTS = Path(os.environ.get('CARESPHERE_SHOTS', ROOT / 'tools' / 'out'))  # raw captures from tools/capture*.js
 OUT = ROOT / 'assets'
 OUT.mkdir(exist_ok=True)
-FONT = str(Path(os.environ.get('PITCH_FONT_DIR', Path.home() / 'fonts')) / 'Arimo[wght].ttf')
+FONT = str(Path(os.environ.get('PITCH_FONT_DIR', ROOT / 'fonts')) / 'Arimo[wght].ttf')
 
-BG = (0x13, 0x1B, 0x16)
+BG = (0x13, 0x1B, 0x16)          # the app's own page background (Calm charcoal theme)
+FRAME = (10, 16, 30)              # drawn device frames, tinted for the blue deck
+FRAME_EDGE = (70, 95, 140)
+FRAME_INNER = (24, 38, 66)
 
 
 def rounded_mask(size, radius):
@@ -56,8 +59,8 @@ def phone_frame(src, dst, target_w=720):
     screen.putalpha(rounded_mask((w, h), radius))
     canvas = Image.new('RGBA', (w + 2 * bezel, h + 2 * bezel), (0, 0, 0, 0))
     d = ImageDraw.Draw(canvas)
-    d.rounded_rectangle([0, 0, canvas.width - 1, canvas.height - 1], radius=radius + bezel, fill=(14, 18, 15, 255), outline=(78, 92, 82, 255), width=3)
-    d.rounded_rectangle([3, 3, canvas.width - 4, canvas.height - 4], radius=radius + bezel - 3, outline=(28, 36, 30, 255), width=2)
+    d.rounded_rectangle([0, 0, canvas.width - 1, canvas.height - 1], radius=radius + bezel, fill=FRAME + (255,), outline=FRAME_EDGE + (255,), width=3)
+    d.rounded_rectangle([3, 3, canvas.width - 4, canvas.height - 4], radius=radius + bezel - 3, outline=FRAME_INNER + (255,), width=2)
     canvas.alpha_composite(screen, (bezel, bezel))
     pw, ph = round(w * 0.30), round(w * 0.075)
     px, py = (canvas.width - pw) // 2, bezel + round(status_h * 0.5 - ph * 0.5)
@@ -75,7 +78,7 @@ def browser_frame(src, dst, target_w=1600, title='CareSphere · installable web 
     radius = round(w * 0.018)
     canvas = Image.new('RGBA', (w + 4, h + bar + 4), (0, 0, 0, 0))
     d = ImageDraw.Draw(canvas)
-    d.rounded_rectangle([0, 0, canvas.width - 1, canvas.height - 1], radius=radius, fill=(27, 36, 30, 255), outline=(70, 84, 74, 255), width=2)
+    d.rounded_rectangle([0, 0, canvas.width - 1, canvas.height - 1], radius=radius, fill=(18, 40, 84, 255), outline=FRAME_EDGE + (255,), width=2)
     # traffic lights
     r = round(bar * 0.22)
     for i, col in enumerate([(226, 109, 109), (240, 178, 58), (91, 142, 107)]):
@@ -86,8 +89,8 @@ def browser_frame(src, dst, target_w=1600, title='CareSphere · installable web 
     tw = font.getlength(title)
     pw = round(tw + bar * 0.9)
     px = (canvas.width - pw) // 2
-    d.rounded_rectangle([px, round(bar * 0.18) + 2, px + pw, round(bar * 0.82) + 2], radius=bar // 3, fill=(19, 27, 22, 255))
-    d.text((px + bar * 0.45, bar * 0.5 + 2), title, font=font, fill=(162, 176, 163), anchor='lm')
+    d.rounded_rectangle([px, round(bar * 0.18) + 2, px + pw, round(bar * 0.82) + 2], radius=bar // 3, fill=(12, 30, 64, 255))
+    d.text((px + bar * 0.45, bar * 0.5 + 2), title, font=font, fill=(170, 190, 225), anchor='lm')
     # screenshot with rounded bottom corners
     mask = Image.new('L', (w, h), 255)
     md = ImageDraw.Draw(mask)
@@ -112,7 +115,7 @@ def plain(src, dst, target_w=None, trim=None):
     return im.size
 
 
-def glow(dst, size=(1400, 1400), color=(91, 142, 107), strength=110):
+def glow(dst, size=(1400, 1400), color=(80, 140, 255), strength=95):
     im = Image.new('RGBA', size, (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     cx, cy = size[0] // 2, size[1] // 2
@@ -126,13 +129,18 @@ def qr(dst, data='https://github.com/engineer2025-sudo/Care'):
     q = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=12, border=2)
     q.add_data(data)
     q.make(fit=True)
-    img = q.make_image(fill_color='#F4F6F2', back_color='#131B16').convert('RGBA')
+    img = q.make_image(fill_color='#0C2D63', back_color='#FFFFFF').convert('RGBA')   # dark-on-white scans best
     img.save(dst)
     return img.size
 
 
 def main():
     sizes = {}
+    if not SHOTS.exists():
+        print(f'raw screenshots not found at {SHOTS} — run tools/capture*.js first (see README). Regenerating drawn assets only.')
+        drawn(sizes)
+        prune()
+        return
     phones = {
         'phone-overview': 'phone-overview.png',
         'phone-activities': 'phone-activities.png',
@@ -196,35 +204,34 @@ def main():
     }
     for name, (f, tw, trim) in crops.items():
         sizes[name] = plain(SHOTS / f, OUT / f'{name}.png', tw, trim)
-    sizes['icon'] = plain(ROOT.parent / 'ios/CareSphere/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon1024.png', OUT / 'icon.png', 512)
-    glow(OUT / 'glow.png')
-    glow(OUT / 'glow-amber.png', color=(240, 178, 58), strength=70)
-    sizes['qr'] = qr(OUT / 'qr.png')
-    prune(sizes)
+    drawn(sizes)
+    prune()
     for k, v in sizes.items():
         print(f'{k:28s} {v}')
 
 
-# Alternates kept in assets/extra for swapping into slides or using as video B-roll.
-EXTRA = {'phone-sos', 'phone-settings', 'phone-visitbrief', 'phone-light', 'phone-toast', 'web-vitals', 'web-highcontrast'}
+def drawn(sizes):
+    """Assets that are drawn rather than captured: app icon, background glow, QR code."""
+    OUT.mkdir(exist_ok=True)
+    sizes['icon'] = plain(ROOT.parent / 'ios/CareSphere/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon1024.png', OUT / 'icon.png', 512)
+    glow(OUT / 'glow.png')
+    sizes['qr'] = qr(OUT / 'qr.png')
 
 
-def prune(sizes):
-    """Keep the repo lean: only assets referenced by build_deck.py stay in assets/."""
+def prune():
+    """Keep assets/ lean: only images referenced by build_deck.py stay there; everything else is parked in
+    assets/extra (real screenshots are never deleted — they are handy for swapping into slides or as video B-roll)."""
     import re
     deck_src = (ROOT / 'build_deck.py').read_text()
     used = set(re.findall(r"'((?:phone|web|crop|strip)-[\w-]+)'", deck_src)) | {'glow', 'icon', 'qr'}
     extra_dir = OUT / 'extra'
     extra_dir.mkdir(exist_ok=True)
-    for name in list(sizes):
-        f = OUT / f'{name}.png'
-        if name in used or not f.exists():
-            continue
-        if name in EXTRA:
+    for f in sorted(OUT.glob('*.png')):
+        if f.stem not in used:
             f.replace(extra_dir / f.name)
-        else:
-            f.unlink()
-            sizes.pop(name)
+    for f in sorted(extra_dir.glob('*.png')):
+        if f.stem in used and not (OUT / f.name).exists():
+            f.replace(OUT / f.name)
 
 
 if __name__ == '__main__':
