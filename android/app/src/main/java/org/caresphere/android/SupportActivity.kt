@@ -34,6 +34,7 @@ class SupportActivity : Activity() {
     private var busy = false
     private var transferFile: java.io.File? = null
     private var receivedTransfer: JSONObject? = null
+    private lateinit var nearbyDiscovery: NearbyDiscovery
     private var nearbyHost: LocalTransferHost? = null
     private var nearbyReceiver: LocalTransferReceiver? = null
     private var nearbyGeneration = UUID.randomUUID()
@@ -68,7 +69,7 @@ class SupportActivity : Activity() {
         val d=dialog().setTitle(title).setView(scroll).setNegativeButton("Cancel",null).setPositiveButton("Continue",null).create()
         d.setOnShowListener{d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener{try{action(fields.map{it.text.toString()});d.dismiss()}catch(_:IllegalArgumentException){fields.first().error="Check the fields. Enter a title/text and valid details."}}};d.show()
     }
-    override fun onCreate(state:Bundle?) {super.onCreate(state);data=CareData(this);section=state?.getString("section")?:"Start here";render()}
+    override fun onCreate(state:Bundle?) {super.onCreate(state);nearbyDiscovery=NearbyDiscovery(this){if(foreground&&!isFinishing&&!isDestroyed&&section=="Device sharing")render()};data=CareData(this);section=state?.getString("section")?:"Start here";render()}
     override fun onSaveInstanceState(out:Bundle){super.onSaveInstanceState(out);out.putString("section",section)}
     override fun onResume(){super.onResume();foreground=true;if(section=="Device sharing")render()}
     override fun onStop(){foreground=false;stopNearby();super.onStop();tts?.stop();pendingSpeech=null;paused=true}
@@ -222,7 +223,7 @@ class SupportActivity : Activity() {
         }
     }
     private fun stopNearby() {
-        nearbyGeneration=UUID.randomUUID();nearbyHost?.close();nearbyHost=null;nearbyReceiver?.close();nearbyReceiver=null
+        nearbyGeneration=UUID.randomUUID();if(::nearbyDiscovery.isInitialized)nearbyDiscovery.stop();nearbyHost?.close();nearbyHost=null;nearbyReceiver?.close();nearbyReceiver=null
         nearbyBusy=false;nearbyOffer=null;nearbyStatus=""
     }
     private fun unlockTransfer(raw:String, pass:String):JSONObject {
@@ -234,7 +235,7 @@ class SupportActivity : Activity() {
     }
     private fun nearbyControls() {
         text("Connect nearby · iPhone or Android",24f)
-        text("Join the same Wi-Fi or join the other phone's hotspot. Internet is not needed. Keep both apps open. Enter the sender's address and 8-digit code; there is no automatic device discovery.")
+        text("Join the same Wi-Fi or join the other phone's hotspot. Internet is not needed. Keep both apps open. Search for the label shown on the sending phone, or enter its address manually. You still need its 8-digit code and encryption passphrase.")
         if(nearbyStatus.isNotEmpty())text(nearbyStatus)
         transferFile?.takeIf{it.exists()}?.let { file ->
             button("Offer to a nearby device") {
@@ -250,9 +251,19 @@ class SupportActivity : Activity() {
             (page.getChildAt(page.childCount-1) as? TextView)?.contentDescription="Connection code. ${info.second.toCharArray().joinToString(", ")}"
             text("This offers only the prepared encrypted copy, not confirmation of delivery. It stops after five minutes or when you leave/background this screen. Tell the recipient the code and encryption passphrase privately; they are different.")
         }
-        button("Connect to a nearby device") {
-            if(nearbyBusy||busy)return@button
-            form("Sender connection details",listOf("Device address" to "","8-digit connection code" to "")){fields->
+        if(nearbyDiscovery.advertisementStatus.isNotEmpty())text(nearbyDiscovery.advertisementStatus)
+        button("Find nearby devices"){stopNearby();nearbyDiscovery.start()}.isEnabled=!nearbyBusy&&!busy&&nearbyOffer==null
+        if(nearbyDiscovery.scanning)button("Stop searching"){nearbyDiscovery.stopSearch();render()}
+        if(nearbyDiscovery.status.isNotEmpty())text(nearbyDiscovery.status)
+        nearbyDiscovery.peers.forEach { peer -> button("Choose ${peer.name} · ${peer.address}"){connectNearby(peer.address)} }
+        button("Connect to a nearby device"){connectNearby()}.isEnabled=!nearbyBusy&&!busy
+        if(nearbyBusy||nearbyOffer!=null)button("Stop nearby connection"){stopNearby();nearbyStatus="Local connection stopped. Received copies cannot be recalled.";render()}
+        text("If a guest network blocks other devices, try a private hotspot or use the encrypted-file option. A connection failure never imports records.")
+    }
+    private fun connectNearby(address:String="") {
+        if(nearbyBusy||busy)return
+        nearbyDiscovery.stopSearch()
+            form("Sender connection details",listOf("Device address" to address,"8-digit connection code" to "")){fields->
                 LocalTransferWire.endpoint(fields[0],fields[1])
                 form("Unlock nearby copy",listOf("Passphrase" to ""),true){secrets->
                     require(secrets[0].length>=12);stopNearby();receivedTransfer=null
@@ -269,20 +280,17 @@ class SupportActivity : Activity() {
                     }.start()
                 }
             }
-        }.isEnabled=!nearbyBusy&&!busy
-        if(nearbyBusy||nearbyOffer!=null)button("Stop nearby connection"){stopNearby();nearbyStatus="Local connection stopped. Received copies cannot be recalled.";render()}
-        text("If a guest network blocks other devices, try a private hotspot or use the encrypted-file option. A connection failure never imports records.")
     }
     private fun offerNearby(file:java.io.File,address:String) {
         stopNearby();val generation=nearbyGeneration;val host=LocalTransferHost();nearbyHost=host;nearbyBusy=true;nearbyStatus="Starting local offer…";render()
         Thread {
             val result=runCatching{require(file.length()<=LocalTransferWire.LIMIT);host.start(file.readBytes(),address) {
                 runOnUiThread { if(nearbyGeneration==generation&&foreground&&!isFinishing&&!isDestroyed) {
-                    nearbyOffer=null;nearbyBusy=false;nearbyStatus="Local offer ended. Start a new offer to try again.";render()
+                    nearbyDiscovery.stopAdvertisement();nearbyOffer=null;nearbyBusy=false;nearbyStatus="Local offer ended. Start a new offer to try again.";render()
                 } }
             }}
             runOnUiThread { if(nearbyGeneration==generation&&foreground&&!isFinishing&&!isDestroyed) {
-                nearbyBusy=false;result.onSuccess{nearbyOffer=it;nearbyStatus="Local offer ready."}.onFailure{host.close();nearbyStatus="Could not offer locally. Check Wi-Fi or hotspot and try again."};render()
+                nearbyBusy=false;result.onSuccess{nearbyOffer=it;nearbyStatus="Local offer ready.";nearbyDiscovery.advertise(it.first)}.onFailure{host.close();nearbyStatus="Could not offer locally. Check Wi-Fi or hotspot and try again."};render()
             } else host.close() }
         }.start()
     }

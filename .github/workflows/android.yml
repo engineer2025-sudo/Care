@@ -28,7 +28,7 @@ jobs:
         working-directory: android
         run: |
           set -o pipefail
-          ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug 2>&1 | tee /tmp/android-build.log
+          ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest 2>&1 | tee /tmp/android-build.log
       - name: Verify APK signing
         run: |
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android/app/build/outputs/apk/debug/app-debug.apk

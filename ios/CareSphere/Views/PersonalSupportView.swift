@@ -44,6 +44,8 @@ struct PersonalSupportView: View {
     @State private var transferBusy = false
     @State private var transferGeneration = UUID()
     @State private var confirmTransfer = false
+    @StateObject private var nearbyAdvertisement = NearbyAdvertisement()
+    @StateObject private var nearbyDiscovery = NearbyDiscovery()
     @State private var nearbyHost = LocalTransferHost()
     @State private var nearbyReceiver = LocalTransferReceiver()
     @State private var nearbyGeneration = UUID()
@@ -195,7 +197,7 @@ struct PersonalSupportView: View {
     private var nearbyControls: some View {
         Group {
             Text("Connect nearby · iPhone or Android").font(.headline)
-            Text("Join the same Wi-Fi, or join the other phone's hotspot. Internet is not needed. Keep both apps open. Enter the sender's address and 8-digit code; there is no automatic device discovery. Allow Local Network when asked.")
+            Text("Join the same Wi-Fi, or join the other phone's hotspot. Internet is not needed. Keep both apps open. Search for the label shown on the sending phone, or enter its address manually. You still need its 8-digit code and encryption passphrase. Allow Local Network when asked.")
             if !nearbyStatus.isEmpty { Text(nearbyStatus).accessibilityAddTraits(.updatesFrequently) }
             if transferURL != nil {
                 let addresses = LocalTransferWire.addresses()
@@ -205,13 +207,24 @@ struct PersonalSupportView: View {
                         ForEach(addresses, id: \.self) { Text($0).tag($0) }
                     }.disabled(nearbyBusy || !offeredAddress.isEmpty)
                 }
-                Button("Offer to a nearby device") { offerNearby() }.disabled(nearbyBusy || !offeredAddress.isEmpty)
+                Button("Offer to a nearby device") { offerNearby() }.disabled(nearbyBusy || transferBusy || !offeredAddress.isEmpty)
             }
             if !offeredAddress.isEmpty {
                 Text("Device address: \(offeredAddress)").textSelection(.enabled)
                 Text("Connection code: \(offeredCode)").font(.title2.monospacedDigit()).textSelection(.enabled)
                     .accessibilityLabel("Connection code. " + offeredCode.map { String($0) }.joined(separator: ", "))
                 Text("Offer expires after five minutes or when you leave/background this screen. The code is not the encryption passphrase. Tell the recipient both separately from any public channel.")
+            }
+            if !nearbyAdvertisement.status.isEmpty { Text(nearbyAdvertisement.status) }
+            Button("Find nearby devices") { stopNearby(); nearbyDiscovery.start() }
+                .disabled(nearbyBusy || transferBusy || !offeredAddress.isEmpty)
+            if nearbyDiscovery.scanning { Button("Stop searching") { nearbyDiscovery.stop() } }
+            if !nearbyDiscovery.status.isEmpty { Text(nearbyDiscovery.status).accessibilityAddTraits(.updatesFrequently) }
+            ForEach(nearbyDiscovery.peers) { peer in
+                Button("Choose \(peer.name) · \(peer.address)") {
+                    receiveAddress = peer.address; receiveCode = ""; nearbyDiscovery.stop()
+                    nearbyStatus = "Address selected. Enter the code shown on that phone and the separately agreed passphrase. Nothing has connected or imported yet."
+                }
             }
             TextField("Sender address · e.g. 192.168.1.5:12345", text: $receiveAddress)
                 .textInputAutocapitalization(.never).autocorrectionDisabled().disabled(nearbyBusy)
@@ -225,7 +238,7 @@ struct PersonalSupportView: View {
         }
     }
     private func stopNearby() {
-        nearbyGeneration = UUID(); nearbyHost.stop(); nearbyReceiver.cancel()
+        nearbyGeneration = UUID(); nearbyHost.stop(); nearbyReceiver.cancel(); nearbyDiscovery.stop(); nearbyAdvertisement.stop()
         nearbyBusy = false; offeredAddress = ""; offeredCode = ""; nearbyStatus = ""
     }
     private func offerNearby() {
@@ -241,12 +254,12 @@ struct PersonalSupportView: View {
             nearbyHost.start(contents: contents, address: address, ready: { result in
                 guard nearbyGeneration == generation else { return }; nearbyBusy = false
                 switch result {
-                case .success(let info): offeredAddress = info.0; offeredCode = info.1; nearbyStatus = "Offering only the prepared encrypted copy on your local network. This is not confirmation of delivery."
+                case .success(let info): offeredAddress = info.0; offeredCode = info.1; nearbyAdvertisement.start(address: info.0); nearbyStatus = "Offering only the prepared encrypted copy on your local network. This is not confirmation of delivery."
                 case .failure: nearbyStatus = "Could not offer locally. Check Wi-Fi and Local Network permission in Settings, then retry."
                 }
             }, ended: {
                 guard nearbyGeneration == generation else { return }
-                nearbyBusy = false; offeredAddress = ""; offeredCode = ""; nearbyStatus = "Local offer ended. Start a new offer to try again."
+                nearbyAdvertisement.stop(); nearbyBusy = false; offeredAddress = ""; offeredCode = ""; nearbyStatus = "Local offer ended. Start a new offer to try again."
             })
         } catch { nearbyBusy = false; nearbyStatus = "Could not read the prepared encrypted file. Prepare it again." }
     }

@@ -37,6 +37,8 @@
 	<string>CareSphere locks your health data behind Touch ID / Face ID.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>CareSphere reads heart rate, blood oxygen, blood pressure, and workout summaries from Apple Health after you approve. It never writes health data.</string>
+	<key>NSBonjourServices</key>
+	<array><string>_care-xfer._tcp</string></array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>CareSphere transfers only selected encrypted records directly between nearby phones on your private Wi-Fi or hotspot, and can search a local Kiwix library. No hosted server is used for device transfers.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

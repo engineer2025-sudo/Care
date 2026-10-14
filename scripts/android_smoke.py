@@ -154,6 +154,9 @@ find('Speak this phrase')
 tap('Clear / stop')
 tap('Choose a tool · Communication')
 tap('Device sharing')
+tap('Find nearby devices')
+find('Stop searching')
+tap('Stop searching')
 adb('push','android/app/src/test/resources/browser-transfer.caretransfer','/sdcard/Download/CareSphere-test.caretransfer')
 tap('Receive: choose a transfer file')
 tap('Passphrase')
@@ -216,6 +219,13 @@ try:
 finally:
     peer.shutdown()
     peer.server_close()
+adb('shell','am','force-stop',package)
+# Separate test APK; no test publisher, fixture or debug switch is shipped in the app.
+adb('install','-r','android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk')
+result = adb('shell','am','instrument','-w',package+'.test/'+package+'.NearbySmokeInstrumentation')
+print(result)
+assert 'PASS: native DNS-SD publish/discover/resolve' in result and 'INSTRUMENTATION_CODE: -1' in result, result
+adb('uninstall',package+'.test')
 adb('shell','am','force-stop',package)
 # Leave the emulator with an empty installation, not a saved test routine.
 adb('shell','pm','clear',package)

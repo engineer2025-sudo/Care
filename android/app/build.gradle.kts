@@ -4,10 +4,11 @@ android {
     compileSdk = 35
     defaultConfig {
         applicationId = "org.caresphere.android"
+        testInstrumentationRunner = "org.caresphere.android.NearbySmokeInstrumentation"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.3.0"
+        versionCode = 5
+        versionName = "1.4.0"
     }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = "17" }
