@@ -25,6 +25,16 @@ def find(label, timeout=35):
         candidates = [n for n in tree.iter('node') if n.attrib.get('text', '').casefold() == label.casefold() or n.attrib.get('content-desc', '').casefold() == label.casefold()]
         if candidates:
             return next((n for n in candidates if n.attrib.get('clickable') == 'true'), candidates[0])
+        # File picker return can show an informational success dialog or leave
+        # the preview visible directly. Verify persistent UI, not a transient notice.
+        messages = {"Unlocked locally. Nothing is saved until you select records and import.",
+                    "Imported selected copies. Existing records were not replaced."}
+        if any(n.attrib.get('text') in messages for n in tree.iter('node')):
+            ok = next((n for n in tree.iter('node') if n.attrib.get('text','').casefold() == 'ok'), None)
+            if ok is not None:
+                x1,y1,x2,y2 = map(int,re.findall(r'\d+',ok.attrib['bounds']))
+                adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+                continue
         attempts += 1
         if any(n.attrib.get('resource-id') == 'android:id/parentPanel' for n in tree.iter('node')) and not any(n.attrib.get('class') == 'android.widget.ListView' for n in tree.iter('node')):
             time.sleep(.5)
@@ -150,13 +160,9 @@ except AssertionError:
     # Some platform images open Downloads directly.
     pass
 tap('CareSphere-test.caretransfer')
-find('Unlocked locally. Nothing is saved until you select records and import.')
-tap('OK')
 find('Preview received copies')
 tap('note: Browser transfer test note')
 tap('Import selected copies')
-find('Imported selected copies. Existing records were not replaced.')
-tap('OK')
 tap('Back to CareSphere')
 tap('Care')
 find('Browser transfer test note')
