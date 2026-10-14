@@ -48,6 +48,7 @@ args = parser.parse_args()
 ios = verified_run(args.ios_run, 'ios')
 android = verified_run(args.android_run, 'android', 'scripts/android_smoke.py')
 web = verified_run(args.web_run, *WEB_PATHS)
+release_commit = command('git', 'rev-parse', 'HEAD').strip()
 # Build from the exact verified sources; no stale dist/ is packaged.
 subprocess.run(['npm', 'ci'], cwd=ROOT, check=True)
 subprocess.run(['npm', 'run', 'build'], cwd=ROOT, check=True)
@@ -208,6 +209,11 @@ with zipfile.ZipFile(web_archive) as z:
     assert z.testzip() is None
     for path,sha in web_manifest['files'].items():
         assert hashlib.sha256(z.read('CareSphere-Web/'+path)).hexdigest() == sha
+# Refuse a release if another edit/commit raced the build or archive creation.
+assert command('git','rev-parse','HEAD').strip() == release_commit, 'Source commit changed during packaging; run again.'
+checked = ['ios', 'android', 'scripts/android_smoke.py', *WEB_PATHS,
+    ':(exclude)ios/README.md', ':(exclude)android/README.md']
+assert not command('git','status','--porcelain','--',*checked).strip(), 'Source changed during packaging; run again.'
 for p in [apk_path,archive,web_archive]:
     sha = hashlib.sha256(p.read_bytes()).hexdigest()
     p.with_name(p.name+'.sha256').write_text(f'{sha}  {p.name}\n')
