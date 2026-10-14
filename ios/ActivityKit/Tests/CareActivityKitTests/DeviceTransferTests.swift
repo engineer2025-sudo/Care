@@ -31,6 +31,8 @@ final class DeviceTransferTests: XCTestCase {
     }
     func testRejectsShortPassphraseAndOversizedRecords() throws {
         XCTAssertThrowsError(try DeviceTransfer.seal(sample(), password: "short"))
+        let large = TransferPayload(records: (0..<100).map { TransferRecord(id: "n:\($0)", type: "note", text: String(repeating: "字", count: 4000)) })
+        XCTAssertThrowsError(try DeviceTransfer.seal(large, password: password))
         XCTAssertThrowsError(try DeviceTransfer.validate(TransferPayload(records: [TransferRecord(id: "r", type: "routine", text: String(repeating: "a", count: 241))])))
     }
 }

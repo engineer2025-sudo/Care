@@ -55,7 +55,9 @@ public enum DeviceTransfer {
     public static func seal(_ payload: TransferPayload, password: String) throws -> Data {
         try validate(payload)
         let salt = Data((0..<16).map { _ in UInt8.random(in: .min ... .max) })
-        let box = try AES.GCM.seal(JSONEncoder().encode(payload), using: key(password, salt: salt), authenticating: aad)
+        let plain = try JSONEncoder().encode(payload)
+        guard plain.count <= 699984 else { throw Failure.invalid }
+        let box = try AES.GCM.seal(plain, using: key(password, salt: salt), authenticating: aad)
         return try JSONEncoder().encode(Envelope(salt: salt, iv: box.nonce.withUnsafeBytes { Data($0) }, ciphertext: box.ciphertext + box.tag))
     }
     public static func open(_ data: Data, password: String) throws -> TransferPayload {

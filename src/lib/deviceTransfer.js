@@ -21,6 +21,7 @@ async function derive(password,salt) {
 }
 export async function encryptTransfer(payload,password) {
   const plain=enc.encode(JSON.stringify(validateTransfer(payload)))
+  if(plain.length>699984)throw Error('Selected text is too large for one transfer. Choose fewer records.')
   const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12))
   const ciphertext=await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:aad,tagLength:128},await derive(password,salt),plain)
   return JSON.stringify({format:'CareSphere Transfer',version:1,iterations:310000,salt:b64(salt),iv:b64(iv),ciphertext:b64(new Uint8Array(ciphertext))})
