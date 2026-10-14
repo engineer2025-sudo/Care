@@ -103,7 +103,7 @@ class MainActivity : Activity() {
     private fun card(title: String, body: (LinearLayout) -> Unit) {
         val c = column(); c.background = shape(Color.WHITE); c.setPadding(dp(18), dp(14), dp(18), dp(16))
         (c.layoutParams as LinearLayout.LayoutParams).apply { topMargin = dp(10); bottomMargin = dp(6) }
-        text(title, 21f, c, true).accessibilityHeading = true
+        text(title, 21f, c, true).apply { if (Build.VERSION.SDK_INT >= 28) accessibilityHeading = true }
         body(c)
     }
     private fun render() {
@@ -152,7 +152,7 @@ class MainActivity : Activity() {
     }
     private fun today() {
         val name = data.json.optString("name")
-        text(if (name.isBlank()) "Your day, at your pace." else "Hello, $name.", 30f, bold = true).accessibilityHeading = true
+        text(if (name.isBlank()) "Your day, at your pace." else "Hello, $name.", 30f, bold = true).apply { if (Build.VERSION.SDK_INT >= 28) accessibilityHeading = true }
         text(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d")), 16f)
         button("Settings & privacy") { settings = true; render() }
         card("A small moment for you") { c ->
