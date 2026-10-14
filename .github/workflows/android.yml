@@ -2,16 +2,16 @@ name: Android Build
 on:
   push:
     branches: ['arena/**', main]
-    paths: ['android/**', '.github/workflows/android.yml']
+    paths: ['android/**', 'scripts/android_smoke.py', '.github/workflows/android.yml']
   pull_request:
-    paths: ['android/**', '.github/workflows/android.yml']
+    paths: ['android/**', 'scripts/android_smoke.py', '.github/workflows/android.yml']
   workflow_dispatch:
 jobs:
   android:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v5
@@ -29,6 +29,38 @@ jobs:
         run: |
           set -o pipefail
           ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug 2>&1 | tee /tmp/android-build.log
+      - name: Verify APK signing
+        run: |
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Enable hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install and exercise Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_2
+          disable-animations: true
+          script: python3 scripts/android_smoke.py
+      # Mirror this CI output through the GitHub API for download clients that
+      # cannot reach Azure artifact URLs. No ref, branch or commit is created.
+      - name: Prepare API-downloadable APK
+        if: success() && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/arena/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, os, subprocess
+          from pathlib import Path
+          apk = Path('android/app/build/outputs/apk/debug/app-debug.apk').read_bytes()
+          request = json.dumps({'content':base64.b64encode(apk).decode(), 'encoding':'base64'})
+          blob = json.loads(subprocess.check_output(['gh','api','--method','POST','repos/'+os.environ['GITHUB_REPOSITORY']+'/git/blobs','--input','-'], input=request, text=True))
+          print('::notice title=Verified Android APK::git_blob=' + blob['sha'] + '; sha256=' + hashlib.sha256(apk).hexdigest() + '; bytes=' + str(len(apk)))
+          PY
       - name: Surface compiler and lint errors
         if: failure()
         run: |
@@ -47,3 +79,4 @@ jobs:
             android/app/build/outputs/apk/debug/app-debug.apk
             android/app/build/reports/
             android/app/build/test-results/
+            /tmp/android-smoke/
