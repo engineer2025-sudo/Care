@@ -54,7 +54,18 @@ class CareData(private val context: Context) {
     }
     fun toggleFavorite(id: String) { put("favorites", JSONArray(LibraryPreferences.toggle(id, favorites()))) }
     fun list(name: String): JSONArray = json.optJSONArray(name) ?: JSONArray()
-    fun put(name: String, value: Any) { json.put(name, value); save() }
+    fun put(name: String, value: Any) {
+        if(name == "routines" || name == "done") json.put("routineUndo", JSONObject()
+            .put("routines", JSONArray(list("routines").toString())).put("done", JSONArray(list("done").toString())).put("day", LocalDate.now().toString()))
+        json.put(name, value); save()
+    }
+    fun undoRoutine() {
+        val previous = json.optJSONObject("routineUndo") ?: return
+        if(previous.optString("day") == LocalDate.now().toString()) {
+            json.put("routines", previous.optJSONArray("routines") ?: JSONArray()).put("done", previous.optJSONArray("done") ?: JSONArray())
+        }
+        json.remove("routineUndo"); save()
+    }
     fun refreshDay() {
         val today = LocalDate.now().toString()
         if (json.optString("day") != today && writable) {
@@ -101,7 +112,7 @@ class CareData(private val context: Context) {
     fun restoreSnapshot(raw: String) {
         check(writable); validateSnapshot(raw)
         val previous = json
-        json = JSONObject(raw); save()
+        json = JSONObject(raw); json.remove("routineUndo"); save()
         if(error != null) { json = previous; throw IllegalStateException("Secure save failed") }
         refreshDay()
     }

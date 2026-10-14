@@ -86,7 +86,7 @@ class MainActivity : Activity() {
         out.putString("feedback", feedback); out.putBoolean("memoryHidden", memoryHidden); out.putInt("memoryPosition", memoryPosition)
         out.putIntArray("matched", matched.toIntArray()); out.putInt("first", firstPair); out.putInt("second", secondPair)
     }
-    override fun onResume() { super.onResume(); if (::data.isInitialized) { data = CareData(this); data.refreshDay(); render() } }
+    override fun onResume() { super.onResume(); if (::data.isInitialized) { data = CareData(this); data.refreshDay(); if(data.json.optJSONObject("tools")?.optBoolean("simple") == true && tab > 1) tab = 0; render() } }
     override fun onStop() {
         stopComfort()
         if (::monitor.isInitialized) monitor.disconnect("Monitoring stopped when CareSphere left the foreground. Reconnect when you're ready.")
@@ -211,11 +211,13 @@ class MainActivity : Activity() {
             button("Add a routine", c) {
                 if (routines.length() >= 24) { message("You can keep up to 24 routines. Remove one in Settings first."); return@button }
                 input("Add your routine", "A short reminder", 80) { title ->
-                    routines.put(JSONObject().put("id", java.util.UUID.randomUUID().toString()).put("title", title))
-                    data.put("routines", routines); render()
+                    val updatedRoutines = JSONArray(routines.toString())
+                    updatedRoutines.put(JSONObject().put("id", java.util.UUID.randomUUID().toString()).put("title", title))
+                    data.put("routines", updatedRoutines); render()
                 }
             }.isEnabled = data.canWrite
         }
+        if(data.json.optJSONObject("routineUndo")?.optString("day") == LocalDate.now().toString()) button("Undo last routine change") { data.undoRoutine(); render() }
         card("How are you feeling?") { c ->
             val current = data.json.optString("mood")
             text(if(current.isBlank()) "No check-in today. Choose a word if you want to." else "Today's self-report: $current", parent = c)

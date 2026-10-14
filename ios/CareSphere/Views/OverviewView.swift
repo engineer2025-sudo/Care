@@ -30,6 +30,7 @@ struct OverviewView: View {
                         if !store.personalSupport.simple { metricsGrid(proxy: proxy) }
                         moodCheckIn
                         routinesCard.id("routines")
+                        if store.routineUndo != nil { Button("Undo last routine change") { store.undoRoutineChange() }.buttonStyle(.bordered) }
                         if !store.personalSupport.simple { medicationsCard.id("medications") }
                         #if os(iOS)
                         if !store.personalSupport.simple { stepsCard }

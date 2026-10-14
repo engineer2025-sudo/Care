@@ -5,7 +5,7 @@ import java.util.Base64
 import java.util.Properties
 class TransferCryptoTest {
     @Test fun readsTheWebFixtureWithUnicodeNormalization() {
-        val fixture=Properties().apply { javaClass.classLoader!!.getResourceAsStream("transfer.properties")!!.use { load(it) } }
+        val fixture=Properties().apply { TransferCryptoTest::class.java.classLoader!!.getResourceAsStream("transfer.properties")!!.use { load(it) } }
         fun bytes(name:String)=Base64.getDecoder().decode(fixture.getProperty(name))
         val encrypted=TransferCrypto.Envelope(bytes("salt"),bytes("iv"),bytes("ciphertext"))
         assertArrayEquals(bytes("plaintext64"),TransferCrypto.open(encrypted,"public cafe\u0301 test phrase"))

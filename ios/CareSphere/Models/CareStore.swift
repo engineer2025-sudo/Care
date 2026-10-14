@@ -14,7 +14,12 @@ final class CareStore: ObservableObject {
     @Published var displayName: String { didSet { save() } }
     @Published var voiceReminders: Bool { didSet { save() } }
     @Published var voiceIdentifier: String { didSet { save() } }
-    @Published var routines: [Routine] { didSet { save() } }
+    @Published private(set) var routineUndo: [Routine]?
+    private var restoringRoutine = false
+    @Published var routines: [Routine] { didSet {
+        if !isErasingLocalData && !restoringRoutine { routineUndo = oldValue }
+        save()
+    } }
     @Published var medications: [Medication] {
         didSet {
             // Names/times added or changed after confirmation need a fresh review.
@@ -298,7 +303,7 @@ final class CareStore: ObservableObject {
         displayName = ""
         voiceReminders = false
         voiceIdentifier = ""
-        routines = []
+        routines = []; routineUndo = nil
         favoriteActivities = []
         personalSupport = PersonalSupport()
         notes = []
@@ -493,6 +498,10 @@ final class CareStore: ObservableObject {
         }
         notes.removeAll { $0.id == id }
     }
+    func undoRoutineChange() {
+        guard let previous = routineUndo else { return }
+        restoringRoutine = true; routines = previous; routineUndo = nil; restoringRoutine = false
+    }
     func restoreDeletedNote(_ entry: DeletedCareNote) {
         if !notes.contains(where: { $0.id == entry.id }) { notes.insert(entry.note, at: 0) }
         personalSupport.deletedNotes.removeAll { $0.id == entry.id }
@@ -517,7 +526,7 @@ final class CareStore: ObservableObject {
         try writePrivateFile(SecureCareStorage.seal(JSONEncoder().encode(box), using: key), to: fileURL)
         encryptionKey = key
         isErasingLocalData = true
-        notes = box.notes; routines = box.routines; personalSupport = support
+        notes = box.notes; routines = box.routines; routineUndo = nil; personalSupport = support
         isErasingLocalData = false; persistenceIssue = nil
         return chosen.count
     }
@@ -545,7 +554,7 @@ final class CareStore: ObservableObject {
         encryptionKey = key
         isErasingLocalData = true
         displayName = box.displayName; voiceReminders = box.voiceReminders; voiceIdentifier = box.voiceIdentifier ?? ""
-        routines = box.routines; medications = box.medications; medicationScheduleConfirmed = false
+        routines = box.routines; routineUndo = nil; medications = box.medications; medicationScheduleConfirmed = false
         notes = box.notes; moods = box.moods; favoriteActivities = ActivityPreferences.normalized(box.favoriteActivities ?? [])
         personalSupport = box.personalSupport ?? PersonalSupport()
         personalSupport.deletedNotes.removeAll { $0.deletedAt < Date().addingTimeInterval(-30 * 86400) }
