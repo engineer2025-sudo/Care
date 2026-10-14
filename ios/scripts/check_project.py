@@ -14,7 +14,7 @@ errors = []
 for source in (root / 'CareSphere').rglob('*.swift'):
     if f'path = "{source.name}";' not in text and f'path = {source.name};' not in text:
         errors.append(f'Source missing from Xcode project: {source.relative_to(root)}')
-references = re.findall(r'^\s*([A-F0-9]{24}) = \{', text, re.M)
+references = re.findall(r'^\s*([A-F0-9]{24}) = \{\s*isa\s*=', text, re.M)
 if len(references) != len(set(references)):
     errors.append('Duplicate Xcode object IDs')
 for file in ['CareSphere-iOS-Info.plist', 'CareSphere.entitlements']:
