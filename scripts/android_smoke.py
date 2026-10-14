@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the actual debug APK in a CI emulator; never pair or call services."""
+"""Exercise the debug APK only in an emulator, using public local test fixtures."""
 import subprocess
 import http.server
 import threading
@@ -13,7 +13,11 @@ from pathlib import Path
 package = 'org.caresphere.android'
 
 def adb(*args):
-    return subprocess.check_output(['adb', *args], text=True, stderr=subprocess.STDOUT)
+    timeout = 120 if 'instrument' in args else 45
+    try:
+        return subprocess.check_output(['adb', *args], text=True, stderr=subprocess.STDOUT, timeout=timeout)
+    except subprocess.CalledProcessError as error:
+        raise RuntimeError(f'ADB {args!r} failed: {error.output[-4000:]}') from error
 
 def screen():
     adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml')
@@ -69,6 +73,9 @@ def tap(label):
     x1,y1,x2,y2 = coords
     adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
     time.sleep(.4)
+
+if adb('shell','getprop','ro.kernel.qemu').strip() != '1':
+    raise SystemExit('Refusing destructive smoke checks: a CI emulator is required, never a physical phone.')
 
 adb('install', '-r', 'android/app/build/outputs/apk/debug/app-debug.apk')
 adb('shell', 'pm', 'clear', package)
