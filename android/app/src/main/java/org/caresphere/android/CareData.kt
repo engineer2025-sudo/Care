@@ -74,6 +74,37 @@ class CareData(private val context: Context) {
             error = null
         } catch (_: Exception) { error = "Changes could not be saved securely. Keep the app open and free device storage before retrying." }
     }
+    companion object {
+        fun validateSnapshot(raw: String) {
+            require(raw.toByteArray(Charsets.UTF_8).size <= 6_000_000)
+            val value = JSONObject(raw)
+            for ((name, limit) in listOf("notes" to 100, "routines" to 24, "trash" to 100)) {
+                val array = value.optJSONArray(name) ?: JSONArray()
+                require(array.length() <= limit)
+                for (i in 0 until array.length()) {
+                    val item = array.getJSONObject(i)
+                    require(item.getString("id").length <= 120)
+                    if (name == "routines") require(item.getString("title").length <= 240)
+                    else { require(item.getString("body").length <= 4000); require(item.getString("at").length <= 100) }
+                }
+            }
+            val tools = value.optJSONObject("tools") ?: JSONObject()
+            for ((name, limit) in listOf("photos" to 10, "plans" to 30, "contacts" to 20, "questions" to 100, "phrases" to 24)) {
+                val array = tools.optJSONArray(name) ?: JSONArray(); require(array.length() <= limit)
+                for (i in 0 until array.length()) { val item = array.getJSONObject(i)
+                    if(name == "photos") require(item.getString("jpeg").length <= 240000)
+                    if(name == "plans") { val steps = item.getJSONArray("steps"); require(steps.length() in 1..40); for(j in 0 until steps.length()) require(steps.getString(j).length <= 240) }
+                }
+            }
+        }
+    }
+    fun restoreSnapshot(raw: String) {
+        check(writable); validateSnapshot(raw)
+        val previous = json
+        json = JSONObject(raw); save()
+        if(error != null) { json = previous; throw IllegalStateException("Secure save failed") }
+        refreshDay()
+    }
     fun erase() {
         try {
             file.delete()

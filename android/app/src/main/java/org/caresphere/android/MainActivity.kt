@@ -86,7 +86,7 @@ class MainActivity : Activity() {
         out.putString("feedback", feedback); out.putBoolean("memoryHidden", memoryHidden); out.putInt("memoryPosition", memoryPosition)
         out.putIntArray("matched", matched.toIntArray()); out.putInt("first", firstPair); out.putInt("second", secondPair)
     }
-    override fun onResume() { super.onResume(); if (::data.isInitialized) { data.refreshDay(); render() } }
+    override fun onResume() { super.onResume(); if (::data.isInitialized) { data = CareData(this); data.refreshDay(); render() } }
     override fun onStop() {
         stopComfort()
         if (::monitor.isInitialized) monitor.disconnect("Monitoring stopped when CareSphere left the foreground. Reconnect when you're ready.")
@@ -164,13 +164,13 @@ class MainActivity : Activity() {
         }
         root.addView(nav, LinearLayout.LayoutParams(-1, -2))
         var navRow = nav
-        listOf("Today", "Activities", "Care", "Health").forEachIndexed { i, label ->
+        (if(data.json.optJSONObject("tools")?.optBoolean("simple") == true) listOf("My Day", "Activities", "My People") else listOf("Today", "Activities", "Care", "Health")).forEachIndexed { i, label ->
             val b = Button(this).apply {
                 text = label; textSize = 15f; isAllCaps = false; minHeight = dp(56)
                 setTextColor(if (i == tab && !settings && activityIndex < 0) Color.WHITE else green)
                 background = shape(if (i == tab && !settings && activityIndex < 0) fill else bg, 14)
                 isSelected = i == tab && !settings && activityIndex < 0
-                setOnClickListener { stopComfort(); tab = i; settings = false; activityIndex = -1; render() }
+                setOnClickListener { if(i == 2 && data.json.optJSONObject("tools")?.optBoolean("simple") == true) { startActivity(Intent(this@MainActivity, SupportActivity::class.java)); return@setOnClickListener }; stopComfort(); tab = i; settings = false; activityIndex = -1; render() }
             }
             if(largeText && i % 2 == 0) {
                 navRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
@@ -184,6 +184,7 @@ class MainActivity : Activity() {
         val name = data.json.optString("name")
         text(if (name.isBlank()) "Your day, at your pace." else "Hello, $name.", 30f, bold = true).apply { if (Build.VERSION.SDK_INT >= 28) isAccessibilityHeading = true }
         text(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d")), 16f)
+        button("My support tools") { startActivity(Intent(this, SupportActivity::class.java)) }
         button("Settings & privacy") { settings = true; render() }
         card("A small moment for you") { c ->
             text("Choose an activity, check in with yourself, or simply take a break. Everything here is optional.", parent = c)
@@ -425,7 +426,7 @@ class MainActivity : Activity() {
                 note.put("body", body).put("editedAt", Instant.now().toString()); data.put("notes", notes); render()
             } }.isEnabled = data.canWrite
             button("Review & share this note", c) { confirm("Share this note?", "Review the recipient before sending.\n\n${note.getString("body")}") { share(note.getString("body")) } }
-            button("Delete note", c) { confirm("Delete this note?", "This removes the note from this device, not copies already shared. It cannot be undone.") { notes.remove(i); data.put("notes", notes); render() } }.isEnabled = data.canWrite
+            button("Delete note", c) { confirm("Delete this note?", "Move this note to Recently deleted in My support tools for 30 days? Previously shared copies cannot be removed.") { val trash = data.list("trash"); trash.put(JSONObject(note.toString()).put("deletedAt", System.currentTimeMillis())); while(trash.length() > 100) trash.remove(0); data.put("trash", trash); notes.remove(i); data.put("notes", notes); render() } }.isEnabled = data.canWrite
         }
     }
     private fun health() {
