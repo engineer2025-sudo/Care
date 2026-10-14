@@ -110,6 +110,7 @@ struct CareNote: Identifiable, Codable, Equatable {
     var createdAt: Date = Date()
     /// On-device NaturalLanguage sentiment score (-1...1) for journal insights.
     var sentiment: Double?
+    var updatedAt: Date? = nil
 }
 
 /// Care focus chosen during onboarding — personalizes the whole app.

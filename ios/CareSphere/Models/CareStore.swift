@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import CareActivityKit
 import CryptoKit
 import UserNotifications
 
@@ -33,6 +34,7 @@ final class CareStore: ObservableObject {
             syncMedicationReminders()
         }
     }
+    @Published var favoriteActivities: [String] { didSet { save() } }
     @Published var notes: [CareNote] { didSet { save() } }
     @Published var moods: [MoodEntry] { didSet { save() } }
     @Published var emotionScore: Int { didSet { save() } }
@@ -75,6 +77,7 @@ final class CareStore: ObservableObject {
         // Older stores did not carry an explicit confirmation. Preserve their
         // saved data, but pause its reminders until the user reviews it.
         medicationScheduleConfirmed = box?.medicationScheduleConfirmed ?? false
+        favoriteActivities = ActivityPreferences.normalized(box?.favoriteActivities ?? [])
         notes = box?.notes ?? []
         moods = box?.moods ?? []
         emotionScore = box?.emotionScore ?? 0
@@ -162,6 +165,7 @@ final class CareStore: ObservableObject {
             routines: routines,
             medications: medications,
             medicationScheduleConfirmed: medicationScheduleConfirmed,
+            favoriteActivities: favoriteActivities,
             notes: notes,
             moods: moods,
             emotionScore: emotionScore,
@@ -290,6 +294,7 @@ final class CareStore: ObservableObject {
         voiceReminders = false
         voiceIdentifier = ""
         routines = []
+        favoriteActivities = []
         notes = []
         moods = []
         emotionScore = 0
@@ -343,6 +348,7 @@ final class CareStore: ObservableObject {
         var medications: [Medication]
         // Optional so pre-confirmation stores decode safely; legacy schedules default paused.
         var medicationScheduleConfirmed: Bool?
+        var favoriteActivities: [String]?
         var notes: [CareNote]
         var moods: [MoodEntry]
         var emotionScore: Int
@@ -460,9 +466,23 @@ final class CareStore: ObservableObject {
         }
     }
 
+    func toggleFavorite(_ id: String) {
+        favoriteActivities = ActivityPreferences.toggling(id, in: favoriteActivities)
+    }
+
+    func updateNote(id: UUID, body: String) {
+        let cleaned = String(body.trimmingCharacters(in: .whitespacesAndNewlines).prefix(4000))
+        guard !cleaned.isEmpty, let index = notes.firstIndex(where: { $0.id == id }) else { return }
+        notes[index].body = cleaned
+        notes[index].updatedAt = Date()
+        notes[index].sentiment = TextInsightsService.sentimentScore(for: cleaned)
+    }
+
+    func deleteNote(id: UUID) { notes.removeAll { $0.id == id } }
+
     func addNote(author: String, body: String) {
         guard !body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = String(body.trimmingCharacters(in: .whitespacesAndNewlines).prefix(4000))
         notes.insert(
             CareNote(author: author, body: trimmed, sentiment: TextInsightsService.sentimentScore(for: trimmed)),
             at: 0)

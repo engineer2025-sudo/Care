@@ -1,9 +1,16 @@
 import SwiftUI
+import CareActivityKit
 
 struct CareCircleView: View {
     @EnvironmentObject private var store: CareStore
     @State private var noteDraft = ""
     @State private var showingVisitPrep = false
+    @State private var query = ""
+    @State private var editingNote: CareNote?
+    @State private var deletingNote: CareNote?
+    private var visibleNotes: [CareNote] {
+        store.notes.filter { ActivityPreferences.matches($0.body + " " + $0.author, query: query) }
+    }
 
     var body: some View {
         NavigationStack {
@@ -21,7 +28,18 @@ struct CareCircleView: View {
             .background(Color.ink)
             .navigationTitle("Care Circle")
             .inlineTitle()
+            .searchable(text: $query, prompt: "Search your care notes")
         }
+        .sheet(item: $editingNote) { note in
+            CareNoteEditor(note: note).environmentObject(store)
+        }
+        .alert("Delete this note?", isPresented: Binding(get: { deletingNote != nil }, set: { if !$0 { deletingNote = nil } })) {
+            Button("Cancel", role: .cancel) { deletingNote = nil }
+            Button("Delete note", role: .destructive) {
+                if let note = deletingNote { store.deleteNote(id: note.id) }
+                deletingNote = nil
+            }
+        } message: { Text("This removes this note from this device. Previously shared copies cannot be removed.") }
         .sheet(isPresented: $showingVisitPrep) {
             VisitPrepView()
                 .environmentObject(store)
@@ -61,7 +79,7 @@ struct CareCircleView: View {
                     .textFieldStyle(.roundedBorder)
                     .font(.body)
                 Button {
-                    store.addNote(author: "You (\(store.displayName))", body: noteDraft)
+                    store.addNote(author: store.displayName.isEmpty ? "You" : "You (\(store.displayName))", body: noteDraft)
                     noteDraft = ""
                     celebrate()
                 } label: {
@@ -75,7 +93,11 @@ struct CareCircleView: View {
                 Text("No notes yet. Save a question, update, or reminder for your next visit.")
                     .foregroundStyle(.secondary).padding(.vertical, 12)
             }
-            ForEach(store.notes) { note in
+            if !store.notes.isEmpty && visibleNotes.isEmpty {
+                Text("No notes match your search.").foregroundStyle(.secondary)
+                Button("Clear search") { query = "" }.buttonStyle(.bordered)
+            }
+            ForEach(visibleNotes) { note in
                 VStack(alignment: .leading, spacing: 3) {
                     HStack {
                         Text(note.author).font(.caption.weight(.bold))
@@ -83,20 +105,25 @@ struct CareCircleView: View {
                         Text(note.createdAt, style: .date).font(.caption2).foregroundStyle(.tertiary)
                     }
                     Text(note.body).font(.footnote).foregroundStyle(.secondary)
-                    if let sentiment = note.sentiment {
-                        HStack(spacing: 5) {
-                            Text(TextInsightsService.emoji(for: sentiment))
-                            StatusChip(text: TextInsightsService.label(for: sentiment),
-                                       color: sentiment >= 0.35 ? .emerald : sentiment <= -0.35 ? .orange : .gray)
-                            Text("on-device NLP").font(.caption2).foregroundStyle(.tertiary)
-                        }
+                    if let date = note.updatedAt {
+                        Text("Edited \(date.formatted())").font(.caption).foregroundStyle(.secondary)
                     }
+                    ViewThatFits(in: .horizontal) {
+                        HStack { noteActions(note) }
+                        VStack(alignment: .leading) { noteActions(note) }
+                    }
+
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
         }
+    }
+
+    @ViewBuilder private func noteActions(_ note: CareNote) -> some View {
+        Button("Edit note") { editingNote = note }.buttonStyle(.bordered).controlSize(.large)
+        Button("Delete", role: .destructive) { deletingNote = note }.buttonStyle(.bordered).controlSize(.large)
     }
 
     private var todaySummary: some View {
@@ -182,5 +209,38 @@ struct CareCircleView: View {
 
     private func moodLabel(_ score: Int) -> String {
         ["Struggling", "Low", "Okay", "Good", "Great"][score - 1]
+    }
+}
+
+private struct CareNoteEditor: View {
+    let note: CareNote
+    @EnvironmentObject private var store: CareStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var draft: String
+    @State private var discard = false
+    init(note: CareNote) { self.note = note; _draft = State(initialValue: note.body) }
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Your private note") {
+                    TextEditor(text: $draft).frame(minHeight: 200).accessibilityLabel("Edit care note")
+                    Text("\(draft.count)/4,000 characters. Editing preserves the original creation date.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Edit note").inlineTitle()
+            .interactiveDismissDisabled(draft != note.body)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { if draft != note.body { discard = true } else { dismiss() } } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { store.updateNote(id: note.id, body: draft); dismiss() }
+                        .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draft.count > 4000)
+                }
+            }
+            .confirmationDialog("Discard unsaved changes?", isPresented: $discard, titleVisibility: .visible) {
+                Button("Discard changes", role: .destructive) { dismiss() }
+                Button("Keep editing", role: .cancel) {}
+            }
+        }
     }
 }

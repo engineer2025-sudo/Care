@@ -3,13 +3,15 @@ import CareActivityKit
 
 /// A library, not a wall of simultaneously active games. Each session is isolated.
 struct TherapyView: View {
+    @EnvironmentObject private var store: CareStore
+    @State private var favoritesOnly = false
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var category: ActivityCategory = .all
     @State private var query = ""
     @State private var selectedActivity: CareActivity?
     @State private var showingEvidence = false
 
-    private var activities: [CareActivity] { CareActivity.filtered(category: category, query: query) }
+    private var activities: [CareActivity] { CareActivity.filtered(category: category, query: query).filter { !favoritesOnly || store.favoriteActivities.contains($0.id) } }
 
     var body: some View {
         NavigationStack {
@@ -37,11 +39,15 @@ struct TherapyView: View {
                     .pickerStyle(.menu)
                     .accessibilityHint("Filter activities by what you would like to do.")
 
+                    Toggle("Favorites only", isOn: $favoritesOnly)
+                        .tint(.emerald)
+                    Text("Save activities you enjoy. Favorites stay on this device; playing is never tracked.")
+                        .font(.footnote).foregroundStyle(.secondary)
                     if activities.isEmpty {
                         SectionCard(title: "No activities found", systemImage: "magnifyingglass") {
                             Text("Try a different word or browse all activities.")
                                 .foregroundStyle(.secondary)
-                            Button("Show all activities") { query = ""; category = .all }
+                            Button("Show all activities") { query = ""; category = .all; favoritesOnly = false }
                                 .buttonStyle(.bordered)
                                 .frame(minHeight: 44)
                         }
@@ -50,12 +56,22 @@ struct TherapyView: View {
                             .font(.subheadline).foregroundStyle(.secondary)
                         LazyVGrid(columns: typeSize.isAccessibilitySize ? [GridItem(.flexible())] : [GridItem(.adaptive(minimum: 280))], spacing: 12) {
                             ForEach(activities) { activity in
+                                VStack(spacing: 6) {
                                 Button { selectedActivity = activity } label: {
                                     ActivityLibraryTile(activity: activity)
                                 }
                                 .buttonStyle(.plain)
                                 .accessibilityIdentifier("activity.\(activity.id)")
                                 .accessibilityHint("Opens one activity. You can leave at any time.")
+                                    Button { store.toggleFavorite(activity.id) } label: {
+                                        Label(store.favoriteActivities.contains(activity.id) ? "Saved to favorites" : "Save to favorites", systemImage: store.favoriteActivities.contains(activity.id) ? "heart.fill" : "heart")
+                                            .font(.subheadline).frame(maxWidth: .infinity, minHeight: 44)
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .accessibilityLabel("\(store.favoriteActivities.contains(activity.id) ? "Remove" : "Save") \(activity.title) \(store.favoriteActivities.contains(activity.id) ? "from" : "to") favorites")
+                                    .accessibilityAddTraits(store.favoriteActivities.contains(activity.id) ? .isSelected : [])
+                                }
+
                             }
                         }
                     }
