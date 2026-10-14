@@ -98,7 +98,7 @@ manifest = {
         'apk_sha256':digest, 'apk_bytes':len(apk)},
     'device_sharing': {'app_backend_required':False, 'mode':'native direct LAN plus encrypted-file snapshots',
         'web_to_android_emulator_import':'passed', 'physical_nearby_delivery_tested':False,
-        'built_in_phone_pairing':False, 'native_manual_lan_connection':True,
+        'bluetooth_phone_pairing':False, 'hosted_backend_required':False, 'temporary_phone_listener':True, 'native_manual_lan_connection':True,
         'automatic_device_discovery':False, 'android_emulator_lan_receive_import':'passed', 'automatic_sync':False, 'remote_revocation':False},
     'compiled_source_comparison_excludes': ['ios/README.md', 'android/README.md'],
     'files': {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
