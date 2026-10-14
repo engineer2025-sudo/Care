@@ -81,24 +81,25 @@ paths += [ROOT / p for p in ['DOWNLOAD.md', 'docs/signing-troubleshooting.md',
     'docs/web-deployment.md', 'docs/device-sharing.md', 'docs/personal-tools.md', 'scripts/android_smoke.py']]
 # Refuse to silently label a later version using this release's metadata.
 project = (ROOT/'ios/CareSphere.xcodeproj/project.pbxproj').read_text()
-assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.2.0'}
-assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'9'}
+assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.3.0'}
+assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'10'}
 gradle = (ROOT/'android/app/build.gradle.kts').read_text()
-assert re.search(r'versionName\s*=\s*"1\.2\.0"', gradle)
-assert re.search(r'versionCode\s*=\s*3\b', gradle)
+assert re.search(r'versionName\s*=\s*"1\.3\.0"', gradle)
+assert re.search(r'versionCode\s*=\s*4\b', gradle)
 assert json.loads((ROOT/'package.json').read_text())['version'] == '1.2.0'
 manifest = {
     'source_commit': command('git','rev-parse','HEAD').strip(),
-    'ios': {'version':'3.2.0 (9)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
+    'ios': {'version':'3.3.0 (10)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
         'unsigned_device_build': True, 'healthkit_build': True, 'simulator_launch': True,
-        'tests':30, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
-    'android': {'version':'1.2.0 (3)', 'ci':android['url'], 'tested_commit':android['headSha'],
-        'tests':19, 'lint':'passed', 'apk_signing_verified_in_ci':True,
+        'tests':35, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
+    'android': {'version':'1.3.0 (4)', 'ci':android['url'], 'tested_commit':android['headSha'],
+        'tests':24, 'lint':'passed', 'apk_signing_verified_in_ci':True,
         'emulator_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
         'apk_sha256':digest, 'apk_bytes':len(apk)},
-    'device_sharing': {'app_backend_required':False, 'mode':'encrypted file snapshots',
+    'device_sharing': {'app_backend_required':False, 'mode':'native direct LAN plus encrypted-file snapshots',
         'web_to_android_emulator_import':'passed', 'physical_nearby_delivery_tested':False,
-        'built_in_phone_pairing':False, 'automatic_sync':False, 'remote_revocation':False},
+        'built_in_phone_pairing':False, 'native_manual_lan_connection':True,
+        'automatic_device_discovery':False, 'android_emulator_lan_receive_import':'passed', 'automatic_sync':False, 'remote_revocation':False},
     'compiled_source_comparison_excludes': ['ios/README.md', 'android/README.md'],
     'files': {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
 }
@@ -131,8 +132,8 @@ not full iOS feature parity. See android/README.md and ios/README.md for exact s
 
 VALIDATION
 See BUILD_VERIFICATION.json for successful CI runs and file hashes.
-iOS 3.2.0 (9): 30 logic/preference/packet/transfer tests; standard device, HealthKit and Simulator builds; launch.
-Android 1.2.0 (3): 19 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
+iOS 3.3.0 (10): 35 logic/preference/packet/transfer/LAN tests; standard device, HealthKit and Simulator builds; launch.
+Android 1.3.0 (4): 24 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
 Real-device BLE, actual Apple Intelligence responses, accessibility with users, and
 Mac signing remain manual acceptance work. No clinical effectiveness is claimed.
 
@@ -140,8 +141,11 @@ PERSONAL SUPPORT + DEVICE SHARING
 Simple Mode, visual routines, communication cards, personal photo activities,
 contacts, appointment questions, comfort preferences, recovery/backup and interest
 prompts are in My support tools. Optional AI drafting is native iPhone-only.
-No backend is needed: select notes/routines, prepare an encrypted transfer and use
-AirDrop/Quick Share/the system share sheet or save the file. Receive through the
+No hosted backend is needed: select notes/routines and prepare an encrypted copy.
+Native phones: join the same private Wi-Fi/hotspot, choose Offer to a nearby device,
+then enter its address and eight-digit code inside the receiving app. Keep both
+apps open. The encryption passphrase is separate. There is no automatic discovery.
+Alternatively use AirDrop/Quick Share/the system share sheet or save the file. Receive through the
 file picker, unlock, preview, then choose copies to import. Tell the recipient the
 passphrase separately. No built-in Bluetooth pairing, live sync or remote revocation.
 Read docs/device-sharing.md and docs/personal-tools.md before using these features.

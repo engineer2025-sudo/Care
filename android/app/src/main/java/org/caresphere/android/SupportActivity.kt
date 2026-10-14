@@ -165,6 +165,7 @@ class SupportActivity : Activity() {
         text("Use direct local Wi-Fi / hotspot transfer below for iPhone or Android, or use the system share sheet. This is not Bluetooth pairing or live sync. An app you choose may use its own cloud. You cannot remotely revoke copies. Tell the recipient the passphrase separately. Medicines, measurements, photos and backup keys are excluded.")
         button("Select records to send"){
             if(busy)return@button
+            stopNearby();render()
             val records=transferableRecords();if(records.isEmpty()){message("Add your own note or routine first. No sample records are supplied.");return@button}
             val checked=BooleanArray(records.size)
             dialog().setTitle("Choose exactly what to share").setMultiChoiceItems(records.map{"${it.getString("type")}: ${it.getString("text")}"}.toTypedArray(),checked){_,i,value->checked[i]=value}
@@ -246,6 +247,7 @@ class SupportActivity : Activity() {
         }
         nearbyOffer?.let { info ->
             text("Device address: ${info.first}");text("Connection code: ${info.second}",24f)
+            (page.getChildAt(page.childCount-1) as? TextView)?.contentDescription="Connection code. ${info.second.toCharArray().joinToString(", ")}"
             text("This offers only the prepared encrypted copy, not confirmation of delivery. It stops after five minutes or when you leave/background this screen. Tell the recipient the code and encryption passphrase privately; they are different.")
         }
         button("Connect to a nearby device") {

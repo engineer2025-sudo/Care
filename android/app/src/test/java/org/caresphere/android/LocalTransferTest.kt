@@ -8,7 +8,7 @@ import java.util.Collections
 class LocalTransferTest {
     @Test fun acceptsOnlyPrivateLiteralEndpoints() {
         assertEquals("/care/00123456",LocalTransferWire.endpoint("192.168.1.2:12345","00123456").path)
-        listOf("8.8.8.8:12345","localhost:12345","127.0.0.1:12345","169.254.169.254:12345","[::1]:12345","10.0.0.1:80","10.0.0.1:65536","user@10.0.0.1:12345","10.0.0.1:12345/path","10.0.0.1:12345?x","10.0.0.1:12345#x","010.0.0.1:12345").forEach {
+        listOf("8.8.8.8:12345","localhost:12345","10.0.0.1.invalid:12345","127.0.0.1:12345","169.254.169.254:12345","[::1]:12345","10.0.0.1:80","10.0.0.1:65536","user@10.0.0.1:12345","10.0.0.1:12345/path","10.0.0.1:12345?x","10.0.0.1:12345#x","010.0.0.1:12345").forEach {
             assertTrue(it,runCatching { LocalTransferWire.endpoint(it,"00123456") }.isFailure)
         }
         assertTrue(runCatching { LocalTransferWire.endpoint("10.0.0.1:12345","1234567\n") }.isFailure)

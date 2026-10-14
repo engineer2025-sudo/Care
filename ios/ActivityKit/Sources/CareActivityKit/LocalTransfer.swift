@@ -112,7 +112,7 @@ public final class LocalTransferHost {
                     attempts += 1
                     let peer = UUID(); self.peers[peer] = connection; connection.start(queue: self.queue)
                     self.readRequest(connection, peer: peer, code: code, contents: contents, buffer: Data())
-                    self.queue.asyncAfter(deadline: .now() + 5) { [weak self] in self?.close(peer) }
+                    self.queue.asyncAfter(deadline: .now() + 15) { [weak self] in self?.close(peer) }
                     if attempts == 16 { listener.cancel() } // existing response can finish; no more guesses
                 }
                 listener.start(queue: queue)
@@ -127,7 +127,7 @@ public final class LocalTransferHost {
             guard bytes.count <= 4096, error == nil else { self.close(peer); return }
             if bytes.range(of: Data("\r\n\r\n".utf8)) != nil {
                 let reply = LocalTransferWire.validRequest(bytes, code: code) ? LocalTransferWire.response(contents) : Data("HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".utf8)
-                connection.send(content: reply, completion: .contentProcessed { [weak self] _ in self?.close(peer) })
+                connection.send(content: reply, contentContext: .finalMessage, isComplete: true, completion: .contentProcessed { [weak self] _ in self?.close(peer) })
             } else if complete { self.close(peer) }
             else { self.readRequest(connection, peer: peer, code: code, contents: contents, buffer: bytes) }
         }

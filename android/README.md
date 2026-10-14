@@ -1,12 +1,12 @@
-# CareSphere for Android — 1.2
+# CareSphere for Android — 1.3
 
 Native Kotlin/Android Views app. Android 8+ (API 26), JDK 17, Gradle 8.9, Android SDK 35. Open this folder in Android Studio; no project-generation or Node toolchain needed. First Gradle sync requires internet for the Android build tools and Kotlin/JUnit. No third-party runtime UI, health, video, analytics, or AI SDK is bundled.
 
-## New in 1.2.0 (3)
+## New in 1.3.0 (4)
 
 Open **My support tools** on Today for Simple Mode, visual routines, communication cards and offline installed-voice speech, personal photos/conversation/matching, trusted contacts, appointment questions/follow-ups, note recovery, encrypted Android backup/restore and interest prompts. Routine changes can be undone. There is still no Apple Intelligence substitute.
 
-**Device sharing is backend-free.** Create an encrypted `.caretransfer` file from selected notes/routines, then choose Quick Share or another app in the system share sheet. Receive through the document picker, preview and selectively merge. No built-in phone-to-phone Bluetooth pairing, automatic synchronization or remote revocation is claimed. The read-only transfer provider grants temporary access only to deliberately shared encrypted files. The app still has no internet permission.
+**Device sharing is backend-free.** Create an encrypted `.caretransfer` file from selected notes/routines, then choose Quick Share or another app in the system share sheet. Receive through the document picker, preview and selectively merge. No built-in phone-to-phone Bluetooth pairing, automatic synchronization or remote revocation is claimed. The read-only transfer provider grants temporary access only to deliberately shared encrypted files. The app now declares Android INTERNET permission for local sockets; direct sharing permits only private IPv4 endpoints, not an internet backend.
 
 [Sharing instructions](../docs/device-sharing.md) · [tool guide](../docs/personal-tools.md). Crypto tests decrypt an actual Web Crypto fixture; the emulator also checks the system file picker and imported note. Physical Quick Share delivery still needs devices.
 
@@ -48,3 +48,7 @@ CI builds the APK, runs 19 activity/preference/packet/backup/transfer tests and 
 - Text at Android's largest font setting; TalkBack names/order/focus; small portrait and landscape windows.
 - Export shares only after confirmation; cancel shares nothing. Erase clears care data and key.
 - Never test by calling real emergency services or acting on a medication dose.
+
+## Direct local phone connection
+
+The native iPhone/Android apps now include **Offer to a nearby device** and a receive connection form. Join the same private Wi-Fi or hotspot, enter the sender's address and eight-digit code inside CareSphere, then unlock with the separate encryption passphrase and preview/select copies to import. Supports either phone as sender without a hosted backend or internet relay. Offers stop on leaving/backgrounding, after five minutes, or explicitly with Stop. Manual address/code entry—not automatic discovery or Bluetooth pairing. Web retains encrypted-file sharing. See [the sharing guide](../docs/device-sharing.md) for limits and physical-device checks.

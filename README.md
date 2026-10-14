@@ -10,8 +10,8 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 
 - **All three platforms:** searchable activity libraries, private favorites, searchable/editable care notes and confirmed deletion.
-- **iPhone 3.2.0 (9):** favorite filtering, note-edit discard protection and updated timestamps. Existing encrypted care data migrates without a reset.
-- **Android 1.2.0 (3):** system/light/dark appearance, native themed dialogs, live search that retains the keyboard, and a two-row navigation layout at large font sizes.
+- **iPhone 3.3.0 (10):** favorite filtering, note-edit discard protection and updated timestamps. Existing encrypted care data migrates without a reset.
+- **Android 1.3.0 (4):** system/light/dark appearance, native themed dialogs, live search that retains the keyboard, and a two-row navigation layout at large font sizes.
 - **Web 1.2.0:** 11 optional activities, one focused session at a time, five added supported-choice/conversation activities, note-edit discard protection and verified offline reopening after the first completed installation.
 
 Downloads are documented in [DOWNLOAD.md](DOWNLOAD.md). See [release verification](docs/release-2026-10-14.md) and [web deployment](docs/web-deployment.md).
@@ -80,3 +80,7 @@ Native CI builds/tests iOS and Android separately. Android also validates its AP
 Activities are research-informed accessibility/wellbeing features, **not clinically validated dementia or autism treatments**, group cognitive stimulation therapy, or diagnostic tests. AI can be wrong. CareSphere does not diagnose, triage, prescribe or monitor emergencies. Sharing always requires explicit action; no clinical or caregiver account is implied.
 
 Old Mac release files are archival; there is no current native macOS target. No slide deck is part of this delivery.
+
+## Direct local phone connection
+
+The native iPhone/Android apps now include **Offer to a nearby device** and a receive connection form. Join the same private Wi-Fi or hotspot, enter the sender's address and eight-digit code inside CareSphere, then unlock with the separate encryption passphrase and preview/select copies to import. Supports either phone as sender without a hosted backend or internet relay. Offers stop on leaving/backgrounding, after five minutes, or explicitly with Stop. Manual address/code entry—not automatic discovery or Bluetooth pairing. Web retains encrypted-file sharing. See [the sharing guide](docs/device-sharing.md) for limits and physical-device checks.

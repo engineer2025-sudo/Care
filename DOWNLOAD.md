@@ -2,7 +2,7 @@
 
 ## Current downloadable files
 
-- **CareSphere-Mobile.zip** — iPhone 3.2.0 (9) Xcode project, Android 1.2.0 (3) source and verified debug APK, install guides and `BUILD_VERIFICATION.json`.
+- **CareSphere-Mobile.zip** — iPhone 3.3.0 (10) Xcode project, Android 1.3.0 (4) source and verified debug APK, install guides and `BUILD_VERIFICATION.json`.
 - **CareSphere-Android.apk** — the same verified Android development build separately.
 - **CareSphere-Web.zip** — web 1.2.0 source, locked dependencies, tests and the built `production/` website. No `node_modules` or personal data included.
 
@@ -54,7 +54,9 @@ Offline routines, notes and activities work after the first completed online ins
 
 Both people open **My support tools → Device sharing**. The sender selects notes/routines, enters a unique passphrase, reviews the selection, then uses the share sheet or saves the encrypted file. The recipient chooses that file, enters the passphrase provided separately, previews it and selects copies to import. Full backups are for same-platform recovery, not cross-platform transfers.
 
-Use AirDrop on compatible Apple devices, Quick Share where available on Android, or another file-transfer method you choose. CareSphere does not implement direct Bluetooth pairing or silent live sync. A received copy cannot be remotely revoked. See [step-by-step sharing](docs/device-sharing.md) and [all personal tools](docs/personal-tools.md).
+For direct native app-to-app transfer on all three phone pairings, join the same private Wi-Fi/hotspot, choose **Offer to a nearby device** on the sender, and enter its address/code in **Connect to a nearby device** on the recipient (iPhone: **Connect and receive encrypted copy**). No hosted service or internet is required. Keep both apps open; offers expire after five minutes. This is manual connection, not automatic discovery.
+
+Alternatively, use AirDrop on compatible Apple devices, Quick Share where available on Android, or another file-transfer method you choose. CareSphere does not implement direct Bluetooth pairing or silent live sync. A received copy cannot be remotely revoked. See [step-by-step sharing](docs/device-sharing.md) and [all personal tools](docs/personal-tools.md).
 
 ## Real data and safety
 

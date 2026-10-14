@@ -1,14 +1,14 @@
-# CareSphere for iPhone — 3.2
+# CareSphere for iPhone — 3.3
 
 Open **CareSphere.xcodeproj** directly. No XcodeGen, remote Swift packages, binary SDKs, or model downloads are needed to build the app. The only package is `ActivityKit/`, included locally.
 
-## New in 3.2.0 (9)
+## New in 3.3.0 (10)
 
 Personal support tools in the header: Simple Mode, visual routines, communication cards and installed-voice speech, personal photos/conversation/matching, trusted contacts, comfort settings, appointment questions/follow-ups, routine undo, retained-note recovery, encrypted backup/restore, interest prompts and optional Apple Intelligence drafting with human review.
 
 **Device sharing needs no backend.** Select notes/routines, create an encrypted `.caretransfer` file, and send it through AirDrop/the share sheet or Files. Preview/select before importing on another CareSphere device. Existing records are not overwritten. No live synchronization or remote revocation is claimed. [Sharing guide](../docs/device-sharing.md) · [tools and limitations](../docs/personal-tools.md).
 
-CI now runs 30 Swift tests, including Web Crypto-to-Swift transfer decryption, tamper/wrong-passphrase checks and UTF-8 payload limits. Physical AirDrop and Apple Intelligence still need hardware validation.
+CI now runs 35 Swift tests, including Web Crypto-to-Swift transfer decryption, tamper/wrong-passphrase checks and UTF-8 payload limits. Physical AirDrop and Apple Intelligence still need hardware validation.
 
 ## Previously added in 3.1.0 (8)
 
@@ -69,3 +69,7 @@ CI builds standard iPhone, optional HealthKit, and Simulator targets with Xcode 
 ## Optional references
 
 Built-in general references work offline. MedlinePlus data downloads only on request. Kiwix requires a separately running server on your trusted private network; no ZIM is bundled. In Health Guide enter its private address and content name. Never port-forward that server. No archive or question is sent to a cloud AI.
+
+## Direct local phone connection
+
+The native iPhone/Android apps now include **Offer to a nearby device** and a receive connection form. Join the same private Wi-Fi or hotspot, enter the sender's address and eight-digit code inside CareSphere, then unlock with the separate encryption passphrase and preview/select copies to import. Supports either phone as sender without a hosted backend or internet relay. Offers stop on leaving/backgrounding, after five minutes, or explicitly with Stop. Manual address/code entry—not automatic discovery or Bluetooth pairing. Web retains encrypted-file sharing. See [the sharing guide](../docs/device-sharing.md) for limits and physical-device checks.

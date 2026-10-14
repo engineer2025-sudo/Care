@@ -11,7 +11,7 @@ object LocalTransferWire {
     fun privateIPv4(host: String): Boolean {
         val fields = host.split('.')
         val parts = fields.mapNotNull { it.toIntOrNull() }
-        if(parts.size != 4 || fields.zip(parts).any { (a,b) -> a != b.toString() || b !in 0..255 }) return false
+        if(fields.size != 4 || parts.size != 4 || fields.zip(parts).any { (a,b) -> a != b.toString() || b !in 0..255 }) return false
         return parts[0] == 10 || parts[0] == 172 && parts[1] in 16..31 || parts[0] == 192 && parts[1] == 168
     }
     fun endpoint(address: String, code: String): URI {
@@ -67,7 +67,7 @@ class LocalTransferHost : Closeable {
                     val client = listener.accept()
                     synchronized(this) { if(closed) { client.close(); return@Thread }; peer = client }
                     val deadline = object: TimerTask() { override fun run() { runCatching { client.close() } } }
-                    timer.schedule(deadline,5000)
+                    timer.schedule(deadline,15000)
                     try { client.use {
                         client.soTimeout = 3000
                         val request = LocalTransferWire.header(client.getInputStream().buffered())

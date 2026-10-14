@@ -203,13 +203,14 @@ struct PersonalSupportView: View {
                     Picker("Sending network address", selection: $networkAddress) {
                         Text("Choose network").tag("")
                         ForEach(addresses, id: \.self) { Text($0).tag($0) }
-                    }
+                    }.disabled(nearbyBusy || !offeredAddress.isEmpty)
                 }
                 Button("Offer to a nearby device") { offerNearby() }.disabled(nearbyBusy || !offeredAddress.isEmpty)
             }
             if !offeredAddress.isEmpty {
                 Text("Device address: \(offeredAddress)").textSelection(.enabled)
                 Text("Connection code: \(offeredCode)").font(.title2.monospacedDigit()).textSelection(.enabled)
+                    .accessibilityLabel("Connection code. " + offeredCode.map { String($0) }.joined(separator: ", "))
                 Text("Offer expires after five minutes or when you leave/background this screen. The code is not the encryption passphrase. Tell the recipient both separately from any public channel.")
             }
             TextField("Sender address · e.g. 192.168.1.5:12345", text: $receiveAddress)

@@ -85,3 +85,8 @@ Record iPhone model, iOS version, Xcode version, build commit, checks passed/fai
 - [ ] Delete/restore a note and undo a routine change. Create an encrypted backup, reject an incorrect password, preview/cancel, then restore test data only.
 - [ ] Select a note/routine, prepare a transfer, AirDrop/save it, open it on another actual device, reject an incorrect password, preview/select/import and reject repeat receipt of the same item. Check Android/web recipients too.
 - [ ] On eligible enabled hardware, generate each AI draft type from deliberately selected text; cancel/background/discard; edit and explicitly save. Original notes must remain unchanged.
+
+
+## Direct nearby connections (3.3)
+
+Use non-sensitive records and two consenting testers. Repeat in BOTH directions for iPhone/iPhone, Android/Android and iPhone/Android. Use the same private Wi-Fi first, then a phone hotspot with internet disabled where supported. Prepare one selected encrypted note/routine; offer locally, enter the shown address/code on the receiver, unlock and preview/select/import. Confirm unselected records are absent, originals unchanged and duplicate receipt marked. Test wrong code/passphrase, denied Local Network access and recovery in Settings, changing networks, multiple interfaces, interrupted receive, leaving the tool, screen lock/background, explicit Stop and five-minute expiry. Confirm a stopped/expired offer cannot be fetched with its old code, and already received copies are not described as revoked. Test a guest network that isolates clients and use the file fallback. IPv6-only Wi-Fi is deliberately unsupported. No automatic discovery or radio pairing should appear.
