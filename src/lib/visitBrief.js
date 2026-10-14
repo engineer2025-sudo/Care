@@ -19,14 +19,11 @@ export function buildVisitBrief({
   notes = [],
   moods = [],
   hrRecords = [],
-  spo2 = null,
-  bp = null,
   includeName = false,
   includeMeds = false,
   includeMoods = false,
   includeNotes = false,
   includeLiveVitals = false,
-  includeSimulatedVitals = false,
   visitQuestions = '',
   moodLabels = DEFAULT_MOOD_LABELS,
   now = new Date(),
@@ -41,7 +38,6 @@ export function buildVisitBrief({
     return Number.isNaN(date.valueOf()) ? String(value) : date.toLocaleString()
   }
   const liveRecords = hrRecords.filter(record => record.source === 'LIVE_BLE').slice(-20)
-  const simulatedRecords = hrRecords.filter(record => record.source !== 'LIVE_BLE').slice(-20)
   const lines = [
     'CareSphere · Visit preparation brief',
     `Prepared: ${now.toLocaleString()}`,
@@ -79,14 +75,6 @@ export function buildVisitBrief({
     lines.push('LIVE BLUETOOTH HEART RATE (source-labeled session samples; not a diagnosis)')
     if (liveRecords.length === 0) lines.push('No live BLE heart-rate samples are available in this browser session.')
     liveRecords.forEach(record => lines.push(`- ${dateLabel(record.timestamp)} · ${record.value} bpm · ${record.source}`))
-    lines.push('')
-  }
-  if (includeSimulatedVitals) {
-    lines.push('SIMULATED DEMONSTRATION VALUES (not measured; not clinical data)')
-    if (simulatedRecords.length === 0 && spo2 === null && bp === null) lines.push('No simulated demonstration values are currently available.')
-    simulatedRecords.forEach(record => lines.push(`- ${dateLabel(record.timestamp)} · ${record.metric}: ${record.value} · ${record.source}`))
-    if (spo2 !== null) lines.push(`- ${now.toLocaleString()} · oxygen saturation demo: ${spo2}% · SIMULATED_SPOT_CHECK`)
-    if (bp !== null) lines.push(`- ${now.toLocaleString()} · blood pressure demo: ${bp} mmHg · SIMULATED_SEQUENCE`)
     lines.push('')
   }
   if (visitQuestions.trim()) {

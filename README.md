@@ -1,65 +1,66 @@
-# 💚 CareSphere AI
+# CareSphere
 
-**Proactive Senior Care · Isolation Prevention · Autism Support** — a native iOS app plus the existing installable web PWA:
+Local routines, connection, and optional accessible activities. **Native iPhone and Android apps**, plus a separate React web app. No generated vital signs, pretend contacts, prefilled medication lists, or automatic caregiver messages.
 
-- 📱 **iOS app (Swift/SwiftUI)** — native iOS source; no public App Store, TestFlight, or signed `.ipa` yet. [Build and install it on your iPhone with Xcode](DOWNLOAD.md#install-the-native-development-build-on-your-iphone).
-- 🧭 **Native scope** — new native product work, Xcode target, and build pipeline are iOS only. Earlier Mac release artifacts are archived; there is no current Mac app target.
-- 🌐 **Web app (React + Vite)** — an installable PWA sharing real `meet.jit.si` rooms with family on other devices.
+## Native apps
 
-> Live tabs: **Overview · Therapy & Sensory · Coffee Circles · Care Circle · Vitals & Telehealth**
+| | iPhone 3.0 | Android 1.0 |
+|---|---|---|
+| Project | `ios/CareSphere.xcodeproj` | `android/` in Android Studio |
+| Minimum OS | iOS 16 | Android 8 / API 26 |
+| Activities | 11 optional, unscored activities | 11 untimed activities |
+| Local care | Routines, notes, mood, confirmed medication reminders | Routines, notes, daily mood; no medication reminders yet |
+| Heart rate | Real BLE; optional dated/source-labeled Apple Health history | Real standard BLE monitor only |
+| Other vitals | Optional read-only Apple Health records | No oxygen/BP/Health Connect integration; no substitute values |
+| AI | Apple's Foundation Models on eligible iOS 26+ devices, explicitly optional | No AI; Apple Intelligence is not available on Android |
+| Speech | Installed Apple voices | No speech feature in this release |
+| Video | Explicit browser handoff | Explicit browser handoff |
+| Privacy | Encrypted local care storage, iOS file protection, optional biometric lock | AES-256-GCM local storage with Android Keystore; backup disabled |
+| Distribution | Source ZIP, own Xcode signing; no signed IPA/TestFlight | Debug-signed development APK; not a Play Store release |
 
----
+**[Install and troubleshoot](DOWNLOAD.md)** · [iOS guide](ios/README.md) · [Android guide](android/README.md) · [codesign/keychain help](docs/signing-troubleshooting.md)
 
-## What makes it realistic (not a demo toy)
+The iOS standard scheme requires no HealthKit capability and has no remote Swift package downloads. Simulator builds do not need signing credentials. Apple Intelligence requires Xcode 26+, iOS 26+, compatible hardware, enabled Apple Intelligence and a ready model in a supported language/region; unavailable/error states are shown, never a fake answer. Standard iPhone builds work without it.
 
-| Area | How it actually works |
-|---|---|
-| 🫀 **Wearable vitals** | "Pair real monitor" uses the **Web Bluetooth API** and subscribes to the standard **Bluetooth SIG Heart Rate profile (service `0x180D`, characteristic `0x2A37`)**. BPM values arrive as real GATT notifications and plot on a live sparkline. Canceling or failing to pair shows no reading; a separate **Start labeled demo** button is required to generate `SIMULATED` sample data. `LIVE BLE` and `SIMULATED` remain distinct on every card and export. |
-| 🩺 **Measurement flows** | The web SpO₂/BP cards generate **simulated examples only**, not sensor readings. This web app has no connected SpO₂/BP sensor path; the native iPhone app can display readings only when Apple Health supplies them. No cuff or optical sensor is emulated as clinical hardware. |
-| ☕ **Video coffee circles** | Real [meet.jit.si](https://meet.jit.si) Jitsi rooms load in-app. They have no CareSphere host, schedule, attendance tracking, or moderation; anyone with a link may join. Verify participants before sharing private health information. |
-| 🔔 **Medication reminders** | After you review and confirm your entered schedule, the open page checks every 15 s and can raise an in-app toast, browser notification, and spoken prompt. Browser delivery varies by platform; this web app cannot reliably schedule while the browser is closed. |
-| 🎧 **Sensory soundscapes** | Rain, ocean, forest, and hearth are **synthesized live with the Web Audio API** — filtered noise beds, LFO swells, procedurally scheduled birdsong and crackle transients. No audio files, works offline. |
-| 🚨 **Emergency SOS** | Real **`tel:911`** dial link, optional GPS coordinates, and a user-confirmed share-sheet/clipboard message. No automatic Care Circle push backend is configured; the app never claims a message was sent or acknowledged. |
-| 📊 **Vitals export** | One-click, CSV-escaped export preserves real BLE readings separately from clearly labeled simulated SpO₂/BP examples. It is a data export—not a clinical record or diagnosis. |
-| 📲 **Installable PWA** | Web app manifest + icons + service worker (production builds). Seniors and families can install it to a home screen; routines still open offline. |
-| ♿ **Accessibility** | Text-size scaling (A / A+ / A++), high-contrast mode, `prefers-reduced-motion` support, ARIA roles/labels throughout, one-tap daily mood check-in. |
-| 🔒 **Privacy** | Web data is stored in browser localStorage (not encrypted by CareSphere), with explicit JSON export and erase controls. The native iOS development app stores care data in encrypted local storage with iOS file protection and provides explicit export/erase controls; physical-device verification remains pending. The optional 1.5B GGUF assistant runs on-device; Kiwix search is sent only to a configured local/private host. |
-| 🧠 **Native Health Guide (iOS)** | Optional Qwen2.5 1.5B Instruct GGUF via `llama.cpp`, local MedlinePlus references, and a private Kiwix/ZIM connector. Qwen weights are a separate opt-in download; questions are not sent to a cloud AI. A narrow local safety gate checks submitted questions before search/model inference. |
-| 🩺 **Offline medical references (iOS)** | The app can download MedlinePlus XML from the U.S. National Library of Medicine after an explicit tap; it is not bundled and is not individualized medical advice. |
-| 🔐 **Biometric privacy** | Native Touch ID/Face ID replaces the root view with an opaque lock screen; private care content is not drawn behind the prompt. |
-| 🔊 **Native spoken prompts (iOS)** | Apple voices remain the default; an optional int8 Kokoro English pack enables local Sherpa-ONNX synthesis. Audio is not uploaded. Scheduled notifications use system sounds when the app is closed. |
+Android is a first native release, **not full iOS feature parity**. Hosted debug signing is for testing, not production security. Physical Bluetooth, accessibility with intended users, and actual Apple Intelligence responses still require device testing.
 
-## Feature tour
+## Web app
 
-- **Overview** — greeting, day-at-a-glance metrics, daily mood check-in (saved + 14-day history dots), user-customizable routines with daily resets, and today's medication self-check-ins.
-- **Therapy & Sensory** — optional, non-clinical emoji and pattern games, Web Audio soundscapes, and paced breathing with clear stop/comfort guidance.
-- **Coffee Circles** — three real Jitsi room links plus an ad-hoc room; join embedded or in a new tab. No CareSphere host, schedule, attendance tracking, or moderation is configured; anyone with a link may join.
-- **Care Circle** — browser/device-local care notes and summaries of saved check-ins, plus a user-selected visit-prep text brief. It previews exactly which notes, self-reports, medication reminders and source-labeled vitals will be included; simulated readings require an explicit choice and remain labeled. The illustrative roster is sample content only; no account sync, clinician portal, family notifications, or shared backend is configured.
-- **Vitals & Telehealth** — real BLE pairing, a separate explicitly labeled demo stream, source chips, live sparkline, generated sample values, RFC-escaped CSV export, and one-tap Jitsi visit.
-- **Native Health Guide (iOS)** — source-linked offline MedlinePlus search, optional Qwen2.5 1.5B on-device summaries, and a local Kiwix connection for an existing Wikipedia/ZIM file. A rules-first safety gate handles a narrow set of self-harm and possible-poisoning phrases before search/model inference; it is not complete or validated crisis detection. The AI is educational only—not diagnosis, triage, a drug-interaction checker, or dosing advice.
-- **Native support check-in (iOS)** — opt-in foreground-and-unlocked live Bluetooth HR prompt, self-reported stress entry, paced breathing, an after-check, and optional caregiver text/Jitsi actions. No caregiver message is sent automatically, and the app does not measure breathing.
-
-## Download & install
-
-See the [iOS build and setup guide](DOWNLOAD.md). There is no public App Store, TestFlight, or signed `.ipa` iOS build. Earlier Mac release files are archival; the current native target and CI pipeline are iOS only.
-
-## Run the web app
+- Real Web Bluetooth notifications only; no generated pulse, oxygen or blood pressure. Missing/invalid readings stay blank, and live readings expire after 15 seconds without an update.
+- User-created routines, notes, mood self-reports and medication reminders. No illustrative care roster.
+- Explicit CSV/visit-brief sharing. Old non-BLE entries are excluded from health exports.
+- Optional Web Audio soundscapes and untimed activities. Synthesized sound is audio output, not a health measurement.
+- Video embeds Jitsi or opens its real website after a user action. No host, schedule, attendance tracking, moderation or family-sync server is provided.
+- Browser care data uses AES-GCM with a non-extractable key in IndexedDB. Shared exports are no longer protected. The app cannot guard against a compromised device or same-origin script.
+- Medication browser reminders need the page open and a user-confirmed schedule; they are not prescription verification. iOS native reminders use system notifications.
 
 ```bash
-npm install
+npm ci
 npm run dev      # http://localhost:3000
-npm test         # storage, daily check-in, CSV, and visit-brief tests
-npm run build    # production bundle + PWA in dist/
+npm test
+npm run build
 ```
 
-Requires Node.js **20.19+** or **22.12+** (Vite 8). For real BLE pairing use Chrome or Edge on desktop/Android — that's a browser/platform capability, not an app limitation.
+Node.js 20.19+ or 22.12+ required. Real Web Bluetooth requires a supported browser such as Chrome/Edge on desktop or Android; Safari/iOS uses the native app instead.
 
-## Stack
+### UI usability checks
 
-Web: React 18 · Vite 8 · Tailwind CSS 3 · Web Bluetooth / Web Audio / WebRTC / Notifications / Speech / Geolocation.
+```bash
+npx playwright install chromium
+npm run test:ui
+```
 
-Native iOS (development source): SwiftUI · read-only HealthKit vitals/workouts · CoreBluetooth · `llama.cpp` GGUF · Sherpa-ONNX/Kokoro offline TTS · ZIPFoundation · FoundationXML · UserNotifications · AVFoundation · LocalAuthentication · Kiwix local-search connector.
+The browser suite checks task shortcuts, mood check-ins, medication form validation,
+settings focus retention, dialog keyboard behavior, no generated-vitals controls,
+and navigation without horizontal overflow at 320–1440px with default and largest
+text. Light, dark, and high-contrast settings remain available. Tests do not call
+video services, pair hardware or request notification permissions.
+Use an existing Chromium with `CHROMIUM_EXECUTABLE_PATH=/path/to/chromium`.
 
-## Current development scope
+## Validation and boundaries
 
-Earlier CareSphere Mac releases are archived and no longer have a native target. Current native development is iOS only; the web PWA remains separate. See the [roadmap](ROADMAP.md) for implementation status and acceptance criteria. Development pushes are CI-only.
+Native CI builds/tests iOS and Android separately. Android also validates its APK signature and exercises basic navigation/persistence in an emulator. iOS compiles standard device, optional HealthKit and Simulator targets, and launches the Simulator. Compile and emulator checks do not certify signing on your Mac, real hardware sensors, VoiceOver/TalkBack usability, or clinical effectiveness.
+
+Activities are research-informed accessibility/wellbeing features, **not clinically validated dementia or autism treatments**, group cognitive stimulation therapy, or diagnostic tests. AI can be wrong. CareSphere does not diagnose, triage, prescribe or monitor emergencies. Sharing always requires explicit action; no clinical or caregiver account is implied.
+
+Old Mac release files are archival; there is no current native macOS target. No slide deck is part of this delivery.

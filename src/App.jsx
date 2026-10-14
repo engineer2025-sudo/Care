@@ -4,11 +4,12 @@ import {
   Volume2, CheckCircle, Bluetooth, BluetoothConnected, Phone, PhoneCall,
   AlertTriangle, Wind, Gamepad2, Flame, TreePine, CloudRain, Waves, Send,
   Bell, Pill, Calendar, Lock, Stethoscope, Settings, Download,
-  BellRing, Smile, Frown, Meh, Laugh, MapPin, User, FileText
+  BellRing, Smile, Frown, Meh, Laugh, MapPin, User, FileText, ArrowRight, ChevronRight, Sun, Check, Plus
 } from 'lucide-react'
+import { useDialog } from './hooks/useDialog'
 import { celebrate as celebrateConfetti } from './lib/celebrate'
 import { soundEngine } from './lib/audio'
-import { connectHeartRateMonitor, startSimulatedHeartRateMonitor } from './lib/bluetooth'
+import { connectHeartRateMonitor } from './lib/bluetooth'
 import { buildVisitBrief } from './lib/visitBrief'
 import { encodeCsv } from './lib/csv'
 import { STORAGE_KEY, RESET_LOCAL_DATA_EVENT, normalizePersistedValue, localDayKey, isRoutineDoneToday, isMedicationTakenToday } from './lib/careStorage'
@@ -125,18 +126,6 @@ function useLocalDayKey() {
   return day
 }
 
-function useEscapeToClose(enabled, onClose) {
-  const closeRef = useRef(onClose)
-  closeRef.current = onClose
-  useEffect(() => {
-    if (!enabled) return
-    const handleKeyDown = event => {
-      if (event.key === 'Escape') closeRef.current?.()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [enabled])
-}
 
 function speak(text) {
   if (!('speechSynthesis' in window)) return
@@ -207,12 +196,12 @@ function JitsiRoom({ room, displayName = 'CareSphere Member' }) {
 }
 
 function VideoModal({ session, displayName, onClose }) {
-  useEscapeToClose(Boolean(session), onClose)
+  const dialogRef = useDialog(Boolean(session), onClose)
   if (!session) return null
   const url = `https://meet.jit.si/${session.room}`
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-6">
-      <div role="dialog" aria-modal="true" aria-label={session.title} className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-6xl h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={session.title} className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-6xl h-[88vh] flex flex-col shadow-2xl overflow-hidden">
         <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
@@ -257,7 +246,7 @@ function SosModal({ open, onClose }) {
   const [shareStatus, setShareStatus] = useState(null)
   const [loc, setLoc] = useState(null)
   const [locState, setLocState] = useState('idle') // idle | loading | ok | error
-  useEscapeToClose(open, onClose)
+  const dialogRef = useDialog(open, onClose)
 
   if (!open) return null
 
@@ -276,7 +265,7 @@ function SosModal({ open, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-      <div role="dialog" aria-modal="true" aria-labelledby="sos-title" className="bg-slate-900 border border-red-500/40 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 text-center shadow-2xl">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="sos-title" className="bg-slate-900 border border-red-500/40 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 text-center shadow-2xl">
         <div className="w-16 h-16 bg-red-500/15 border border-red-500/40 rounded-2xl flex items-center justify-center mx-auto text-3xl">🚨</div>
         <div className="space-y-1.5">
           <h3 id="sos-title" className="text-xl font-black text-white">Emergency SOS</h3>
@@ -417,7 +406,7 @@ function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirm
 
   const add = () => {
     const trimmed = name.trim()
-    if (!trimmed) return
+    if (!trimmed || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return
     const [hours, minutes] = time.split(':').map(Number)
     const period = hours >= 12 ? 'PM' : 'AM'
     const timeLabel = `${hours % 12 || 12}:${String(minutes).padStart(2, '0')} ${period}`
@@ -430,7 +419,7 @@ function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirm
   return (
     <div className="border-t border-slate-800 pt-4 mt-3 space-y-3">
       <div>
-        <h4 className="text-sm font-bold text-white">Medication schedule · local only</h4>
+        <h4 id="medication-settings" tabIndex={-1} className="text-sm font-bold text-white">Medication schedule · local only</h4>
         <p className="text-[11px] text-slate-400 mt-1">Add only medicines and times confirmed by your care team or label. CareSphere does not prescribe, verify a dose, or check interactions.</p>
       </div>
       {meds.length === 0 ? (
@@ -456,17 +445,43 @@ function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirm
           </p>
         </div>
       )}
-      <div className="grid grid-cols-[1fr_auto_auto] gap-2">
-        <input value={name} onChange={event => setName(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') add() }} placeholder="Medication name" aria-label="New medication name" className="min-w-0 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500" />
-        <input type="time" value={time} onChange={event => setTime(event.target.value)} aria-label="Reminder time" className="bg-slate-800 border border-slate-700 rounded-xl px-2 py-2 text-xs text-white" />
-        <button onClick={add} disabled={!name.trim()} className="bg-emerald-700 disabled:opacity-40 text-xs font-bold text-white px-3 py-2 rounded-xl">Add</button>
-      </div>
-      {message && <p className="text-[11px] text-emerald-300">{message}</p>}
+      <form onSubmit={event => { event.preventDefault(); add() }} className="medication-form">
+        <label className="field-label">Medication name
+          <input required value={name} onChange={event => setName(event.target.value)} placeholder="As written on your label" className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500" />
+        </label>
+        <label className="field-label">Reminder time
+          <input required type="time" value={time} onChange={event => setTime(event.target.value)} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+        </label>
+        <button type="submit" disabled={!name.trim() || !time} className="bg-emerald-700 disabled:opacity-40 text-sm font-bold text-white px-4 py-2 rounded-xl">Add medication</button>
+      </form>
+      {message && <p role="status" className="text-sm text-emerald-300">{message}</p>}
     </div>
   )
 }
 
-function SettingsModal({ open, onClose, settings, update, notifyState, enableNotifications, meds, setMeds, medsConfirmed, setMedsConfirmed, onExportData, onClearLocalData, localDataBytes, storageSecurity }) {
+const SettingsRow = ({ label, hint, children }) => (
+    <div className="settings-row flex items-center justify-between gap-4 py-3.5 border-b border-slate-800 last:border-0">
+      <div className="min-w-0">
+        <div className="text-sm font-bold text-white">{label}</div>
+        {hint && <div className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{hint}</div>}
+      </div>
+      <div className="shrink-0">{children}</div>
+    </div>
+  )
+const SettingsToggle = ({ on, onClick, label }) => (
+    <button
+      onClick={onClick}
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      className={`w-12 h-7 rounded-full transition relative ${on ? 'bg-emerald-500' : 'bg-slate-700'}`}
+    >
+      <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${on ? 'left-6' : 'left-1'}`} />
+    </button>
+  )
+
+
+function SettingsModal({ open, initialSection, onClose, settings, update, notifyState, enableNotifications, meds, setMeds, medsConfirmed, setMedsConfirmed, onExportData, onClearLocalData, localDataBytes, storageSecurity }) {
   const [confirmClear, setConfirmClear] = useState(false)
   const [clearing, setClearing] = useState(false)
   const [privacyMessage, setPrivacyMessage] = useState('')
@@ -476,7 +491,14 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
       setPrivacyMessage('')
     }
   }, [open])
-  useEscapeToClose(open, onClose)
+  const dialogRef = useDialog(open, onClose)
+  useEffect(() => {
+    if (open && initialSection === 'medications') {
+      const heading = document.getElementById('medication-settings')
+      heading?.focus({ preventScroll: true })
+      heading?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    }
+  }, [open, initialSection])
   if (!open) return null
 
   const formatBytes = (bytes) => bytes < 1024 ? `${bytes} bytes` : `${(bytes / 1024).toFixed(1)} KB`
@@ -495,37 +517,17 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
       ? 'Saved CareSphere data and its local encryption key were removed from this browser.'
       : 'CareSphere could not fully remove its saved data or encryption key. Check this browser’s site storage before continuing.')
   }
-  const Row = ({ label, hint, children }) => (
-    <div className="flex items-center justify-between gap-4 py-3.5 border-b border-slate-800 last:border-0">
-      <div className="min-w-0">
-        <div className="text-sm font-bold text-white">{label}</div>
-        {hint && <div className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{hint}</div>}
-      </div>
-      <div className="shrink-0">{children}</div>
-    </div>
-  )
-  const Toggle = ({ on, onClick, label }) => (
-    <button
-      onClick={onClick}
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      className={`w-12 h-7 rounded-full transition relative ${on ? 'bg-emerald-500' : 'bg-slate-700'}`}
-    >
-      <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${on ? 'left-6' : 'left-1'}`} />
-    </button>
-  )
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4" onClick={onClose}>
       <div
-        role="dialog"
+        ref={dialogRef} role="dialog"
         aria-modal="true"
         aria-labelledby="settings-title"
-        className="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-1 shadow-2xl max-h-[85vh] overflow-y-auto"
+        className="settings-dialog bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-1 shadow-2xl max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between pb-2">
+        <div className="settings-heading flex items-center justify-between gap-3 pb-2">
           <h3 id="settings-title" className="text-lg font-black text-white flex items-center gap-2">
             <Settings className="w-5 h-5 text-emerald-400" /> Settings & Accessibility
           </h3>
@@ -534,7 +536,7 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
           </button>
         </div>
 
-        <Row label="Display name" hint="Shown when you join video coffee circles.">
+        <SettingsRow label="Display name" hint="Shown when you join video coffee circles.">
           <input
             type="text"
             value={settings.name}
@@ -542,9 +544,9 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
             aria-label="Display name"
             className="w-36 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
           />
-        </Row>
+        </SettingsRow>
 
-        <Row label="Text size" hint="Larger text across the whole app — good for low vision.">
+        <SettingsRow label="Text size" hint="Larger text across the whole app — good for low vision.">
           <div className="flex bg-slate-800 border border-slate-700 rounded-xl p-1 gap-1">
             {[
               { id: 'md', label: 'A' },
@@ -563,9 +565,9 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
               </button>
             ))}
           </div>
-        </Row>
+        </SettingsRow>
 
-        <Row label="Color appearance" hint="Choose the device appearance, calm charcoal, or warm light. Contrast stays readable in each theme.">
+        <SettingsRow label="Color appearance" hint="Choose the device appearance, calm charcoal, or warm light. Contrast stays readable in each theme.">
           <select
             value={settings.theme || 'system'}
             onChange={event => update({ theme: event.target.value })}
@@ -576,21 +578,21 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
             <option value="dark">Calm charcoal</option>
             <option value="light">Warm light</option>
           </select>
-        </Row>
+        </SettingsRow>
 
-        <Row label="High contrast" hint="Brightens grey text and borders; keep this on if it makes text easier to see.">
-          <Toggle on={settings.highContrast} onClick={() => update({ highContrast: !settings.highContrast })} label="High contrast" />
-        </Row>
+        <SettingsRow label="High contrast" hint="Brightens grey text and borders; keep this on if it makes text easier to see.">
+          <SettingsToggle on={settings.highContrast} onClick={() => update({ highContrast: !settings.highContrast })} label="High contrast" />
+        </SettingsRow>
 
-        <Row label="Reduce visual movement" hint="Turns off confetti, pulsing decoration, and hover scaling. Activities remain untimed; you can change this any time.">
-          <Toggle on={settings.lowSensory} onClick={() => update({ lowSensory: !settings.lowSensory })} label="Reduce visual movement" />
-        </Row>
+        <SettingsRow label="Reduce visual movement" hint="Turns off confetti, pulsing decoration, and hover scaling. Activities remain untimed; you can change this any time.">
+          <SettingsToggle on={settings.lowSensory} onClick={() => update({ lowSensory: !settings.lowSensory })} label="Reduce visual movement" />
+        </SettingsRow>
 
-        <Row label="Voice reminders" hint="Speaks medication and routine prompts aloud (browser speech synthesis).">
-          <Toggle on={settings.voice} onClick={() => update({ voice: !settings.voice })} label="Voice reminders" />
-        </Row>
+        <SettingsRow label="Voice reminders" hint="Speaks medication and routine prompts aloud (browser speech synthesis).">
+          <SettingsToggle on={settings.voice} onClick={() => update({ voice: !settings.voice })} label="Voice reminders" />
+        </SettingsRow>
 
-        <Row label="Preview reminder" hint="Hear a generic voice preview; a saved schedule preview never records a dose or enables reminders.">
+        <SettingsRow label="Preview reminder" hint="Hear a generic voice preview; a saved schedule preview never records a dose or enables reminders.">
           <button
             onClick={() => {
               speak('This is a CareSphere reminder preview. Please follow the medication instructions you reviewed with your care team.')
@@ -600,9 +602,9 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
           >
             ▶ Test
           </button>
-        </Row>
+        </SettingsRow>
 
-        <Row
+        <SettingsRow
           label="Browser notifications"
           hint={
             notifyState === 'granted'
@@ -621,7 +623,7 @@ function SettingsModal({ open, onClose, settings, update, notifyState, enableNot
               Enable
             </button>
           )}
-        </Row>
+        </SettingsRow>
 
         <MedicationScheduleEditor meds={meds} setMeds={setMeds} medsConfirmed={medsConfirmed} setMedsConfirmed={setMedsConfirmed} />
 
@@ -691,7 +693,6 @@ function Sparkline({ data, stroke = '#34d399' }) {
 
 const STATUS_STYLES = {
   live: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
-  simulated: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
   connecting: 'bg-sky-500/15 text-sky-300 border-sky-500/40',
   unsupported: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
   disconnected: 'bg-slate-700/40 text-slate-300 border-slate-600',
@@ -1158,11 +1159,11 @@ function BreathingCoach() {
 // Mood check-in — daily emotional pulse, visualised over two weeks.
 // ─────────────────────────────────────────────────────────────────────────────
 const MOODS = [
-  { score: 1, emoji: '😞', label: 'Struggling', color: 'bg-rose-500' },
-  { score: 2, emoji: '😕', label: 'Low', color: 'bg-orange-400' },
-  { score: 3, emoji: '😐', label: 'Okay', color: 'bg-amber-300' },
-  { score: 4, emoji: '🙂', label: 'Good', color: 'bg-lime-400' },
-  { score: 5, emoji: '😄', label: 'Great', color: 'bg-emerald-400' },
+  { score: 1, icon: Frown, label: 'Very low', color: 'bg-rose-500' },
+  { score: 2, icon: Frown, label: 'Low', color: 'bg-orange-400' },
+  { score: 3, icon: Meh, label: 'Okay', color: 'bg-amber-300' },
+  { score: 4, icon: Smile, label: 'Good', color: 'bg-lime-400' },
+  { score: 5, icon: Laugh, label: 'Great', color: 'bg-emerald-400' },
 ]
 
 function MoodCheckIn({ moods, setMoods }) {
@@ -1177,15 +1178,15 @@ function MoodCheckIn({ moods, setMoods }) {
     celebrateConfetti({ particleCount: 16 })
   }
 
-  const last14 = [...moods].sort((a, b) => (a.date < b.date ? -1 : 1)).slice(-14)
+  const last14 = [...moods].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-14)
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-base text-white flex items-center gap-2">
-          <Smile className="w-4 h-4 text-amber-300" /> Daily mood check-in
+          <Smile className="w-4 h-4 text-amber-300" /> How are you feeling today?
         </h3>
-        <span className="text-xs text-slate-500">one tap, saved privately</span>
+        <span className="mood-privacy text-xs text-slate-500"><Lock className="w-3.5 h-3.5" /> Only on this device</span>
       </div>
       <div className="flex justify-between gap-2">
         {MOODS.map(m => (
@@ -1194,18 +1195,19 @@ function MoodCheckIn({ moods, setMoods }) {
             onClick={() => setToday(m.score)}
             aria-label={`Feeling ${m.label}`}
             aria-pressed={todayMood?.score === m.score}
-            className={`flex-1 py-3 rounded-2xl border text-2xl transition ${
+            className={`mood-option flex-1 py-3 rounded-2xl border text-2xl transition ${
               todayMood?.score === m.score
-                ? 'bg-amber-500/15 border-amber-400/60 ring-2 ring-amber-400/50 scale-105'
+                ? 'bg-amber-500/15 border-amber-400/60 ring-2 ring-amber-400/50'
                 : 'bg-slate-800/60 border-slate-700 hover:bg-slate-800'
             }`}
           >
-            {m.emoji}
+            <m.icon className="w-7 h-7 text-slate-300" strokeWidth={1.5} aria-hidden="true" />
+            <span className="mood-label">{m.label}</span>
           </button>
         ))}
       </div>
-      <div className="flex items-center justify-between text-[11px] text-slate-500">
-        <span>{todayMood ? `Today: feeling ${MOODS[todayMood.score - 1].label.toLowerCase()}` : 'How are you feeling right now?'}</span>
+      <div className="flex flex-wrap gap-3 items-center justify-between text-xs text-slate-500">
+        <span role="status">{todayMood ? `Saved for today: ${MOODS[todayMood.score - 1].label.toLowerCase()}. You can change this anytime.` : 'How are you feeling right now?'}</span>
         {last14.length > 0 && (
           <span className="flex items-center gap-1" title="Last check-ins">
             {last14.map(m => (
@@ -1222,13 +1224,19 @@ function MoodCheckIn({ moods, setMoods }) {
 // v2.3 groundwork — user-selected, on-device visit-prep brief. This is an
 // editable handoff aid, not a medical record, diagnosis, or clinical summary.
 // ─────────────────────────────────────────────────────────────────────────────
-function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, notes, moods, hrRecords, spo2, bp }) {
+const VisitBriefChoice = ({ checked, onChange, title, detail }) => (
+    <label className="flex items-start gap-3 rounded-xl border border-slate-700 bg-slate-800/70 p-3 cursor-pointer hover:border-emerald-700/70">
+      <input type="checkbox" checked={checked} onChange={event => onChange(event.target.checked)} className="mt-0.5 accent-emerald-500" />
+      <span className="min-w-0"><span className="block text-xs font-bold text-slate-100">{title}</span><span className="mt-0.5 block text-[10px] leading-relaxed text-slate-400">{detail}</span></span>
+    </label>
+  )
+
+function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, notes, moods, hrRecords }) {
   const [includeName, setIncludeName] = useState(false)
   const [includeMeds, setIncludeMeds] = useState(false)
   const [includeMoods, setIncludeMoods] = useState(false)
   const [includeNotes, setIncludeNotes] = useState(false)
   const [includeLiveVitals, setIncludeLiveVitals] = useState(false)
-  const [includeSimulatedVitals, setIncludeSimulatedVitals] = useState(false)
   const [visitQuestions, setVisitQuestions] = useState('')
   const [downloadMessage, setDownloadMessage] = useState('')
 
@@ -1239,11 +1247,10 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
     setIncludeMoods(false)
     setIncludeNotes(false)
     setIncludeLiveVitals(false)
-    setIncludeSimulatedVitals(false)
     setVisitQuestions('')
     setDownloadMessage('')
   }, [open])
-  useEscapeToClose(open, onClose)
+  const dialogRef = useDialog(open, onClose)
 
   if (!open) return null
 
@@ -1254,14 +1261,11 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
     notes,
     moods,
     hrRecords,
-    spo2,
-    bp,
     includeName,
     includeMeds,
     includeMoods,
     includeNotes,
     includeLiveVitals,
-    includeSimulatedVitals,
     visitQuestions,
     moodLabels: Object.fromEntries(MOODS.map(mood => [mood.score, mood.label])),
   })
@@ -1282,16 +1286,11 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
     }
   }
 
-  const Choice = ({ checked, onChange, title, detail }) => (
-    <label className="flex items-start gap-3 rounded-xl border border-slate-700 bg-slate-800/70 p-3 cursor-pointer hover:border-emerald-700/70">
-      <input type="checkbox" checked={checked} onChange={event => onChange(event.target.checked)} className="mt-0.5 accent-emerald-500" />
-      <span className="min-w-0"><span className="block text-xs font-bold text-slate-100">{title}</span><span className="mt-0.5 block text-[10px] leading-relaxed text-slate-400">{detail}</span></span>
-    </label>
-  )
+
 
   return (
     <div className="fixed inset-0 z-[55] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6" onClick={onClose}>
-      <section role="dialog" aria-modal="true" aria-labelledby="visit-brief-title" className="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl max-h-[92vh] overflow-y-auto space-y-5" onClick={event => event.stopPropagation()}>
+      <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="visit-brief-title" className="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl max-h-[92vh] overflow-y-auto space-y-5" onClick={event => event.stopPropagation()}>
         <header className="flex items-start justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-sky-700/50 bg-sky-950/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-sky-200"><FileText className="h-3.5 w-3.5" /> Local preview · no sync</div>
@@ -1302,12 +1301,11 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <Choice checked={includeName} onChange={setIncludeName} title="Display name" detail="Optional. Off by default." />
-          <Choice checked={includeMeds} onChange={setIncludeMeds} title="Medication reminders" detail="User-entered names and times; review/confirmation status is shown." />
-          <Choice checked={includeMoods} onChange={setIncludeMoods} title="Mood check-ins" detail="Self-reports from this browser. They are not a clinical measure." />
-          <Choice checked={includeNotes} onChange={setIncludeNotes} title="Care notes" detail="Private note text may be sensitive; include only after review." />
-          <Choice checked={includeLiveVitals} onChange={setIncludeLiveVitals} title="Live BLE heart-rate samples" detail="Only readings labeled LIVE_BLE from the current browser session." />
-          <Choice checked={includeSimulatedVitals} onChange={setIncludeSimulatedVitals} title="Simulated demonstrations" detail="Optional demo values, explicitly labeled SIMULATED and not measured." />
+          <VisitBriefChoice checked={includeName} onChange={setIncludeName} title="Display name" detail="Optional. Off by default." />
+          <VisitBriefChoice checked={includeMeds} onChange={setIncludeMeds} title="Medication reminders" detail="User-entered names and times; review/confirmation status is shown." />
+          <VisitBriefChoice checked={includeMoods} onChange={setIncludeMoods} title="Mood check-ins" detail="Self-reports from this browser. They are not a clinical measure." />
+          <VisitBriefChoice checked={includeNotes} onChange={setIncludeNotes} title="Care notes" detail="Private note text may be sensitive; include only after review." />
+          <VisitBriefChoice checked={includeLiveVitals} onChange={setIncludeLiveVitals} title="Live BLE heart-rate samples" detail="Only readings labeled LIVE_BLE from the current browser session." />
         </div>
 
         <label className="block space-y-2">
@@ -1346,6 +1344,8 @@ export default function App() {
   const [videoSession, setVideoSession] = useState(null)
   const [sosOpen, setSosOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsSection, setSettingsSection] = useState(null)
+  const openSettings = (section = null) => { setSettingsSection(section); setSettingsOpen(true) }
   const [visitBriefOpen, setVisitBriefOpen] = useState(false)
   const [installTipDismissed, setInstallTipDismissed] = useState(false)
   const showInstallTip = isIOS && !isStandalone && !installTipDismissed
@@ -1353,7 +1353,7 @@ export default function App() {
 
   // Settings (persisted)
   const [settings, setSettings] = usePersisted('settings', {
-    name: 'Alex', textScale: 'md', theme: 'system', highContrast: false, lowSensory: true, voice: false,
+    name: '', textScale: 'md', theme: 'system', highContrast: false, lowSensory: true, voice: false,
   })
   const updateSettings = (patch) => setSettings(s => ({ ...s, ...patch }))
 
@@ -1399,12 +1399,7 @@ export default function App() {
   }, [])
 
   // ── Daily living state (persisted) ──
-  const [routines, setRoutines] = usePersisted('routines', [
-    { id: 1, text: 'Morning hydration 💧', completedOn: null },
-    { id: 2, text: '10-minute brain game 🧩', completedOn: null },
-    { id: 3, text: 'Join a coffee circle ☕', completedOn: null },
-    { id: 4, text: 'Evening stretch & wind-down 🌿', completedOn: null },
-  ])
+  const [routines, setRoutines] = usePersisted('routines', [])
   // Never prefill medications. Older saved schedules remain visible for review,
   // but reminders stay paused until the user explicitly confirms every entry.
   const [meds, setMeds] = usePersisted('meds', [])
@@ -1524,7 +1519,7 @@ export default function App() {
     return () => clearInterval(iv)
   }, [meds, medsConfirmed, settings.voice, notifyState]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Demo hook for the "Preview reminder" button in Settings.
+  // User-requested preview for the configured reminder in Settings.
   useEffect(() => {
     window.__careSphereTestReminder = () => {
       if (meds.length === 0) {
@@ -1550,23 +1545,19 @@ export default function App() {
   const [hr, setHr] = useState(null)
   const [hrHistory, setHrHistory] = useState([])
   const [hrRecords, setHrRecords] = useState([])
-  const [hrStatus, setHrStatus] = useState({ mode: 'disconnected', message: 'No sensor connected. Pair a monitor or choose a labeled demo.' })
-  const hrModeRef = useRef('disconnected')
+  const [hrStatus, setHrStatus] = useState({ mode: 'disconnected', message: 'No sensor connected. Pair a real monitor when you are ready.' })
   const hrStopRef = useRef(null)
   const hrConnectionGenerationRef = useRef(0)
-  const spotCheckTimersRef = useRef([])
   const [connectingHr, setConnectingHr] = useState(false)
 
   const receiveHeartRate = (bpm) => {
     const timestamp = new Date().toISOString()
-    const source = hrModeRef.current === 'live' ? 'LIVE_BLE' : 'SIMULATED'
     setHr(bpm)
     setHrHistory(history => [...history.slice(-35), bpm])
     setHrRecords(records => [...records.slice(-499), { timestamp, metric: 'heart_rate_bpm', value: bpm, source }])
   }
   const receiveHeartRateStatus = (status, generation) => {
     if (generation !== hrConnectionGenerationRef.current) return
-    hrModeRef.current = status.mode
     setHrStatus(status)
     if (status.mode === 'disconnected' || status.mode === 'unsupported') {
       setHr(null)
@@ -1580,7 +1571,7 @@ export default function App() {
     const generation = ++hrConnectionGenerationRef.current
     setConnectingHr(true)
     const stop = await connectHeartRateMonitor(
-      receiveHeartRate,
+      bpm => { if (generation === hrConnectionGenerationRef.current) receiveHeartRate(bpm) },
       status => receiveHeartRateStatus(status, generation),
     )
     if (generation !== hrConnectionGenerationRef.current) {
@@ -1588,15 +1579,6 @@ export default function App() {
       return
     }
     hrStopRef.current = stop
-    setConnectingHr(false)
-  }
-  const startHeartRateDemo = () => {
-    if (hrStopRef.current || connectingHr) return
-    const generation = ++hrConnectionGenerationRef.current
-    hrStopRef.current = startSimulatedHeartRateMonitor(
-      receiveHeartRate,
-      status => receiveHeartRateStatus(status, generation),
-    )
     setConnectingHr(false)
   }
   const disconnectHr = () => {
@@ -1607,38 +1589,17 @@ export default function App() {
     setHr(null)
     setHrHistory([])
     setHrRecords([])
-    hrModeRef.current = 'disconnected'
     setHrStatus({ mode: 'disconnected', message: 'Disconnected. No current heart-rate reading is displayed.' })
   }
   useEffect(() => () => {
     hrStopRef.current?.()
-    spotCheckTimersRef.current.forEach(timer => window.clearTimeout(timer))
   }, [])
 
-  const [spo2, setSpo2] = useState(null)
-  const [spo2Phase, setSpo2Phase] = useState('idle')
-  const scheduleSpotCheck = (callback, delay) => {
-    const timer = window.setTimeout(() => {
-      spotCheckTimersRef.current = spotCheckTimersRef.current.filter(item => item !== timer)
-      callback()
-    }, delay)
-    spotCheckTimersRef.current.push(timer)
-    return timer
-  }
-  const clearSpotCheckTimers = () => {
-    spotCheckTimersRef.current.forEach(timer => window.clearTimeout(timer))
-    spotCheckTimersRef.current = []
-  }
   const clearTransientCareData = ({ closeOverlays = false } = {}) => {
     setNoteDraft('')
     setRoutineDraft('')
     setRoutineEditorOpen(false)
     disconnectHr()
-    clearSpotCheckTimers()
-    setSpo2(null)
-    setSpo2Phase('idle')
-    setBp(null)
-    setBpPhase('idle')
     setToasts([])
     setVisitBriefOpen(false)
     setVideoSession(null)
@@ -1653,40 +1614,14 @@ export default function App() {
     window.addEventListener(RESET_LOCAL_DATA_EVENT, handleLocalDataReset)
     return () => window.removeEventListener(RESET_LOCAL_DATA_EVENT, handleLocalDataReset)
   }, [])
-  const runSpo2 = () => {
-    if (spo2Phase === 'measuring') return
-    setSpo2Phase('measuring')
-    scheduleSpotCheck(() => {
-      setSpo2(96 + Math.floor(Math.random() * 4))
-      setSpo2Phase('idle')
-      celebrateConfetti({ particleCount: 12 })
-    }, 4000)
-  }
-
-  const [bp, setBp] = useState(null)
-  const [bpPhase, setBpPhase] = useState('idle')
-  const runBp = () => {
-    if (bpPhase !== 'idle') return
-    setBpPhase('inflating')
-    scheduleSpotCheck(() => setBpPhase('measuring'), 2000)
-    scheduleSpotCheck(() => {
-      const sys = 112 + Math.floor(Math.random() * 22)
-      const dia = 70 + Math.floor(Math.random() * 12)
-      setBp(`${sys} / ${dia}`)
-      setBpPhase('idle')
-    }, 5200)
-  }
-
   const hasLiveHeartRate = hrStatus.mode === 'live' && hr !== null
   const anyFlag = hasLiveHeartRate && (hr < 50 || hr > 110)
 
   const exportVitals = () => {
     const rows = [['timestamp', 'metric', 'value', 'source']]
     hrRecords.forEach(record => rows.push([record.timestamp, record.metric, record.value, record.source]))
-    if (spo2 !== null) rows.push([new Date().toISOString(), 'spo2_pct', spo2, 'SIMULATED_SPOT_CHECK'])
-    if (bp !== null) rows.push([new Date().toISOString(), 'blood_pressure_mmHg', bp.replace(' / ', '/'), 'SIMULATED_SEQUENCE'])
     if (rows.length === 1) {
-      pushToast({ kind: 'info', title: 'Nothing to export yet', body: 'Pair a real sensor or generate a clearly labeled demo value first.' })
+      pushToast({ kind: 'info', title: 'Nothing to export yet', body: 'Pair a real heart-rate monitor first.' })
       return
     }
     const csv = encodeCsv(rows)
@@ -1698,7 +1633,7 @@ export default function App() {
     a.click()
     a.remove()
     window.setTimeout(() => URL.revokeObjectURL(url), 10000)
-    pushToast({ kind: 'success', title: 'Exported', body: 'CSV downloaded with source labels. Simulated rows are demo values, not clinical measurements.' })
+    pushToast({ kind: 'success', title: 'Exported', body: 'CSV downloaded with Bluetooth source labels. Readings are not a diagnosis.' })
   }
 
   const exportLocalData = () => {
@@ -1721,8 +1656,6 @@ export default function App() {
         },
         sessionVitals: {
           heartRate: hrRecords,
-          oxygenSaturation: spo2 === null ? null : { timestamp: new Date().toISOString(), value: spo2, source: 'SIMULATED_SPOT_CHECK' },
-          bloodPressure: bp === null ? null : { timestamp: new Date().toISOString(), value: bp, source: 'SIMULATED_SEQUENCE' },
         },
       }
       const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' })
@@ -1790,14 +1723,29 @@ export default function App() {
     : null
 
   const tabs = [
-    { id: 'home', label: 'Overview', icon: Sparkles },
-    { id: 'games', label: 'Activities', icon: Gamepad2 },
-    { id: 'buddies', label: 'Coffee Circles', icon: Coffee },
-    { id: 'care', label: 'Care Circle', icon: Shield },
-    { id: 'telehealth', label: 'Vitals & Telehealth', icon: Activity },
+    { id: 'home', label: 'Overview', shortLabel: 'Today', icon: Sun },
+    { id: 'games', label: 'Activities', shortLabel: 'Activities', icon: Gamepad2 },
+    { id: 'buddies', label: 'Coffee Circles', shortLabel: 'Connect', icon: Coffee },
+    { id: 'care', label: 'Care Circle', shortLabel: 'Care', icon: Shield },
+    { id: 'telehealth', label: 'Vitals & Telehealth', shortLabel: 'Vitals', icon: Activity },
   ]
 
   useEffect(() => { if (activeTab !== 'games') soundEngine.stop() }, [activeTab])
+
+  const mainRef = useRef(null)
+  const previousTab = useRef(activeTab)
+  useEffect(() => {
+    if (previousTab.current === activeTab) return
+    previousTab.current = activeTab
+    window.scrollTo({ top: 0, behavior: 'instant' })
+    mainRef.current?.focus({ preventScroll: true })
+  }, [activeTab])
+
+  const goToSection = id => {
+    const section = document.getElementById(id)
+    section?.scrollIntoView({ behavior: 'instant', block: 'start' })
+    section?.focus({ preventScroll: true })
+  }
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
@@ -1805,20 +1753,22 @@ export default function App() {
   return (
     <div className="app-shell bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950">
 
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+
       {/* Header */}
       <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 pb-4 safe-x ios-header">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <button type="button" aria-label="Go to Overview" className="flex items-center space-x-3 shrink-0 text-left" onClick={() => setActiveTab('home')}>
-            <div className="w-10 h-10 rounded-2xl bg-emerald-700 flex items-center justify-center text-white text-xl">💚</div>
-            <div className="hidden sm:block">
+            <div className="brand-mark"><Heart className="w-6 h-6" aria-hidden="true" /></div>
+            <div className="brand-copy">
               <div className="flex items-center space-x-2">
                 <span className="font-extrabold text-lg tracking-tight text-emerald-300">CareSphere</span>
               </div>
-              <p className="text-[11px] text-slate-400">Senior care · autism support</p>
+              <p className="text-[11px] text-slate-400">A little support, every day</p>
             </div>
           </button>
 
-          <nav className="hidden md:flex items-center space-x-1 bg-slate-800/80 p-1.5 rounded-2xl border border-slate-700/60" aria-label="Main navigation">
+          <nav className="desktop-nav hidden xl:flex items-center space-x-1" aria-label="Main navigation">
             {tabs.map((tab) => {
               const Icon = tab.icon
               return (
@@ -1829,7 +1779,7 @@ export default function App() {
                   aria-current={activeTab === tab.id ? 'page' : undefined}
                   aria-pressed={activeTab === tab.id}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    activeTab === tab.id ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                    activeTab === tab.id ? 'bg-emerald-600 text-white shadow-md' : 'nav-inactive'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -1841,11 +1791,12 @@ export default function App() {
 
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => setSettingsOpen(true)}
+              onClick={() => openSettings()}
               aria-label="Settings and accessibility"
-              className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-2xl border border-slate-700 transition"
+              title="Settings and accessibility"
+              className="header-settings p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-2xl border border-slate-700 transition"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-4 h-4" /><span className="hidden sm:inline">Settings</span>
             </button>
             <button
               onClick={() => setSosOpen(true)}
@@ -1855,8 +1806,9 @@ export default function App() {
             </button>
           </div>
         </div>
+      </header>
 
-        <nav className="flex md:hidden overflow-x-auto pt-3 mt-3 gap-2 border-t border-slate-800/80" aria-label="Main navigation">
+      <nav className="mobile-nav xl:hidden" aria-label="Main navigation">
           {tabs.map((tab) => {
             const Icon = tab.icon
             return (
@@ -1866,17 +1818,17 @@ export default function App() {
                 onClick={() => setActiveTab(tab.id)}
                 aria-current={activeTab === tab.id ? 'page' : undefined}
                 aria-pressed={activeTab === tab.id}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                  activeTab === tab.id ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300'
+                aria-label={tab.label}
+                className={`mobile-nav-item ${
+                  activeTab === tab.id ? 'is-active' : ''
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
-                <span>{tab.label}</span>
+                <span>{tab.shortLabel}</span>
               </button>
             )
           })}
         </nav>
-      </header>
 
       {/* iOS install tip — Safari requires manual Add to Home Screen */}
       {showInstallTip && (
@@ -1894,76 +1846,69 @@ export default function App() {
         </div>
       )}
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 safe-x space-y-8">
+      <main id="main-content" ref={mainRef} tabIndex={-1} aria-label={tabs.find(tab => tab.id === activeTab)?.label} className="main-content flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-8">
 
         {/* ══════════ OVERVIEW ══════════ */}
         {activeTab === 'home' && (
           <div className="space-y-8">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 border border-emerald-500/30 p-8 sm:p-12 shadow-2xl">
-              <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="relative z-10 max-w-2xl space-y-4">
-                <div className="inline-flex items-center space-x-2 bg-emerald-500/20 text-emerald-300 px-3.5 py-1 rounded-full text-xs font-bold border border-emerald-500/30">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{greeting}, {settings.name} — here's your day at a glance</span>
-                </div>
-                <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-                  Connected care for independent living
-                </h1>
-                <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                  Live wearable vitals over Bluetooth, one-tap Jitsi video coffee circles that fight isolation,
-                  medication reminders you configure, and sensory-friendly games — with real Jitsi rooms you can share with family.
-                </p>
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <button
-                    onClick={launchOpenRoom}
-                    className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold px-6 py-3 rounded-2xl text-xs shadow-lg transition flex items-center gap-2"
-                  >
-                    <Video className="w-3.5 h-3.5" /> Join a live coffee circle
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('telehealth')}
-                    className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-6 py-3 rounded-2xl text-xs border border-slate-700 transition"
-                  >
-                    Connect wearable vitals 🫀
-                  </button>
+            <section className="overview-welcome" aria-labelledby="welcome-title">
+              <div className="welcome-copy">
+                <div className="eyebrow"><span className="welcome-dot" /> YOUR DAILY SPACE <span className="welcome-date">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</span></div>
+                <h1 id="welcome-title">{greeting}, {settings.name || 'friend'}<span className="text-emerald-400">.</span></h1>
+                <p>A little structure. A moment of calm. A familiar face.<br className="hidden sm:block" /> Take today at your own pace.</p>
+                <div className="welcome-actions">
+                  <button onClick={() => goToSection('daily-routine')} className="primary-action">View my routine <ArrowRight className="w-4 h-4" /></button>
+                  <button onClick={() => setActiveTab('games')} className="secondary-action"><Wind className="w-4 h-4" /> Find a calm moment</button>
                 </div>
               </div>
-            </div>
+              <div className="daily-note">
+                <div className="daily-note-icon"><TreePine className="w-7 h-7" strokeWidth={1.5} /></div>
+                <span className="eyebrow">ONE THING AT A TIME</span>
+                <h2>Your day, your pace.</h2>
+                <p>Check in with yourself, follow a routine, or simply take a break. You choose what feels right.</p>
+                <span className="daily-note-footer"><Check className="w-4 h-4" /> Small steps are enough</span>
+              </div>
+            </section>
 
-            {/* Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-1.5">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Routine today</div>
-                <div className="text-2xl font-black text-white">{routinesDone} / {routines.length}</div>
-                <p className="text-xs text-slate-500">A personal checklist for today</p>
+            <section aria-labelledby="today-summary">
+              <div className="section-heading"><h2 id="today-summary">Today at a glance</h2><span>Here to help, not to hurry.</span></div>
+              <div className="summary-grid">
+                <button onClick={() => goToSection('daily-routine')} className="summary-card">
+                  <span className="summary-top"><span className="summary-icon"><CheckCircle /></span><ChevronRight /></span>
+                  <span className="summary-label">Daily routine</span>
+                  <span className="summary-value">{routinesDone}<span> / {routines.length} done</span></span>
+                  <span className="summary-hint">{routines.length === 0 ? 'Create your first routine' : routinesDone === routines.length ? 'All checked in for today' : 'Your personal daily checklist'}</span>
+                  <span className="routine-progress" aria-hidden="true"><span style={{ width: `${routines.length ? routinesDone / routines.length * 100 : 0}%` }} /></span>
+                </button>
+                <button onClick={() => goToSection('today-medications')} className="summary-card">
+                  <span className="summary-top"><span className="summary-icon rose"><Pill /></span><ChevronRight /></span>
+                  <span className="summary-label">Medications</span>
+                  <span className="summary-value">{meds.length === 0 ? 'Not set up' : medsConfirmed ? <>{medsTaken}<span> / {meds.length} marked</span></> : 'Review needed'}</span>
+                  <span className="summary-hint">{meds.length === 0 ? 'Add your own reminder schedule' : medsConfirmed ? (nextMed ? `Next: ${nextMed.name} at ${nextMed.time}` : 'All check-ins marked today') : 'Confirm your saved schedule'}</span>
+                </button>
+                <button onClick={() => setActiveTab('telehealth')} className="summary-card">
+                  <span className="summary-top"><span className="summary-icon blue"><Activity /></span><ChevronRight /></span>
+                  <span className="summary-label">Heart rate</span>
+                  <span className="summary-value">{hr !== null ? <>{hr}<span> bpm</span></> : 'Not connected'}</span>
+                  <span className="summary-hint">{hrStatus.mode === 'live' ? 'Live reading · Bluetooth monitor' : 'Connect a Bluetooth monitor'}</span>
+                </button>
+                <button onClick={() => setActiveTab('buddies')} className="summary-card">
+                  <span className="summary-top"><span className="summary-icon amber"><Coffee /></span><ChevronRight /></span>
+                  <span className="summary-label">A moment together</span>
+                  <span className="summary-value">Coffee circles</span>
+                  <span className="summary-hint">Explore video rooms to share</span>
+                </button>
               </div>
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-1.5">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sensor status</div>
-                <div className="text-2xl font-black text-white">{hr !== null ? `${hr} bpm` : 'Not paired'}</div>
-                <p className="text-xs text-slate-500 truncate">{hrStatus.mode === 'live' ? 'Live BLE stream' : 'Pair in Vitals & Telehealth'}</p>
-              </div>
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-1.5">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Optional activities</div>
-                <div className="text-2xl font-black text-emerald-300">Untimed</div>
-                <p className="text-xs text-slate-500">No scores or progress tracking</p>
-              </div>
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-1.5">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Medications</div>
-                <div className="text-2xl font-black text-emerald-400">{meds.length === 0 ? '—' : medsConfirmed ? `${medsTaken} / ${meds.length}` : 'Review'}</div>
-                <p className="text-xs text-slate-500 truncate">
-                  {meds.length === 0 ? 'No medication schedule' : medsConfirmed ? (nextMed ? `Next: ${nextMed.name.split(' (')[0]} at ${nextMed.time}` : 'All check-ins marked today ✓') : 'Saved schedule paused · confirm in Settings'}
-                </p>
-              </div>
-            </div>
+            </section>
 
             <MoodCheckIn moods={moods} setMoods={setMoods} />
 
             {/* Routines & meds */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+              <div id="daily-routine" tabIndex={-1} role="region" aria-labelledby="routine-title" className="task-card bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <h3 className="font-bold text-base text-white">Predictable daily routine</h3>
+                    <h3 id="routine-title" className="font-bold text-base text-white">My daily routine</h3>
                     <p className="text-[11px] text-slate-500 mt-0.5">Check-ins reset at local midnight.</p>
                   </div>
                   <button
@@ -2017,26 +1962,32 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-base text-white">Today's medications</h3>
-                  <Bell className="w-4 h-4 text-rose-400" />
+              <div id="today-medications" tabIndex={-1} role="region" aria-labelledby="medications-title" className="task-card bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 id="medications-title" className="font-bold text-base text-white">Today's medications</h3>
+                  <button onClick={() => openSettings('medications')} className="text-xs font-bold text-emerald-300 px-3 py-2 rounded-xl border border-emerald-800/60">{meds.length ? 'Manage' : 'Set up'}</button>
                 </div>
                 <div className="space-y-2.5">
-                  {meds.length === 0 && <p className="text-xs text-slate-400">No reminders are configured. Add a personal schedule and review it against your current instructions.</p>}
+                  {meds.length === 0 && <div className="medication-empty">
+                    <span className="summary-icon rose"><Pill /></span>
+                    <h4>No medication reminders yet</h4>
+                    <p>If you need them, add medicines and times from your label or care team's instructions.</p>
+                    <button onClick={() => openSettings('medications')} className="secondary-action"><Plus className="w-4 h-4" /> Add a medication</button>
+                  </div>}
                   {meds.length > 0 && !medsConfirmed && <p className="text-xs text-amber-200 bg-amber-950/30 border border-amber-800/50 rounded-xl p-3">A saved schedule needs review in Settings. Reminders and dose check-ins are paused until you confirm every name and time.</p>}
                   {medsConfirmed && meds.map(m => (
-                    <div key={m.id} className={`flex items-center justify-between p-4 rounded-2xl border transition ${medicationIsTaken(m) ? 'bg-slate-800/40 border-slate-700/50 text-slate-400' : 'bg-rose-950/30 border-rose-500/30 text-slate-100'}`}>
+                    <div key={m.id} className={`medication-item flex items-center justify-between gap-3 p-4 rounded-2xl border transition ${medicationIsTaken(m) ? 'bg-slate-800/40 border-slate-700/50 text-slate-400' : 'bg-rose-950/30 border-rose-500/30 text-slate-100'}`}>
                       <div className="flex items-center gap-3 min-w-0">
                         <button
                           onClick={() => toggleMed(m.id)}
                           aria-label={`Mark ${m.name} ${medicationIsTaken(m) ? 'not taken' : 'taken'}`}
-                          className={`w-6 h-6 rounded-full flex items-center justify-center transition shrink-0 ${medicationIsTaken(m) ? 'bg-emerald-500 text-slate-950 font-bold' : 'border border-rose-400 hover:bg-rose-500/20'}`}
+                          aria-pressed={medicationIsTaken(m)}
+                          className={`medication-check w-11 h-11 rounded-full flex items-center justify-center transition shrink-0 ${medicationIsTaken(m) ? 'bg-emerald-500 text-slate-950 font-bold' : 'border border-rose-400 hover:bg-rose-500/20'}`}
                         >
                           {medicationIsTaken(m) && '✓'}
                         </button>
                         <div className="min-w-0">
-                          <div className={`font-bold text-sm truncate ${medicationIsTaken(m) ? 'line-through text-slate-500' : 'text-white'}`}>{m.name}</div>
+                          <div className={`font-bold text-sm break-words ${medicationIsTaken(m) ? 'line-through text-slate-500' : 'text-white'}`}>{m.name}</div>
                           <div className="text-xs text-slate-400">Scheduled {m.time}</div>
                         </div>
                       </div>
@@ -2059,7 +2010,7 @@ export default function App() {
         {activeTab === 'games' && (
           <div className="space-y-8">
             <div>
-              <h2 className="text-2xl font-black text-white">Activities & Sensory Tools</h2>
+              <h1 className="text-2xl font-black text-white">Activities & Sensory Tools</h1>
               <p className="text-sm text-slate-400 mt-1 leading-relaxed">
                 Optional, self-paced activities for shared practice and enjoyment—not therapy, treatment, or assessment. No activity is timed or scored; skip or stop at any time.
               </p>
@@ -2080,7 +2031,7 @@ export default function App() {
           <div className="space-y-8">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-black text-white">Coffee Circles — Isolation Prevention</h2>
+                <h1 className="text-2xl font-black text-white">Coffee Circles — Isolation Prevention</h1>
                 <p className="text-xs sm:text-sm text-slate-400 mt-1">
                   These buttons open real <span className="text-emerald-300 font-semibold">meet.jit.si</span> rooms — join embedded or in a full tab. Rooms are public links with no scheduled host, attendance count, or CareSphere moderation. Share only with people you trust; no installs or accounts required. You'll appear as <span className="text-white font-semibold">{settings.name}</span>.
                 </p>
@@ -2142,7 +2093,7 @@ export default function App() {
           <div className="space-y-8">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-black text-white">Care Circle · Local</h2>
+                <h1 className="text-2xl font-black text-white">Care Circle · Local</h1>
                 <p className="text-xs sm:text-sm text-slate-400 mt-1">Private notes and check-ins saved in this browser. No family-sync, clinician portal, or push-alert server is connected.</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -2165,13 +2116,14 @@ export default function App() {
                     onChange={(e) => setNoteDraft(e.target.value)}
                     placeholder="Add a note stored in this browser…"
                     aria-label="New care note"
-                    className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                    className="min-w-0 flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
                   />
-                  <button type="submit" className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-3 rounded-2xl text-xs shadow transition flex items-center gap-1.5">
-                    <Send className="w-3.5 h-3.5" /> Post
+                  <button type="submit" disabled={!noteDraft.trim()} className="disabled:opacity-40 bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-3 rounded-2xl text-xs shadow transition flex items-center gap-1.5">
+                    <Send className="w-3.5 h-3.5" /> Save
                   </button>
                 </form>
                 <div className="space-y-3">
+                  {notes.length === 0 && <p className="text-sm text-slate-400 py-6 text-center">No care notes yet. Save a question, update, or reminder for your next visit.</p>}
                   {notes.map((n) => (
                     <div key={n.id} className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 space-y-1">
                       <div className="flex items-center justify-between text-xs font-bold text-slate-300 gap-2">
@@ -2205,26 +2157,8 @@ export default function App() {
                 </div>
 
                 <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2"><User className="w-4 h-4 text-sky-400" /> Sample roster · not contacts</h3>
-                  <p className="text-[11px] text-slate-500">Illustrative names only. This build cannot invite, message, or notify these people.</p>
-                  <ul className="space-y-2.5 text-xs">
-                    {[
-                      { n: 'Sarah M.', r: 'Daughter · primary caregiver', c: 'bg-emerald-500' },
-                      { n: 'Dr. Evelyn Vance', r: 'Primary care physician', c: 'bg-sky-500' },
-                      { n: 'Elena R.', r: 'Wellness coach · coffee circle host', c: 'bg-purple-500' },
-                      { n: 'David K.', r: 'Activity lead · trivia host', c: 'bg-amber-500' },
-                    ].map(p => (
-                      <li key={p.n} className="flex items-center gap-3">
-                        <span className={`w-8 h-8 rounded-full ${p.c} bg-opacity-20 border border-white/10 flex items-center justify-center text-[10px] font-black text-white`}>
-                          {p.n.split(' ').map(w => w[0]).join('')}
-                        </span>
-                        <div>
-                          <div className="font-bold text-slate-200">{p.n}</div>
-                          <div className="text-slate-500">{p.r}</div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                  <h3 className="text-sm font-bold text-white">Your care information stays local</h3>
+                  <p className="text-sm text-slate-400">No contacts or clinicians are connected. Use the visit brief to choose what to share with someone you trust. Nobody is invited or notified automatically.</p>
                 </div>
               </div>
             </div>
@@ -2236,9 +2170,9 @@ export default function App() {
           <div className="space-y-8">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-black text-white">Wearable Vitals & Telehealth</h2>
+                <h1 className="text-2xl font-black text-white">Wearable Vitals & Telehealth</h1>
                 <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                  Pair a real BLE heart-rate monitor, optionally generate clearly labeled sample values, and export source-labeled session data—not a clinical summary.
+                  Pair a real Bluetooth heart-rate monitor and export measurements received in this session. No sensor means no reading.
                 </p>
               </div>
               <div className="flex gap-2">
@@ -2276,14 +2210,8 @@ export default function App() {
                 >
                   <Bluetooth className="w-3.5 h-3.5" /> {connectingHr ? 'Pairing…' : 'Pair real monitor'}
                 </button>
-                {hrStopRef.current ? (
-                  <button onClick={disconnectHr} className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-4 py-2.5 rounded-2xl text-xs border border-slate-700 transition">
-                    {hrStatus.mode === 'simulated' ? 'Stop demo' : 'Disconnect'}
-                  </button>
-                ) : (
-                  <button onClick={startHeartRateDemo} disabled={connectingHr} className="bg-amber-950/50 hover:bg-amber-900/60 disabled:opacity-40 text-amber-200 font-bold px-4 py-2.5 rounded-2xl text-xs border border-amber-800/60 transition">
-                    Start labeled demo
-                  </button>
+                {hrStopRef.current && (
+                  <button onClick={disconnectHr} className="bg-slate-800 text-white font-bold px-4 py-2.5 rounded-2xl text-xs">Disconnect</button>
                 )}
               </div>
             </div>
@@ -2294,8 +2222,8 @@ export default function App() {
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span className="leading-relaxed">
                   <span className="font-bold">iPhone note:</span> iOS Safari doesn't support Web Bluetooth.
-                  For live Apple Watch vitals use the native <span className="font-bold">CareSphere iOS app</span> (HealthKit + CoreBluetooth).
-                  On desktop Chrome/Edge, "Pair real monitor" pairs BLE straps. "Start labeled demo" shows generated example values only; it does not read a sensor.
+                  For real Bluetooth pairing or optional shared Apple Health history, use the native <span className="font-bold">CareSphere iOS app</span>. Apple Health history is not a live stream.
+                  On desktop Chrome/Edge and compatible Android browsers, "Pair real monitor" pairs standard BLE heart-rate monitors.
                 </span>
               </div>
             )}
@@ -2314,7 +2242,7 @@ export default function App() {
                   {!hasLiveHeartRate ? 'Reference check uses live Bluetooth heart rate only' : anyFlag ? 'Live heart rate is outside this broad example range' : 'Live heart rate is within this broad example range'}
                 </div>
                 <p className={!hasLiveHeartRate ? 'text-slate-300 mt-1' : anyFlag ? 'text-amber-200/80 mt-1' : 'text-emerald-200/70 mt-1'}>
-                  This simple example range checks only a current LIVE BLE heart-rate reading (50–110 bpm). Simulated SpO₂ and blood-pressure examples are excluded. Ranges vary by person; this is not triage, does not notify anyone, and does not create a clinical record.
+                  This simple example range checks only a current LIVE BLE heart-rate reading (50–110 bpm). Ranges vary by person; this is not triage, does not notify anyone, and does not create a clinical record.
                 </p>
               </div>
             </div>
@@ -2332,58 +2260,12 @@ export default function App() {
                   {hr ?? '—'} <span className="text-xs text-slate-400 font-normal">bpm</span>
                 </div>
                 <Sparkline data={hrHistory} />
-                <p className="text-[11px] text-slate-500">Bluetooth SIG Heart Rate profile (0x180D) · 1.5 s polling</p>
+                <p className="text-[11px] text-slate-500">Bluetooth SIG Heart Rate profile (0x180D) · sensor notifications · stale after 15 seconds</p>
               </div>
 
-              {/* SpO2 */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Wind className="w-3.5 h-3.5 text-sky-400" /> Blood oxygen (SpO₂)
-                  </span>
-                  <SensorChip mode={spo2 !== null ? 'simulated' : 'disconnected'} label={spo2 !== null ? 'SIMULATED' : 'NO READING'} />
-                </div>
-                <div className="text-4xl font-black text-white">
-                  {spo2Phase === 'measuring' ? '…' : spo2 !== null ? `${spo2}%` : '—'}
-                </div>
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div
-                    className={`bg-sky-500 h-full rounded-full transition-all duration-1000 ${spo2Phase === 'measuring' ? 'w-2/3 animate-pulse' : ''}`}
-                    style={spo2 !== null && spo2Phase !== 'measuring' ? { width: `${((spo2 - 88) / 12) * 100}%` } : undefined}
-                  />
-                </div>
-                <button
-                  onClick={runSpo2}
-                  disabled={spo2Phase === 'measuring'}
-                  className="w-full bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-xs font-bold py-2.5 rounded-xl text-slate-200 transition"
-                >
-                  {spo2Phase === 'measuring' ? 'Generating demo value…' : 'Generate example (simulated)'}
-                </button>
-                <p className="text-[11px] text-slate-500">Sample data only. No pulse oximeter or Apple Health measurement is used.</p>
-              </div>
-
-              {/* Blood pressure */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Heart className="w-3.5 h-3.5 text-rose-400" /> Blood pressure
-                  </span>
-                  <SensorChip mode={bp !== null ? 'simulated' : 'disconnected'} label={bp !== null ? 'SIMULATED' : 'NOT MEASURED'} />
-                </div>
-                <div className="text-3xl font-black text-white">
-                  {bpPhase !== 'idle' ? '…' : bp ?? '—'} <span className="text-xs text-slate-400 font-normal">mmHg</span>
-                </div>
-                <p className="text-[11px] text-slate-500 min-h-4">
-                  {bpPhase !== 'idle' && 'Generating a simulated example — no cuff is connected…'}
-                  {bpPhase === 'idle' && 'Generated values only. No cuff or sensor is read.'}
-                </p>
-                <button
-                  onClick={runBp}
-                  disabled={bpPhase !== 'idle'}
-                  className="w-full bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-xs font-bold py-2.5 rounded-xl text-slate-200 transition"
-                >
-                  {bpPhase !== 'idle' ? 'Generating demo…' : 'Generate example (simulated)'}
-                </button>
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3 md:col-span-2">
+                <h2 className="font-bold text-white">Other health readings</h2>
+                <p className="text-sm text-slate-400">Blood oxygen and blood pressure are not connected in this browser. No values are generated. The optional HealthKit build of the native iOS app can read records you choose to share from Apple Health.</p>
               </div>
             </div>
 
@@ -2394,10 +2276,7 @@ export default function App() {
                 (Chrome/Edge desktop & Android) and subscribes to the standard BLE Heart Rate service — the same profile exposed by
                 many chest straps. Readings arrive as GATT notifications, plotted above in real time.
               </p>
-              <p>
-                <span className="text-slate-200 font-semibold">Demo mode:</span> sample data starts only after you tap "Start labeled demo". It uses no sensor,
-                is not a measurement, and is excluded from the live heart-rate reference check. Canceling pairing or using an unsupported browser leaves the value blank.
-              </p>
+              <p>Canceling pairing, losing the connection, or using an unsupported browser leaves the current reading blank. Only real Bluetooth measurements are exported.</p>
             </div>
           </div>
         )}
@@ -2414,13 +2293,12 @@ export default function App() {
         notes={notes}
         moods={moods}
         hrRecords={hrRecords}
-        spo2={spo2}
-        bp={bp}
       />
       <VideoModal session={videoSession} displayName={settings.name} onClose={() => setVideoSession(null)} />
       <SosModal open={sosOpen} onClose={() => setSosOpen(false)} />
       <SettingsModal
         open={settingsOpen}
+        initialSection={settingsSection}
         onClose={() => setSettingsOpen(false)}
         settings={settings}
         update={updateSettings}
@@ -2437,15 +2315,15 @@ export default function App() {
       />
 
       {/* Toast stack */}
-      <div className="fixed bottom-4 right-4 z-[60] flex flex-col gap-3 pointer-events-none safe-bottom pr-4" aria-live="polite">
+      <div className="toast-stack fixed bottom-4 right-4 z-[60] flex flex-col gap-3 pointer-events-none" aria-live="polite">
         {toasts.map(t => (
           <ToastItem key={t.id} toast={t} onDismiss={dismissToast} />
         ))}
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-900/60 py-8 safe-bottom text-center text-xs text-slate-500 space-y-2 px-4">
-        <div className="font-bold text-slate-300">💚 CareSphere AI — proactive senior care & autism support</div>
+      <footer className="app-footer border-t border-slate-800 bg-slate-900/60 py-8 text-center text-xs text-slate-500 space-y-2 px-4">
+        <div className="font-bold text-slate-300">CareSphere — a little support, every day</div>
         <p>Real Jitsi Meet rooms · Web Bluetooth vitals · Web Audio sensory studio · Your data stays on your device.</p>
       </footer>
     </div>

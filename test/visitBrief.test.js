@@ -73,7 +73,7 @@ test('live BLE selection never silently includes simulated heart-rate records', 
   assert.doesNotMatch(brief, /99 bpm|SIMULATED DEMONSTRATION VALUES/)
 })
 
-test('simulated values appear only after opt-in and stay visibly labeled', () => {
+test('legacy generated values are excluded even if an old caller requests them', () => {
   const brief = buildVisitBrief({
     hrRecords: [{ timestamp: '2026-09-27T18:01:00.000Z', metric: 'heart_rate_bpm', value: 99, source: 'SIMULATED' }],
     spo2: 97,
@@ -82,10 +82,7 @@ test('simulated values appear only after opt-in and stay visibly labeled', () =>
     now: fixedNow,
   })
 
-  assert.match(brief, /SIMULATED DEMONSTRATION VALUES \(not measured; not clinical data\)/)
-  assert.match(brief, /99 · SIMULATED/)
-  assert.match(brief, /97% · SIMULATED_SPOT_CHECK/)
-  assert.match(brief, /118 \/ 76 mmHg · SIMULATED_SEQUENCE/)
+  assert.doesNotMatch(brief, /SIMULATED|99|97%|118 \/ 76/)
 })
 
 test('selected mood, note and discussion sections retain their limitations', () => {

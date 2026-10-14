@@ -1,4 +1,4 @@
-# iPhone acceptance checklist — CareSphere 2.3
+# iPhone acceptance checklist — CareSphere 3.0
 
 A passing compile is not a passing device test. Fill this out on the intended iPhone before demonstrating or distributing the app. Never use real medication or emergency actions just to test UI.
 
@@ -6,11 +6,11 @@ A passing compile is not a passing device test. Fill this out on the intended iP
 
 - [ ] Open `ios/CareSphere.xcodeproj` directly; choose CareSphere scheme.
 - [ ] Choose your team, a unique bundle identifier if necessary, and your connected iPhone (iOS 16+).
-- [ ] Confirm the installed Xcode supports your phone's iOS version. Use Xcode 16+ for the Swift 6 package manifest.
-- [ ] Resolve packages, compile, sign, install, and launch without a crash.
+- [ ] Confirm the installed Xcode supports your phone's iOS version. Use Xcode 26+ to compile Apple Intelligence; the baseline app can use Xcode 16+.
+- [ ] Open the full folder with the included local package; compile, sign, install, and launch. No remote package retrieval should occur.
 - [ ] On a clean install, use **Explore first · set up later**. No camera, microphone, motion, health, or notification permission should be needed to play games.
 - [ ] Repeat with guided setup; large text can scroll each step; birth date can remain absent; voice reminders do not turn on based on age.
-- [ ] Settings version shows 2.3.0 (6).
+- [ ] Settings version shows 3.0.0 (7).
 
 ## Layout and navigation
 
@@ -48,17 +48,18 @@ A passing compile is not a passing device test. Fill this out on the intended iP
 - [ ] Denied notifications, motion, Bluetooth, and HealthKit permissions have understandable states; missing data is not presented as a measurement.
 - [ ] Step counting starts only after enabling; test return across local midnight.
 - [ ] Pair compatible BLE hardware, disconnect/reconnect, verify source labels; check real HealthKit records if available.
-- [ ] Test optional model/reference/voice downloads on real Wi-Fi with sufficient space. Failed downloads show an error; do not claim they are network-proof.
+- [ ] Test optional reference downloads. Check Apple Intelligence unavailable/disabled/not-ready/available states on eligible and ineligible devices.
 - [ ] Test Face ID/Touch ID lock and background privacy, local export/erase, visit-brief selection.
 - [ ] Open SOS and cancel. **Do not dial emergency numbers as a test.** Use a consenting non-emergency recipient for any message/video testing.
 
 Record iPhone model, iOS version, Xcode version, build commit, checks passed/failed, and reproducible issues. Clinical benefit, usability with target users, and App Store review require separate work.
 
-## Follow-up checks: downloads, pairing, and explicit sharing
+## Follow-up checks: Apple Intelligence, pairing, and explicit sharing
 
-- [ ] Cancel a model/voice download partway through; ensure controls return to retry-ready state and no success is claimed.
-- [ ] Retry on a working connection; verify downloaded bytes/progress, low-storage feedback, and actual offline inference/speech after installation.
-- [ ] Cancel voice extraction while the UI remains responsive. Apple voices should remain available.
+- [ ] Standard scheme builds without a HealthKit profile. Optional HealthKit scheme requests access only after you tap Enable.
+- [ ] On supported iOS 26 hardware, request a reference summary, cancel, retry, clear, and background the app. Cancelled results must not reappear.
+- [ ] Unavailable Apple Intelligence leaves reference search usable; no fabricated answer replaces errors.
+- [ ] Installed Apple voices can preview without third-party voice/model downloads.
 - [ ] With two monitors nearby, confirm scanning connects to neither until you choose one. Check device-name/identifier labels.
 - [ ] Cancel pairing during scan/connection; late callbacks must not connect or display a reading afterward.
 - [ ] Test no-device timeout, denied/off Bluetooth, missing service, subscription failure, and disconnect. Reconnect is an explicit user action.
