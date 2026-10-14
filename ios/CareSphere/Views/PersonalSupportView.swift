@@ -3,6 +3,7 @@ import PhotosUI
 import UniformTypeIdentifiers
 import CryptoKit
 import CommonCrypto
+import CareActivityKit
 
 struct PersonalSupportView: View {
     @EnvironmentObject private var store: CareStore
@@ -33,7 +34,16 @@ struct PersonalSupportView: View {
     @State private var confirmRestore = false
     @State private var aiMode = "Simplify wording"
     @State private var reviewed = ""
-    private let sections = ["Start here", "Visual routines", "Communication", "My photos", "My people", "Comfort", "Appointments", "Recovery & backup", "Interest activities", "Apple Intelligence", "Cross-device sharing"]
+    @State private var transferPassword = ""
+    @State private var selectedRecords = Set<String>()
+    @State private var incomingRecords = Set<String>()
+    @State private var incomingTransfer: TransferPayload?
+    @State private var transferURL: URL?
+    @State private var importTransferFile = false
+    @State private var transferBusy = false
+    @State private var transferGeneration = UUID()
+    @State private var confirmTransfer = false
+    private let sections = ["Start here", "Visual routines", "Communication", "My photos", "My people", "Comfort", "Appointments", "Recovery & backup", "Interest activities", "Apple Intelligence", "Device sharing"]
     private let phrases = ["I need a break", "It is too loud", "Please explain again", "Yes", "No", "I would like help"]
     private let packs = ["Nature": ["What do you notice outside?", "Would you choose a garden, beach or forest?", "Point to something that grows."], "Music": ["What sounds do you enjoy?", "Would you like music or quiet?", "Tell a story about a song, or skip."], "Familiar objects": ["What makes a place comfortable?", "Which object do you like nearby?", "Describe a familiar everyday task."]]
     var body: some View {
@@ -45,8 +55,8 @@ struct PersonalSupportView: View {
             }
             .navigationTitle("My support tools")
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-            .onChange(of: section) { _ in draft = ""; detail = ""; third = ""; shown = ""; status = ""; password = ""; planID = nil; assistant.clearResponse(); SpeechService.shared.stop() }
-            .onDisappear { assistant.clearResponse(); SpeechService.shared.stop() }
+            .onChange(of: section) { _ in draft = ""; detail = ""; third = ""; shown = ""; status = ""; password = ""; transferPassword = ""; transferGeneration = UUID(); transferBusy = false; incomingTransfer = nil; planID = nil; assistant.clearResponse(); SpeechService.shared.stop() }
+            .onDisappear { transferPassword = ""; transferGeneration = UUID(); assistant.clearResponse(); SpeechService.shared.stop() }
             .onChange(of: phase) { value in if value != .active { SpeechService.shared.stop(); assistant.clearResponse(); paused = true } }
             .onChange(of: selectedPhoto) { item in Task { await loadPhoto(item) } }
             .onChange(of: assistant.response) { reviewed = $0 }
@@ -54,6 +64,23 @@ struct PersonalSupportView: View {
                 if let url = pendingURL { Button("Continue") { UIApplication.shared.open(url); pendingURL = nil } }
                 Button("Cancel", role: .cancel) { pendingURL = nil }
             } message: { Text("Review the recipient in the next app. Nothing is sent automatically. External providers have their own privacy terms.") }
+            .alert("Prepare selected copies?", isPresented: $confirmTransfer) {
+                Button("Cancel", role: .cancel) { }
+                Button("Prepare encrypted file") { prepareTransfer() }
+            } message: { Text("Only your selected notes and routines are included. Recipients can keep or forward copies. You cannot recall them remotely. Tell the recipient the passphrase separately.") }
+            .fileImporter(isPresented: $importTransferFile, allowedContentTypes: [.json, .data]) { result in
+                do {
+                    let url = try result.get(); let access = url.startAccessingSecurityScopedResource(); defer { if access { url.stopAccessingSecurityScopedResource() } }
+                    guard (try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) <= 1_000_000 else { throw DeviceTransfer.Failure.invalid }
+                    let data = try Data(contentsOf: url); let pass = transferPassword; let generation = UUID(); transferGeneration = generation; transferBusy = true; incomingTransfer = nil
+                    Task {
+                        let result = await Task.detached { Result { try DeviceTransfer.open(data, password: pass) } }.value
+                        guard transferGeneration == generation else { return }; transferBusy = false
+                        switch result { case .success(let payload): incomingTransfer = payload; incomingRecords = []; status = "Unlocked locally. Preview and select records before importing."
+                        case .failure: status = "Cannot unlock this CareSphere transfer. Check the file and passphrase. Nothing was imported." }
+                    }
+                } catch { status = "Could not read this transfer. Nothing was imported." }
+            }
             .fileExporter(isPresented: $exportBackup, document: backupDocument, contentType: .json, defaultFilename: "CareSphere-iPhone-backup") { result in
                 if case .failure = result { status = "The backup was not saved. Try again." }
                 password = ""; backupDocument = nil
@@ -114,11 +141,62 @@ struct PersonalSupportView: View {
                 Text("Speak, point, listen or skip. Answers are not recorded; these are leisure prompts, not treatment.")
             }
         case "Apple Intelligence": intelligence
-        default:
-            Section("Optional sharing service") {
-                Text("The web support tools include encrypted read-only invitations, 24-hour expiry and revocation. A separately configured HTTPS sharing service is required. This native app is not connected to that service and does not synchronize your records.")
-                Text("Use the existing visit brief or share sheet to deliberately share selected information. Previously shared copies cannot be recalled. There are no automatic caregiver alerts.")
+        default: deviceSharing
+        }
+    }
+    private var transferableRecords: [TransferRecord] {
+        store.notes.map { TransferRecord(id: "n:" + $0.id.uuidString, type: "note", text: $0.body) } +
+        store.routines.map { TransferRecord(id: "r:" + $0.id.uuidString, type: "routine", text: $0.title) }
+    }
+    private var deviceSharing: some View {
+        Section("Device-to-device · no backend") {
+            Text("1. Select notes or routines and prepare an encrypted file. 2. Send using AirDrop, another app, or Save to Files. 3. On the other device open CareSphere → My support tools → Device sharing, choose the received file and preview before importing.")
+            Text("Nearby options depend on your system. This is not built-in Bluetooth pairing or automatic sync. For iPhone-to-Android, use a compatible file-transfer app or cable. An app you choose may use its own cloud. Copies cannot be remotely revoked.")
+            SecureField("Transfer passphrase · 12+ characters", text: $transferPassword)
+                .onChange(of: transferPassword) { _ in incomingTransfer = nil; transferGeneration = UUID(); transferBusy = false; if let url = transferURL { try? FileManager.default.removeItem(at: url) }; transferURL = nil }
+                .onChange(of: selectedRecords) { _ in if let url = transferURL { try? FileManager.default.removeItem(at: url) }; transferURL = nil }
+            Text("Tell the recipient the passphrase separately. No recovery is possible. Photos, medicines, measurements and encryption keys are excluded.")
+            ForEach(transferableRecords) { record in
+                Toggle("\(record.type): \(record.text)", isOn: Binding(get: { selectedRecords.contains(record.id) }, set: { value in if value { selectedRecords.insert(record.id) } else { selectedRecords.remove(record.id) } }))
             }
+            Button("Review and prepare transfer") { confirmTransfer = true }.disabled(transferBusy || selectedRecords.isEmpty || transferPassword.count < 12)
+            if transferBusy { ProgressView("Protecting your data…") }
+            if let url = transferURL {
+                ShareLink("Send encrypted file · AirDrop / share sheet", item: url)
+                Button("Clear prepared file") { try? FileManager.default.removeItem(at: url); transferURL = nil }
+            }
+            Button("Receive: choose a transfer file") { incomingTransfer = nil; importTransferFile = true }.disabled(transferBusy || transferPassword.count < 12)
+            if let payload = incomingTransfer {
+                Text("Preview received copies. Not verified clinical information. Existing records are never replaced.").font(.headline)
+                ForEach(payload.records) { record in
+                    let imported = (store.personalSupport.receivedItems ?? []).contains(payload.id + ":" + record.id)
+                    Toggle("\(record.type): \(record.text)\(imported ? " · Already imported" : "")", isOn: Binding(get: { incomingRecords.contains(record.id) }, set: { value in if value { incomingRecords.insert(record.id) } else { incomingRecords.remove(record.id) } })).disabled(imported)
+                }
+                Button("Import selected copies") {
+                    do { let count = try store.importTransfer(payload, selected: incomingRecords); incomingTransfer = nil; incomingRecords = []; transferPassword = ""; status = "Imported \(count) copies. Existing records were not replaced." }
+                    catch { status = "Import could not finish. Check capacity and secure storage. Nothing was replaced." }
+                }.disabled(incomingRecords.isEmpty)
+                Button("Cancel import") { incomingTransfer = nil; incomingRecords = [] }
+            }
+        }
+    }
+    private func prepareTransfer() {
+        let payload = TransferPayload(records: transferableRecords.filter { selectedRecords.contains($0.id) })
+        let pass = transferPassword; let generation = UUID(); transferGeneration = generation; transferBusy = true
+        Task {
+            let result = await Task.detached { Result { try DeviceTransfer.seal(payload, password: pass) } }.value
+            guard transferGeneration == generation else { return }; transferBusy = false
+            do {
+                let bytes = try result.get()
+                let directory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("Transfers", isDirectory: true)
+                try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                for old in (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.contentModificationDateKey])) ?? [] {
+                    if let date = try? old.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate, date < Date().addingTimeInterval(-86400) { try? FileManager.default.removeItem(at: old) }
+                }
+                let url = directory.appendingPathComponent(UUID().uuidString + ".caretransfer")
+                try bytes.write(to: url, options: [.atomic, .completeFileProtection]); transferURL = url
+                status = "Encrypted file prepared. Use the share sheet to send it; nothing leaves automatically."
+            } catch { status = "Could not prepare the transfer. Choose up to 100 notes/routines, with notes up to 4,000 characters and routine titles up to 240." }
         }
     }
     @ViewBuilder private var plans: some View {

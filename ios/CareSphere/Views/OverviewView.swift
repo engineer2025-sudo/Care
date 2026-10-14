@@ -27,12 +27,12 @@ struct OverviewView: View {
                 ScrollView {
                     VStack(spacing: 20) {
                         hero
-                        metricsGrid(proxy: proxy)
+                        if !store.personalSupport.simple { metricsGrid(proxy: proxy) }
                         moodCheckIn
                         routinesCard.id("routines")
-                        medicationsCard.id("medications")
+                        if !store.personalSupport.simple { medicationsCard.id("medications") }
                         #if os(iOS)
-                        stepsCard
+                        if !store.personalSupport.simple { stepsCard }
                         #endif
                     }
                     .carePagePadding()

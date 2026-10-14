@@ -31,6 +31,8 @@ class SupportActivity : Activity() {
     private var backupBytes: ByteArray? = null
     private var password: CharArray? = null
     private var busy = false
+    private var transferFile: java.io.File? = null
+    private var receivedTransfer: JSONObject? = null
     private var pairs = false
     private val revealed = mutableListOf<Int>()
     private val matched = mutableSetOf<Int>()
@@ -39,7 +41,7 @@ class SupportActivity : Activity() {
     private val ink get() = if(dark) Color.rgb(237,244,237) else Color.rgb(28,46,36)
     private val bg get() = if(dark) Color.rgb(20,29,23) else Color.rgb(246,248,244)
     private val soft get() = if(dark) Color.rgb(45,62,49) else Color.rgb(233,240,232)
-    private val sections = listOf("Start here", "Visual routines", "Communication", "My photos", "My people", "Comfort", "Appointments", "Recovery & backup", "Interest activities", "Cross-device sharing")
+    private val sections = listOf("Start here", "Visual routines", "Communication", "My photos", "My people", "Comfort", "Appointments", "Recovery & backup", "Interest activities", "Device sharing")
     private val phrases = listOf("I need a break", "It is too loud", "Please explain again", "Yes", "No", "I would like help")
     private val packs = mapOf("Nature" to listOf("What do you notice outside?", "Would you choose a garden, beach or forest?", "Point to something that grows."), "Music" to listOf("What sounds do you enjoy?", "Would you like music or quiet?", "Tell a story about a song, or skip."), "Familiar objects" to listOf("What makes a place comfortable?", "Which object do you like nearby?", "Describe a familiar everyday task."))
     private fun dp(v:Int) = (resources.displayMetrics.density*v).toInt()
@@ -49,7 +51,7 @@ class SupportActivity : Activity() {
     private fun dialog()=AlertDialog.Builder(ContextThemeWrapper(this, if(dark) android.R.style.Theme_Material_Dialog_Alert else android.R.style.Theme_Material_Light_Dialog_Alert))
     private fun text(value:String,size:Float=18f) { page.addView(TextView(this).apply { text=value;textSize=size;setTextColor(ink);setPadding(0,dp(10),0,dp(10));setTextIsSelectable(true) }) }
     private fun button(label:String, action:()->Unit):Button = Button(this).apply { text=label;isAllCaps=false;textSize=18f;minHeight=dp(52);setTextColor(ink);background=GradientDrawable().apply{setColor(soft);cornerRadius=dp(14).toFloat()};page.addView(this,LinearLayout.LayoutParams(-1,-2).apply{topMargin=dp(6);bottomMargin=dp(6)});setOnClickListener{action()} }
-    private fun message(value:String) { if(!isFinishing)dialog().setMessage(value).setPositiveButton("OK",null).show() }
+    private fun message(value:String) { if(!isFinishing && !isDestroyed)dialog().setMessage(value).setPositiveButton("OK",null).show() }
     private fun confirm(body:String,action:()->Unit) { dialog().setMessage(body).setNegativeButton("Cancel",null).setPositiveButton("Continue"){_,_->action()}.show() }
     private fun form(title:String, labels:List<Pair<String,String>>, passwordField:Boolean=false, action:(List<String>)->Unit) {
         val box=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(dp(20),0,dp(20),0)}
@@ -82,7 +84,7 @@ class SupportActivity : Activity() {
             "Appointments"->questions()
             "Recovery & backup"->recovery()
             "Interest activities"->{button("Interest · $pack"){dialog().setItems(packs.keys.toTypedArray()){_,i->pack=packs.keys.elementAt(i);promptIndex=0;render()}.show()};text(packs.getValue(pack)[promptIndex%3],24f);button("Next / skip"){promptIndex++;render()};text("Speak, point, listen or skip. Answers are not recorded. These are leisure prompts, not treatment.")}
-            else->text("The web app offers encrypted read-only invitations, 24-hour expiry and revocation when its separate HTTPS sharing service is configured. This native app is not connected and does not synchronize records. Use the deliberate share sheet for now. No automatic caregiver alerts or fake accounts.")
+            else->deviceSharing()
         }
     }
     private fun comfort(){
@@ -131,12 +133,87 @@ class SupportActivity : Activity() {
         if(pairs){val chosen=photos.take(tools.optInt("choices",3).coerceIn(2,4));text("Reveal two cards. Clear a mismatch yourself. No timer or score.");(0 until chosen.size*2).forEach{i->if(revealed.contains(i)||matched.contains(i))image(chosen[i%chosen.size]);button("Photo card ${i+1}${if(matched.contains(i))" · matched" else ""}"){if(revealed.size<2&&!revealed.contains(i)&&!matched.contains(i)){revealed.add(i);if(revealed.size==2&&revealed[0]%chosen.size==revealed[1]%chosen.size){matched.addAll(revealed);revealed.clear()};render()}}};button("Clear selection"){revealed.clear();render()};button("Start again"){revealed.clear();matched.clear();render()}}
         else{val photo=photos[photoIndex%photos.size];image(photo);text(photo.optString("caption"));text("What do you notice? Speak, point, listen or skip.");button("Next photo"){photoIndex++;render()};button("Remove displayed photo"){confirm("Remove this photo? Routine references will show text only."){update("photos",photos.filter{it.optString("id")!=photo.optString("id")})}}}
     }
+    private fun transferableRecords(): List<JSONObject> {
+        val notes=data.list("notes");val routines=data.list("routines")
+        return (0 until notes.length()).map { val n=notes.getJSONObject(it);JSONObject().put("id","n:"+n.optString("id")).put("type","note").put("text",n.optString("body")) } +
+            (0 until routines.length()).map { val r=routines.getJSONObject(it);JSONObject().put("id","r:"+r.optString("id")).put("type","routine").put("text",r.optString("title")) }
+    }
+    private fun checkTransfer(payload: JSONObject): List<JSONObject> {
+        require(payload.getInt("version")==1)
+        val id=payload.getString("id");require(id.length==36 && UUID.fromString(id).toString().equals(id,true))
+        val array=payload.getJSONArray("records");require(array.length() in 1..100)
+        val records=(0 until array.length()).map { array.getJSONObject(it) }
+        val ids=mutableSetOf<String>()
+        records.forEach { r->require(r.opt("id") is String && r.opt("text") is String)
+            val type=r.getString("type");val text=r.getString("text");val rid=r.getString("id")
+            require(type in listOf("note","routine") && rid.isNotEmpty() && rid.length<=120 && ids.add(rid) && text.isNotBlank() && text.length <= if(type=="note")4000 else 240)
+        };return records
+    }
+    private fun deviceSharing(){
+        text("Device-to-device · no backend",24f)
+        text("Select notes or routines, protect a file with a passphrase, then choose Quick Share or another app in the Android share sheet. On the receiving device open CareSphere → My support tools → Device sharing and choose the received file.")
+        text("Nearby options depend on your system. This is not built-in Bluetooth pairing or live sync. For iPhone-to-Android use a compatible file-transfer app or cable. An app you choose may use its own cloud. You cannot remotely revoke copies. Tell the recipient the passphrase separately. Medicines, measurements, photos and backup keys are excluded.")
+        button("Select records to send"){
+            if(busy)return@button
+            val records=transferableRecords();if(records.isEmpty()){message("Add your own note or routine first. No sample records are supplied.");return@button}
+            val checked=BooleanArray(records.size)
+            dialog().setTitle("Choose exactly what to share").setMultiChoiceItems(records.map{"${it.getString("type")}: ${it.getString("text")}"}.toTypedArray(),checked){_,i,value->checked[i]=value}
+                .setNegativeButton("Cancel",null).setPositiveButton("Review selection"){_,_->
+                    val chosen=records.filterIndexed{i,_->checked[i]};if(chosen.isEmpty()){message("No records selected.");return@setPositiveButton}
+                    confirm("Prepare copies of ${chosen.size} selected records? The recipient can keep or forward them."){
+                        form("Transfer passphrase · 12+ characters",listOf("Passphrase" to ""),true){v->
+                            val pass=v[0];require(pass.length>=12);val payload=JSONObject().put("version",1).put("id",UUID.randomUUID().toString()).put("records",JSONArray(chosen));checkTransfer(payload);busy=true
+                            Thread {val result=runCatching {
+                                val sealed=TransferCrypto.seal(payload.toString().toByteArray(Charsets.UTF_8),pass)
+                                JSONObject().put("format","CareSphere Transfer").put("version",1).put("iterations",310000).put("salt",Base64.getEncoder().encodeToString(sealed.salt)).put("iv",Base64.getEncoder().encodeToString(sealed.iv)).put("ciphertext",Base64.getEncoder().encodeToString(sealed.ciphertext)).toString()
+                            };runOnUiThread {busy=false;if(!isFinishing&&!isDestroyed)result.onSuccess {raw->runCatching{
+                                val dir=java.io.File(cacheDir,"transfers").apply{mkdirs()};dir.listFiles()?.filter{System.currentTimeMillis()-it.lastModified()>86400000}?.forEach{it.delete()}
+                                transferFile?.delete();transferFile=java.io.File(dir,UUID.randomUUID().toString()+".caretransfer").apply{writeText(raw)};render();message("Encrypted transfer prepared. Choose Send encrypted file. Nothing leaves automatically.")
+                            }.onFailure{message("Could not save the protected transfer. Check device storage.")}}.onFailure{message("Cannot prepare this transfer. Choose up to 100 notes/routines; notes up to 4,000 characters, routine titles up to 240.")} }
+                            }.start()
+                        }
+                    }
+                }.show()
+        }
+        transferFile?.takeIf{it.exists()}?.let { file->
+            button("Send encrypted file · Quick Share / apps"){
+                val uri=Uri.Builder().scheme("content").authority(packageName+".transfer").appendPath(file.name).build()
+                val send=Intent(Intent.ACTION_SEND).setType("application/json").putExtra(Intent.EXTRA_STREAM,uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                send.clipData=ClipData.newRawUri("CareSphere encrypted transfer",uri)
+                runCatching{startActivity(Intent.createChooser(send,"Choose nearby sharing or another app"))}.onFailure{message("No file-sharing app is available. Nothing was sent.")}
+            }
+            button("Clear prepared file"){file.delete();transferFile=null;render()}
+        }
+        button("Receive: choose a transfer file"){
+            if(busy)return@button
+            form("Unlock a CareSphere transfer",listOf("Passphrase" to ""),true){v->require(v[0].length>=12);password?.fill('\u0000');password=v[0].toCharArray();receivedTransfer=null
+                runCatching{startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE),613)}.onFailure{password?.fill('\u0000');password=null;message("No file picker available.")}
+            }
+        }
+        receivedTransfer?.let { payload->
+            text("Preview received copies",24f);text("Not verified clinical information. Only the records you select will be added. Existing records are never replaced.")
+            val records=checkTransfer(payload);val history=data.list("receivedItems");val imported=(0 until history.length()).map{history.optString(it)}.toSet();val selected=mutableSetOf<String>()
+            records.forEach{r->val marker=payload.getString("id")+":"+r.getString("id");page.addView(CheckBox(this).apply{text="${r.getString("type")}: ${r.getString("text")}${if(imported.contains(marker))" · Already imported" else ""}";textSize=18f;setTextColor(ink);isEnabled=!imported.contains(marker);setOnCheckedChangeListener{_,value->if(value)selected.add(r.getString("id"))else selected.remove(r.getString("id"))}})}
+            button("Import selected copies"){
+                val chosen=records.filter{selected.contains(it.getString("id"))&&!imported.contains(payload.getString("id")+":"+it.getString("id"))}
+                if(chosen.isEmpty()){message("Choose records that have not already been imported.");return@button}
+                runCatching {
+                    val snapshot=JSONObject(data.json.toString());val notes=snapshot.optJSONArray("notes")?:JSONArray();val routines=snapshot.optJSONArray("routines")?:JSONArray()
+                    require(notes.length()+chosen.count{it.getString("type")=="note"}<=100 && routines.length()+chosen.count{it.getString("type")=="routine"}<=24)
+                    val received=imported.toMutableList()
+                    chosen.forEach {r->if(r.getString("type")=="note")notes.put(JSONObject().put("id",UUID.randomUUID()).put("body",r.getString("text")).put("at",java.time.Instant.now().toString()).put("imported",true))else routines.put(JSONObject().put("id",UUID.randomUUID()).put("title",r.getString("text")));received.add(payload.getString("id")+":"+r.getString("id"))}
+                    snapshot.put("notes",notes).put("routines",routines).put("receivedItems",JSONArray(received.takeLast(2000)));data.restoreSnapshot(snapshot.toString());receivedTransfer=null;render();message("Imported selected copies. Existing records were not replaced.")
+                }.onFailure{message("Import could not finish. Check available storage and record capacity (100 notes, 24 routines). Nothing was replaced.")}
+            }
+            button("Cancel import"){receivedTransfer=null;render()}
+        }
+    }
     private fun recovery(){
         text("Recently deleted notes · 30 days",24f)
         val trash=data.list("trash");val alive=(0 until trash.length()).mapNotNull{trash.optJSONObject(it)}.filter{it.optLong("deletedAt")>System.currentTimeMillis()-30L*86400000}
         alive.forEach{n->text(n.optString("body"));button("Restore note"){val notes=data.list("notes");if((0 until notes.length()).none{notes.getJSONObject(it).optString("id")==n.optString("id")}){notes.put(n);data.put("notes",notes)};data.put("trash",JSONArray(alive.filter{it.optString("id")!=n.optString("id")}));render()};button("Erase note permanently"){confirm("Permanently erase this retained note?"){data.put("trash",JSONArray(alive.filter{it.optString("id")!=n.optString("id")}));render()}}}
         text("Encrypted Android backup",24f);text("Includes your care records, photos and retained deleted notes. Use a unique passphrase of at least 12 characters; it cannot be recovered. Android backups are not interchangeable with iPhone or web backups.")
-        button("Create encrypted backup"){if(busy)return@button;form("Backup passphrase",listOf("Passphrase" to ""),true){v->require(v[0].length>=12);val pass=v[0].toCharArray();val snapshot=data.json.toString().toByteArray(Charsets.UTF_8);busy=true;Thread{val result=runCatching{BackupCipher.seal(snapshot,pass)};pass.fill('\u0000');runOnUiThread{busy=false;if(!isFinishing){result.onSuccess{backupBytes=it;runCatching{startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).setType("application/octet-stream").putExtra(Intent.EXTRA_TITLE,"CareSphere-Android.carebackup").addCategory(Intent.CATEGORY_OPENABLE),611)}.onFailure{message("No file picker available.")}}.onFailure{message("Backup could not be created.")}}}}.start()}}
+        button("Create encrypted backup"){if(busy)return@button;form("Backup passphrase",listOf("Passphrase" to ""),true){v->require(v[0].length>=12);val pass=v[0].toCharArray();val snapshot=data.json.toString().toByteArray(Charsets.UTF_8);busy=true;Thread{val result=runCatching{BackupCipher.seal(snapshot,pass)};pass.fill('\u0000');runOnUiThread{busy=false;if(!isFinishing && !isDestroyed){result.onSuccess{backupBytes=it;runCatching{startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).setType("application/octet-stream").putExtra(Intent.EXTRA_TITLE,"CareSphere-Android.carebackup").addCategory(Intent.CATEGORY_OPENABLE),611)}.onFailure{message("No file picker available.")}}.onFailure{message("Backup could not be created.")}}}}.start()}}
         button("Choose backup to preview"){if(busy)return@button;form("Unlock Android backup",listOf("Passphrase" to ""),true){v->require(v[0].length>=12);password=v[0].toCharArray();runCatching{startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE),612)}.onFailure{password?.fill('\u0000');password=null;message("No file picker available.")}}}
     }
     @Deprecated("Platform activity results")
@@ -146,8 +223,14 @@ class SupportActivity : Activity() {
         if(resultCode!=RESULT_OK||uri==null){password?.fill('\u0000');password=null;backupBytes?.fill(0);backupBytes=null;return}
         try{when(requestCode){
             610->{val bytes=contentResolver.openInputStream(uri)!!.use{it.readBytesBounded(10_000_000)};val bounds=BitmapFactory.Options().apply{inJustDecodeBounds=true};BitmapFactory.decodeByteArray(bytes,0,bytes.size,bounds);require(bounds.outWidth>0&&bounds.outHeight>0);val options=BitmapFactory.Options().apply{inSampleSize=maxOf(1,maxOf(bounds.outWidth,bounds.outHeight)/512)};val bitmap=BitmapFactory.decodeByteArray(bytes,0,bytes.size,options)?:throw IllegalArgumentException();val out=java.io.ByteArrayOutputStream();bitmap.compress(Bitmap.CompressFormat.JPEG,65,out);bitmap.recycle();require(out.size()<180000);form("Photo description",listOf("Description" to "My photo")){v->require(rows("photos").size<10&&v[0].isNotBlank());update("photos",rows("photos")+JSONObject().put("id",UUID.randomUUID()).put("caption",v[0].take(120)).put("jpeg",Base64.getEncoder().encodeToString(out.toByteArray())))}}
+            613->{val pass=password?:return;password=null;val raw=contentResolver.openInputStream(uri)!!.use{String(it.readBytesBounded(1_000_000),Charsets.UTF_8)};busy=true
+                Thread{val result=runCatching{val envelope=JSONObject(raw);require(envelope.getString("format")=="CareSphere Transfer"&&envelope.getInt("version")==1&&envelope.getInt("iterations")==310000)
+                    val e=TransferCrypto.Envelope(Base64.getDecoder().decode(envelope.getString("salt")),Base64.getDecoder().decode(envelope.getString("iv")),Base64.getDecoder().decode(envelope.getString("ciphertext")))
+                    JSONObject(String(TransferCrypto.open(e,String(pass)),Charsets.UTF_8)).also{checkTransfer(it)}
+                };pass.fill('\u0000');runOnUiThread{busy=false;if(!isFinishing&&!isDestroyed)result.onSuccess{receivedTransfer=it;section="Device sharing";render();message("Unlocked locally. Nothing is saved until you select records and import.")}.onFailure{message("Cannot unlock this CareSphere transfer. Check the passphrase and file. Nothing was imported.")}}}.start()
+            }
             611->{val bytes=backupBytes?:return;contentResolver.openOutputStream(uri,"w")!!.use{it.write(bytes)};bytes.fill(0);backupBytes=null;message("Encrypted backup saved. Keep its passphrase separately.")}
-            612->{val pass=password?:return;password=null;val bytes=contentResolver.openInputStream(uri)!!.use{it.readBytesBounded(6_100_000)};busy=true;Thread{val result=runCatching{String(BackupCipher.open(bytes,pass),Charsets.UTF_8).also{CareData.validateSnapshot(it)}};pass.fill('\u0000');runOnUiThread{busy=false;if(!isFinishing)result.onSuccess{raw->val parsed=JSONObject(raw);confirm("Replace local records with ${parsed.optJSONArray("notes")?.length()?:0} notes and ${parsed.optJSONArray("routines")?.length()?:0} routines? Create a current backup first if needed."){runCatching{data.restoreSnapshot(raw);render();message("Backup restored.")}.onFailure{message("Restore could not finish. Check storage and try again.")}}}.onFailure{message("Could not unlock this Android backup. Check the file and passphrase. Nothing changed.")}}}.start()}
+            612->{val pass=password?:return;password=null;val bytes=contentResolver.openInputStream(uri)!!.use{it.readBytesBounded(6_100_000)};busy=true;Thread{val result=runCatching{String(BackupCipher.open(bytes,pass),Charsets.UTF_8).also{CareData.validateSnapshot(it)}};pass.fill('\u0000');runOnUiThread{busy=false;if(!isFinishing && !isDestroyed)result.onSuccess{raw->val parsed=JSONObject(raw);confirm("Replace local records with ${parsed.optJSONArray("notes")?.length()?:0} notes and ${parsed.optJSONArray("routines")?.length()?:0} routines? Create a current backup first if needed."){runCatching{data.restoreSnapshot(raw);render();message("Backup restored.")}.onFailure{message("Restore could not finish. Check storage and try again.")}}}.onFailure{message("Could not unlock this Android backup. Check the file and passphrase. Nothing changed.")}}}.start()}
         }}catch(_:Exception){password?.fill('\u0000');password=null;backupBytes?.fill(0);backupBytes=null;message("The file could not be processed. Nothing was imported.")}
     }
     private fun java.io.InputStream.readBytesBounded(limit:Int):ByteArray{val out=java.io.ByteArrayOutputStream();val buffer=ByteArray(8192);while(true){val n=read(buffer);if(n<0)break;require(out.size()+n<=limit);out.write(buffer,0,n)};return out.toByteArray()}

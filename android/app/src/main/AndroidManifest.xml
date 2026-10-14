@@ -11,6 +11,7 @@
     <application android:allowBackup="false" android:fullBackupContent="false"
         android:label="CareSphere" android:icon="@drawable/ic_care" android:theme="@style/AppTheme"
         android:supportsRtl="true" android:usesCleartextTraffic="false">
+        <provider android:name=".TransferFileProvider" android:authorities="${applicationId}.transfer" android:exported="false" android:grantUriPermissions="true" />
         <activity android:name=".SupportActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="true" android:windowSoftInputMode="adjustResize">
             <intent-filter>

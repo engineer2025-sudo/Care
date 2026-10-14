@@ -39,7 +39,7 @@ struct CareCircleView: View {
                 if let note = deletingNote { store.deleteNote(id: note.id) }
                 deletingNote = nil
             }
-        } message: { Text("This removes this note from this device. Previously shared copies cannot be removed.") }
+        } message: { Text("This moves the note to Recently deleted in My support tools for 30 days. Previously shared copies cannot be removed.") }
         .sheet(isPresented: $showingVisitPrep) {
             VisitPrepView()
                 .environmentObject(store)

@@ -497,6 +497,30 @@ final class CareStore: ObservableObject {
         if !notes.contains(where: { $0.id == entry.id }) { notes.insert(entry.note, at: 0) }
         personalSupport.deletedNotes.removeAll { $0.id == entry.id }
     }
+    /// Persist the complete merged snapshot before changing any observable state.
+    func importTransfer(_ transfer: TransferPayload, selected: Set<String>) throws -> Int {
+        guard persistenceCanWrite else { throw CareStoreError.storageUnavailable }
+        try DeviceTransfer.validate(transfer)
+        var box = persistedBox()
+        var support = box.personalSupport ?? PersonalSupport()
+        var history = support.receivedItems ?? []
+        let chosen = transfer.records.filter { selected.contains($0.id) && !history.contains(transfer.id + ":" + $0.id) }
+        guard !chosen.isEmpty, box.notes.count + chosen.filter({ $0.type == "note" }).count <= 500,
+              box.routines.count + chosen.filter({ $0.type == "routine" }).count <= 200 else { throw CareStoreError.storageUnavailable }
+        for record in chosen {
+            if record.type == "note" { box.notes.append(CareNote(author: "Imported copy", body: record.text, sentiment: TextInsightsService.sentimentScore(for: record.text))) }
+            else { box.routines.append(Routine(emoji: "", title: record.text)) }
+            history.append(transfer.id + ":" + record.id)
+        }
+        support.receivedItems = Array(history.suffix(2000)); box.personalSupport = support
+        let key = try SecureCareStorage.loadOrCreateKey()
+        try writePrivateFile(SecureCareStorage.seal(JSONEncoder().encode(box), using: key), to: fileURL)
+        encryptionKey = key
+        isErasingLocalData = true
+        notes = box.notes; routines = box.routines; personalSupport = support
+        isErasingLocalData = false; persistenceIssue = nil
+        return chosen.count
+    }
     func backupSnapshot() throws -> Data { try JSONEncoder().encode(persistedBox()) }
     func inspectBackup(_ data: Data) throws -> String {
         let box = try validatedBackup(data)

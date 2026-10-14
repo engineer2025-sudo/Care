@@ -516,7 +516,7 @@ class MainActivity : Activity() {
             button("Erase all local data", c) { confirm("Erase everything?", "This permanently removes your saved care information and encryption key from this app. Copies you previously shared cannot be removed.") { monitor.disconnect(); data.erase(); settings = false; tab = 0; render() } }
         }
         card("About this Android release") { c ->
-            text("CareSphere 1.1 · Native Android\nEleven optional activities, local routines and notes, daily mood self-report, real Bluetooth heart rate, and deliberate sharing. No generated health measurements.", parent = c)
+            text("CareSphere 1.2 · Native Android\nEleven optional activities, local routines and notes, daily mood self-report, real Bluetooth heart rate, and deliberate sharing. No generated health measurements.", parent = c)
             text("Apple Intelligence is an Apple-only capability and is not available in this Android app. No AI answers are fabricated or substituted. This is a first Android release, not full iOS feature parity.", parent = c)
         }
     }

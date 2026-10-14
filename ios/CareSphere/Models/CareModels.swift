@@ -224,6 +224,7 @@ struct PersonalSupport: Codable {
     var contacts: [TrustedPerson] = []
     var questions: [VisitQuestion] = []
     var deletedNotes: [DeletedCareNote] = []
+    var receivedItems: [String]? = nil
 }
 struct VisualPlan: Identifiable, Codable {
     var id = UUID()
