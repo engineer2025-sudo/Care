@@ -196,13 +196,16 @@ struct OverviewView: View {
         SectionCard(title: "Today's steps", systemImage: "figure.walk") {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("\(steps.todaySteps)")
+                    Text(steps.hasStarted && steps.isAvailable ? "\(steps.todaySteps)" : "—")
                         .font(.system(size: 32, weight: .black))
                     Text("of \(store.profile.dailyStepGoal) goal · \(steps.statusMessage)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
-                Spacer()
+                if !steps.hasStarted {
+                    Button("Enable step counting") { steps.start() }
+                        .buttonStyle(.bordered).controlSize(.large)
+                }
                 ProgressView(value: Double(min(steps.todaySteps, store.profile.dailyStepGoal)),
                              total: Double(max(store.profile.dailyStepGoal, 1)))
                     .frame(maxWidth: .infinity)

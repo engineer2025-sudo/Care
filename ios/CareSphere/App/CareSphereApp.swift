@@ -85,10 +85,10 @@ struct CareSphereApp: App {
                     hasCheckedInitialLock = true
                     if store.biometricEnabled { isLocked = true }
                 }
-                steps.start()
             }
             .onChange(of: scenePhase) { phase in
                 careSupport.setAppActive(phase == .active)
+                if phase == .active && steps.hasStarted { steps.start() }
                 if phase == .active && healthKit.hasRequestedAuthorization {
                     healthKit.refreshAll()
                 }

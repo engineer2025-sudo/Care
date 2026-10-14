@@ -40,7 +40,7 @@ struct VitalsView: View {
                     bloodPressureCard
                     howItWorks
                 }
-                .padding()
+                .carePagePadding()
             }
             .background(Color.ink)
             .navigationTitle("Vitals & Telehealth")

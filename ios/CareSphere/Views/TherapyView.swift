@@ -196,7 +196,11 @@ struct PicturePairsCard: View {
                             Image(systemName: isOpen ? card.symbol : "square")
                                 .font(.title2)
                                 .accessibilityHidden(true)
-                            if isMatched { Label("Matched", systemImage: "checkmark").font(.caption) }
+                            if isMatched {
+                                Label("Matched", systemImage: "checkmark.circle.fill").font(.caption)
+                            } else if opened.contains(card.id) {
+                                Label("Chosen", systemImage: "checkmark.circle").font(.caption)
+                            }
                             Text(isOpen ? card.label : "Card \(index + 1)")
                                 .font(.caption.weight(.semibold))
                                 .multilineTextAlignment(.center)
@@ -206,11 +210,12 @@ struct PicturePairsCard: View {
                                     in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .strokeBorder(isMatched ? Color.emeraldText : Color.secondary.opacity(0.3), lineWidth: isMatched ? 2 : 1))
+                                .strokeBorder(isMatched || opened.contains(card.id) ? Color.emeraldText : Color.secondary.opacity(0.3), lineWidth: isMatched || opened.contains(card.id) ? 2 : 1))
                     }
                     .buttonStyle(.plain)
                     .disabled(isMatched || opened.count == 2)
-                    .accessibilityLabel(isOpen ? "\(card.label)\(isMatched ? ", pair found" : "")" : "Hidden picture card \(index + 1)")
+                    .accessibilityLabel(isOpen ? "\(card.label), card \(index + 1)\(isMatched ? ", pair found" : "")" : "Hidden picture card \(index + 1)")
+                    .accessibilityValue(opened.contains(card.id) ? "Chosen" : "")
                     .accessibilityHint(isMatched ? "Pair found." : "Double-tap to choose this card.")
                 }
             }
@@ -221,9 +226,9 @@ struct PicturePairsCard: View {
 
             HStack {
                 if canHideCards {
-                    Button("Hide cards") {
+                    Button(revealAll ? "Clear selection" : "Hide cards") {
                         opened = []
-                        message = "Cards hidden. Choose two when you are ready."
+                        message = "Selection cleared. Choose two when you are ready."
                     }
                     .buttonStyle(.bordered)
                 }
@@ -252,7 +257,7 @@ struct PicturePairsCard: View {
                 ? "All pairs are visible. Start again or choose a different number of pairs."
                 : "Pair found. Take your time with the next one."
         } else {
-            message = "These are different pictures. They will stay open until you choose Hide cards."
+            message = "These are different pictures. Clear the selection or hide the cards when you are ready."
         }
     }
 
@@ -411,7 +416,7 @@ struct BreathingCard: View {
     }
 }
 
-/// Shared 4·4·6 activity used by Therapy and the optional support check-in.
+/// Shared paced-breathing activity, with an opt-in hold, for activities and support.
 /// It guides a pace only; it does not observe or verify a person's breathing.
 struct PacedBreathingActivity: View {
     let targetCycles: Int?

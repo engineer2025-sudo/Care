@@ -42,11 +42,13 @@ struct ContactPicker: UIViewControllerRepresentable {
 /// emergency contact → security (Touch ID) → permissions → done.
 /// ─────────────────────────────────────────────────────────────────────────
 struct OnboardingView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var store: CareStore
     @EnvironmentObject private var healthKit: HealthKitService
     @EnvironmentObject private var notifications: NotificationService
 
     @State private var step: Step = .welcome
+    @State private var includeBirthDate = false
     @State private var birthDate: Date = Calendar.current.date(byAdding: .year, value: -70, to: Date())!
     @State private var careMode: CareMode = .both
     @State private var meds: [Medication] = []
@@ -84,6 +86,8 @@ struct OnboardingView: View {
             .padding(.horizontal, 24)
             .padding(.top, 12)
 
+            ScrollViewReader { proxy in
+            ScrollView {
             Group {
                 switch step {
                 case .welcome: welcomePage
@@ -97,10 +101,10 @@ struct OnboardingView: View {
                 case .done: donePage
                 }
             }
-            .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
-                                    removal: .move(edge: .leading).combined(with: .opacity)))
-            .id(step)
-            .animation(.spring(response: 0.45, dampingFraction: 0.85), value: step)
+            .id("setup-content")
+            }
+            .onChange(of: step) { _ in proxy.scrollTo("setup-content", anchor: .top) }
+            }
 
             Spacer(minLength: 0)
 
@@ -108,7 +112,7 @@ struct OnboardingView: View {
             HStack(spacing: 12) {
                 if step != .welcome {
                     Button {
-                        withAnimation { step = Step(rawValue: step.rawValue - 1) ?? .welcome }
+                        step = Step(rawValue: step.rawValue - 1) ?? .welcome
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.subheadline.weight(.black))
@@ -116,6 +120,7 @@ struct OnboardingView: View {
                             .background(Color.cardInner, in: Circle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Previous setup step")
                 }
                 Button {
                     advance()
@@ -167,12 +172,18 @@ struct OnboardingView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 8)
             }
-            HStack(spacing: 14) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 110))], spacing: 14) {
                 featureBadge("waveform.path.ecg", "Live vitals")
                 featureBadge("video.fill", "Video circles")
                 featureBadge("pills.fill", "Reminders")
-                featureBadge("gamecontroller.fill", "Therapy")
+                featureBadge("gamecontroller.fill", "Activities")
             }
+            Button("Explore first · set up later") {
+                store.hasCompletedOnboarding = true
+            }
+            .buttonStyle(.bordered).controlSize(.large)
+            Text("Activities work without an account, health permissions, or model downloads. Add your details later in Settings.")
+                .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
             Spacer()
             Spacer()
         }
@@ -188,15 +199,13 @@ struct OnboardingView: View {
                     .textFieldStyle(.roundedBorder)
             }
             VStack(alignment: .leading, spacing: 8) {
-                Text("Date of birth").font(.caption.weight(.bold)).foregroundStyle(.secondary)
-                DatePicker("Date of birth", selection: $birthDate, displayedComponents: .date)
-                    .datePickerStyle(.compact)
-                    .labelsHidden()
-                if let age = Calendar.current.dateComponents([.year], from: birthDate, to: Date()).year {
-                    Label("That makes you \(age) — CareSphere will adapt font sizes and pacing for you.", systemImage: "sparkles")
-                        .font(.caption)
-                        .foregroundStyle(Color.emeraldText)
+                Toggle("Add date of birth (optional)", isOn: $includeBirthDate)
+                if includeBirthDate {
+                    DatePicker("Date of birth", selection: $birthDate, in: ...Date(), displayedComponents: .date)
+                        .datePickerStyle(.compact)
                 }
+                Text("Text size follows your iPhone settings. You choose the activity and pace; age does not automatically change them.")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
         }
         .padding(28)
@@ -204,7 +213,7 @@ struct OnboardingView: View {
 
     private var focusPage: some View {
         VStack(alignment: .leading, spacing: 22) {
-            pageHeader("What brings you here?", "CareSphere adapts its pacing, games and reminders to your focus.", systemImage: "switch.2")
+            pageHeader("What brings you here?", "Choose a profile preference. All activities remain available; this is not a diagnosis or treatment plan.", systemImage: "switch.2")
             VStack(spacing: 12) {
                 ForEach(CareMode.allCases) { mode in
                     Button {
@@ -508,10 +517,10 @@ struct OnboardingView: View {
 
     private func advance() {
         commitCurrentStep()
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+        withAnimation((reduceMotion || store.reduceVisualMotion) ? nil : .easeInOut(duration: 0.2)) {
             if step == .done {
                 store.hasCompletedOnboarding = true
-                HapticsService.success()
+                if !store.reduceVisualMotion { HapticsService.success() }
             } else {
                 step = Step(rawValue: step.rawValue + 1) ?? .done
             }
@@ -521,8 +530,7 @@ struct OnboardingView: View {
     private func commitCurrentStep() {
         switch step {
         case .profile:
-            store.profile.birthDate = birthDate
-            if let age = store.profile.age, age >= 65 { store.voiceReminders = true }
+            store.profile.birthDate = includeBirthDate ? birthDate : nil
         case .focus:
             store.profile.careMode = careMode
         case .medications:

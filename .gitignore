@@ -5,3 +5,15 @@ dist/
 
 # Downloaded CI installers and local delivery bundles are not source assets.
 deliverables/
+
+# Local browser checks and test reports
+.cache/
+playwright-report/
+test-results/
+
+# Native build and per-user Xcode state (keep the shared project and scheme)
+**/.build/
+**/.swiftpm/
+**/xcuserdata/
+**/*.xcuserstate
+DerivedData/

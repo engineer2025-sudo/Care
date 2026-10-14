@@ -117,13 +117,14 @@ struct ActivitySessionView: View {
 
     var body: some View {
         NavigationStack {
+            ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Label("No score · stop whenever you like", systemImage: "leaf")
                         .font(.subheadline).foregroundStyle(Color.emeraldText)
                     // Keep the session mounted while paused so choices are not lost.
                     // Activity lifecycle handlers stop sound/playback on backgrounding.
-                    ZStack {
+                    ZStack(alignment: .top) {
                         activityContent
                             .opacity(paused ? 0 : 1)
                             .allowsHitTesting(!paused)
@@ -151,7 +152,10 @@ struct ActivitySessionView: View {
                         .background(Color.card, in: RoundedRectangle(cornerRadius: 16))
                     }
                 }
+                .id("session-top")
                 .carePagePadding()
+            }
+            .onChange(of: paused) { _ in proxy.scrollTo("session-top", anchor: .top) }
             }
             .background(Color.ink)
             .navigationTitle(activity.title)
@@ -161,7 +165,7 @@ struct ActivitySessionView: View {
                     Button("Done") { dismiss() }.accessibilityLabel("Leave activity")
                 }
                 // Sound and breathing have their own explicit pause controls.
-                if activity != .soundscapes && activity != .breathing && activity != .patternRecall {
+                if activity != .soundscapes && activity != .breathing {
                     ToolbarItem(placement: .primaryAction) {
                         Button(paused ? "Continue" : "Take a break") { paused.toggle() }
                     }
@@ -169,7 +173,7 @@ struct ActivitySessionView: View {
             }
             .sheet(isPresented: $showingEvidence) { ActivityEvidenceView() }
             .onChange(of: scenePhase) { phase in
-                if phase != .active && activity != .soundscapes && activity != .breathing && activity != .patternRecall {
+                if phase != .active && activity != .soundscapes && activity != .breathing {
                     paused = true
                 }
             }
