@@ -27,6 +27,7 @@ class SupportActivity : Activity() {
     private var pack = "Nature"
     private var phrase = ""
     private var tts: TextToSpeech? = null
+    private var speechReady = false
     private var pendingSpeech: String? = null
     private var backupBytes: ByteArray? = null
     private var password: CharArray? = null
@@ -66,7 +67,8 @@ class SupportActivity : Activity() {
     override fun onDestroy(){tts?.shutdown();password?.fill('\u0000');backupBytes?.fill(0);super.onDestroy()}
     private fun say(value:String){
         pendingSpeech=value
-        if(tts==null){tts=TextToSpeech(this){status->if(status==TextToSpeech.SUCCESS){val voice=tts?.voices?.firstOrNull{!it.isNetworkConnectionRequired && it.locale.language==java.util.Locale.getDefault().language};if(voice!=null){tts?.voice=voice;pendingSpeech?.let{say(it)}}else message("No matching installed offline voice. The phrase stays visible.")}else message("Speech is unavailable. The phrase stays visible.")};return}
+        if(tts==null){tts=TextToSpeech(this){status->if(status==TextToSpeech.SUCCESS){val voice=tts?.voices?.firstOrNull{!it.isNetworkConnectionRequired && it.locale.language==java.util.Locale.getDefault().language};if(voice!=null){tts?.voice=voice;speechReady=true;pendingSpeech?.let{say(it)}}else message("No matching installed offline voice. The phrase stays visible.")}else message("Speech is unavailable. The phrase stays visible.")};return}
+        if(!speechReady){pendingSpeech=null;message("No installed offline voice is ready. The phrase remains visible.");return}
         tts?.speak(value,TextToSpeech.QUEUE_FLUSH,null,UUID.randomUUID().toString());pendingSpeech=null
     }
     private fun render(){

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { normalizeSupport, PHRASES, PACKS, speak, safeLink, downloadFile } from '../lib/support'
 import { makeBackup, openBackup } from '../lib/backup'
 import { getCareStorageCache, persistCareStorage } from '../lib/secureCareStorage'
@@ -9,6 +9,7 @@ const Button = ({children,...props}) => <button className="library-secondary" {.
 const Field = ({label,...props}) => <label className="block space-y-2"><span>{label}</span><input className="library-input" {...props}/></label>
 function Card({title,children}) { return <section className="support-card"><h2>{title}</h2>{children}</section> }
 export default function SupportHub({ support, setSupport, notes, setNotes, routines, setRoutines, settings, updateSettings, navigate }) {
+  const generation = useRef(0)
   const [section,setSection]=useState('start')
   const [status,setStatus]=useState(''), [phrase,setPhrase]=useState(''), [shown,setShown]=useState('')
   const [title,setTitle]=useState(''), [stepText,setStepText]=useState(''), [selectedPhoto,setSelectedPhoto]=useState('')
@@ -20,16 +21,23 @@ export default function SupportHub({ support, setSupport, notes, setNotes, routi
   const [photoGame,setPhotoGame]=useState(false),[revealed,setRevealed]=useState([]),[matched,setMatched]=useState([])
   const patch = data => setSupport(s=>normalizeSupport({...s,...data}))
   const run = async action => {setBusy(true);setStatus('');try {await action()} catch(e){setStatus(e.message||'This action could not finish.')} finally {setBusy(false)}}
-  useEffect(()=>()=>globalThis.speechSynthesis?.cancel(),[])
+  useEffect(()=>{
+    const reset=()=>{generation.current++;globalThis.speechSynthesis?.cancel();setDraftFields();setSession(null);setShown('');setContactAction(null);setPending(null);setPassword('');setPhotoGame(false);setRevealed([]);setMatched([])}
+    const setDraftFields=()=>{setPhrase('');setTitle('');setStepText('');setSelectedPhoto('');setName('');setPhone('');setVideo('');setQuestion('');setCaption('');setPhotoIndex(0)}
+    window.addEventListener(RESET_LOCAL_DATA_EVENT,reset)
+    return()=>{generation.current++;globalThis.speechSynthesis?.cancel();window.removeEventListener(RESET_LOCAL_DATA_EVENT,reset)}
+  },[])
   useEffect(()=>{ const stop=()=>{if(document.hidden){globalThis.speechSynthesis?.cancel();setPaused(true)}};document.addEventListener('visibilitychange',stop);return()=>document.removeEventListener('visibilitychange',stop)},[])
   const chooseSection = value => {globalThis.speechSynthesis?.cancel();setSection(value);setStatus('');setSession(null);setPaused(false);setShown('');setContactAction(null);setPending(null);setPassword('')}
   const sections={start:'Start here',plans:'Visual routines',communicate:'Communication cards',photos:'My photos',people:'My people',comfort:'My comfort',visit:'Appointment questions',recovery:'Recovery & backup',packs:'Interest activities',sharing:'Device-to-device sharing'}
   const plan=session && support.plans.find(p=>p.id===session.id), step=plan?.steps[session.index]
   async function importPhoto(file) {
+    const operation = generation.current
     if(!file)return
     if(support.photos.length>=10 || file.size>10000000 || !['image/jpeg','image/png','image/webp'].includes(file.type)) throw Error('Choose a JPEG, PNG or WebP under 10 MB. Keep up to 10 photos.')
     const bitmap=await createImageBitmap(file); const canvas=document.createElement('canvas'); const scale=Math.min(1,512/Math.max(bitmap.width,bitmap.height));canvas.width=bitmap.width*scale;canvas.height=bitmap.height*scale;canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close()
     const url=canvas.toDataURL('image/jpeg',0.65);if(url.length>=180000)throw Error('Please choose a smaller photo.')
+    if(operation!==generation.current)return
     patch({photos:[...support.photos,{id:id(),caption:caption.trim()||'My photo',url}]});setCaption('');setStatus('Photo saved locally. Image metadata was removed by resizing.');setPhotoIndex(0)
   }
   return <div className="space-y-5 support-hub"><header className="flex flex-wrap justify-between gap-3"><div><h1 className="text-2xl font-bold">Your support tools</h1><p>Choose what helps. Nothing here is required.</p></div><Button onClick={()=>navigate('home')}>Back to my day</Button></header>

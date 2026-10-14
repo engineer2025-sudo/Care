@@ -67,6 +67,11 @@ class CareData(private val context: Context) {
         json.remove("routineUndo"); save()
     }
     fun refreshDay() {
+        if(writable && json.has("trash")) {
+            val trash=list("trash");val now=System.currentTimeMillis()
+            val keep=(0 until trash.length()).mapNotNull { trash.optJSONObject(it) }.filter { it.optLong("deletedAt") in (now-30L*86400000)..now }
+            if(keep.size != trash.length()) { json.put("trash",JSONArray(keep));save() }
+        }
         val today = LocalDate.now().toString()
         if (json.optString("day") != today && writable) {
             json.put("day", today).put("done", JSONArray()).remove("mood")

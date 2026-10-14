@@ -1412,6 +1412,7 @@ export default function App() {
   const [medsConfirmed, setMedsConfirmed] = usePersisted('medsConfirmed', false)
   const [notes, setNotes] = usePersisted('notes', [])
   const [support, setSupport] = usePersisted('support', normalizeSupport())
+  useEffect(()=>{setSupport(current=>normalizeSupport(current))},[localDay])
   const [favorites, setFavorites] = usePersisted('favoriteActivities', [])
   const [moods, setMoods] = usePersisted('moods', [])
   const [routineDraft, setRoutineDraft] = useState('')
