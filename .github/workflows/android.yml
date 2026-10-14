@@ -36,8 +36,8 @@ jobs:
           from pathlib import Path
           p = Path('/tmp/android-build.log')
           if p.exists():
-              for line in p.read_text().splitlines()[-100:]:
-                  if line.strip(): print('::error::' + line.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+              tail = '\n'.join(p.read_text().splitlines()[-120:])[-50000:]
+              print('::error::' + tail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
           PY
       - uses: actions/upload-artifact@v7
         if: always()
