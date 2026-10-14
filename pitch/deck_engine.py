@@ -1,10 +1,13 @@
-"""Shared slide engine for the CareSphere pitch decks.
+"""Slide engine for the CareSphere pitch deck.
 
-A slide is a list of primitives (rect / oval / line / text / image, all in inches).
-Each deck is rendered twice from the same description:
-  * editable PowerPoint via python-pptx (Arial / Courier New), and
-  * PNG/JPG previews via Pillow using Arimo / Cousine (metric-compatible fonts),
-    so layouts can be checked visually without PowerPoint.
+A slide is a list of primitives (rect / oval / line / text / image, all in inches).  Each deck is rendered twice
+from the same description:
+  * an editable PowerPoint via python-pptx, with the typefaces embedded (see embed_fonts.py), and
+  * JPG previews via Pillow using the very same TTF files, so what you see here is what PowerPoint shows.
+
+Design system (one family, one accent — everything matches the CareSphere app icon):
+  type    Plus Jakarta Sans (ExtraBold display, Bold headlines, Regular body) + JetBrains Mono for code
+  colour  icon navy gradient background, translucent white panels, the icon's mint-green as the only accent
 """
 from __future__ import annotations
 
@@ -14,7 +17,7 @@ import re
 from pathlib import Path
 
 from lxml import etree
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.dml import MSO_LINE_DASH_STYLE
@@ -23,39 +26,61 @@ from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
 from pptx.oxml.ns import qn
 from pptx.util import Emu, Inches, Pt
 
+import embed_fonts
+
 ROOT = Path(__file__).resolve().parent
 ASSETS = ROOT / 'assets'
-FONT_DIR = Path(os.environ.get('PITCH_FONT_DIR', ROOT / 'fonts'))  # Arimo + Cousine (OFL) ship in pitch/fonts
-FONT_REG = str(FONT_DIR / 'Arimo[wght].ttf')
-FONT_ITA = str(FONT_DIR / 'Arimo-Italic[wght].ttf')
-FONT_MONO = str(FONT_DIR / 'Cousine-Regular.ttf')
+FONT_DIR = Path(os.environ.get('PITCH_FONT_DIR', ROOT / 'fonts'))
+
+# weight → (TTF file, PowerPoint typeface name, PowerPoint bold flag)
+FACES = {
+    400: ('PlusJakartaSans-Regular.ttf', 'Plus Jakarta Sans', False),
+    500: ('PlusJakartaSans-Medium.ttf', 'Plus Jakarta Sans Medium', False),
+    700: ('PlusJakartaSans-Bold.ttf', 'Plus Jakarta Sans', True),
+    800: ('PlusJakartaSans-ExtraBold.ttf', 'Plus Jakarta Sans ExtraBold', False),
+    'mono': ('JetBrainsMono-Regular.ttf', 'JetBrains Mono', False),
+}
+EMBED = [
+    {'typeface': 'Plus Jakarta Sans', 'regular': FONT_DIR / FACES[400][0], 'bold': FONT_DIR / FACES[700][0]},
+    {'typeface': 'Plus Jakarta Sans Medium', 'regular': FONT_DIR / FACES[500][0]},
+    {'typeface': 'Plus Jakarta Sans ExtraBold', 'regular': FONT_DIR / FACES[800][0]},
+    {'typeface': 'JetBrains Mono', 'regular': FONT_DIR / FACES['mono'][0]},
+]
+ASCENT, DESCENT = 1.038, 0.222       # Plus Jakarta Sans hhea metrics (em), used to place baselines in previews
+MONO_ASCENT, MONO_DESCENT = 1.02, 0.30
 
 # ---------------------------------------------------------------- geometry
 W, H = 13.333, 7.5          # 16:9 slide, inches
 PX = 144                    # preview pixels per inch (1920 x 1080)
-M = 0.7                     # outer margin
+M = 0.8                     # outer margin
 CW = W - 2 * M              # content width
 
-# ---------------------------------------------------------------- blue theme
-BG = '0C2D63'        # deep blue background
-PANEL = '15407F'     # cards
-PANEL2 = '1B4A90'    # lighter cards / hover
-BORDER = '2E5CA6'
-BORDER2 = '3F70C0'
+# ---------------------------------------------------------------- palette (from the app icon: #0A1324 navy, #06E288 heart)
+BG = '0B1733'               # gradient top
+BG2 = '0F2659'              # gradient bottom
+INK = '0A1324'              # icon navy — text on accent surfaces
 WHITE = 'FFFFFF'
-TEXT = 'EAF0FB'
-TEXT2 = 'C7D7F2'
-MUTED = 'A6BBE0'
-DIM = '7F98C6'
-ACCENT = '4ADE80'    # CareSphere green (the icon's heart) on blue
-ACCENT_D = '22C55E'
-WARM = 'FFC94D'
-ROSE = 'FF7B7B'
-SKY = '7CC4FF'
-VIOLET = 'B8A6FF'
-NAVY = '0D1424'
+TEXT = 'D7E0F2'             # body
+MUTED = '93A4C7'            # secondary
+DIM = '5F7299'              # footers, sources
+ACCENT = '06E288'           # the icon's heart — the only accent colour
+LINE = 'FFFFFF'             # used with alpha for panel borders
+PANEL_ALPHA = 0.06
+PANEL_LINE_ALPHA = 0.10
+# compatibility names for older slide code
+PANEL = '15284F'
+PANEL2 = '1A3160'
+BORDER = '2B3F6B'
+BORDER2 = '3A5287'
+TEXT2 = TEXT
+ACCENT_D = ACCENT
+WARM = ACCENT
+ROSE = MUTED
+SKY = ACCENT
+VIOLET = ACCENT
+NAVY = INK
 
-FOOTER_TEXT = ''     # minimalist: slide number only
+FOOTER_BRAND = 'CareSphere AI'
 
 
 def rgb(hexstr):
@@ -66,47 +91,48 @@ def rgb(hexstr):
 _font_cache: dict = {}
 
 
-def pil_font(size_pt: float, bold=False, italic=False, mono=False):
+def pil_font(size_pt: float, weight=400, mono=False):
     px = max(1.0, round(size_pt * PX / 72, 1))
-    key = (px, bold, italic, mono)
+    key = (px, 'mono' if mono else weight)
     if key not in _font_cache:
-        if mono:
-            f = ImageFont.truetype(FONT_MONO, px)
-        else:
-            f = ImageFont.truetype(FONT_ITA if italic else FONT_REG, px)
-            f.set_variation_by_axes([700 if bold else 400])
-        _font_cache[key] = f
+        _font_cache[key] = ImageFont.truetype(str(FONT_DIR / FACES['mono' if mono else weight][0]), px)
     return _font_cache[key]
 
 
+def _weight(st):
+    return 700 if st.get('bold') and st.get('weight', 400) < 700 else st.get('weight', 400)
+
+
 def parse_markup(text: str, base: dict) -> list[tuple[str, dict]]:
-    """**bold** → bold run (uses base['strong'] colour), ~~muted~~ → dim run."""
+    """**strong** → bold run in base['strong'] colour, ~~muted~~ → dim run, ==accent== → accent-coloured run."""
     runs = []
-    pattern = re.compile(r'(\*\*.+?\*\*|~~.+?~~)')
+    pattern = re.compile(r'(\*\*.+?\*\*|~~.+?~~|==.+?==)')
     for part in pattern.split(text):
         if not part:
             continue
         style = dict(base)
         if part.startswith('**'):
             part = part[2:-2]
-            style['bold'] = True
+            style['weight'] = max(700, base.get('weight', 400))
             style['color'] = base.get('strong', base['color'])
         elif part.startswith('~~'):
             part = part[2:-2]
-            style['color'] = base.get('dim', MUTED)
+            style['color'] = MUTED
+        elif part.startswith('=='):
+            part = part[2:-2]
+            style['color'] = ACCENT
         runs.append((part, style))
     return runs
 
 
-def norm_paras(paras, size, color, bold, italic, strong, lh, space_after, mono=False):
+def norm_paras(paras, size, color, weight, strong, lh, space_after, mono=False, tracking=0.0):
     out = []
     for p in paras:
         if isinstance(p, str):
             p = {'text': p}
         base = {
-            'size': p.get('size', size), 'color': p.get('color', color),
-            'bold': p.get('bold', bold), 'italic': p.get('italic', italic),
-            'strong': p.get('strong', strong), 'mono': p.get('mono', mono),
+            'size': p.get('size', size), 'color': p.get('color', color), 'weight': p.get('weight', weight),
+            'strong': p.get('strong', strong), 'mono': p.get('mono', mono), 'tracking': p.get('tracking', tracking),
         }
         runs = p['runs'] if 'runs' in p else parse_markup(p['text'], base)
         runs = [(t, {**base, **st}) for t, st in runs]
@@ -114,28 +140,35 @@ def norm_paras(paras, size, color, bold, italic, strong, lh, space_after, mono=F
             'runs': runs, 'bullet': p.get('bullet', False), 'size': base['size'],
             'space_before': p.get('space_before', 0), 'space_after': p.get('space_after', space_after),
             'lh': p.get('lh', lh), 'align': p.get('align'), 'bullet_color': p.get('bullet_color', ACCENT),
-            'indent': p.get('indent', 0.24), 'bullet_char': p.get('bullet_char', '•'),
+            'indent': p.get('indent', 0.26), 'bullet_char': p.get('bullet_char', '•'),
         })
     return out
 
 
+def run_width(f, tok, st, scale):
+    w = f.getlength(tok)
+    if st.get('tracking'):
+        w += len(tok) * st['tracking'] * scale * PX / 72
+    return w
+
+
 def layout_paras(paras, w_in, scale=1.0):
-    """Greedy word wrap using Arimo metrics. Returns (lines, total_height_in)."""
+    """Greedy word wrap with the real font metrics. Returns (lines, total_height_in)."""
     lines = []
     total = 0.0
     for pi, p in enumerate(paras):
         size = p['size'] * scale
         indent = p['indent'] if p['bullet'] else 0
-        max_px = (w_in - indent) * PX * 0.965
+        max_px = (w_in - indent) * PX * 0.975
         tokens = []
         for text, st in p['runs']:
             for tok in re.findall(r'\S+\s*|\s+', text):
                 tokens.append((tok, st))
         cur, cur_w = [], 0.0
         for tok, st in tokens:
-            f = pil_font(st['size'] * scale, st['bold'], st['italic'], st.get('mono'))
-            tw = f.getlength(tok)
-            tw_fit = f.getlength(tok.rstrip())
+            f = pil_font(st['size'] * scale, _weight(st), st.get('mono'))
+            tw = run_width(f, tok, st, scale)
+            tw_fit = run_width(f, tok.rstrip(), st, scale)
             if cur and cur_w + tw_fit > max_px:
                 lines.append((pi, cur, cur_w))
                 cur, cur_w = [], 0.0
@@ -152,35 +185,37 @@ def layout_paras(paras, w_in, scale=1.0):
 
 # --------------------------------------------------------------- slide model
 class Slide:
-    def __init__(self, deck, footer=True, bg=BG):
+    def __init__(self, deck, footer=True):
         self.deck = deck
         self.items = []
         self.notes = ''
         self.footer = footer
-        self.bg = bg
 
     # primitives --------------------------------------------------------
-    def rect(self, x, y, w, h, fill=None, line=None, lw=1.0, r=0.0, alpha=None, dash=False):
-        self.items.append(('rect', dict(x=x, y=y, w=w, h=h, fill=fill, line=line, lw=lw, r=r, alpha=alpha, dash=dash)))
+    def rect(self, x, y, w, h, fill=None, line=None, lw=1.0, r=0.0, alpha=None, line_alpha=None, dash=False):
+        self.items.append(('rect', dict(x=x, y=y, w=w, h=h, fill=fill, line=line, lw=lw, r=r, alpha=alpha,
+                                        line_alpha=line_alpha, dash=dash)))
 
     def oval(self, x, y, w, h, fill=None, line=None, lw=1.0, alpha=None):
         self.items.append(('oval', dict(x=x, y=y, w=w, h=h, fill=fill, line=line, lw=lw, alpha=alpha)))
 
-    def line(self, x1, y1, x2, y2, color=BORDER2, lw=1.0, arrow=False, dash=False):
-        self.items.append(('line', dict(x1=x1, y1=y1, x2=x2, y2=y2, color=color, lw=lw, arrow=arrow, dash=dash)))
+    def line(self, x1, y1, x2, y2, color=BORDER2, lw=1.0, arrow=False, dash=False, alpha=None):
+        self.items.append(('line', dict(x1=x1, y1=y1, x2=x2, y2=y2, color=color, lw=lw, arrow=arrow, dash=dash, alpha=alpha)))
 
-    def text(self, x, y, w, h, paras, size=18, color=TEXT2, bold=False, italic=False, align='l', anchor='t',
-             lh=1.2, space_after=0, fit=True, strong=WHITE, min_size=8, mono=False):
+    def text(self, x, y, w, h, paras, size=20, color=TEXT, weight=400, bold=False, align='l', anchor='t',
+             lh=1.25, space_after=0, fit=True, strong=WHITE, min_size=8, mono=False, tracking=0.0):
         if isinstance(paras, (str, dict)):
             paras = [paras]
-        paras = norm_paras(paras, size, color, bold, italic, strong, lh, space_after, mono)
+        if bold:
+            weight = max(weight, 700)
+        paras = norm_paras(paras, size, color, weight, strong, lh, space_after, mono, tracking)
         scale = 1.0
         lines, total = layout_paras(paras, w)
         while fit and total > h + 0.01 and paras[0]['size'] * scale > min_size:
             scale -= 0.04
             lines, total = layout_paras(paras, w, scale)
         if total > h + 0.02:
-            self.deck.warnings.append(f'slide {len(self.deck.slides) + 1}: text overflow {total:.2f}in > {h:.2f}in: '
+            self.deck.warnings.append(f'slide {len(self.deck.slides)}: text overflow {total:.2f}in > {h:.2f}in: '
                                       f'{paras[0]["runs"][0][0][:50]!r}')
         self.items.append(('text', dict(x=x, y=y, w=w, h=h, paras=paras, scale=scale, align=align, anchor=anchor,
                                         lines=lines, total=total)))
@@ -210,41 +245,37 @@ class Slide:
         return x, y, dw, dh
 
     # composites --------------------------------------------------------
-    def header(self, label, title, subtitle=None, title_size=36, title_w=None):
+    def eyebrow(self, label, x=M, y=0.62, color=ACCENT):
+        self.rect(x, y + 0.085, 0.28, 0.035, fill=color, r=0.0175)
+        self.text(x + 0.4, y - 0.04, 6, 0.3, label.upper(), size=11.5, color=color, weight=700, tracking=1.6)
+
+    def header(self, label, title, subtitle=None, title_size=40, title_w=None, y=1.0):
         if label:
-            self.text(M, 0.45, CW, 0.3, label.upper(), size=12, color=ACCENT, bold=True)
-        th = self.text(M, 0.72, title_w or CW, 1.2, title, size=title_size, color=WHITE, bold=True, anchor='t', lh=1.12)
+            self.eyebrow(label)
+        th = self.text(M, y, title_w or CW, 1.4, title, size=title_size, color=WHITE, weight=700, anchor='t', lh=1.12)
         if subtitle:
-            self.text(M, 0.72 + th + 0.12, title_w or CW, 0.5, subtitle, size=18, color=TEXT2)
-        return 0.72 + th
+            self.text(M, y + th + 0.15, title_w or CW, 0.6, subtitle, size=20, color=MUTED)
+        return y + th
 
-    def card(self, x, y, w, h, fill=PANEL, line=None, r=0.2, lw=1.0):
-        self.rect(x, y, w, h, fill=fill, line=line, lw=lw, r=r)
+    def card(self, x, y, w, h, fill=WHITE, alpha=PANEL_ALPHA, line=LINE, line_alpha=PANEL_LINE_ALPHA, r=0.2, lw=0.75):
+        self.rect(x, y, w, h, fill=fill, line=line, lw=lw, r=r, alpha=alpha, line_alpha=line_alpha)
 
-    def bullets(self, x, y, w, h, items, size=18, color=TEXT2, gap=8, strong=WHITE, lh=1.22):
+    def bullets(self, x, y, w, h, items, size=19, color=TEXT, gap=8, strong=WHITE, lh=1.25):
         paras = [{'text': t, 'bullet': True, 'space_after': gap} for t in items]
         return self.text(x, y, w, h, paras, size=size, color=color, strong=strong, lh=lh)
 
-    def numbered(self, x, y, w, h, items, size=16, color=TEXT2, gap=8, num_color=ACCENT, lh=1.22):
-        paras = [{'text': t, 'bullet': True, 'bullet_char': str(i + 1), 'bullet_color': num_color,
-                  'indent': 0.32, 'space_after': gap} for i, t in enumerate(items)]
-        return self.text(x, y, w, h, paras, size=size, color=color, lh=lh)
-
-    def accent_top(self, x, y, w, color):
-        """Thin accent 'tab' along the top edge of a card (inset so it clears the rounded corners)."""
-        self.rect(x + 0.22, y - 0.01, w - 0.44, 0.07, fill=color, r=0.035)
-
-    def chip(self, x, y, text, color=ACCENT, fill=None, size=11, w=None, h=0.34):
-        f = pil_font(size, True)
-        tw = f.getlength(text.upper()) / PX + 0.4
+    def chip(self, x, y, text, color=ACCENT, fill=None, alpha=0.12, size=11, w=None, h=0.36, text_color=None):
+        f = pil_font(size, 700)
+        tw = f.getlength(text.upper()) / PX + len(text) * 1.0 / 72 + 0.46
         w = w or tw
-        self.rect(x, y, w, h, fill=fill or PANEL2, line=None, r=h / 2)
-        self.text(x, y, w, h, text.upper(), size=size, color=color, bold=True, align='c', anchor='m', fit=False)
+        self.rect(x, y, w, h, fill=fill or color, alpha=alpha if fill is None else None, r=h / 2)
+        self.text(x, y, w, h, text.upper(), size=size, color=text_color or color, weight=700, align='c', anchor='m',
+                  fit=False, tracking=1.0)
         return w
 
-    def placeholder(self, x, y, w, h, label):
-        self.rect(x, y, w, h, fill=PANEL, line=ACCENT, lw=1.5, r=0.2, dash=True)
-        self.text(x + 0.3, y, w - 0.6, h, label, size=14, color=ACCENT, align='c', anchor='m', italic=True)
+    def stat(self, x, y, w, number, label, size=88, color=WHITE, label_color=ACCENT, align='l'):
+        self.text(x, y, w, size / 72 * 1.15, number, size=size, color=color, weight=800, align=align, anchor='t', lh=1.05, fit=False)
+        self.text(x, y + size / 72 * 1.2, w, 0.9, label, size=20, color=label_color, weight=500, align=align, lh=1.25)
 
 
 class Deck:
@@ -259,8 +290,8 @@ class Deck:
                 self._sizes[path] = im.size
         return self._sizes[path]
 
-    def slide(self, footer=True, bg=BG):
-        s = Slide(self, footer=footer, bg=bg)
+    def slide(self, footer=True):
+        s = Slide(self, footer=footer)
         self.slides.append(s)
         return s
 
@@ -273,24 +304,32 @@ class Deck:
         for idx, s in enumerate(self.slides, start=1):
             sl = prs.slides.add_slide(blank)
             fill = sl.background.fill
-            fill.solid()
-            fill.fore_color.rgb = RGBColor(*rgb(s.bg))
+            fill.gradient()
+            fill.gradient_angle = 90          # top → bottom
+            stops = fill.gradient_stops
+            stops[0].position = 0.0
+            stops[0].color.rgb = RGBColor(*rgb(BG))
+            stops[1].position = 1.0
+            stops[1].color.rgb = RGBColor(*rgb(BG2))
             for kind, it in s.items:
                 getattr(self, f'_pptx_{kind}')(sl, it)
             if s.footer:
-                self._pptx_footer(sl, idx, n)
+                for kind, it in self._footer_items(idx, n):
+                    getattr(self, f'_pptx_{kind}')(sl, it)
             sl.notes_slide.notes_text_frame.text = s.notes or ''
         prs.save(path)
+        embed_fonts.embed(path, EMBED)
 
     @staticmethod
     def _no_shadow(shape):
         shape.shadow.inherit = False
 
     @staticmethod
-    def _set_alpha(shape, alpha):
-        sf = shape._element.spPr.find(qn('a:solidFill'))
-        if sf is not None:
-            clr = sf.find(qn('a:srgbClr'))
+    def _set_alpha(shape, alpha, where='a:solidFill'):
+        spPr = shape._element.spPr
+        node = spPr.find(qn(where)) if where == 'a:solidFill' else spPr.find(qn('a:ln')).find(qn('a:solidFill'))
+        if node is not None:
+            clr = node.find(qn('a:srgbClr'))
             a = etree.SubElement(clr, qn('a:alpha'))
             a.set('val', str(int(alpha * 100000)))
 
@@ -298,7 +337,7 @@ class Deck:
         shp = sl.shapes.add_shape(kind, Inches(it['x']), Inches(it['y']), Inches(it['w']), Inches(it['h']))
         self._no_shadow(shp)
         if kind == MSO_SHAPE.ROUNDED_RECTANGLE:
-            shp.adjustments[0] = min(0.5, it['r'] / max(0.01, min(it['w'], it['h'])))
+            shp.adjustments[0] = min(0.5, it['r'] / min(it['w'], it['h']))
         if it['fill']:
             shp.fill.solid()
             shp.fill.fore_color.rgb = RGBColor(*rgb(it['fill']))
@@ -311,13 +350,15 @@ class Deck:
             shp.line.width = Pt(it['lw'])
             if it.get('dash'):
                 shp.line.dash_style = MSO_LINE_DASH_STYLE.DASH
+            if it.get('line_alpha') is not None:
+                self._set_alpha(shp, it['line_alpha'], where='a:ln')
         else:
             shp.line.fill.background()
         shp.text_frame.text = ''
         return shp
 
     def _pptx_rect(self, sl, it):
-        kind = MSO_SHAPE.ROUNDED_RECTANGLE if it['r'] > 0 else MSO_SHAPE.RECTANGLE
+        kind = MSO_SHAPE.ROUNDED_RECTANGLE if it['r'] else MSO_SHAPE.RECTANGLE
         self._pptx_shape(sl, kind, it)
 
     def _pptx_oval(self, sl, it):
@@ -327,10 +368,12 @@ class Deck:
         c = sl.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(it['x1']), Inches(it['y1']), Inches(it['x2']), Inches(it['y2']))
         c.line.color.rgb = RGBColor(*rgb(it['color']))
         c.line.width = Pt(it['lw'])
-        ln = c.line._get_or_add_ln()
         if it.get('dash'):
-            d = etree.SubElement(ln, qn('a:prstDash'))
-            d.set('val', 'dash')
+            c.line.dash_style = MSO_LINE_DASH_STYLE.DASH
+        ln = c.line._get_or_add_ln()
+        if it.get('alpha') is not None:
+            clr = ln.find(qn('a:solidFill')).find(qn('a:srgbClr'))
+            etree.SubElement(clr, qn('a:alpha')).set('val', str(int(it['alpha'] * 100000)))
         if it['arrow']:
             tail = etree.SubElement(ln, qn('a:tailEnd'))
             tail.set('type', 'triangle')
@@ -340,16 +383,14 @@ class Deck:
     def _pptx_image(self, sl, it):
         pic = sl.shapes.add_picture(str(it['path']), Inches(it['x']), Inches(it['y']), Inches(it['w']), Inches(it['h']))
         if it.get('r'):
-            pic.auto_shape_type = MSO_SHAPE.ROUNDED_RECTANGLE
-            prst = pic._pic.spPr.prstGeom
+            prst = pic._element.spPr.find(qn('a:prstGeom'))
+            prst.set('prst', 'roundRect')
             av = prst.find(qn('a:avLst'))
-            if av is None:
-                av = etree.SubElement(prst, qn('a:avLst'))
-            for gd in list(av):
-                av.remove(gd)
+            for child in list(av):
+                av.remove(child)
             gd = etree.SubElement(av, qn('a:gd'))
             gd.set('name', 'adj')
-            gd.set('fmla', f"val {int(min(0.5, it['r'] / max(0.01, min(it['w'], it['h']))) * 100000)}")
+            gd.set('fmla', f'val {int(min(0.5, it["r"] / min(it["w"], it["h"])) * 100000)}')
 
     def _pptx_text(self, sl, it):
         tb = sl.shapes.add_textbox(Inches(it['x']), Inches(it['y']), Inches(it['w']), Inches(it['h']))
@@ -373,50 +414,61 @@ class Deck:
                 pPr.set('indent', str(-int(ind)))
                 buClr = etree.SubElement(pPr, qn('a:buClr'))
                 etree.SubElement(buClr, qn('a:srgbClr')).set('val', p['bullet_color'])
-                etree.SubElement(pPr, qn('a:buFont')).set('typeface', 'Arial')
+                etree.SubElement(pPr, qn('a:buFont')).set('typeface', FACES[700][1])
                 etree.SubElement(pPr, qn('a:buChar')).set('char', p['bullet_char'])
             else:
                 etree.SubElement(pPr, qn('a:buNone'))
             for text, st in p['runs']:
                 r = para.add_run()
                 r.text = text
-                r.font.name = 'Courier New' if st.get('mono') else 'Arial'
+                face = FACES['mono' if st.get('mono') else _weight(st)]
+                r.font.name = face[1]
                 r.font.size = Pt(round(st['size'] * scale * 2) / 2)
-                r.font.bold = bool(st['bold'])
-                r.font.italic = bool(st['italic'])
+                r.font.bold = face[2]
                 r.font.color.rgb = RGBColor(*rgb(st['color']))
+                if st.get('tracking'):
+                    r.font._rPr.set('spc', str(int(st['tracking'] * scale * 100)))
 
     def _footer_items(self, idx, n):
         items = []
-        if FOOTER_TEXT:
-            items.append(dict(x=M, y=H - 0.45, w=8, h=0.25, paras=norm_paras([FOOTER_TEXT], 10, DIM, False, False, WHITE, 1.2, 0),
-                              scale=1, align='l', anchor='m', lines=None))
-        items.append(dict(x=W - M - 1.5, y=H - 0.45, w=1.5, h=0.25, paras=norm_paras([f'{idx} / {n}'], 10, DIM, False, False, WHITE, 1.2, 0),
-                          scale=1, align='r', anchor='m', lines=None))
+        y = H - 0.5
+        items.append(('image', dict(path=ASSETS / 'icon.png', x=M, y=y - 0.02, w=0.26, h=0.26, r=0.07)))
+        items.append(('text', dict(x=M + 0.36, y=y, w=4, h=0.22,
+                                   paras=norm_paras([FOOTER_BRAND], 10.5, DIM, 700, WHITE, 1.2, 0, tracking=0.6),
+                                   scale=1, align='l', anchor='m', lines=None)))
+        items.append(('text', dict(x=W - M - 1.5, y=y, w=1.5, h=0.22,
+                                   paras=norm_paras([f'{idx:02d}  /  {n:02d}'], 10.5, DIM, 500, WHITE, 1.2, 0, tracking=0.6),
+                                   scale=1, align='r', anchor='m', lines=None)))
         return items
 
-    def _pptx_footer(self, sl, idx, n):
-        for it in self._footer_items(idx, n):
-            self._pptx_text(sl, it)
-
     # --------------------------------------------------------- preview out
+    def _background(self):
+        w, h = int(W * PX), int(H * PX)
+        c0, c1 = rgb(BG), rgb(BG2)
+        grad = Image.new('RGB', (1, h))
+        for yy in range(h):
+            t = yy / (h - 1)
+            grad.putpixel((0, yy), tuple(int(c0[i] + (c1[i] - c0[i]) * t) for i in range(3)))
+        return grad.resize((w, h)).convert('RGBA')
+
     def write_previews(self, folder: Path):
         folder.mkdir(exist_ok=True)
         n = len(self.slides)
         thumbs = []
+        bg = self._background()
         for idx, s in enumerate(self.slides, start=1):
-            im = Image.new('RGBA', (int(W * PX), int(H * PX)), rgb(s.bg) + (255,))
+            im = bg.copy()
             for kind, it in s.items:
                 getattr(self, f'_pil_{kind}')(im, it)
             if s.footer:
-                for it in self._footer_items(idx, n):
-                    self._pil_text(im, it)
+                for kind, it in self._footer_items(idx, n):
+                    getattr(self, f'_pil_{kind}')(im, it)
             out = folder / f'slide-{idx:02d}.jpg'
-            im.convert('RGB').save(out, quality=88, optimize=True)
+            im.convert('RGB').save(out, quality=90, optimize=True)
             thumbs.append(im.convert('RGB').resize((480, 270), Image.LANCZOS))
         cols = 4
         rows = (n + cols - 1) // cols
-        sheet = Image.new('RGB', (cols * 500 + 20, rows * 290 + 20), (40, 40, 40))
+        sheet = Image.new('RGB', (cols * 500 + 20, rows * 290 + 20), (24, 24, 28))
         for i, t in enumerate(thumbs):
             sheet.paste(t, (20 + (i % cols) * 500, 20 + (i // cols) * 290))
         sheet.save(folder / 'contact-sheet.jpg', quality=88, optimize=True)
@@ -430,31 +482,24 @@ class Deck:
         d = ImageDraw.Draw(layer)
         box = [self._px(it['x']), self._px(it['y']), self._px(it['x'] + it['w']), self._px(it['y'] + it['h'])]
         fill = rgb(it['fill']) + (int(255 * (it['alpha'] if it.get('alpha') is not None else 1)),) if it['fill'] else None
-        outline = rgb(it['line']) + (255,) if it['line'] else None
-        lw = max(1, int(round(it['lw'] * PX / 72)))
+        outline = rgb(it['line']) + (int(255 * (it['line_alpha'] if it.get('line_alpha') is not None else 1)),) if it['line'] else None
+        lw = max(1, int(round(it['lw'] * PX / 72))) if outline else 0
+        r = self._px(it['r'])
         if it.get('dash') and outline:
-            d.rounded_rectangle(box, radius=self._px(it['r']), fill=fill)
-            # approximate dashes: draw outline then punch gaps
-            d.rounded_rectangle(box, radius=self._px(it['r']), outline=outline, width=lw)
-            gap = Image.new('RGBA', im.size, (0, 0, 0, 0))
-            gd = ImageDraw.Draw(gap)
-            step = 18
-            for xx in range(box[0], box[2], step):
-                gd.rectangle([xx + 9, box[1] - lw, xx + step, box[1] + lw], fill=(0, 0, 0, 255))
-                gd.rectangle([xx + 9, box[3] - lw, xx + step, box[3] + lw], fill=(0, 0, 0, 255))
-            for yy in range(box[1], box[3], step):
-                gd.rectangle([box[0] - lw, yy + 9, box[0] + lw, yy + step], fill=(0, 0, 0, 255))
-                gd.rectangle([box[2] - lw, yy + 9, box[2] + lw, yy + step], fill=(0, 0, 0, 255))
-            inner = Image.new('L', im.size, 0)
-            ImageDraw.Draw(inner).rounded_rectangle([box[0] + lw, box[1] + lw, box[2] - lw, box[3] - lw], radius=self._px(it['r']), fill=255)
-            gap_mask = Image.composite(Image.new('L', im.size, 0), gap.split()[3], inner)
-            layer.paste((0, 0, 0, 0), mask=gap_mask)
             if fill:
-                fl = Image.new('RGBA', im.size, (0, 0, 0, 0))
-                ImageDraw.Draw(fl).rounded_rectangle([box[0] + lw, box[1] + lw, box[2] - lw, box[3] - lw], radius=self._px(it['r']), fill=fill)
-                layer.alpha_composite(fl)
+                d.rounded_rectangle(box, radius=r, fill=fill)
+            # dashed outline: draw segments along the perimeter
+            peri = [(box[0], box[1]), (box[2], box[1]), (box[2], box[3]), (box[0], box[3]), (box[0], box[1])]
+            for (ax, ay), (bx, by) in zip(peri, peri[1:]):
+                L = math.hypot(bx - ax, by - ay)
+                ux, uy = (bx - ax) / L, (by - ay) / L
+                t = r
+                while t < L - r:
+                    seg = min(12, L - r - t)
+                    d.line([(ax + ux * t, ay + uy * t), (ax + ux * (t + seg), ay + uy * (t + seg))], fill=outline, width=lw)
+                    t += 20
         else:
-            d.rounded_rectangle(box, radius=self._px(it['r']), fill=fill, outline=outline, width=lw if outline else 0)
+            d.rounded_rectangle(box, radius=r, fill=fill, outline=outline, width=lw)
         im.alpha_composite(layer)
 
     def _pil_oval(self, im, it):
@@ -467,11 +512,12 @@ class Deck:
         im.alpha_composite(layer)
 
     def _pil_line(self, im, it):
-        d = ImageDraw.Draw(im)
+        layer = Image.new('RGBA', im.size, (0, 0, 0, 0))
+        d = ImageDraw.Draw(layer)
         p1 = (self._px(it['x1']), self._px(it['y1']))
         p2 = (self._px(it['x2']), self._px(it['y2']))
         lw = max(1, int(round(it['lw'] * PX / 72)))
-        col = rgb(it['color']) + (255,)
+        col = rgb(it['color']) + (int(255 * (it['alpha'] if it.get('alpha') is not None else 1)),)
         if it.get('dash'):
             L = math.hypot(p2[0] - p1[0], p2[1] - p1[1])
             if L == 0:
@@ -492,6 +538,7 @@ class Deck:
                    (p2[0] - size * math.cos(ang - 0.45), p2[1] - size * math.sin(ang - 0.45)),
                    (p2[0] - size * math.cos(ang + 0.45), p2[1] - size * math.sin(ang + 0.45))]
             d.polygon(pts, fill=col)
+        im.alpha_composite(layer)
 
     def _pil_image(self, im, it):
         src = Image.open(it['path']).convert('RGBA')
@@ -500,8 +547,8 @@ class Deck:
         if it.get('r'):
             mask = Image.new('L', src.size, 0)
             ImageDraw.Draw(mask).rounded_rectangle([0, 0, tw - 1, th - 1], radius=self._px(it['r']), fill=255)
-            a = src.split()[3]
-            src.putalpha(Image.composite(a, Image.new('L', src.size, 0), mask))
+            alpha = src.getchannel('A')
+            src.putalpha(Image.composite(alpha, Image.new('L', src.size, 0), mask))
         im.alpha_composite(src, (self._px(it['x']), self._px(it['y'])))
 
     def _pil_text(self, im, it):
@@ -535,14 +582,20 @@ class Deck:
                 x = x0 + indent + avail - lw_px
             else:
                 x = x0 + indent
-            baseline = y + (lh_px - 1.117 * size_px) / 2 + 0.905 * size_px
+            mono = bool(p['runs'] and p['runs'][0][1].get('mono'))
+            asc, desc = (MONO_ASCENT, MONO_DESCENT) if mono else (ASCENT, DESCENT)
+            baseline = y + (lh_px - (asc + desc) * size_px) / 2 + asc * size_px
             if p['bullet'] and first_line:
-                bf = pil_font(p['size'] * scale, True)
+                bf = pil_font(p['size'] * scale, 700)
                 d.text((x0, baseline), p['bullet_char'], font=bf, fill=rgb(p['bullet_color']), anchor='ls')
             for tok, st in toks:
-                f = pil_font(st['size'] * scale, st['bold'], st['italic'], st.get('mono'))
-                d.text((x, baseline), tok, font=f, fill=rgb(st['color']), anchor='ls')
-                x += f.getlength(tok)
+                f = pil_font(st['size'] * scale, _weight(st), st.get('mono'))
+                if st.get('tracking'):
+                    extra = st['tracking'] * scale * PX / 72
+                    for ch in tok:
+                        d.text((x, baseline), ch, font=f, fill=rgb(st['color']), anchor='ls')
+                        x += f.getlength(ch) + extra
+                else:
+                    d.text((x, baseline), tok, font=f, fill=rgb(st['color']), anchor='ls')
+                    x += f.getlength(tok)
             y += lh_px
-
-

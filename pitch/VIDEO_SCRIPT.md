@@ -1,7 +1,7 @@
 # CareSphere AI — Congressional App Challenge 2026 video script
 
-Target length: **2:50** (hard limit is 3:00). Slide narration is ~320 words plus ~110 words over the demo —
-a calm 150–155 words per minute. If your first take runs long, drop the optional sentence on slide 3 and tighten
+Target length: **2:50** (hard limit is 3:00). Slide narration is ~320 words plus ~100 words over the demo —
+a calm 150–155 words per minute. If your first take runs long, shorten your story on slide 2 and tighten
 demo shots 4 and 5.
 
 Judges' checklist covered: student name(s) ✔ app name ✔ purpose ✔ intended audience ✔ tools & languages ✔
@@ -16,22 +16,23 @@ Fill in every `[bracket]` before recording. Slide numbers refer to
 
 | Time | On screen | Say |
 |---|---|---|
-| 0:00–0:15 | **Slide 1** — title | Hi, I'm **[Name]**, a **[grade]** at **[School]** in **[City]**, California. This is **CareSphere AI** — a private care companion for older adults, autistic people and the families who look after them, on iPhone and on the web. |
-| 0:15–0:31 | **Slide 2** — problem | One in four older adults is socially isolated — a twenty-nine percent higher risk of early death. One in thirty-one children is autistic, and they become adults who still need support. Half of long-term medications aren't taken as prescribed. |
-| 0:31–0:43 | **Slide 3** — today | Today a family juggles a medication app, a video app, a health portal and a family-update site — four accounts, four clouds — and none was designed for autistic users. *(Optional, one sentence: why you built it — e.g. "My grandmother lives alone, and every call started with: did you take your pills? did you talk to anyone today?")* |
-| 0:43–0:53 | **Slide 4** — solution | CareSphere is one calm app with five tabs — Overview, Activities, Coffee Circles, Care Circle and Vitals — with no server behind any of it. |
-| 0:53–1:40 | **Slide 5 → screen recording** | Let me show you. *(narrate the shot list below)* |
-| 1:40–1:51 | **Slide 6** — four rules | What makes it different isn't a feature — it's four rules in the code: never fabricate a reading, never send anything automatically, calm by default, private by architecture. |
-| 1:51–1:58 | **Slide 7** — audience | Three people who rarely get the same app: older adults, autistic teens and adults, and their caregivers. |
-| 1:58–2:09 | **Slide 8** — privacy | Everything stays on the device: AES-256 encryption, Bluetooth and HealthKit read locally, and a 1.5-billion-parameter model that answers health questions offline. Zero accounts, zero servers, zero trackers. |
-| 2:09–2:20 | **Slide 9** — built with | It's React and JavaScript on the web, Swift and SwiftUI on iPhone — Web Bluetooth, HealthKit, CryptoKit and llama.cpp. Eleven thousand lines, seventeen tests, three public releases. |
-| 2:20–2:33 | **Slide 10** — hardest problem | The hardest problem was keeping Bluetooth honest. Notifications arrive late and out of order, so I parse the standard profile, label every sample at the source, and drop stale sessions with a generation counter. |
-| 2:33–2:45 | **Slide 11** — next | Version 2.0 starts with co-design sessions with autistic people, people living with dementia and caregivers, then a TestFlight beta and sensor history in the visit brief — still with no server. |
-| 2:45–2:51 | **Slide 12** — close | CareSphere AI — care that stays yours. The code and install guide are on GitHub. Thank you. |
+| 0:00–0:14 | **Slide 1** — title | Hi, I'm **[Name]**, a **[grade]** at **[School]** in **[City]**, California. This is **CareSphere AI** — a private care companion for older adults, autistic people and their families, on iPhone and on the web. |
+| 0:14–0:26 | **Slide 2** — why I built it | **[Your story in one sentence — name a specific person and a specific moment. e.g. "My grandmother lives alone, and every call started the same way: did you take your pills? did you talk to anyone today?"]** So I built the app I wished she had: calm, honest, and private by design. |
+| 0:26–0:39 | **Slide 3** — problem | One in four older adults is socially isolated — a twenty-nine percent higher risk of early death. One in thirty-one children is autistic. Half of long-term medications aren't taken as prescribed. And sixty-three million family caregivers hold it all together. |
+| 0:39–0:47 | **Slide 4** — today | Today a family juggles four apps — four accounts, four clouds — and none of them was designed for autistic users. |
+| 0:47–0:57 | **Slide 5** — solution | CareSphere is one calm app with five tabs — Overview, Activities, Coffee Circles, Care Circle and Vitals — with no server behind any of it. |
+| 0:57–1:42 | **Slide 6 → screen recording** | Let me show you. *(narrate the shot list below)* |
+| 1:42–1:53 | **Slide 7** — four rules | What makes it different isn't a feature — it's four rules in the code: never fabricate a reading, never send anything automatically, calm by default, private by architecture. |
+| 1:53–2:01 | **Slide 8** — audience | It's built for three people at once: older adults, autistic teens and adults, and the caregivers who support them. |
+| 2:01–2:12 | **Slide 9** — privacy | Everything stays on the device: AES-256 encryption, Bluetooth and HealthKit read locally, and a 1.5-billion-parameter model that answers health questions offline. Zero accounts, zero servers, zero trackers. |
+| 2:12–2:23 | **Slide 10** — built with | It's React and JavaScript on the web, Swift and SwiftUI on iPhone — Web Bluetooth, HealthKit, CryptoKit and llama.cpp. Eleven thousand lines, seventeen tests, three public releases. |
+| 2:23–2:35 | **Slide 11** — hardest problem | The hardest problem was keeping Bluetooth honest: notifications arrive late and out of order, so I label every sample live or simulated at the source and drop stale sessions with a generation counter. |
+| 2:35–2:47 | **Slide 12** — next | Version 2.0 starts with co-design sessions with autistic people, people living with dementia and caregivers, then a TestFlight beta and sensor history in the visit brief — still with no server. |
+| 2:47–2:53 | **Slide 13** — close | CareSphere AI — care that stays yours. The code and install guide are on GitHub. Thank you. |
 
 ---
 
-## Demo shot list (0:53–1:40, ~47 seconds)
+## Demo shot list (0:57–1:42, ~45 seconds)
 
 Record the **web app** in Chrome or Edge (needed for Web Bluetooth) at 1920×1080. Keep the cursor slow;
 each shot is 6–9 seconds. Shots 7 and 8 are optional extras — use them only if the take is comfortably under 3:00.
@@ -61,7 +62,7 @@ Tip: if shot 2's timing is awkward, record it separately and cut it in. Keep the
 - Deck in **Slide Show** mode, 16:9, 1080p export; record with OBS, QuickTime or Zoom (local recording).
 - Browser zoom 100 %, window 1920×1080, no bookmarks bar, no other tabs. Use the **calm charcoal** theme for the demo (matches the screenshots in the deck).
 - Say your name and "CareSphere AI" in the first ten seconds (judging requirement).
-- Replace `[Student Name]`, `[School]`, `[City]`, `[email]`, `[CA-XX]` (slide 1) and `[YouTube link]` (slide 12) before exporting.
+- Replace `[Student Name]`, `[School]`, `[City]`, `[email]`, `[CA-XX]` (slides 1, 2, 13), your story (slide 2) and `[YouTube link]` (slide 13) before exporting.
 - Upload the video as **public** on YouTube or Vimeo; paste the link into the CAC portal before **Oct 26, 2026, 12:00 PM ET**.
 
 ---
@@ -81,7 +82,7 @@ Version 2.0 starts with co-design sessions with autistic people, people living w
 
 ---
 
-## Statistics cited on slide 2 (sources)
+## Statistics cited on slide 3 (sources)
 
 - 1 in 4 adults 65+ socially isolated — National Academies of Sciences, Engineering, and Medicine, *Social Isolation and Loneliness in Older Adults* (2020).
 - 29 % higher risk of premature death from social isolation — U.S. Surgeon General, *Our Epidemic of Loneliness and Isolation* (2023), citing Holt-Lunstad et al. (2015).
