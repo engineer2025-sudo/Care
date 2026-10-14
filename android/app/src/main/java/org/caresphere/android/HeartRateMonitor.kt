@@ -27,7 +27,7 @@ class HeartRateMonitor(private val activity: Activity, private val changed: () -
     var busy = false; private set
     val permissions: Array<String> get() = if (Build.VERSION.SDK_INT >= 31)
         arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
-        else arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        else arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     fun permitted() = permissions.all { activity.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
     private val expire = Runnable { bpm = null; measuredAt = null; status = "No fresh reading for 15 seconds. Check the monitor's contact and connection."; changed() }
     private val timeout = Runnable { disconnect("Connection timed out. Check the monitor and try again.") }
