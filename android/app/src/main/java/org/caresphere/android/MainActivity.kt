@@ -157,10 +157,13 @@ class MainActivity : Activity() {
             tab == 2 -> care()
             else -> health()
         }
-        val navScroll = HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; isFillViewport = true }
-        root.addView(navScroll, LinearLayout.LayoutParams(-1, -2))
-        val nav = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(dp(8), dp(6), dp(8), dp(6)) }
-        navScroll.addView(nav, ViewGroup.LayoutParams(-1, -2))
+        val largeText = resources.configuration.fontScale > 1.3f
+        val nav = LinearLayout(this).apply {
+            orientation = if(largeText) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
+            setPadding(dp(8), dp(6), dp(8), dp(6))
+        }
+        root.addView(nav, LinearLayout.LayoutParams(-1, -2))
+        var navRow = nav
         listOf("Today", "Activities", "Care", "Health").forEachIndexed { i, label ->
             val b = Button(this).apply {
                 text = label; textSize = 15f; isAllCaps = false; minHeight = dp(56)
@@ -169,7 +172,11 @@ class MainActivity : Activity() {
                 isSelected = i == tab && !settings && activityIndex < 0
                 setOnClickListener { stopComfort(); tab = i; settings = false; activityIndex = -1; render() }
             }
-            nav.addView(b, LinearLayout.LayoutParams(if(resources.configuration.fontScale > 1.3f) dp(116) else 0, -2, 1f).apply { marginEnd = dp(3) })
+            if(largeText && i % 2 == 0) {
+                navRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+                nav.addView(navRow, LinearLayout.LayoutParams(-1, -2))
+            }
+            navRow.addView(b, LinearLayout.LayoutParams(0, -2, 1f).apply { marginEnd = dp(3) })
         }
         root.requestApplyInsets()
     }
@@ -259,7 +266,7 @@ class MainActivity : Activity() {
         val visible = ActivityRules.titles.indices.filter {
             (!favoritesOnly || LibraryPreferences.ids[it] in favorites) && LibraryPreferences.matches(ActivityRules.titles[it] + " " + LibraryPreferences.descriptions[it], activityQuery)
         }
-        text("${visible.size} activities · available offline", 15f, parent)
+        text("${visible.size} ${if(visible.size == 1) "activity" else "activities"} · available offline", 15f, parent)
         if(visible.isEmpty()) {
             text("No matching activities. Try a different word, or show everything.", parent = parent)
             button("Show all activities", parent) { activityQuery = ""; favoritesOnly = false; render() }

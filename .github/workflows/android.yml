@@ -60,6 +60,11 @@ jobs:
           request = json.dumps({'content':base64.b64encode(apk).decode(), 'encoding':'base64'})
           blob = json.loads(subprocess.check_output(['gh','api','--method','POST','repos/'+os.environ['GITHUB_REPOSITORY']+'/git/blobs','--input','-'], input=request, text=True))
           print('::notice title=Verified Android APK::git_blob=' + blob['sha'] + '; sha256=' + hashlib.sha256(apk).hexdigest() + '; bytes=' + str(len(apk)))
+          picture = Path('/tmp/android-smoke/health-dark.png')
+          if picture.exists():
+              body = json.dumps({'content':base64.b64encode(picture.read_bytes()).decode(), 'encoding':'base64'})
+              image = json.loads(subprocess.check_output(['gh','api','--method','POST','repos/'+os.environ['GITHUB_REPOSITORY']+'/git/blobs','--input','-'], input=body, text=True))
+              print('::notice title=Android screenshot::git_blob=' + image['sha'])
           PY
       - name: Surface compiler and lint errors
         if: failure()
