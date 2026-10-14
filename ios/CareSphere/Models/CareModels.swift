@@ -212,3 +212,45 @@ enum CareTime {
         return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
 }
+
+// Optional at the CareStore boundary, so pre-support releases migrate safely.
+struct PersonalSupport: Codable {
+    var simple = false
+    var speakSteps = false
+    var choices = 3
+    var phrases: [String] = []
+    var plans: [VisualPlan] = []
+    var photos: [PersonalPhoto] = []
+    var contacts: [TrustedPerson] = []
+    var questions: [VisitQuestion] = []
+    var deletedNotes: [DeletedCareNote] = []
+}
+struct VisualPlan: Identifiable, Codable {
+    var id = UUID()
+    var title: String
+    var steps: [String]
+    var photoID: UUID?
+}
+struct PersonalPhoto: Identifiable, Codable {
+    var id = UUID()
+    var caption: String
+    var jpeg: Data
+}
+struct TrustedPerson: Identifiable, Codable {
+    var id = UUID()
+    var name: String
+    var phone: String
+    var video: String
+}
+struct VisitQuestion: Identifiable, Codable {
+    var id = UUID()
+    var text: String
+    var important = false
+    var discussed = false
+    var followup = ""
+}
+struct DeletedCareNote: Identifiable, Codable {
+    var id: UUID { note.id }
+    var note: CareNote
+    var deletedAt = Date()
+}

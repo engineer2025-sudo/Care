@@ -34,6 +34,7 @@ final class CareStore: ObservableObject {
             syncMedicationReminders()
         }
     }
+    @Published var personalSupport: PersonalSupport { didSet { save() } }
     @Published var favoriteActivities: [String] { didSet { save() } }
     @Published var notes: [CareNote] { didSet { save() } }
     @Published var moods: [MoodEntry] { didSet { save() } }
@@ -77,6 +78,9 @@ final class CareStore: ObservableObject {
         // Older stores did not carry an explicit confirmation. Preserve their
         // saved data, but pause its reminders until the user reviews it.
         medicationScheduleConfirmed = box?.medicationScheduleConfirmed ?? false
+        var loadedSupport = box?.personalSupport ?? PersonalSupport()
+        loadedSupport.deletedNotes.removeAll { $0.deletedAt < Date().addingTimeInterval(-30 * 86400) }
+        personalSupport = loadedSupport
         favoriteActivities = ActivityPreferences.normalized(box?.favoriteActivities ?? [])
         notes = box?.notes ?? []
         moods = box?.moods ?? []
@@ -166,6 +170,7 @@ final class CareStore: ObservableObject {
             medications: medications,
             medicationScheduleConfirmed: medicationScheduleConfirmed,
             favoriteActivities: favoriteActivities,
+            personalSupport: personalSupport,
             notes: notes,
             moods: moods,
             emotionScore: emotionScore,
@@ -295,6 +300,7 @@ final class CareStore: ObservableObject {
         voiceIdentifier = ""
         routines = []
         favoriteActivities = []
+        personalSupport = PersonalSupport()
         notes = []
         moods = []
         emotionScore = 0
@@ -349,6 +355,7 @@ final class CareStore: ObservableObject {
         // Optional so pre-confirmation stores decode safely; legacy schedules default paused.
         var medicationScheduleConfirmed: Bool?
         var favoriteActivities: [String]?
+        var personalSupport: PersonalSupport?
         var notes: [CareNote]
         var moods: [MoodEntry]
         var emotionScore: Int
@@ -478,7 +485,51 @@ final class CareStore: ObservableObject {
         notes[index].sentiment = TextInsightsService.sentimentScore(for: cleaned)
     }
 
-    func deleteNote(id: UUID) { notes.removeAll { $0.id == id } }
+    func deleteNote(id: UUID) {
+        if let note = notes.first(where: { $0.id == id }) {
+            personalSupport.deletedNotes.removeAll { $0.id == id }
+            personalSupport.deletedNotes.insert(DeletedCareNote(note: note), at: 0)
+            personalSupport.deletedNotes = Array(personalSupport.deletedNotes.prefix(100))
+        }
+        notes.removeAll { $0.id == id }
+    }
+    func restoreDeletedNote(_ entry: DeletedCareNote) {
+        if !notes.contains(where: { $0.id == entry.id }) { notes.insert(entry.note, at: 0) }
+        personalSupport.deletedNotes.removeAll { $0.id == entry.id }
+    }
+    func backupSnapshot() throws -> Data { try JSONEncoder().encode(persistedBox()) }
+    func inspectBackup(_ data: Data) throws -> String {
+        let box = try validatedBackup(data)
+        return "\(box.notes.count) notes, \(box.routines.count) routines. Existing local records will be replaced. Medication reminders will be paused for review."
+    }
+    private func validatedBackup(_ data: Data) throws -> PersistedBox {
+        guard data.count < 8_000_000 else { throw CareStoreError.storageUnavailable }
+        let box = try JSONDecoder().decode(PersistedBox.self, from: data)
+        guard box.notes.count <= 500, box.routines.count <= 200, box.medications.count <= 200,
+              (box.personalSupport?.photos.count ?? 0) <= 10,
+              (box.personalSupport?.photos.allSatisfy { $0.jpeg.count <= 180_000 } ?? true)
+        else { throw CareStoreError.storageUnavailable }
+        return box
+    }
+    func restoreBackup(_ data: Data) throws {
+        guard persistenceCanWrite else { throw CareStoreError.storageUnavailable }
+        var box = try validatedBackup(data)
+        box.medicationScheduleConfirmed = false
+        box.biometricEnabled = biometricEnabled
+        let key = try SecureCareStorage.loadOrCreateKey()
+        try writePrivateFile(SecureCareStorage.seal(JSONEncoder().encode(box), using: key), to: fileURL)
+        encryptionKey = key
+        isErasingLocalData = true
+        displayName = box.displayName; voiceReminders = box.voiceReminders; voiceIdentifier = box.voiceIdentifier ?? ""
+        routines = box.routines; medications = box.medications; medicationScheduleConfirmed = false
+        notes = box.notes; moods = box.moods; favoriteActivities = ActivityPreferences.normalized(box.favoriteActivities ?? [])
+        personalSupport = box.personalSupport ?? PersonalSupport()
+        personalSupport.deletedNotes.removeAll { $0.deletedAt < Date().addingTimeInterval(-30 * 86400) }
+        emotionScore = box.emotionScore; bestPattern = box.bestPattern
+        profile = box.profile ?? CareProfile(); colorAppearance = box.colorAppearance ?? "system"
+        highContrast = box.highContrast ?? false; reduceVisualMotion = box.reduceVisualMotion ?? true
+        isErasingLocalData = false; save(); syncMedicationReminders()
+    }
 
     func addNote(author: String, body: String) {
         guard !body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }

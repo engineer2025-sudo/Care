@@ -11,6 +11,8 @@ final class CareNavigation: ObservableObject {
 
 struct RootTabView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
+    @EnvironmentObject private var store: CareStore
+    @State private var showSupport = false
     @StateObject private var navigation = CareNavigation()
     @State private var showSettings = false
     @State private var showSOS = false
@@ -28,6 +30,7 @@ struct RootTabView: View {
                 }
                 .accessibilityElement(children: .combine)
                 Spacer(minLength: 4)
+                Button { showSupport = true } label: { Image(systemName: "hand.raised").frame(minWidth: 44, minHeight: 44) }.accessibilityLabel("My support tools")
                 Button { showSettings = true } label: {
                     Image(systemName: "gearshape")
                         .font(.title3)
@@ -51,15 +54,21 @@ struct RootTabView: View {
                     .tabItem { Label("Today", systemImage: "house") }.tag(CareNavigation.Tab.today)
                 TherapyView()
                     .tabItem { Label("Activities", systemImage: "square.grid.2x2") }.tag(CareNavigation.Tab.activities)
+                if store.personalSupport.simple {
+                    PersonalSupportView().tabItem { Label("My People", systemImage: "person.2") }.tag(CareNavigation.Tab.connect)
+                } else {
                 CoffeeCirclesView()
                     .tabItem { Label("Connect", systemImage: "person.2") }.tag(CareNavigation.Tab.connect)
                 CareCircleView()
                     .tabItem { Label("Care", systemImage: "heart.text.square") }.tag(CareNavigation.Tab.care)
                 HealthHomeView()
                     .tabItem { Label("Health", systemImage: "waveform.path.ecg") }.tag(CareNavigation.Tab.health)
+                }
             }
         }
         .environmentObject(navigation)
+        .onChange(of: store.personalSupport.simple) { _ in navigation.selectedTab = .today }
+        .sheet(isPresented: $showSupport) { PersonalSupportView() }
         .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(isPresented: $showSOS) { SosView() }
     }
