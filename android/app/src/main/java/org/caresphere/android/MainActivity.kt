@@ -497,7 +497,7 @@ class MainActivity : Activity() {
             val routines = data.list("routines")
             if(routines.length() == 0) text("Add routines from Today.", parent = c)
             for(i in 0 until routines.length()) {
-                button("Remove ${routines.getJSONObject(i).getString("title")}", c) { confirm("Remove routine?", "Your other routines will remain.") { routines.remove(i); data.put("routines", routines); render() } }.isEnabled = data.canWrite
+                button("Remove ${routines.getJSONObject(i).getString("title")}", c) { confirm("Remove routine?", "Your other routines will remain.") { val updated = JSONArray(routines.toString()); updated.remove(i); data.put("routines", updated); render() } }.isEnabled = data.canWrite
             }
         }
         card("Appearance") { c ->
