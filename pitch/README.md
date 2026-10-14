@@ -2,17 +2,22 @@
 
 Everything needed to record the 3-minute submission video.
 
+Two versions of the same 13-slide deck ship side by side. They share the arc, the narration, the slide numbers and
+the timings in `VIDEO_SCRIPT.md`, so you can switch between them (or mix slides) without touching the script.
+
 | File | What it is |
 |---|---|
-| `CareSphere_Congressional_App_Challenge_Deck.pptx` | 13-slide editable deck, 16:9, with the typefaces **embedded** so it looks the same on any PowerPoint (2016+ / 365). Speaker notes on every slide carry the timed narration. |
+| `CareSphere_Congressional_App_Challenge_Deck.pptx` | **Version A — clean.** Translucent panels on the navy gradient, Bold 40 pt headlines, one accent. Previews in `preview/`. |
+| `CareSphere_Congressional_App_Challenge_Deck_B.pptx` | **Version B — editorial.** Same palette and type, re-composed: dot-grid backdrop with two soft glows, a faint slide numeral top-right, ExtraBold headlines with the key phrase in the accent, ink-dark cards, layered screenshots (stacked phones on the title, phone over browser on the demo, a heart-rate card over the code), plus three new visuals — an on-device architecture diagram (privacy), a date-proportional six-week timeline (traction) and a need / today / CareSphere comparison table (status quo). Previews in `preview-b/`. |
+| both | 16:9, typefaces **embedded** (identical on any PowerPoint 2016+ / 365), speaker notes with the timed narration, and **slide transitions**: a 600 ms fade between slides, a push into the demo slide and a fade-through-black into the close. Set `AUTO_ADVANCE = True` in `build_deck_b.py` to make the slides advance on the script's timings while you record. |
 | `VIDEO_SCRIPT.md` | Run-of-show with timings, the click-by-click demo shot list, a recording checklist, and drafts of the three CAC written answers (within the 350 / 1,500 / 750-character limits). |
-| `preview/slide-NN.jpg`, `preview/contact-sheet.jpg` | Pixel-exact renders of each slide (same fonts, same layout). Use them to check on a phone — or drop them straight into the video editor if you don't have PowerPoint. |
+| `preview/`, `preview-b/` | Pixel-exact renders of each slide (`slide-NN.jpg` + `contact-sheet.jpg`, same fonts, same layout). Use them to check on a phone — or drop them straight into the video editor if you don't have PowerPoint. Transitions only show in PowerPoint / Keynote / Google Slides. |
 | `assets/` | Every picture in the deck: real screenshots of the running web app in drawn device frames, the app icon, a QR code to the repo, a soft glow. `assets/extra/` holds spare framed screenshots and crops (SOS, Settings, Visit brief, light theme, high-contrast, games, breathing…) for swapping in or as video B-roll. |
 | `fonts/` | Plus Jakarta Sans (Regular / Medium / Bold / ExtraBold) and JetBrains Mono — SIL Open Font License. Embedded in the .pptx; install them only if you edit in Keynote or Google Slides. |
-| `build_deck.py` | The slide content — 13 slides described in plain Python (text, cards, images). Generates the .pptx **and** the previews. |
-| `deck_engine.py` | The design system (type scale, palette, cards, chips, stats) and the two renderers (python-pptx and Pillow). |
+| `build_deck.py`, `build_deck_b.py` | The slide content of Version A / Version B — 13 slides described in plain Python (text, cards, images). Each generates its .pptx **and** its previews; B reuses A's speaker notes so the narration can never drift apart. |
+| `deck_engine.py` | The design system (type scale, palette, cards, chips, stats), slide transitions, and the two renderers (python-pptx and Pillow). |
 | `embed_fonts.py` | Wraps the TTFs as Embedded OpenType and registers them in the .pptx (`<p:embeddedFontLst>`). |
-| `make_assets.py` | Frames screenshots (navy bezel + soft shadow), builds icon / glow / QR; re-frames existing assets when raw captures are absent. |
+| `make_assets.py` | Frames screenshots (navy bezel + soft shadow), builds icon / glow / dot-grid backdrop / QR; re-frames existing assets when raw captures are absent. |
 | `make_fonts.py` | Regenerates the static font files from Google Fonts' variable sources (needs `fonttools`). |
 | `tools/` | Headless-Chromium capture scripts that seed realistic demo data into the web app and screenshot every tab, crop and overlay. |
 
@@ -23,7 +28,8 @@ Everything needed to record the 3-minute submission video.
 - **Colour.** The background is a gradient of the icon's navy (`#0B1733 → #0F2659`); panels are translucent white; the **only accent is the icon's mint-green `#06E288`** (eyebrow labels, key numbers, the CTA). No second or third hue anywhere.
 - **Type.** One family, Plus Jakarta Sans: ExtraBold for the two display lines, Bold 40 pt for headlines, Regular/Medium 15–22 pt for body, 11.5 pt tracked capitals for eyebrows. JetBrains Mono for the single code panel.
 - **Images.** Real screenshots only, all in the same navy bezel with the same soft shadow and corner radius.
-- **Rhythm.** Every content slide: eyebrow + headline at the same position, 0.8" margins, one footer (brand mark left, `NN / 13` right).
+- **Rhythm.** Every content slide: eyebrow + headline at the same position, 0.8" margins, one footer (brand mark left; A adds `NN / 13` right, B a faint numeral top-right).
+- **Motion.** Transitions only where they mean something: a quiet fade everywhere, a push when the live demo "enters", a fade through black before the close. No object animations — judges watch a video, not a slideshow.
 
 ## Why the deck is built this way
 
@@ -33,21 +39,21 @@ per slide, large type, strong contrast, real screenshots instead of clip-art, a 
 **personal story** (what winning CAC videos have in common), a visible roadmap, contact on the first and last slide and a
 close that asks for something — never a bare "Thank you". Everything trimmed from the slides lives in the speaker notes.
 
-| # | Slide | Headline |
-|---|---|---|
-| 1 | Title | CareSphere AI — Connected care for independent living |
-| 2 | Why I built it | “[your story]” |
-| 3 | Problem | Growing older — or growing up autistic — too often means facing care alone. |
-| 4 | Today | Four apps. Four accounts. Four clouds. |
-| 5 | Solution | One calm app. Five tabs. Zero servers. |
-| 6 | Live demo | Let's see it. |
-| 7 | Different | Four rules, written into the code. |
-| 8 | Audience | Built for three people at once. |
-| 9 | Privacy | Everything stays on the device. |
-| 10 | Built with | Two clients. One promise. No server. |
-| 11 | Hardest problem | Making Bluetooth honest. |
-| 12 | Where it stands | Shipped and tested. Next: built with the people it serves. |
-| 13 | Close | Care that stays yours. |
+| # | Slide | Headline | Version B treatment |
+|---|---|---|---|
+| 1 | Title | CareSphere AI — Connected care for independent living | B: two stacked phones |
+| 2 | Why I built it | “[your story]” | B: medication list + reminder toast |
+| 3 | Problem | Growing older — or growing up autistic — too often means facing care alone. | B: stat cards |
+| 4 | Today | Four apps. Four accounts. Four clouds. | B: need / today / CareSphere table |
+| 5 | Solution | One calm app. Five tabs. Zero servers. | B: staggered phones |
+| 6 | Live demo | Let's see it. | B: phone over browser + six-shot list |
+| 7 | Different | Four rules, written into the code. | B: each rule with its line of code |
+| 8 | Audience | Built for three people at once. | B: phones rising out of the cards |
+| 9 | Privacy | Everything stays on the device. | B: on-device architecture diagram |
+| 10 | Built with | Two clients. One promise. No server. | B: stack chips + metric cards |
+| 11 | Hardest problem | Making Bluetooth honest. | B: real HR card over the code |
+| 12 | Where it stands | A: Shipped and tested. Next: built with the people it serves. · B: Six weeks from first commit to v2.2. | B: dated timeline + Next / Then / Deliberately not |
+| 13 | Close | Care that stays yours. | B: centred, three CTA chips |
 
 ## Before you record
 
@@ -59,8 +65,9 @@ close that asks for something — never a bare "Thank you". Everything trimmed f
 
 ```bash
 pip install python-pptx pillow qrcode fonttools    # Python 3.10+
-python3 pitch/build_deck.py                         # writes the .pptx (fonts embedded) + preview/
-python3 pitch/make_assets.py                        # re-frames screenshots, rebuilds icon / glow / QR
+python3 pitch/build_deck.py                         # Version A → .pptx (fonts embedded, transitions) + preview/
+python3 pitch/build_deck_b.py                       # Version B → _B.pptx + preview-b/
+python3 pitch/make_assets.py                        # re-frames screenshots, rebuilds icon / glow / backdrop / QR
 ```
 
 To re-capture screenshots: `npm run build && npx serve -s dist -l 4173`, then in `pitch/tools`

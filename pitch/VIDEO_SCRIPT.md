@@ -7,8 +7,10 @@ demo shots 4 and 5.
 Judges' checklist covered: student name(s) ✔ app name ✔ purpose ✔ intended audience ✔ tools & languages ✔
 app shown in use ✔ (plus the three written-answer themes: challenge, how it was overcome, version 2.0).
 
-Fill in every `[bracket]` before recording. Slide numbers refer to
-`CareSphere_Congressional_App_Challenge_Deck.pptx` — the speaker notes of each slide contain the same lines.
+Fill in every `[bracket]` before recording. Slide numbers are the same in both decks
+(`CareSphere_Congressional_App_Challenge_Deck.pptx` — Version A, and `..._Deck_B.pptx` — Version B); the speaker
+notes of each slide contain the same lines. Slide 12's headline differs (A: "Shipped and tested…", B: "Six weeks from
+first commit to v2.2.") — the narration below fits both.
 
 ---
 

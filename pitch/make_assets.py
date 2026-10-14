@@ -13,7 +13,7 @@ import re
 from pathlib import Path
 
 import qrcode
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent
 SHOTS = Path(os.environ.get('CARESPHERE_SHOTS', ROOT / 'tools' / 'out'))  # raw captures from tools/capture*.js
@@ -176,6 +176,28 @@ def glow(dst, size=(1600, 1600), color=ACCENT, strength=70):
     im.save(dst, optimize=True)
 
 
+def mesh(dst, size=(1920, 1080)):
+    """Backdrop texture for deck B: a faint dot grid that fades towards the bottom, a mint glow top-left and a
+    deeper blue glow bottom-right.  Transparent PNG laid over the gradient background of every slide."""
+    im = Image.new('RGBA', size, (0, 0, 0, 0))
+    glows = Image.new('RGBA', size, (0, 0, 0, 0))
+    g = ImageDraw.Draw(glows)
+    g.ellipse([-420, -520, 760, 420], fill=ACCENT + (40,))
+    g.ellipse([1180, 620, 2420, 1500], fill=(24, 72, 180, 92))
+    glows = glows.filter(ImageFilter.GaussianBlur(190))
+    im.alpha_composite(glows)
+    grid = Image.new('RGBA', size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(grid)
+    step = 48
+    for yy in range(24, size[1], step):
+        for xx in range(24, size[0], step):
+            d.ellipse([xx - 1.4, yy - 1.4, xx + 1.4, yy + 1.4], fill=(255, 255, 255, 34))
+    fade = Image.linear_gradient('L').resize(size).point(lambda v: 255 - int(v * 0.72))   # 255 at top → ~70 at bottom
+    grid.putalpha(ImageChops.multiply(grid.getchannel('A'), fade))
+    im.alpha_composite(grid)
+    im.save(dst, optimize=True)
+
+
 def qr(dst, data='https://github.com/engineer2025-sudo/Care'):
     q = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=12, border=2)
     q.add_data(data)
@@ -189,6 +211,7 @@ def drawn(sizes):
     OUT.mkdir(exist_ok=True)
     sizes['icon'] = plain(ROOT.parent / 'ios/CareSphere/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon1024.png', OUT / 'icon.png', 512)
     glow(OUT / 'glow.png')
+    mesh(OUT / 'bg-mesh.png')
     sizes['qr'] = qr(OUT / 'qr.png')
 
 
@@ -244,8 +267,8 @@ def reframe_existing(sizes):
 def prune():
     """Only images referenced by build_deck.py stay in assets/; everything else is parked in assets/extra
     (real screenshots are never deleted — handy for swapping into slides or as video B-roll)."""
-    deck_src = (ROOT / 'build_deck.py').read_text()
-    used = set(re.findall(r"'((?:phone|web|crop|strip)-[\w-]+)'", deck_src)) | {'glow', 'icon', 'qr'}
+    deck_src = ''.join(f.read_text() for f in ROOT.glob('build_deck*.py'))
+    used = set(re.findall(r"'((?:phone|web|crop|strip|bg)-[\w-]+)'", deck_src)) | {'glow', 'icon', 'qr', 'bg-mesh'}
     EXTRA.mkdir(exist_ok=True)
     for f in sorted(OUT.glob('*.png')):
         if f.stem not in used:

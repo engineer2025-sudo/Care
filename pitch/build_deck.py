@@ -7,6 +7,7 @@ One idea per slide, the headline is the takeaway, ≤ ~40 words per slide, a sou
 first and last slide.  Everything cut from the slides lives in the speaker notes, so the narration loses nothing.
 
 Design system: Plus Jakarta Sans, icon-navy gradient, one accent (the icon's mint-green), real screenshots only.
+Transitions: 600 ms fade, push into the demo, fade-through-black into the close (see deck_engine.TRANSITIONS).
 Usage:  python3 build_deck.py
 """
 from pathlib import Path
@@ -96,7 +97,7 @@ def build() -> Deck:
     s.notes = '[0:47–0:57] CareSphere is one calm app with five tabs — Overview, Activities, Coffee Circles, Care Circle and Vitals — with no server behind any of it.'
 
     # 6 --------------------------------------------------------------------- Demo
-    s = d.slide()
+    s = d.slide(transition='push')
     s.header('Live demo', 'Let’s see it.')
     s.image('web-overview', M - 0.45, 1.5, w=8.5)
     cx = M + 8.55
@@ -238,7 +239,7 @@ def build() -> Deck:
     s.notes = '[2:35–2:47] Version 2.0 starts with co-design sessions with autistic people, people living with dementia and caregivers, then a TestFlight beta and sensor history in the visit brief — still with no server. (Deliberately not planned: cloud sync, a clinician portal or a drug-interaction checker — not without clinical review.)'
 
     # 13 --------------------------------------------------------------------- Close
-    s = d.slide(footer=False)
+    s = d.slide(footer=False, transition='fade-black')
     s.image('glow', -3.2, -3.4, 9.5, 9.5)
     s.image('icon', M, 1.35, 1.0, 1.0, r=0.24)
     s.text(M, 2.65, 8.6, 1.3, 'Care that stays yours.', size=54, color=WHITE, weight=800, anchor='t', lh=1.05, fit=False)

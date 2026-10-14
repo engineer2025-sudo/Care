@@ -82,6 +82,17 @@ NAVY = INK
 
 FOOTER_BRAND = 'CareSphere AI'
 
+# slide transitions (PowerPoint 2010+ form with a plain ECMA-376 fallback; Keynote / Google Slides import both)
+NS_MC = 'http://schemas.openxmlformats.org/markup-compatibility/2006'
+NS_P14 = 'http://schemas.microsoft.com/office/powerpoint/2010/main'
+TRANSITIONS = {
+    'fade': dict(kind='fade', dur=600),
+    'fade-black': dict(kind='fade', dur=900, thru_black=True),
+    'push': dict(kind='push', dur=650, dir='l'),
+    'wipe': dict(kind='wipe', dur=600, dir='r'),
+    'none': None,
+}
+
 
 def rgb(hexstr):
     return tuple(int(hexstr[i:i + 2], 16) for i in (0, 2, 4))
@@ -185,11 +196,13 @@ def layout_paras(paras, w_in, scale=1.0):
 
 # --------------------------------------------------------------- slide model
 class Slide:
-    def __init__(self, deck, footer=True):
+    def __init__(self, deck, footer=True, transition='default', chrome=None):
         self.deck = deck
         self.items = []
         self.notes = ''
         self.footer = footer
+        self.chrome = footer if chrome is None else chrome   # backdrop + numeral (deck options)
+        self.transition = transition                           # key of TRANSITIONS, a dict, or None
 
     # primitives --------------------------------------------------------
     def rect(self, x, y, w, h, fill=None, line=None, lw=1.0, r=0.0, alpha=None, line_alpha=None, dash=False):
@@ -221,9 +234,12 @@ class Slide:
                                         lines=lines, total=total)))
         return total
 
-    def image(self, name, x, y, w=None, h=None, align='c', valign='m', r=0.0):
+    def image(self, name, x, y, w=None, h=None, align='c', valign='m', r=0.0, rot=0.0, crop=None):
+        """crop = (left, top, right, bottom) fractions of the source to cut away; w/h then describe the visible part."""
         path = ASSETS / f'{name}.png'
         iw, ih = self.deck.img_size(path)
+        crop = crop or (0, 0, 0, 0)
+        iw, ih = iw * (1 - crop[0] - crop[2]), ih * (1 - crop[1] - crop[3])
         if w and h:
             s = min(w / iw, h / ih)
         elif w:
@@ -241,7 +257,7 @@ class Slide:
             y += h - dh
         if not r and name.startswith(('crop-', 'strip-')):
             r = 0.04 * dw      # the app's own card radius, so page-colour corners never show on the slide
-        self.items.append(('image', dict(path=path, x=x, y=y, w=dw, h=dh, r=r)))
+        self.items.append(('image', dict(path=path, x=x, y=y, w=dw, h=dh, r=r, rot=rot, crop=crop)))
         return x, y, dw, dh
 
     # composites --------------------------------------------------------
@@ -279,10 +295,15 @@ class Slide:
 
 
 class Deck:
-    def __init__(self):
+    def __init__(self, bg=BG, bg2=BG2, backdrop=None, numeral=False, footer_page=True, transition='fade'):
         self.slides: list[Slide] = []
         self.warnings: list[str] = []
         self._sizes = {}
+        self.bg, self.bg2 = bg, bg2
+        self.backdrop = backdrop          # asset name drawn full-bleed under every chrome slide (e.g. a dot grid)
+        self.numeral = numeral            # big faint slide number top-right instead of the small footer counter
+        self.footer_page = footer_page
+        self.transition = transition      # default transition for slides that don't set their own
 
     def img_size(self, path):
         if path not in self._sizes:
@@ -290,10 +311,16 @@ class Deck:
                 self._sizes[path] = im.size
         return self._sizes[path]
 
-    def slide(self, footer=True):
-        s = Slide(self, footer=footer)
+    def slide(self, footer=True, transition='default', chrome=None):
+        s = Slide(self, footer=footer, transition=transition, chrome=chrome)
         self.slides.append(s)
         return s
+
+    def _transition_for(self, s):
+        tr = self.transition if s.transition == 'default' else s.transition
+        if isinstance(tr, str):
+            tr = TRANSITIONS[tr]
+        return tr
 
     # ------------------------------------------------------------ PPTX out
     def write_pptx(self, path):
@@ -305,20 +332,56 @@ class Deck:
             sl = prs.slides.add_slide(blank)
             fill = sl.background.fill
             fill.gradient()
-            fill.gradient_angle = 90          # top → bottom
             stops = fill.gradient_stops
             stops[0].position = 0.0
-            stops[0].color.rgb = RGBColor(*rgb(BG))
+            stops[0].color.rgb = RGBColor(*rgb(self.bg))
             stops[1].position = 1.0
-            stops[1].color.rgb = RGBColor(*rgb(BG2))
+            stops[1].color.rgb = RGBColor(*rgb(self.bg2))
+            # OOXML measures the gradient angle clockwise: 90° (5 400 000) is top → bottom
+            fill._fill._gradFill.find(qn('a:lin')).set('ang', '5400000')
+            for kind, it in self._chrome_items(s, idx, n, before=True):
+                getattr(self, f'_pptx_{kind}')(sl, it)
             for kind, it in s.items:
                 getattr(self, f'_pptx_{kind}')(sl, it)
-            if s.footer:
-                for kind, it in self._footer_items(idx, n):
-                    getattr(self, f'_pptx_{kind}')(sl, it)
+            for kind, it in self._chrome_items(s, idx, n, before=False):
+                getattr(self, f'_pptx_{kind}')(sl, it)
             sl.notes_slide.notes_text_frame.text = s.notes or ''
+            self._add_transition(sl, self._transition_for(s))
         prs.save(path)
         embed_fonts.embed(path, EMBED)
+
+    @staticmethod
+    def _add_transition(sl, tr):
+        """<mc:AlternateContent> with a p14 transition (duration in ms) and a plain p:transition fallback —
+        the exact form PowerPoint itself writes.  Goes after p:clrMapOvr, before any p:timing / p:extLst."""
+        if not tr:
+            return
+        dur = int(tr.get('dur', 600))
+
+        def build(with_p14):
+            el = etree.Element(qn('p:transition'))
+            el.set('spd', 'slow' if dur >= 900 else 'med' if dur >= 500 else 'fast')
+            if with_p14:
+                el.set(f'{{{NS_P14}}}dur', str(dur))
+            if tr.get('adv_tm') is not None:
+                el.set('advTm', str(int(tr['adv_tm'])))
+            child = etree.SubElement(el, qn(f"p:{tr.get('kind', 'fade')}"))
+            if tr.get('kind', 'fade') == 'fade' and tr.get('thru_black'):
+                child.set('thruBlk', '1')
+            if tr.get('dir') and tr.get('kind') in ('push', 'wipe', 'cover', 'pull', 'strips', 'blinds', 'checker', 'comb', 'randomBar'):
+                child.set('dir', tr['dir'])
+            return el
+
+        ac = etree.Element(f'{{{NS_MC}}}AlternateContent', nsmap={'mc': NS_MC})
+        choice = etree.SubElement(ac, f'{{{NS_MC}}}Choice', nsmap={'p14': NS_P14})
+        choice.set('Requires', 'p14')
+        choice.append(build(True))
+        etree.SubElement(ac, f'{{{NS_MC}}}Fallback').append(build(False))
+        sld = sl._element
+        anchor = sld.find(qn('p:clrMapOvr'))
+        if anchor is None:
+            anchor = sld.find(qn('p:cSld'))
+        anchor.addnext(ac)
 
     @staticmethod
     def _no_shadow(shape):
@@ -382,6 +445,12 @@ class Deck:
 
     def _pptx_image(self, sl, it):
         pic = sl.shapes.add_picture(str(it['path']), Inches(it['x']), Inches(it['y']), Inches(it['w']), Inches(it['h']))
+        if it.get('name'):
+            pic.name = it['name']
+        if it.get('rot'):
+            pic.rotation = it['rot']
+        if it.get('crop') and any(it['crop']):
+            pic.crop_left, pic.crop_top, pic.crop_right, pic.crop_bottom = it['crop']
         if it.get('r'):
             prst = pic._element.spPr.find(qn('a:prstGeom'))
             prst.set('prst', 'roundRect')
@@ -426,8 +495,27 @@ class Deck:
                 r.font.size = Pt(round(st['size'] * scale * 2) / 2)
                 r.font.bold = face[2]
                 r.font.color.rgb = RGBColor(*rgb(st['color']))
+                if st.get('alpha') is not None and st['alpha'] < 1:
+                    clr = r.font._rPr.find(qn('a:solidFill')).find(qn('a:srgbClr'))
+                    etree.SubElement(clr, qn('a:alpha')).set('val', str(int(st['alpha'] * 100000)))
                 if st.get('tracking'):
                     r.font._rPr.set('spc', str(int(st['tracking'] * scale * 100)))
+
+    def _chrome_items(self, s, idx, n, before):
+        """Deck-level furniture: backdrop texture (under the content), slide numeral + footer (over it)."""
+        items = []
+        if before:
+            if self.backdrop and s.chrome:
+                items.append(('image', dict(path=ASSETS / f'{self.backdrop}.png', x=0, y=0, w=W, h=H, r=0, name='Backdrop')))
+            return items
+        if self.numeral and s.chrome:
+            paras = norm_paras([f'{idx:02d}'], 92, WHITE, 800, WHITE, 1.0, 0)
+            for p in paras:
+                p['runs'] = [(t, {**st, 'alpha': 0.07}) for t, st in p['runs']]
+            items.append(('text', dict(x=W - M - 2.2, y=0.32, w=2.2, h=1.4, paras=paras, scale=1, align='r', anchor='t', lines=None)))
+        if s.footer:
+            items += self._footer_items(idx, n)
+        return items
 
     def _footer_items(self, idx, n):
         items = []
@@ -436,15 +524,16 @@ class Deck:
         items.append(('text', dict(x=M + 0.36, y=y, w=4, h=0.22,
                                    paras=norm_paras([FOOTER_BRAND], 10.5, DIM, 700, WHITE, 1.2, 0, tracking=0.6),
                                    scale=1, align='l', anchor='m', lines=None)))
-        items.append(('text', dict(x=W - M - 1.5, y=y, w=1.5, h=0.22,
-                                   paras=norm_paras([f'{idx:02d}  /  {n:02d}'], 10.5, DIM, 500, WHITE, 1.2, 0, tracking=0.6),
-                                   scale=1, align='r', anchor='m', lines=None)))
+        if self.footer_page:
+            items.append(('text', dict(x=W - M - 1.5, y=y, w=1.5, h=0.22,
+                                       paras=norm_paras([f'{idx:02d}  /  {n:02d}'], 10.5, DIM, 500, WHITE, 1.2, 0, tracking=0.6),
+                                       scale=1, align='r', anchor='m', lines=None)))
         return items
 
     # --------------------------------------------------------- preview out
     def _background(self):
         w, h = int(W * PX), int(H * PX)
-        c0, c1 = rgb(BG), rgb(BG2)
+        c0, c1 = rgb(self.bg), rgb(self.bg2)
         grad = Image.new('RGB', (1, h))
         for yy in range(h):
             t = yy / (h - 1)
@@ -458,11 +547,12 @@ class Deck:
         bg = self._background()
         for idx, s in enumerate(self.slides, start=1):
             im = bg.copy()
+            for kind, it in self._chrome_items(s, idx, n, before=True):
+                getattr(self, f'_pil_{kind}')(im, it)
             for kind, it in s.items:
                 getattr(self, f'_pil_{kind}')(im, it)
-            if s.footer:
-                for kind, it in self._footer_items(idx, n):
-                    getattr(self, f'_pil_{kind}')(im, it)
+            for kind, it in self._chrome_items(s, idx, n, before=False):
+                getattr(self, f'_pil_{kind}')(im, it)
             out = folder / f'slide-{idx:02d}.jpg'
             im.convert('RGB').save(out, quality=90, optimize=True)
             thumbs.append(im.convert('RGB').resize((480, 270), Image.LANCZOS))
@@ -542,6 +632,9 @@ class Deck:
 
     def _pil_image(self, im, it):
         src = Image.open(it['path']).convert('RGBA')
+        if it.get('crop') and any(it['crop']):
+            l, t, r_, b = it['crop']
+            src = src.crop((int(src.width * l), int(src.height * t), int(src.width * (1 - r_)), int(src.height * (1 - b))))
         tw, th = max(1, self._px(it['w'])), max(1, self._px(it['h']))
         src = src.resize((tw, th), Image.LANCZOS)
         if it.get('r'):
@@ -549,11 +642,22 @@ class Deck:
             ImageDraw.Draw(mask).rounded_rectangle([0, 0, tw - 1, th - 1], radius=self._px(it['r']), fill=255)
             alpha = src.getchannel('A')
             src.putalpha(Image.composite(alpha, Image.new('L', src.size, 0), mask))
-        im.alpha_composite(src, (self._px(it['x']), self._px(it['y'])))
+        dx, dy = self._px(it['x']), self._px(it['y'])
+        if it.get('rot'):
+            cx, cy = dx + tw / 2, dy + th / 2
+            src = src.rotate(-it['rot'], expand=True, resample=Image.BICUBIC)   # PowerPoint rotates clockwise about the centre
+            dx, dy = int(round(cx - src.width / 2)), int(round(cy - src.height / 2))
+        if dx < 0 or dy < 0:                                                      # alpha_composite refuses negative offsets
+            src = src.crop((max(0, -dx), max(0, -dy), src.width, src.height))
+            dx, dy = max(0, dx), max(0, dy)
+        if dx < im.width and dy < im.height:
+            im.alpha_composite(src, (dx, dy))
 
     def _pil_text(self, im, it):
-        d = ImageDraw.Draw(im)
         paras, scale = it['paras'], it['scale']
+        translucent = any(st.get('alpha', 1) < 1 for p in paras for _, st in p['runs'])
+        layer = Image.new('RGBA', im.size, (0, 0, 0, 0)) if translucent else im
+        d = ImageDraw.Draw(layer)
         lines, total = layout_paras(paras, it['w'], scale)
         x0 = it['x'] * PX
         if it['anchor'] == 't':
@@ -590,12 +694,15 @@ class Deck:
                 d.text((x0, baseline), p['bullet_char'], font=bf, fill=rgb(p['bullet_color']), anchor='ls')
             for tok, st in toks:
                 f = pil_font(st['size'] * scale, _weight(st), st.get('mono'))
+                col = rgb(st['color']) + (int(255 * st.get('alpha', 1)),)
                 if st.get('tracking'):
                     extra = st['tracking'] * scale * PX / 72
                     for ch in tok:
-                        d.text((x, baseline), ch, font=f, fill=rgb(st['color']), anchor='ls')
+                        d.text((x, baseline), ch, font=f, fill=col, anchor='ls')
                         x += f.getlength(ch) + extra
                 else:
-                    d.text((x, baseline), tok, font=f, fill=rgb(st['color']), anchor='ls')
+                    d.text((x, baseline), tok, font=f, fill=col, anchor='ls')
                     x += f.getlength(tok)
             y += lh_px
+        if translucent:
+            im.alpha_composite(layer)
