@@ -4,7 +4,7 @@ const aad = enc.encode('CareSphere transfer v1')
 const b64 = a => { let s=''; for(let i=0;i<a.length;i+=8192)s+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(s) }
 const bytes = s => { if(typeof s!=='string'||!(/^[A-Za-z0-9+/]*={0,2}$/).test(s))throw Error('Invalid encoding');return Uint8Array.from(atob(s),c=>c.charCodeAt(0)) }
 export function validateTransfer(v) {
-  if(!v || v.version!==1 || typeof v.id!=='string' || !/^[a-f0-9-]{36}$/i.test(v.id) || !Array.isArray(v.records) || !v.records.length || v.records.length>100)throw Error('Not a supported CareSphere transfer.')
+  if(!v || v.version!==1 || typeof v.id!=='string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(v.id) || !Array.isArray(v.records) || !v.records.length || v.records.length>100)throw Error('Not a supported CareSphere transfer.')
   const ids=new Set()
   for(const r of v.records){
     if(!r || typeof r.id!=='string' || !r.id || r.id.length>120 || ids.has(r.id) || !['note','routine'].includes(r.type) || typeof r.text!=='string' || !r.text.trim() || r.text.length>(r.type==='note'?4000:240))throw Error('The transfer contains invalid or oversized records. Nothing was imported.')
