@@ -3,6 +3,9 @@ package org.caresphere.android
 import android.app.*
 import android.os.*
 import android.content.*
+import android.content.res.Configuration
+import android.text.Editable
+import android.text.TextWatcher
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -23,6 +26,9 @@ class MainActivity : Activity() {
     private var tab = 0
     private var settings = false
     private var activityIndex = -1
+    private var activityQuery = ""
+    private var noteQuery = ""
+    private var favoritesOnly = false
     private var round = 0
     private var feedback = ""
     private var firstPair = -1
@@ -42,10 +48,19 @@ class MainActivity : Activity() {
     private var deviceList: LinearLayout? = null
     private var hrControl: Button? = null
     private var displayedDevices = ""
-    private val green = Color.rgb(55,111,76)
-    private val ink = Color.rgb(28,46,36)
-    private val muted = Color.rgb(80,98,87)
-    private val bg = Color.rgb(246,248,244)
+    private val dark: Boolean get() = when (if (::data.isInitialized) data.json.optString("appearance", "system") else "system") {
+        "dark" -> true; "light" -> false
+        else -> resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+    }
+    private val green get() = if (dark) Color.rgb(168,211,178) else Color.rgb(55,111,76)
+    private val fill get() = Color.rgb(55,111,76)
+    private val ink get() = if (dark) Color.rgb(237,244,237) else Color.rgb(28,46,36)
+    private val muted get() = if (dark) Color.rgb(189,205,190) else Color.rgb(80,98,87)
+    private val bg get() = if (dark) Color.rgb(20,29,23) else Color.rgb(246,248,244)
+    private val surface get() = if (dark) Color.rgb(31,43,34) else Color.WHITE
+    private val soft get() = if (dark) Color.rgb(45,62,49) else Color.rgb(233,240,232)
+    private fun dialogBuilder() = AlertDialog.Builder(ContextThemeWrapper(this,
+        if (dark) android.R.style.Theme_Material_Dialog_Alert else android.R.style.Theme_Material_Light_Dialog_Alert))
     private val pairWords = listOf("Flower", "Star", "Leaf", "Star", "Flower", "Leaf")
     private val memory = listOf("Circle", "Star", "Leaf")
     private fun dp(n: Int) = (n * resources.displayMetrics.density).toInt()
@@ -55,6 +70,7 @@ class MainActivity : Activity() {
         data = CareData(this)
         monitor = HeartRateMonitor(this) { updateHealth() }
         savedInstanceState?.let {
+            activityQuery = it.getString("activityQuery", ""); noteQuery = it.getString("noteQuery", ""); favoritesOnly = it.getBoolean("favoritesOnly")
             tab = it.getInt("tab"); settings = it.getBoolean("settings")
             activityIndex = it.getInt("activity", -1); round = it.getInt("round")
             feedback = it.getString("feedback", ""); memoryHidden = it.getBoolean("memoryHidden")
@@ -65,6 +81,7 @@ class MainActivity : Activity() {
     }
     override fun onSaveInstanceState(out: Bundle) {
         super.onSaveInstanceState(out)
+        out.putString("activityQuery", activityQuery); out.putString("noteQuery", noteQuery); out.putBoolean("favoritesOnly", favoritesOnly)
         out.putInt("tab", tab); out.putBoolean("settings", settings); out.putInt("activity", activityIndex); out.putInt("round", round)
         out.putString("feedback", feedback); out.putBoolean("memoryHidden", memoryHidden); out.putInt("memoryPosition", memoryPosition)
         out.putIntArray("matched", matched.toIntArray()); out.putInt("first", firstPair); out.putInt("second", secondPair)
@@ -96,17 +113,23 @@ class MainActivity : Activity() {
     private fun button(label: String, parent: LinearLayout = page, primary: Boolean = false, action: () -> Unit): Button = Button(this).apply {
         text = label; textSize = 17f; isAllCaps = false; minHeight = dp(52)
         setPadding(dp(12), dp(10), dp(12), dp(10)); setTextColor(if(primary) Color.WHITE else green)
-        background = shape(if (primary) green else Color.rgb(233,240,232), 14)
+        background = shape(if (primary) fill else soft, 14)
         parent.addView(this, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6); bottomMargin = dp(6) })
         setOnClickListener { action() }
     }
     private fun card(title: String, body: (LinearLayout) -> Unit) {
-        val c = column(); c.background = shape(Color.WHITE); c.setPadding(dp(18), dp(14), dp(18), dp(16))
+        val c = column(); c.background = shape(surface); c.setPadding(dp(18), dp(14), dp(18), dp(16))
         (c.layoutParams as LinearLayout.LayoutParams).apply { topMargin = dp(10); bottomMargin = dp(6) }
         text(title, 21f, c, true).apply { if (Build.VERSION.SDK_INT >= 28) isAccessibilityHeading = true }
         body(c)
     }
     private fun render() {
+        @Suppress("DEPRECATION")
+        window.statusBarColor = bg
+        @Suppress("DEPRECATION")
+        window.navigationBarColor = bg
+        @Suppress("DEPRECATION")
+        window.decorView.systemUiVisibility = if(dark) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         hrLabel = null; hrStatus = null; hrTimestamp = null; deviceList = null; hrControl = null; breathLabel = null; displayedDevices = ""
         root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
         root.setOnApplyWindowInsetsListener { v, insets ->
@@ -140,13 +163,13 @@ class MainActivity : Activity() {
         navScroll.addView(nav, ViewGroup.LayoutParams(-1, -2))
         listOf("Today", "Activities", "Care", "Health").forEachIndexed { i, label ->
             val b = Button(this).apply {
-                text = label; textSize = 14f; isAllCaps = false; minHeight = dp(52)
+                text = label; textSize = 15f; isAllCaps = false; minHeight = dp(56)
                 setTextColor(if (i == tab && !settings && activityIndex < 0) Color.WHITE else green)
-                background = shape(if (i == tab && !settings && activityIndex < 0) green else bg, 14)
+                background = shape(if (i == tab && !settings && activityIndex < 0) fill else bg, 14)
                 isSelected = i == tab && !settings && activityIndex < 0
                 setOnClickListener { stopComfort(); tab = i; settings = false; activityIndex = -1; render() }
             }
-            nav.addView(b, LinearLayout.LayoutParams(0, -2, 1f).apply { marginEnd = dp(3) })
+            nav.addView(b, LinearLayout.LayoutParams(if(resources.configuration.fontScale > 1.3f) dp(116) else 0, -2, 1f).apply { marginEnd = dp(3) })
         }
         root.requestApplyInsets()
     }
@@ -194,19 +217,63 @@ class MainActivity : Activity() {
             text("A personal check-in, not a health assessment.", 14f, c)
         }
     }
+    private fun searchField(label: String, value: String, changed: (String) -> Unit) {
+        text(label, 15f, bold = true)
+        val field = EditText(this).apply {
+            hint = label; contentDescription = label; setText(value); textSize = 18f
+            isSingleLine = true; setTextColor(ink); setHintTextColor(muted)
+            setPadding(dp(14), dp(10), dp(14), dp(10)); minHeight = dp(52); background = shape(soft, 14)
+            filters = arrayOf(android.text.InputFilter.LengthFilter(160))
+        }
+        page.addView(field, LinearLayout.LayoutParams(-1, -2))
+        field.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { changed(s.toString()) }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+    private fun openActivity(i: Int) {
+        activityIndex = i; round = 0; feedback = ""; firstPair = -1; secondPair = -1; matched.clear(); memoryPosition = 0; memoryHidden = false
+        (getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager).hideSoftInputFromWindow(root.windowToken, 0)
+        render()
+    }
     private fun activities() {
         text("Make room for a pause.", 30f, bold = true)
-        text("No scores. No countdowns. Hints and breaks whenever you want. Choose based on your own interests and comfort.")
-        ActivityRules.titles.forEachIndexed { i, title ->
-            button(title) {
-                activityIndex = i; round = 0; feedback = ""; firstPair = -1; secondPair = -1; matched.clear(); memoryPosition = 0; memoryHidden = false
-                render()
-            }
-        }
+        text("Find something you enjoy. Save a favorite for next time. No scores, streaks, or pressure to finish.")
+        lateinit var results: LinearLayout
+        searchField("Find an activity", activityQuery) { activityQuery = it; activityResults(results) }
+        val only = CheckBox(this).apply {
+            text = "Favorites only"; textSize = 18f; minHeight = dp(52); setTextColor(ink); isChecked = favoritesOnly
+            setOnCheckedChangeListener { _, checked -> favoritesOnly = checked; activityResults(results) }
+        }; page.addView(only)
+        results = column(); activityResults(results)
         card("Why these activities?") { c ->
             text("Predictable steps, personal choice, and reduced sensory pressure draw on accessibility and wellbeing guidance. These individual games are not clinically validated dementia or autism treatments, cognitive stimulation therapy, or diagnostic tests.", parent = c)
             button("Read NICE dementia guidance", c) { openURL("https://www.nice.org.uk/guidance/ng97/chapter/recommendations") }
             button("Read NICE autistic-adult guidance", c) { openURL("https://www.nice.org.uk/guidance/cg142/chapter/recommendations") }
+        }
+    }
+    private fun activityResults(parent: LinearLayout) {
+        parent.removeAllViews()
+        val favorites = data.favorites()
+        val visible = ActivityRules.titles.indices.filter {
+            (!favoritesOnly || LibraryPreferences.ids[it] in favorites) && LibraryPreferences.matches(ActivityRules.titles[it] + " " + LibraryPreferences.descriptions[it], activityQuery)
+        }
+        text("${visible.size} activities · available offline", 15f, parent)
+        if(visible.isEmpty()) {
+            text("No matching activities. Try a different word, or show everything.", parent = parent)
+            button("Show all activities", parent) { activityQuery = ""; favoritesOnly = false; render() }
+        }
+        for (i in visible) {
+            val c = column(parent); c.background = shape(surface); c.setPadding(dp(16), dp(12), dp(16), dp(14))
+            (c.layoutParams as LinearLayout.LayoutParams).bottomMargin = dp(12)
+            button(ActivityRules.titles[i], c, true) { openActivity(i) }
+            text(LibraryPreferences.descriptions[i], 16f, c)
+            val saved = LibraryPreferences.ids[i] in favorites
+            button(if(saved) "Remove from favorites" else "Save to favorites", c) {
+                data.toggleFavorite(LibraryPreferences.ids[i]); activityResults(parent)
+                parent.announceForAccessibility(if(saved) "Removed from favorites" else "Saved to favorites")
+            }.apply { contentDescription = "${if(saved) "Remove" else "Save"} ${ActivityRules.titles[i]} ${if(saved) "from" else "to"} favorites"; isEnabled = data.canWrite }
         }
     }
     private fun activityPage() {
@@ -311,35 +378,47 @@ class MainActivity : Activity() {
     }
     private fun care() {
         text("Keep what matters.", 30f, bold = true)
-        text("Private notes stored on this device. No family sync, clinician portal, medication reminders, or automatic alerts are configured in this Android release.")
+        text("Private notes on this device. Search, edit, or choose exactly what to share. No family sync or clinician portal is connected.")
         button("Write a care note", primary = true) {
             if (data.list("notes").length() >= 100) { message("You have 100 notes. Remove a note before adding another."); return@button }
             input("New care note", "What would you like to remember?", 4000) { note ->
                 val notes = data.list("notes")
-                notes.put(JSONObject().put("body", note).put("at", Instant.now().toString()))
-                data.put("notes", notes); render()
+                notes.put(JSONObject().put("id", java.util.UUID.randomUUID().toString()).put("body", note).put("at", Instant.now().toString()))
+                data.put("notes", notes); noteQuery = ""; render()
             }
         }.isEnabled = data.canWrite
-        val notes = data.list("notes")
-        if(notes.length() == 0) card("No notes yet") { text("Only notes you write will appear here.", parent = it) }
-        for (i in notes.length()-1 downTo 0) {
-            val note = notes.getJSONObject(i)
-            card("Your note") { c ->
-                text(note.getString("body"), parent = c)
-                val date = runCatching { Instant.parse(note.getString("at")).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("MMM d, yyyy · h:mm a")) }.getOrDefault("Date not recorded")
-                text(date, 14f, c)
-                button("Review & share this note", c) { confirm("Share this note?", "This opens Android's share sheet. Review the recipient before sending.\n\n${note.getString("body")}") { share(note.getString("body")) } }
-                button("Delete note", c) { confirm("Delete this note?", "This cannot be undone.") { notes.remove(i); data.put("notes", notes); render() } }.isEnabled = data.canWrite
-            }
-        }
+        lateinit var results: LinearLayout
+        searchField("Search care notes", noteQuery) { noteQuery = it; noteResults(results) }
+        results = column(); noteResults(results)
         card("Connect with someone you trust") { c ->
             text("Create a room link, share it yourself, and open the real video provider. Nobody is invited automatically. The provider may require sign-in and handles its own privacy and permissions.", parent = c)
             button("Create a video invitation", c) {
                 val url = "https://meet.jit.si/CareSphere-${java.util.UUID.randomUUID()}"
-                AlertDialog.Builder(this).setTitle("Your room invitation").setMessage(url)
+                dialogBuilder().setTitle("Your room invitation").setMessage(url)
                     .setPositiveButton("Open provider") { _, _ -> openURL(url) }
                     .setNeutralButton("Share link") { _, _ -> share(url) }.setNegativeButton("Cancel", null).show()
             }
+        }
+    }
+    private fun noteResults(parent: LinearLayout) {
+        parent.removeAllViews()
+        val notes = data.list("notes")
+        val visible = (notes.length()-1 downTo 0).filter { LibraryPreferences.matches(notes.getJSONObject(it).optString("body"), noteQuery) }
+        if(notes.length() == 0) { text("No notes yet", 22f, parent, true); text("Only notes you write will appear here.", parent = parent) }
+        else if(visible.isEmpty()) { text("No notes match your search.", parent = parent); button("Clear search", parent) { noteQuery = ""; render() } }
+        else text("${visible.size} ${if(visible.size == 1) "note" else "notes"}", 15f, parent)
+        for(i in visible) {
+            val note = notes.getJSONObject(i)
+            val c = column(parent); c.background = shape(surface); c.setPadding(dp(16), dp(14), dp(16), dp(14))
+            (c.layoutParams as LinearLayout.LayoutParams).topMargin = dp(12)
+            text(note.getString("body"), 18f, c)
+            val date = runCatching { Instant.parse(note.getString("at")).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("MMM d, yyyy · h:mm a")) }.getOrDefault("Date not recorded")
+            text("Created $date${if(note.has("editedAt")) " · edited" else ""}", 14f, c)
+            button("Edit note", c) { input("Edit care note", "Your note", 4000, initial = note.getString("body")) { body ->
+                note.put("body", body).put("editedAt", Instant.now().toString()); data.put("notes", notes); render()
+            } }.isEnabled = data.canWrite
+            button("Review & share this note", c) { confirm("Share this note?", "Review the recipient before sending.\n\n${note.getString("body")}") { share(note.getString("body")) } }
+            button("Delete note", c) { confirm("Delete this note?", "This removes the note from this device, not copies already shared. It cannot be undone.") { notes.remove(i); data.put("notes", notes); render() } }.isEnabled = data.canWrite
         }
     }
     private fun health() {
@@ -355,9 +434,13 @@ class MainActivity : Activity() {
                 else monitor.scan()
             }
             deviceList = column(c)
-            button("Bluetooth & permission settings", c) {
+            button("Bluetooth settings", c) {
                 runCatching { startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)) }
                     .onFailure { message("Open Bluetooth in your device Settings.") }
+            }
+            button("App permissions", c) {
+                runCatching { startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))) }
+                    .onFailure { message("Open CareSphere's permissions in Android Settings.") }
             }
             text("Readings expire after 15 seconds without an update. Monitoring stops when the app leaves the foreground. This is not a medical device or an emergency monitor.", 15f, c)
         }
@@ -407,6 +490,14 @@ class MainActivity : Activity() {
                 button("Remove ${routines.getJSONObject(i).getString("title")}", c) { confirm("Remove routine?", "Your other routines will remain.") { routines.remove(i); data.put("routines", routines); render() } }.isEnabled = data.canWrite
             }
         }
+        card("Appearance") { c ->
+            text("Choose what feels comfortable. System follows your device's light or dark setting.", parent = c)
+            val current = data.json.optString("appearance", "system")
+            listOf("system", "light", "dark").forEach { mode ->
+                button("${mode.replaceFirstChar { it.uppercase() }}${if(current == mode) " · selected" else ""}", c) { data.put("appearance", mode); render() }
+                    .apply { isSelected = current == mode; isEnabled = data.canWrite }
+            }
+        }
         card("Accessibility") { c ->
             text("Text follows Android's font-size setting. Buttons have text labels and generous touch targets. Activities don't auto-advance; no flashing, points, or timed tests. TalkBack uses the native controls.", parent = c)
             button("Open Android accessibility settings", c) { runCatching { startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) }.onFailure { message("Open Accessibility in Android Settings.") } }
@@ -417,22 +508,22 @@ class MainActivity : Activity() {
             button("Erase all local data", c) { confirm("Erase everything?", "This permanently removes your saved care information and encryption key from this app. Copies you previously shared cannot be removed.") { monitor.disconnect(); data.erase(); settings = false; tab = 0; render() } }
         }
         card("About this Android release") { c ->
-            text("CareSphere 1.0 · Native Android\nEleven optional activities, local routines and notes, daily mood self-report, real Bluetooth heart rate, and deliberate sharing. No generated health measurements.", parent = c)
+            text("CareSphere 1.1 · Native Android\nEleven optional activities, local routines and notes, daily mood self-report, real Bluetooth heart rate, and deliberate sharing. No generated health measurements.", parent = c)
             text("Apple Intelligence is an Apple-only capability and is not available in this Android app. No AI answers are fabricated or substituted. This is a first Android release, not full iOS feature parity.", parent = c)
         }
     }
-    private fun input(title: String, hint: String, limit: Int, save: (String) -> Unit) {
-        val input = EditText(this).apply { this.hint = hint; minLines = 2; maxLines = 7; filters = arrayOf(android.text.InputFilter.LengthFilter(limit)); setPadding(dp(22), dp(14), dp(22), dp(14)) }
-        val dialog = AlertDialog.Builder(this).setTitle(title).setView(input).setPositiveButton("Save", null).setNegativeButton("Cancel", null).create()
+    private fun input(title: String, hint: String, limit: Int, initial: String = "", save: (String) -> Unit) {
+        val input = EditText(ContextThemeWrapper(this, if(dark) android.R.style.Theme_Material else android.R.style.Theme_Material_Light)).apply { this.hint = hint; setText(initial); setSelection(text.length); minLines = 2; maxLines = 7; filters = arrayOf(android.text.InputFilter.LengthFilter(limit)); setPadding(dp(22), dp(14), dp(22), dp(14)) }
+        val dialog = dialogBuilder().setTitle(title).setView(input).setPositiveButton("Save", null).setNegativeButton("Cancel", null).create()
         dialog.setOnShowListener { dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val value = input.text.toString().trim()
             if(value.isBlank()) input.error = "Enter some text, or cancel." else { save(value); dialog.dismiss() }
         } }; dialog.show()
     }
     private fun confirm(title: String, body: String, action: () -> Unit) {
-        AlertDialog.Builder(this).setTitle(title).setMessage(body).setPositiveButton("Continue") { _, _ -> action() }.setNegativeButton("Cancel", null).show()
+        dialogBuilder().setTitle(title).setMessage(body).setPositiveButton("Continue") { _, _ -> action() }.setNegativeButton("Cancel", null).show()
     }
-    private fun message(value: String) { AlertDialog.Builder(this).setMessage(value).setPositiveButton("OK", null).show() }
+    private fun message(value: String) { dialogBuilder().setMessage(value).setPositiveButton("OK", null).show() }
     private fun share(value: String) {
         runCatching { startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, value), "Choose who receives this")) }
             .onFailure { message("No compatible sharing app is available. Nothing was sent.") }

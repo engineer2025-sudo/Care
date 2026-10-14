@@ -48,6 +48,11 @@ class CareData(private val context: Context) {
                 .setKeySize(256).setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build())
         }.generateKey()
     }
+    fun favorites(): List<String> {
+        val array = list("favorites")
+        return LibraryPreferences.normalized((0 until array.length()).map { array.optString(it) })
+    }
+    fun toggleFavorite(id: String) { put("favorites", JSONArray(LibraryPreferences.toggle(id, favorites()))) }
     fun list(name: String): JSONArray = json.optJSONArray(name) ?: JSONArray()
     fun put(name: String, value: Any) { json.put(name, value); save() }
     fun refreshDay() {
