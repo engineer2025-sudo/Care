@@ -48,7 +48,8 @@ struct VitalsView: View {
             .onAppear {
                 if healthKit.hasRequestedAuthorization { healthKit.refreshAll() }
             }
-            .onReceive(bluetooth.$bpm.compactMap { $0 }) { value in
+            .onReceive(bluetooth.$bpm) { reading in
+                guard let value = reading else { series = []; return }
                 series.append(VitalsPoint(date: Date(), bpm: Double(value)))
                 if series.count > 60 { series.removeFirst() }
             }
@@ -266,7 +267,12 @@ struct VitalsView: View {
                     .frame(maxWidth: .infinity)
                     .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 12))
             }
-            Text("BLE: Bluetooth SIG Heart Rate profile (0x180D/0x2A37) · Apple Health: Apple Watch samples")
+            if let date = bluetooth.measuredAt, bluetooth.bpm != nil {
+                Text("Received \(date.formatted(date: .omitted, time: .standard)) · \(bluetooth.sensorName ?? "Bluetooth monitor")").font(.footnote)
+            } else if let date = healthKit.heartRateRecordedAt, healthKit.heartRate != nil {
+                Text("Recorded \(date.formatted()) · \(healthKit.heartRateSource ?? "Apple Health") · historical, not live").font(.footnote)
+            }
+            Text("BLE: Bluetooth SIG Heart Rate profile (0x180D/0x2A37). Apple Health shows the latest record shared by your source app, not continuous live monitoring.")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
@@ -274,6 +280,9 @@ struct VitalsView: View {
 
     private var spo2Card: some View {
         SectionCard(title: "Blood oxygen (SpO₂)", systemImage: "lungs.fill") {
+            if let date = healthKit.oxygenRecordedAt {
+                Text("Recorded \(date.formatted()) · \(healthKit.oxygenSource ?? "Apple Health") · historical").font(.footnote)
+            }
             HStack(alignment: .firstTextBaseline) {
                 Text(healthKit.spo2.map { "\(Int($0))%" } ?? "—")
                     .font(.system(size: 40, weight: .black))
@@ -291,6 +300,9 @@ struct VitalsView: View {
 
     private var bloodPressureCard: some View {
         SectionCard(title: "Blood pressure", systemImage: "stethoscope") {
+            if let date = healthKit.bloodPressureRecordedAt {
+                Text("Recorded \(date.formatted()) · \(healthKit.bloodPressureSource ?? "Apple Health") · historical").font(.footnote)
+            }
             HStack(alignment: .firstTextBaseline) {
                 Text(healthKit.systolic.map { "\(Int($0)) / \(Int(healthKit.diastolic ?? 0))" } ?? "—")
                     .font(.system(size: 34, weight: .black))

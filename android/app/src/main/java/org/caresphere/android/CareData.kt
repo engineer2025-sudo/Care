@@ -25,7 +25,7 @@ class CareData(private val context: Context) {
     private val alias = "caresphere.local.v1"
 
     init {
-        if (file.baseFile.exists()) {
+        if (file.baseFile.exists() || File(file.baseFile.path + ".bak").exists()) {
             try {
                 val bytes = file.readFully()
                 require(bytes.size > 28)
@@ -45,7 +45,7 @@ class CareData(private val context: Context) {
         check(create) { "Encryption key missing" }
         return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").apply {
             init(KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build())
+                .setKeySize(256).setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build())
         }.generateKey()
     }
     fun list(name: String): JSONArray = json.optJSONArray(name) ?: JSONArray()

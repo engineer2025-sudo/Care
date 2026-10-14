@@ -39,7 +39,11 @@ struct HealthGuideView: View {
             .navigationTitle("Health Guide")
             .inlineTitle()
             .onAppear { assistant.refreshAvailability() }
-            .onDisappear { assistant.cancel() }
+            .onDisappear {
+                searchGenerationID = UUID()
+                isSearching = false
+                assistant.cancel()
+            }
 
         }
     }
@@ -114,6 +118,15 @@ struct HealthGuideView: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSearching || assistant.isGenerating)
+
+            Button("Clear question and answer") {
+                searchGenerationID = UUID()
+                isSearching = false
+                question = ""
+                references = []
+                statusText = nil
+                assistant.clearResponse()
+            }.buttonStyle(.bordered)
 
             if let statusText {
                 Text(statusText).font(.caption2).foregroundStyle(.secondary)

@@ -1,5 +1,6 @@
 import Foundation
 import CoreBluetooth
+import CareActivityKit
 
 struct HeartRateMonitorCandidate: Identifiable {
     let id: UUID
@@ -10,6 +11,7 @@ struct HeartRateMonitorCandidate: Identifiable {
 /// Main-queue CoreBluetooth callbacks. Scanning does not connect to the first
 /// stranger's monitor: the person explicitly selects a discovered device.
 final class BluetoothHeartRateService: NSObject, ObservableObject {
+    @Published private(set) var measuredAt: Date?
     @Published var bpm: Int?
     @Published var sensorName: String?
     @Published private(set) var isConnected = false
@@ -100,6 +102,7 @@ final class BluetoothHeartRateService: NSObject, ObservableObject {
         isConnected = false
         isPairing = false
         bpm = nil
+        measuredAt = nil
         sensorName = nil
         candidates = []
         discovered = [:]
@@ -111,6 +114,7 @@ final class BluetoothHeartRateService: NSObject, ObservableObject {
         let timeout = DispatchWorkItem { [weak self] in
             guard let self, self.isConnected else { return }
             self.bpm = nil
+            self.measuredAt = nil
             self.statusMessage = "No fresh reading for 15 seconds. Check the monitor; the old value is no longer displayed."
         }
         readingTimeout = timeout
@@ -201,21 +205,17 @@ extension BluetoothHeartRateService: CBPeripheralDelegate {
         guard self.peripheral === peripheral, characteristic.uuid == Self.heartRateMeasurementUUID else { return }
         guard error == nil, let data = characteristic.value, data.count >= 2 else {
             bpm = nil
+            measuredAt = nil
             statusMessage = "A monitor reading could not be received. No value is displayed."
             return
         }
-        let value: Int
-        if data[0] & 0x01 != 0 {
-            guard data.count >= 3 else { bpm = nil; return }
-            value = Int(UInt16(data[1]) | (UInt16(data[2]) << 8))
-        } else {
-            value = Int(data[1])
-        }
-        guard value > 20, value < 250 else {
+        guard let value = HeartRatePacket.bpm(from: Array(data)) else {
             bpm = nil
-            statusMessage = "The monitor returned a value outside this app's supported display range. No value is shown."
+            measuredAt = nil
+            statusMessage = "The monitor sent an invalid, incomplete, or no-contact reading. Check its fit; no value is shown."
             return
         }
+        measuredAt = Date()
         bpm = value
         statusMessage = "Live reading from \(sensorName ?? "your selected monitor")."
         expireReadingLater()
