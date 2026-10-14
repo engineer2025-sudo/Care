@@ -1,0 +1,9 @@
+{
+  "name": "caresphere-pitch-tools",
+  "private": true,
+  "description": "Headless-Chromium screenshot capture of the CareSphere web app for the pitch deck",
+  "dependencies": {
+    "@sparticuz/chromium": "^153.0.0",
+    "puppeteer-core": "^25.13.0"
+  }
+}
