@@ -5,99 +5,85 @@ struct SosView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var location: LocationService
     @EnvironmentObject private var store: CareStore
+    @State private var includeLocation = false
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 18) {
-                Text("🚨")
-                    .font(.system(size: 52))
-                Text("Emergency SOS")
-                    .font(.title2.weight(.heavy))
-                Text("Real emergencies need real responders. Call 911 directly, and/or alert your Care Circle with your medical profile and live location.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-
-                if let location = location.location {
-                    Link(destination: URL(string:
-                        "https://www.google.com/maps?q=\(location.coordinate.latitude),\(location.coordinate.longitude)")!) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "location.fill")
-                            Text(String(format: "Location attached: %.5f, %.5f (±%d m)", location.coordinate.latitude, location.coordinate.longitude, Int(location.horizontalAccuracy)))
-                                .font(.caption.weight(.semibold))
-                            Image(systemName: "safari")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(12)
-                        .background(Color.blue.opacity(0.15), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
-                    .foregroundStyle(.blue)
-                } else if let error = location.errorText {
-                    Text("Location unavailable (\(error)) — the alert still goes out without coordinates.")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                }
-
-                Text("CareSphere has no push-notification server for the Care Circle. Use Share SOS below to send the details with Messages, Mail, or another app you choose.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-
-                VStack(spacing: 10) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Need urgent help?")
+                        .font(.title.weight(.bold))
+                        .accessibilityAddTraits(.isHeader)
+                    Text("In the United States, call 911 for immediate danger. Outside the US, use the local emergency number. CareSphere does not contact anyone automatically.")
+                        .font(.body)
                     Link(destination: URL(string: "tel:911")!) {
-                        Label("Call 911 Now", systemImage: "phone.fill")
-                            .font(.title3.weight(.black))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(.red, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        Label("Call 911", systemImage: "phone.fill")
+                            .font(.title3.weight(.bold))
+                            .frame(maxWidth: .infinity, minHeight: 52)
+                            .padding(.vertical, 8)
+                            .background(Color.red, in: RoundedRectangle(cornerRadius: 16))
                             .foregroundStyle(.white)
                     }
-                    if location.location == nil {
-                        Button {
-                            location.request()
-                        } label: {
-                            Label(location.isLocating ? "Locating…" : "Attach my GPS location",
-                                  systemImage: "location")
-                                .font(.subheadline.weight(.bold))
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 13)
+                    SectionCard(title: "Share a request for help", systemImage: "square.and.arrow.up") {
+                        Text("Choose a messaging app and recipient, then review and send the message yourself. CareSphere cannot confirm delivery or a response.")
+                            .foregroundStyle(.secondary)
+
+                        if includeLocation, let fix = location.location {
+                            Label(String(format: "Location ready to share: %.5f, %.5f", fix.coordinate.latitude, fix.coordinate.longitude), systemImage: "location")
+                                .font(.subheadline)
+                            Text("Location recorded \(fix.timestamp.formatted(date: .omitted, time: .shortened)). \(fix.horizontalAccuracy >= 0 ? "Accuracy about \(Int(fix.horizontalAccuracy)) meters." : "Accuracy unavailable.")")
+                                .font(.footnote).foregroundStyle(.secondary)
+                        }
+                        if includeLocation, let error = location.errorText {
+                            Text("Location unavailable: \(error). You can still choose to share a message without coordinates. Nothing has been sent.")
+                                .font(.footnote).foregroundStyle(.secondary)
+                        }
+                        Button { includeLocation = true; location.request() } label: {
+                            Label(location.isLocating ? "Getting location…" : location.location == nil ? "Add my location (optional)" : "Refresh my location", systemImage: "location")
+                                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         }
                         .buttonStyle(.bordered)
                         .disabled(location.isLocating)
+
+                        if includeLocation {
+                            Button("Remove location from message") { includeLocation = false }
+                                .frame(minHeight: 44)
+                        }
+                        Text("Message preview").font(.headline)
+                        Text(emergencyShareMessage)
+                            .textSelection(.enabled)
+                            .padding(14)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14))
+                        ShareLink(item: emergencyShareMessage) {
+                            Label("Choose how to share", systemImage: "square.and.arrow.up")
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
-                    ShareLink(item: emergencyShareMessage) {
-                        Label("Share SOS details", systemImage: "square.and.arrow.up")
-                            .font(.subheadline.weight(.bold))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 13)
-                    }
-                    .buttonStyle(.bordered)
-                    Button("Close") { dismiss() }
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.secondary)
+                    Text("No medical profile is attached. Only the name and optional location shown above are included.")
+                        .font(.footnote).foregroundStyle(.secondary)
                 }
-                Spacer()
+                .carePagePadding()
             }
-            .padding(22)
             .background(Color.ink)
-            #if os(iOS)
+            .navigationTitle("Emergency SOS")
+            .inlineTitle()
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { dismiss() } label: { Image(systemName: "xmark.circle.fill") }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Close") { dismiss() }
+                        .accessibilityLabel("Close emergency actions")
                 }
             }
-            #endif
         }
         .presentationDetents([.large])
     }
 
     private var emergencyShareMessage: String {
         var message = "CareSphere SOS: \(store.displayName) is requesting help. Please check in now."
-        if let location = location.location {
-            let mapsURL = "https://www.google.com/maps?q=\(location.coordinate.latitude),\(location.coordinate.longitude)"
-            message += " Current location: \(mapsURL)"
+        if includeLocation, let fix = location.location {
+            let mapsURL = "https://www.google.com/maps?q=\(fix.coordinate.latitude),\(fix.coordinate.longitude)"
+            message += " Location recorded at \(fix.timestamp.formatted(date: .abbreviated, time: .shortened)): \(mapsURL)"
         }
         return message
     }

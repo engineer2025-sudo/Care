@@ -56,51 +56,35 @@ struct VitalsView: View {
     }
 
     private var sensorBar: some View {
-        SectionCard(title: "Connected sensors", systemImage: "antenna.radiowaves.left.and.right") {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 8) {
-                    Image(systemName: bluetooth.isConnected ? "dot.radiowaves.left.and.right" : "bluetooth")
-                        .foregroundStyle(bluetooth.isConnected ? Color.emeraldText : Color.secondary)
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack {
-                            StatusChip(
-                                text: bluetooth.isConnected ? "LIVE BLE" : "NOT PAIRED",
-                                color: bluetooth.isConnected ? .emerald : .gray)
-                            if let name = bluetooth.sensorName {
-                                Text(name).font(.caption.weight(.semibold))
-                            }
-                        }
-                        Text(bluetooth.statusMessage).font(.caption2).foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button(bluetooth.isConnected ? "Disconnect" : "Pair") {
-                        bluetooth.isConnected ? bluetooth.disconnect() : bluetooth.pair()
-                    }
-                    .buttonStyle(.bordered)
-                    .font(.caption.weight(.bold))
+        SectionCard(title: "Connect your health data", systemImage: "antenna.radiowaves.left.and.right") {
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Bluetooth heart-rate monitor", systemImage: "waveform.path.ecg")
+                    .font(.headline)
+                StatusChip(text: bluetooth.isConnected ? "LIVE BLE" : "NOT CONNECTED",
+                           color: bluetooth.isConnected ? .emeraldText : .secondary)
+                if let name = bluetooth.sensorName { Text(name).font(.subheadline.weight(.medium)) }
+                Text(bluetooth.statusMessage).font(.subheadline).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(bluetooth.isConnected ? "Disconnect monitor" : "Pair a heart-rate monitor") {
+                    bluetooth.isConnected ? bluetooth.disconnect() : bluetooth.pair()
                 }
-                Divider()
-                HStack(spacing: 8) {
-                    Image(systemName: healthKit.hasRequestedAuthorization ? "heart.text.square.fill" : "heart.text.square")
-                        .foregroundStyle(healthKit.hasRequestedAuthorization ? Color.pink : Color.secondary)
-                    VStack(alignment: .leading, spacing: 2) {
-                        StatusChip(
-                            text: healthKit.canRequestAuthorization
-                                ? (healthKit.hasRequestedAuthorization ? "READ REQUESTED" : "READY · NOT ENABLED")
-                                : "iOS ONLY",
-                            color: healthKit.hasRequestedAuthorization ? .pink : healthKit.canRequestAuthorization ? .skyBlue : .gray)
-                        Text(healthKit.statusMessage).font(.caption2).foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button(healthKit.canRequestAuthorization
-                           ? (healthKit.hasRequestedAuthorization ? "Review" : "Enable")
-                           : "iOS app") {
-                        healthKit.requestAuthorization()
-                    }
-                    .buttonStyle(.bordered)
-                    .font(.caption.weight(.bold))
-                    .disabled(!healthKit.canRequestAuthorization)
+                .buttonStyle(.bordered).controlSize(.large)
+
+                Divider().padding(.vertical, 4)
+                Label("Apple Health", systemImage: "heart.text.square")
+                    .font(.headline)
+                StatusChip(text: healthKit.canRequestAuthorization
+                           ? (healthKit.hasRequestedAuthorization ? "READ ACCESS REQUESTED" : "NOT ENABLED")
+                           : "UNAVAILABLE", color: .emeraldText)
+                Text(healthKit.statusMessage).font(.subheadline).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(healthKit.hasRequestedAuthorization ? "Review Apple Health access" : "Enable Apple Health") {
+                    healthKit.requestAuthorization()
                 }
+                .buttonStyle(.bordered).controlSize(.large)
+                .disabled(!healthKit.canRequestAuthorization)
+                Text("Both are optional. If no records are available, readings stay blank. You can use routines and activities without connecting either.")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
         }
     }

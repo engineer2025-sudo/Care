@@ -311,12 +311,12 @@ struct OverviewView: View {
                                     .font(.subheadline.weight(.bold))
                                     .strikethrough(med.isTaken)
                                     .foregroundStyle(med.isTaken ? .secondary : .primary)
-                                Text("\(med.purpose) · \(med.timeLabel)")
-                                    .font(.caption)
+                                Text(med.purpose.isEmpty ? med.timeLabel : "\(med.purpose) · \(med.timeLabel)")
+                                    .font(.subheadline)
                                     .foregroundStyle(.secondary)
+                                StatusChip(text: med.isTaken ? "Marked today" : "Not marked", color: med.isTaken ? .gray : .pink)
                             }
-                            Spacer()
-                            StatusChip(text: med.isTaken ? "Marked today" : "Not marked", color: med.isTaken ? .gray : .pink)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .padding(12)
                         .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))

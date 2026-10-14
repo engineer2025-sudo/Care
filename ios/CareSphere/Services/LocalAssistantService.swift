@@ -17,6 +17,10 @@ final class LocalAssistantService: ObservableObject {
     @Published private(set) var modelURL: URL?
     @Published private(set) var installedModelLabel = "No local model installed"
     @Published private(set) var isDownloading = false
+    @Published private(set) var downloadProgress: Double?
+    @Published private(set) var downloadStatus: String?
+    private var downloadTask: Task<Void, Never>?
+    private var downloadID = UUID()
     @Published private(set) var isImporting = false
     @Published private(set) var isGenerating = false
     @Published private(set) var response = ""
@@ -52,29 +56,65 @@ final class LocalAssistantService: ObservableObject {
         return ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
     }
 
-    func downloadRecommendedModel() async {
-        guard !isDownloading, !isImporting else { return }
+    func downloadRecommendedModel() {
+        guard downloadTask == nil, !isDownloading, !isImporting, !isGenerating else { return }
         isDownloading = true
+        downloadProgress = nil
+        downloadStatus = "Starting the optional model download…"
         errorText = nil
         generationErrorText = nil
-        defer { isDownloading = false }
+        downloadID = UUID()
+        downloadTask = Task { await performModelDownload() }
+    }
 
+    func cancelModelDownload() {
+        downloadStatus = "Canceling download…"
+        downloadTask?.cancel()
+    }
+
+    private func performModelDownload() async {
+        let requestID = downloadID
+        defer { isDownloading = false; downloadTask = nil; downloadProgress = nil }
         do {
+            let storageURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            let capacity = try? storageURL.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+            if let available = capacity?.volumeAvailableCapacityForImportantUsage, available < 1_500_000_000 {
+                throw LocalAssistantError.notEnoughStorage
+            }
+            let observer = CareDownloadProgress { [weak self] received, expected in
+                Task { @MainActor in
+                    guard let self, self.isDownloading, self.downloadID == requestID else { return }
+                    self.downloadProgress = expected > 0 ? min(1, Double(received) / Double(expected)) : nil
+                    self.downloadStatus = CareDownloadProgress.label(received: received, expected: expected)
+                }
+            }
             let request = URLRequest(
                 url: Self.recommendedModelURL,
                 cachePolicy: .reloadIgnoringLocalCacheData,
                 timeoutInterval: 120)
-            let (temporaryURL, response) = try await URLSession.shared.download(for: request)
+            let (temporaryURL, response) = try await URLSession.shared.download(for: request, delegate: observer)
+            defer { try? FileManager.default.removeItem(at: temporaryURL) }
+            try Task.checkCancellation()
             guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
                 throw LocalAssistantError.downloadFailed
             }
+            // Reject a tiny/truncated response before it can replace a usable installation.
+            let bytes = try temporaryURL.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+            guard bytes >= 900_000_000 else { throw LocalAssistantError.downloadFailed }
+            downloadStatus = "Checking and installing the model…"
             let installedURL = try ModelFileStorage.installDownloadedFile(from: temporaryURL)
             modelURL = installedURL
             installedModelLabel = Self.recommendedModelName
             UserDefaults.standard.set(installedURL.path, forKey: modelPathKey)
             UserDefaults.standard.set(installedModelLabel, forKey: modelNameKey)
+            downloadStatus = "Model installed. It is ready for optional offline summaries."
         } catch {
-            errorText = error.localizedDescription
+            if error is CancellationError || (error as? URLError)?.code == .cancelled {
+                downloadStatus = "Download canceled. You can start it again whenever you like."
+            } else {
+                downloadStatus = nil
+                errorText = error.localizedDescription
+            }
         }
     }
 
@@ -264,9 +304,11 @@ private enum ModelFileStorage {
     private static func commit(staged: URL, to destination: URL) throws -> URL {
         do {
             if FileManager.default.fileExists(atPath: destination.path) {
-                try FileManager.default.removeItem(at: destination)
+                // Atomic replacement preserves the previous file if installation fails.
+                _ = try FileManager.default.replaceItemAt(destination, withItemAt: staged)
+            } else {
+                try FileManager.default.moveItem(at: staged, to: destination)
             }
-            try FileManager.default.moveItem(at: staged, to: destination)
             var values = URLResourceValues()
             values.isExcludedFromBackup = true
             var mutableURL = destination
@@ -281,6 +323,7 @@ private enum ModelFileStorage {
 
 private enum LocalAssistantError: LocalizedError {
     case downloadFailed
+    case notEnoughStorage
     case invalidModel
     case unsupportedModel
     case runtimeUnavailable
@@ -295,6 +338,8 @@ private enum LocalAssistantError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
+        case .notEnoughStorage:
+            return "Allow at least 1.5 GB of free storage for the optional model, then retry. Activities and local reference search do not need it."
         case .downloadFailed:
             return "The model download did not complete. Check your connection and available storage, then try again."
         case .invalidModel:
@@ -472,3 +517,40 @@ private actor LocalLlamaRuntime {
     }
 }
 #endif
+
+
+/// Per-download progress only. No credentials, questions, or care data are sent.
+/// URLSession's async download propagates cancellation from its owning Task.
+final class CareDownloadProgress: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
+    private let report: @Sendable (Int64, Int64) -> Void
+    private let lock = NSLock()
+    private var lastReport = Date.distantPast
+
+    init(report: @escaping @Sendable (Int64, Int64) -> Void) {
+        self.report = report
+        super.init()
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
+                    didWriteData bytesWritten: Int64, totalBytesWritten: Int64,
+                    totalBytesExpectedToWrite: Int64) {
+        lock.lock()
+        let now = Date()
+        let shouldReport = now.timeIntervalSince(lastReport) >= 0.25 || totalBytesWritten == totalBytesExpectedToWrite
+        if shouldReport { lastReport = now }
+        lock.unlock()
+        if shouldReport { report(totalBytesWritten, totalBytesExpectedToWrite) }
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
+                    didFinishDownloadingTo location: URL) {
+        // The async download API returns the temporary file to its caller.
+    }
+
+    static func label(received: Int64, expected: Int64) -> String {
+        let downloaded = ByteCountFormatter.string(fromByteCount: received, countStyle: .file)
+        guard expected > 0 else { return "Downloaded \(downloaded) — keep CareSphere open." }
+        let total = ByteCountFormatter.string(fromByteCount: expected, countStyle: .file)
+        return "\(downloaded) of \(total) — keep CareSphere open."
+    }
+}

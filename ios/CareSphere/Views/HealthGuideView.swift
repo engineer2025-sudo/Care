@@ -101,14 +101,14 @@ struct HealthGuideView: View {
                         .disabled(assistant.isGenerating)
                 }
             } else {
-                Text("Optional Qwen2.5 1.5B Instruct (Q4_K_M), an open-weights model. It is downloaded only when you choose; the app installer stays small.")
+                Text("Optional: Qwen2.5 1.5B Instruct (Q4_K_M). Allow 1.5 GB free space and use Wi-Fi if preferred. Activities and reference search work without this download.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 10) {
                     Button {
-                        Task { await assistant.downloadRecommendedModel() }
+                        assistant.downloadRecommendedModel()
                     } label: {
-                        Label("Download · ~1.1 GB", systemImage: "arrow.down.circle.fill")
+                        Label(assistant.errorText == nil ? "Download · ~1.1 GB" : "Retry download · ~1.1 GB", systemImage: "arrow.down.circle.fill")
                             .font(.caption.weight(.heavy))
                             .frame(maxWidth: .infinity)
                     }
@@ -126,10 +126,17 @@ struct HealthGuideView: View {
                 }
             }
 
-            if assistant.isDownloading || assistant.isImporting {
-                ProgressView(assistant.isDownloading ? "Downloading model — keep CareSphere open…" : "Copying model into private storage…")
-                    .font(.caption2)
-                    .tint(.emerald)
+            if assistant.isDownloading {
+                ProgressView(value: assistant.downloadProgress) {
+                    Text(assistant.downloadStatus ?? "Starting download…")
+                }
+                .tint(.emerald)
+                Button("Cancel download") { assistant.cancelModelDownload() }
+                    .buttonStyle(.bordered).controlSize(.large)
+            } else if assistant.isImporting {
+                ProgressView("Copying model into private storage…")
+            } else if let status = assistant.downloadStatus {
+                Text(status).font(.subheadline).foregroundStyle(.secondary)
             }
             if let error = assistant.errorText, assistant.generationErrorText == nil {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
@@ -330,12 +337,12 @@ struct HealthGuideView: View {
 
     private var kiwixCard: some View {
         SectionCard(title: "Wikipedia ZIM · Kiwix server", systemImage: "books.vertical") {
-            Text("This build does not include a ZIM reader: keep your 6.9 GB archive where it is and run Kiwix Server separately. CareSphere sends searches only to the private server address below; it does not bundle or copy the archive.")
+            Text("This build does not include a ZIM reader: keep your existing archive where it is and run Kiwix Server separately. CareSphere sends searches only to the private server address below; it does not bundle or copy the archive.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
             VStack(alignment: .leading, spacing: 9) {
-                TextField("Kiwix server · http://127.0.0.1:8080", text: $library.kiwixServerURL)
+                TextField("Kiwix server · http://computer.local:8080", text: $library.kiwixServerURL)
                     .disableKiwixTextCorrections()
                     .padding(10)
                     .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 12, style: .continuous))

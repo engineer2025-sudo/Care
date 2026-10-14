@@ -45,6 +45,10 @@ final class KokoroSpeechService: NSObject, ObservableObject, AVAudioPlayerDelega
 
     @Published private(set) var isModelInstalled = false
     @Published private(set) var isDownloading = false
+    @Published private(set) var downloadProgress: Double?
+    @Published private(set) var isInstalling = false
+    private var downloadTask: Task<Void, Never>?
+    private var downloadID = UUID()
     @Published private(set) var isGenerating = false
     @Published private(set) var statusMessage: String?
     @Published private(set) var errorMessage: String?
@@ -63,12 +67,25 @@ final class KokoroSpeechService: NSObject, ObservableObject, AVAudioPlayerDelega
 
     /// Downloads the separately released, upstream-verified model pack and
     /// extracts it into Application Support (excluded from device backups).
-    func downloadModel() async {
-        guard !isDownloading, !isGenerating else { return }
+    func downloadModel() {
+        guard downloadTask == nil, !isDownloading, !isGenerating else { return }
         isDownloading = true
-        statusMessage = "Downloading the optional Kokoro voice pack (~158 MB)…"
+        isInstalling = false
+        downloadProgress = nil
+        downloadID = UUID()
+        statusMessage = "Starting the optional Kokoro voice download…"
         errorMessage = nil
-        defer { isDownloading = false }
+        downloadTask = Task { await performDownload() }
+    }
+
+    func cancelDownload() {
+        statusMessage = "Canceling download…"
+        downloadTask?.cancel()
+    }
+
+    private func performDownload() async {
+        let requestID = downloadID
+        defer { isDownloading = false; isInstalling = false; downloadProgress = nil; downloadTask = nil }
 
         do {
             let supportDirectory = try Self.supportDirectory(create: true)
@@ -82,7 +99,16 @@ final class KokoroSpeechService: NSObject, ObservableObject, AVAudioPlayerDelega
             var request = URLRequest(url: Self.archiveURL)
             request.timeoutInterval = 30 * 60
             request.cachePolicy = .reloadIgnoringLocalCacheData
-            let (downloadedFile, response) = try await URLSession.shared.download(for: request)
+            let observer = CareDownloadProgress { [weak self] received, expected in
+                Task { @MainActor in
+                    guard let self, self.isDownloading, !self.isInstalling, self.downloadID == requestID else { return }
+                    self.downloadProgress = expected > 0 ? min(1, Double(received) / Double(expected)) : nil
+                    self.statusMessage = CareDownloadProgress.label(received: received, expected: expected)
+                }
+            }
+            let (downloadedFile, response) = try await URLSession.shared.download(for: request, delegate: observer)
+            defer { try? FileManager.default.removeItem(at: downloadedFile) }
+            try Task.checkCancellation()
             guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
                 throw KokoroSpeechError.downloadFailed
             }
@@ -95,16 +121,28 @@ final class KokoroSpeechService: NSObject, ObservableObject, AVAudioPlayerDelega
                 throw KokoroSpeechError.downloadFailed
             }
 
-            statusMessage = "Verifying and installing the voice files…"
+            isInstalling = true
+            statusMessage = "Checking the archive and installing voice files…"
             let extracted = workDirectory.appendingPathComponent("extracted", isDirectory: true)
             try fileManager.createDirectory(at: extracted, withIntermediateDirectories: true)
             let extractionProgress = Progress(totalUnitCount: 0)
-            try fileManager.unzipItem(
-                at: archive,
-                to: extracted,
-                skipCRC32: false,
-                allowUncontainedSymlinks: false,
-                progress: extractionProgress)
+            // Extraction can take seconds. Keep SwiftUI responsive and allow cancel.
+            let extraction = Task.detached(priority: .utility) {
+                try Task.checkCancellation()
+                try FileManager.default.unzipItem(
+                    at: archive,
+                    to: extracted,
+                    skipCRC32: false,
+                    allowUncontainedSymlinks: false,
+                    progress: extractionProgress)
+            }
+            try await withTaskCancellationHandler {
+                try await extraction.value
+            } onCancel: {
+                extractionProgress.cancel()
+                extraction.cancel()
+            }
+            try Task.checkCancellation()
 
             guard Self.validModelDirectory(at: extracted) else {
                 throw KokoroSpeechError.invalidModel
@@ -113,12 +151,17 @@ final class KokoroSpeechService: NSObject, ObservableObject, AVAudioPlayerDelega
             // Release a previously loaded runtime before replacing its files.
             stopPlayback()
             await runtime.unload()
+            try Task.checkCancellation()
             try Self.install(extracted, into: Self.installedModelURL, fileManager: fileManager)
             isModelInstalled = true
             statusMessage = "Kokoro is installed. Choose a speaker above to use it offline."
         } catch {
-            statusMessage = nil
-            errorMessage = error.localizedDescription
+            if Task.isCancelled || error is CancellationError || (error as? URLError)?.code == .cancelled {
+                statusMessage = "Download canceled. Apple voices are still available; retry whenever you like."
+            } else {
+                statusMessage = nil
+                errorMessage = error.localizedDescription
+            }
         }
     }
 

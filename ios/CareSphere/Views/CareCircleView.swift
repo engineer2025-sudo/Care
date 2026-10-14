@@ -54,7 +54,7 @@ struct CareCircleView: View {
 
     private var careNotes: some View {
         SectionCard(title: "Care notes · local only", systemImage: "square.and.pencil") {
-            HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 10) {
                 TextField("Add a private care note…", text: $noteDraft, axis: .vertical)
                     .lineLimit(2...6)
                     .accessibilityLabel("New private care note")
@@ -65,10 +65,10 @@ struct CareCircleView: View {
                     noteDraft = ""
                     celebrate()
                 } label: {
-                    Text("Save").frame(minWidth: 44, minHeight: 44)
+                    Label("Save note", systemImage: "square.and.pencil").frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(noteDraft.trimmingCharacters(in: .whitespaces).isEmpty)
+                .disabled(noteDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
 
             if store.notes.isEmpty {
