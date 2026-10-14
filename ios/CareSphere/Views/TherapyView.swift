@@ -5,7 +5,12 @@ import SwiftUI
 private let feelingOptions: [(name: String, emoji: String)] = [
     ("Happy", "😊"), ("Calm", "😌"), ("Excited", "🤩"), ("Tired", "😴"), ("Not sure", "💭"),
 ]
-private let feelingPictures = ["🙂", "😐", "😴", "😊"]
+private let feelingPictures: [(emoji: String, description: String)] = [
+    ("🙂", "A simplified face with a small upward-curving mouth."),
+    ("😐", "A simplified face with open eyes and a straight mouth."),
+    ("😴", "A simplified face with closed eyes and sleep marks above it."),
+    ("😊", "A simplified face with curved eyes and an upward-curving mouth."),
+]
 
 struct FeelingsExplorerCard: View {
     @State private var pictureIndex = 0
@@ -17,9 +22,9 @@ struct FeelingsExplorerCard: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             VStack(spacing: 10) {
-                Text(feelingPictures[pictureIndex])
+                Text(feelingPictures[pictureIndex].emoji)
                     .font(.system(size: 58))
-                    .accessibilityHidden(true)
+                    .accessibilityLabel(feelingPictures[pictureIndex].description)
                 if let choice {
                     Text("“\(choice)” is one possibility. It is also okay not to know.")
                         .font(.footnote.weight(.medium))
@@ -432,6 +437,11 @@ struct PacedBreathingActivity: View {
             ? [("Breathe in", 4, 1.0), ("Hold", 4, 1.0), ("Breathe out", 6, 0.55)]
             : [("Breathe in", 4, 1.0), ("Breathe out", 6, 0.55)]
     }
+    // A paused hold preference can change before onChange resets phaseIndex.
+    // Clamp rendering during that update so toggling the hold cannot index past the array.
+    private var currentPhase: (name: String, seconds: Int, scale: CGFloat) {
+        phases[min(phaseIndex, phases.count - 1)]
+    }
     @State private var running = false
     @State private var phaseIndex = 0
     @State private var count = 4
@@ -463,11 +473,11 @@ struct PacedBreathingActivity: View {
                         .fill(Color.teal.opacity(0.22))
                         .frame(width: 128, height: 128)
                         .scaleEffect((reduceMotion || store.reduceVisualMotion) ? 1.0 : breathScale)
-                        .animation((reduceMotion || store.reduceVisualMotion) ? nil : .easeInOut(duration: Double(phases[phaseIndex].seconds)), value: breathScale)
+                        .animation((reduceMotion || store.reduceVisualMotion) ? nil : .easeInOut(duration: Double(currentPhase.seconds)), value: breathScale)
                     VStack(spacing: 2) {
                         Text("\(count)").font(.title.weight(.black))
                             .accessibilityAddTraits(.updatesFrequently)
-                        Text(running ? phases[phaseIndex].name.uppercased() : "PAUSED")
+                        Text(running ? currentPhase.name.uppercased() : "PAUSED")
                             .font(.caption2.weight(.bold))
                             .foregroundStyle(.teal)
                     }
@@ -525,8 +535,8 @@ struct PacedBreathingActivity: View {
                             return
                         }
                     }
-                    count = phases[phaseIndex].seconds
-                    breathScale = phases[phaseIndex].scale
+                    count = currentPhase.seconds
+                    breathScale = currentPhase.scale
                 }
             }
         }

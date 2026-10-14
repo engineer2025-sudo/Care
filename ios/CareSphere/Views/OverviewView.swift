@@ -1,4 +1,5 @@
 import SwiftUI
+import CareActivityKit
 
 struct OverviewView: View {
     @EnvironmentObject private var navigation: CareNavigation
@@ -113,7 +114,7 @@ struct OverviewView: View {
                     navigation.healthPage = .vitals
                     navigation.selectedTab = .health
                 }
-                BigMetricButton(title: "11 activities", subtitle: "Explore at your pace") {
+                BigMetricButton(title: "\(CareActivity.allCases.count) activities", subtitle: "Explore at your pace") {
                     Image(systemName: "square.grid.2x2").foregroundStyle(Color.emeraldText)
                 } action: { navigation.selectedTab = .activities }
                 BigMetricButton(
@@ -139,6 +140,7 @@ struct OverviewView: View {
                         RoundedRectangle(cornerRadius: 2)
                             .fill(moodColor(entry.score))
                             .frame(height: 8)
+                            .accessibilityLabel("\(entry.day): \(moodLabel(entry.score))")
                     }
                 }
             }

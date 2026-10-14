@@ -21,7 +21,7 @@ struct TherapyView: View {
                             .accessibilityAddTraits(.isHeader)
                         Text("Choose something you enjoy. Play alone or with someone you trust. No scores, streaks, or pressure to finish.")
                             .foregroundStyle(.secondary)
-                        Label("11 activities · available offline", systemImage: "checkmark.circle")
+                        Label("\(CareActivity.allCases.count) activities · available offline", systemImage: "checkmark.circle")
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(Color.emeraldText)
                     }
