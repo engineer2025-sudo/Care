@@ -1,8 +1,9 @@
+import { normalizeSupport } from './support.js'
 import { normalizeFavorites } from './activityLibrary.js'
 export const STORAGE_KEY = 'caresphere.v1'
 export const RESET_LOCAL_DATA_EVENT = 'caresphere:reset-local-data'
 
-const PERSISTED_KEYS = new Set(['settings', 'routines', 'meds', 'medsConfirmed', 'notes', 'moods', 'emotionScore', 'bestPattern', 'favoriteActivities'])
+const PERSISTED_KEYS = new Set(['settings', 'routines', 'meds', 'medsConfirmed', 'notes', 'moods', 'emotionScore', 'bestPattern', 'favoriteActivities', 'support'])
 const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value)
 const isDayKey = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 
@@ -35,6 +36,7 @@ export function parseCareStorage(raw) {
 
 /** Bound and type-check values restored from editable browser storage. */
 export function normalizePersistedValue(key, value, fallback) {
+  if (key === 'support') return normalizeSupport(value)
   if (key === 'favoriteActivities') return normalizeFavorites(value)
   if (key === 'settings') {
     if (!isRecord(value)) return fallback

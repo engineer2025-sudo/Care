@@ -8,6 +8,8 @@ import {
 } from 'lucide-react'
 import ActivityLibrary from './components/ActivityLibrary'
 import CareNotes from './components/CareNotes'
+import SupportHub from './components/SupportHub'
+import { normalizeSupport } from './lib/support'
 import { toggleFavorite } from './lib/activityLibrary'
 import { useDialog } from './hooks/useDialog'
 import { celebrate as celebrateConfetti } from './lib/celebrate'
@@ -1402,11 +1404,14 @@ export default function App() {
 
   // ── Daily living state (persisted) ──
   const [routines, setRoutines] = usePersisted('routines', [])
+  const [routineUndo, setRoutineUndo] = useState(null)
+  const undoRoutine = () => { if(routineUndo?.day === localDayKey()) setRoutines(routineUndo.items); setRoutineUndo(null) }
   // Never prefill medications. Older saved schedules remain visible for review,
   // but reminders stay paused until the user explicitly confirms every entry.
   const [meds, setMeds] = usePersisted('meds', [])
   const [medsConfirmed, setMedsConfirmed] = usePersisted('medsConfirmed', false)
   const [notes, setNotes] = usePersisted('notes', [])
+  const [support, setSupport] = usePersisted('support', normalizeSupport())
   const [favorites, setFavorites] = usePersisted('favoriteActivities', [])
   const [moods, setMoods] = usePersisted('moods', [])
   const [routineDraft, setRoutineDraft] = useState('')
@@ -1419,6 +1424,7 @@ export default function App() {
     const current = routines.find(routine => routine.id === id)
     if (!current) return
     const wasDone = isRoutineDoneToday(current, now)
+    setRoutineUndo({items:routines,day:localDayKey()})
     setRoutines(items => items.map(routine => routine.id === id
       ? { ...routine, completedOn: wasDone ? null : day }
       : routine))
@@ -1429,10 +1435,11 @@ export default function App() {
     const text = routineDraft.trim().slice(0, 120)
     if (!text || routines.length >= 24) return
     const id = globalThis.crypto?.randomUUID?.() || `routine-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    setRoutineUndo({items:routines,day:localDayKey()})
     setRoutines(items => [...items, { id, text, completedOn: null }])
     setRoutineDraft('')
   }
-  const removeRoutine = (id) => setRoutines(items => items.filter(routine => routine.id !== id))
+  const removeRoutine = (id) => { setRoutineUndo({items:routines,day:localDayKey()}); setRoutines(items => items.filter(routine => routine.id !== id)) }
 
   const toggleMed = (id) => {
     const now = new Date()
@@ -1589,6 +1596,7 @@ export default function App() {
 
   const clearTransientCareData = ({ closeOverlays = false } = {}) => {
     setRoutineDraft('')
+    setRoutineUndo(null)
     setRoutineEditorOpen(false)
     disconnectHr()
     setToasts([])
@@ -1713,7 +1721,11 @@ export default function App() {
       .sort((a, b) => a.t[1] * 60 + Number(a.t[2]) - (b.t[1] * 60 + Number(b.t[2])))[0]
     : null
 
-  const tabs = [
+  const tabs = support.simple ? [
+    { id:'home', label:'My Day', shortLabel:'My Day', icon:Sun },
+    { id:'games', label:'Activities', shortLabel:'Activities', icon:Gamepad2 },
+    { id:'support', label:'My People & Tools', shortLabel:'My People', icon:Heart },
+  ] : [
     { id: 'home', label: 'Overview', shortLabel: 'Today', icon: Sun },
     { id: 'games', label: 'Activities', shortLabel: 'Activities', icon: Gamepad2 },
     { id: 'buddies', label: 'Coffee Circles', shortLabel: 'Connect', icon: Coffee },
@@ -1799,7 +1811,7 @@ export default function App() {
         </div>
       </header>
 
-      <nav className="mobile-nav xl:hidden" aria-label="Main navigation">
+      <nav style={{gridTemplateColumns:`repeat(${tabs.length}, minmax(0, 1fr))`}} className="mobile-nav xl:hidden" aria-label="Main navigation">
           {tabs.map((tab) => {
             const Icon = tab.icon
             return (
@@ -1838,9 +1850,13 @@ export default function App() {
       )}
 
       <main id="main-content" ref={mainRef} tabIndex={-1} aria-label={tabs.find(tab => tab.id === activeTab)?.label} className="main-content flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-8">
+        {activeTab !== 'support' && <div className="flex flex-wrap gap-3 items-center"><button className="library-secondary" onClick={()=>setActiveTab('support')}>My support tools</button>{!support.onboarded && <span className="text-sm">New here? Try an activity or choose your comfort settings—no profile required.</span>}</div>}
 
         {/* ══════════ OVERVIEW ══════════ */}
-        {activeTab === 'home' && (
+        {activeTab === 'support' && <SupportHub support={support} setSupport={setSupport} notes={notes} setNotes={setNotes} routines={routines} setRoutines={setRoutines} settings={settings} updateSettings={updateSettings} navigate={setActiveTab} />}
+        {activeTab === 'home' && support.simple && <section className="support-card"><h1 className="text-3xl font-bold">My day, at my pace</h1><p>One thing at a time. Choose what feels useful.</p><div className="support-actions"><button className="library-primary" onClick={()=>setActiveTab('games')}>Activities</button><button className="library-primary" onClick={()=>setActiveTab('support')}>My people & support tools</button></div><h2>My daily routine</h2>{routines.length ? routines.map(r=><button key={r.id} className="library-choice" aria-pressed={routineIsDone(r)} onClick={()=>toggleRoutine(r.id)}>{routineIsDone(r)?'✓ ':''}{r.text}</button>) : <p>No daily routines yet. Visual routines are in My support tools. Restore the full view to customize your daily checklist.</p>}<button className="library-secondary" onClick={()=>setSupport(s=>({...s,simple:false}))}>Restore full view</button></section>}
+        {activeTab === 'home' && routineUndo?.day === localDayKey() && <button className="library-secondary" onClick={undoRoutine}>Undo last routine change</button>}
+        {activeTab === 'home' && !support.simple && (
           <div className="space-y-8">
             <section className="overview-welcome" aria-labelledby="welcome-title">
               <div className="welcome-copy">
@@ -2006,7 +2022,7 @@ export default function App() {
                 Optional, self-paced activities for shared practice and enjoyment—not therapy, treatment, or assessment. No activity is timed or scored; skip or stop at any time.
               </p>
             </div>
-            <ActivityLibrary favorites={favorites} onToggleFavorite={id => setFavorites(current => toggleFavorite(id, current))} renderActivity={id => {
+            <ActivityLibrary choices={support.choices} favorites={favorites} onToggleFavorite={id => setFavorites(current => toggleFavorite(id, current))} renderActivity={id => {
               switch (id) {
                 case 'feelings': return <EmotionMatch />
                 case 'patternRecall': return <PatternRecall reduceVisualMotion={settings.lowSensory} />
@@ -2101,7 +2117,7 @@ export default function App() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <CareNotes notes={notes} setNotes={setNotes} displayName={settings.name} />
+              <CareNotes onDelete={note => setSupport(s=>normalizeSupport({...s,trash:[{...note,deletedAt:Date.now()},...s.trash.filter(n=>n.id!==note.id)]}))} notes={notes} setNotes={setNotes} displayName={settings.name} />
 
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-indigo-950 to-purple-950 border border-indigo-500/30 rounded-3xl p-6 space-y-3.5">

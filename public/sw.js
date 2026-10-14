@@ -1,8 +1,8 @@
 // CareSphere service worker — private, same-origin offline app shell.
 // Navigations are network-first; hashed assets are cache-first. No third-party
 // requests or user-export downloads are cached by this worker.
-const SHELL_CACHE = 'caresphere-shell-v3'
-const ASSET_CACHE = 'caresphere-assets-v3'
+const SHELL_CACHE = 'caresphere-shell-v4'
+const ASSET_CACHE = 'caresphere-assets-v4'
 const SHELL_URL = new URL('/', self.location.origin).href
 const MAX_ASSETS = 80
 
