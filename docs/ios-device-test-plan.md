@@ -1,4 +1,4 @@
-# iPhone acceptance checklist — CareSphere 3.0
+# iPhone acceptance checklist — CareSphere 3.1
 
 A passing compile is not a passing device test. Fill this out on the intended iPhone before demonstrating or distributing the app. Never use real medication or emergency actions just to test UI.
 
@@ -10,7 +10,7 @@ A passing compile is not a passing device test. Fill this out on the intended iP
 - [ ] Open the full folder with the included local package; compile, sign, install, and launch. No remote package retrieval should occur.
 - [ ] On a clean install, use **Explore first · set up later**. No camera, microphone, motion, health, or notification permission should be needed to play games.
 - [ ] Repeat with guided setup; large text can scroll each step; birth date can remain absent; voice reminders do not turn on based on age.
-- [ ] Settings version shows 3.0.0 (7).
+- [ ] Settings version shows 3.1.0 (8).
 
 ## Layout and navigation
 
@@ -20,6 +20,14 @@ A passing compile is not a passing device test. Fill this out on the intended iP
 - [ ] Medication setup shortcut opens the actual medication section and retains a visible Done control.
 - [ ] Try the smallest supported phone and an iPad; repeat with largest Accessibility text, Bold Text, light, dark, and higher contrast.
 - [ ] VoiceOver announces buttons, mood labels/selected state, card positions, hints, feedback, and exits in a sensible order. Test Switch Control if available.
+
+## Favorites and care notes
+
+- [ ] Favorite/unfavorite each activity; filter favorites; search by several words; verify after restarting.
+- [ ] Existing notes still load. Search, edit, save, verify creation/edited dates and restart.
+- [ ] Cancel unchanged edits; confirm/decline discarding changed edits; try swipe dismissal and the keyboard at largest text size.
+- [ ] Whitespace-only notes cannot save; the 4,000-character limit works; delete cancellation leaves the note untouched.
+- [ ] Export/erase remain explicit; check that erasure removes favorites and notes.
 
 ## Every activity
 

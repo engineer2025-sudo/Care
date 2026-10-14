@@ -1,6 +1,12 @@
-# CareSphere for Android — 1.0
+# CareSphere for Android — 1.1
 
 Native Kotlin/Android Views app. Android 8+ (API 26), JDK 17, Gradle 8.9, Android SDK 35. Open this folder in Android Studio; no project-generation or Node toolchain needed. First Gradle sync requires internet for the Android build tools and Kotlin/JUnit. No third-party runtime UI, health, video, analytics, or AI SDK is bundled.
+
+## New in 1.1.0 (2)
+
+Activity search and private favorites; note search/editing with preserved creation dates and edited dates; system/light/dark appearance; themed dialogs; Bluetooth and app-permission settings shortcuts. Large text uses two rows of navigation so no destination disappears offscreen. Search updates results without rebuilding the focused input.
+
+The emulator smoke also checks saved favorites after restart, note editing, delete cancellation, dark appearance and navigation at 160% font size. Real TalkBack and BLE remain device checks.
 
 ## Implemented
 
@@ -23,7 +29,7 @@ No Health Connect, cloud Garmin sync, blood oxygen/pressure integrations, medica
 # APK: app/build/outputs/apk/debug/app-debug.apk
 ```
 
-CI builds the APK, runs eight activity/packet tests and Android lint. Debug APKs are installable, but debuggable and not production releases. Android Studio maintains its own local debug signing key; hosted CI debug certificates can change between runs. Never commit a private production signing key. See [installation guide](../DOWNLOAD.md).
+CI builds the APK, runs 13 activity/preference/packet tests and Android lint. Debug APKs are installable, but debuggable and not production releases. Android Studio maintains its own local debug signing key; hosted CI debug certificates can change between runs. Never commit a private production signing key. See [installation guide](../DOWNLOAD.md).
 
 ## Manual acceptance checklist (not completed by compilation)
 

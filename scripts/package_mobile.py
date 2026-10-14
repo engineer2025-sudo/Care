@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Package verified native sources and fetch the matching CI-built Android APK.
-Usage: python3 scripts/package_mobile.py --ios-run RUN --android-run RUN
+"""Package verified native/web sources and fetch the matching CI-built Android APK.
+Usage: python3 scripts/package_mobile.py --ios-run RUN --android-run RUN --web-run RUN
 Requires gh + git authentication, never Apple/Android signing credentials.
 """
 import argparse
@@ -22,29 +22,42 @@ def command(*args):
 def api(path):
     return json.loads(command('gh', 'api', path))
 
-def verified_run(run_id, directory):
+WEB_PATHS = ['src', 'public', 'test', 'e2e', 'e2e-offline', 'package.json', 'package-lock.json',
+    'index.html', 'vite.config.js', 'postcss.config.js', 'tailwind.config.js',
+    'playwright.config.js', 'playwright.offline.config.js', '.github/workflows/web.yml']
+
+def verified_run(run_id, *directories):
+    directory = ', '.join(directories)
+    # Native README updates do not change the compiled app. Their exact bytes
+    # are still recorded in the release manifest. Never exclude native source.
+    checked_paths = [*directories, ':(exclude)ios/README.md', ':(exclude)android/README.md']
     run = json.loads(command('gh', 'run', 'view', run_id, '--json', 'status,conclusion,headSha,url,jobs'))
     if run['status'] != 'completed' or run['conclusion'] != 'success':
         raise SystemExit(f'{directory} CI must finish successfully before packaging: {run["url"]}')
-    if command('git', 'diff', run['headSha'], 'HEAD', '--', directory).strip():
+    if command('git', 'diff', run['headSha'], 'HEAD', '--', *checked_paths).strip():
         raise SystemExit(f'{directory} source differs from the successful CI source.')
-    if command('git', 'status', '--porcelain', '--', directory).strip():
+    if command('git', 'status', '--porcelain', '--', *checked_paths).strip():
         raise SystemExit(f'{directory} has unverified working-tree changes.')
     return run
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--ios-run', required=True)
 parser.add_argument('--android-run', required=True)
+parser.add_argument('--web-run', required=True)
 args = parser.parse_args()
 ios = verified_run(args.ios_run, 'ios')
 android = verified_run(args.android_run, 'android')
+web = verified_run(args.web_run, *WEB_PATHS)
+# Build from the exact verified sources; no stale dist/ is packaged.
+subprocess.run(['npm', 'ci'], cwd=ROOT, check=True)
+subprocess.run(['npm', 'run', 'build'], cwd=ROOT, check=True)
 
 # Retrieve the run's unreferenced artifact mirror. Never create a branch/tag.
 notices = []
 for job in android['jobs']:
     notices.extend(api(f'repos/{REPO}/check-runs/{job["databaseId"]}/annotations?per_page=100'))
 pattern = r'git_blob=([0-9a-f]{40}); sha256=([0-9a-f]{64}); bytes=(\d+)'
-match = next((re.search(pattern, n['message']) for n in notices if re.search(pattern, n['message'])), None)
+match = next((re.search(pattern, n['message']) for n in notices if n.get('title') == 'Verified Android APK' and re.search(pattern, n['message'])), None)
 if not match:
     raise SystemExit('The successful run has no APK mirror notice. Download the official Actions artifact instead.')
 blob_sha, digest, size = match.groups()
@@ -63,16 +76,26 @@ with zipfile.ZipFile(apk_path) as z:
 
 paths = [ROOT / p for p in command('git', 'ls-files', 'ios', 'android').splitlines()]
 paths += [ROOT / p for p in ['DOWNLOAD.md', 'docs/signing-troubleshooting.md',
-    'docs/ios-device-test-plan.md', 'docs/activities-and-accessibility.md', 'scripts/android_smoke.py']]
+    'docs/ios-device-test-plan.md', 'docs/activities-and-accessibility.md', 'docs/release-2026-10-14.md',
+    'docs/web-deployment.md', 'scripts/android_smoke.py']]
+# Refuse to silently label a later version using this release's metadata.
+project = (ROOT/'ios/CareSphere.xcodeproj/project.pbxproj').read_text()
+assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.1.0'}
+assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'8'}
+gradle = (ROOT/'android/app/build.gradle.kts').read_text()
+assert re.search(r'versionName\s*=\s*"1\.1\.0"', gradle)
+assert re.search(r'versionCode\s*=\s*2\b', gradle)
+assert json.loads((ROOT/'package.json').read_text())['version'] == '1.1.0'
 manifest = {
     'source_commit': command('git','rev-parse','HEAD').strip(),
-    'ios': {'version':'3.0.0 (7)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
+    'ios': {'version':'3.1.0 (8)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
         'unsigned_device_build': True, 'healthkit_build': True, 'simulator_launch': True,
-        'tests':20, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
-    'android': {'version':'1.0.0 (1)', 'ci':android['url'], 'tested_commit':android['headSha'],
-        'tests':8, 'lint':'passed', 'apk_signing_verified_in_ci':True,
+        'tests':25, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
+    'android': {'version':'1.1.0 (2)', 'ci':android['url'], 'tested_commit':android['headSha'],
+        'tests':13, 'lint':'passed', 'apk_signing_verified_in_ci':True,
         'emulator_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
         'apk_sha256':digest, 'apk_bytes':len(apk)},
+    'compiled_source_comparison_excludes': ['ios/README.md', 'android/README.md'],
     'files': {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
 }
 start = '''CARESPHERE — ANDROID + IPHONE
@@ -98,16 +121,18 @@ Routines, notes, and mood choices are entered by you. No prefilled people or vit
 Heart rate appears only from a real monitor (or optional Apple Health history on iOS).
 Apple Intelligence uses Apple's on-device framework only on supported iPhones with
 it enabled and ready. Android has no Apple Intelligence and no fake substitute.
-Eleven optional activities on each platform. Android is a first native release,
+Eleven optional activities with search/favorites on each platform. Search and edit
+care notes with confirmed deletion. Android is a native development release,
 not full iOS feature parity. See android/README.md and ios/README.md for exact scope.
 
 VALIDATION
 See BUILD_VERIFICATION.json for successful CI runs and file hashes.
-iOS: 20 logic/packet tests; standard device, HealthKit and Simulator builds; launch.
-Android: 8 tests, lint, APK signature check, emulator install/basic interaction checks.
+iOS 3.1.0 (8): 25 logic/preference/packet tests; standard device, HealthKit and Simulator builds; launch.
+Android 1.1.0 (2): 13 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark and large text.
 Real-device BLE, actual Apple Intelligence responses, accessibility with users, and
 Mac signing remain manual acceptance work. No clinical effectiveness is claimed.
 
+The separate CareSphere-Web.zip contains web 1.1.0 source and a built website.
 START_HERE.txt and DOWNLOAD.md explain installation. No slide deck is included.
 '''
 archive = out / 'CareSphere-Mobile.zip'
@@ -127,7 +152,46 @@ with tempfile.TemporaryDirectory() as tmp, zipfile.ZipFile(archive) as z:
     subprocess.run(['python3',str(unpacked/'ios/scripts/check_project.py')],check=True)
     for executable in ['ios/scripts/preflight.sh','android/gradlew']:
         assert (z.getinfo('CareSphere-Mobile/'+executable).external_attr >> 16) & 0o100
-for p in [apk_path,archive]:
+# Separate web download: source + a ready-to-host production directory.
+web_paths = [ROOT / p for p in command('git', 'ls-files', *WEB_PATHS).splitlines()]
+web_paths += [ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md']
+web_files = {str(p.relative_to(ROOT)):p for p in web_paths}
+web_files.update({'production/'+str(p.relative_to(ROOT/'dist')):p for p in (ROOT/'dist').rglob('*') if p.is_file()})
+web_manifest = {
+    'version':'1.1.0', 'source_commit':command('git','rev-parse','HEAD').strip(),
+    'ci':web['url'], 'tested_commit':web['headSha'],
+    'unit_tests':25, 'browser_tests':16, 'offline_production_tests':1,
+    'audit_known_vulnerabilities':0, 'audit_date':'2026-10-14',
+    'production_build':'rebuilt locally from verified source with the locked dependencies',
+    'node':command('node','--version').strip(),
+    'physical_ble_tested':False,
+    'files':{name:hashlib.sha256(p.read_bytes()).hexdigest() for name,p in web_files.items()},
+}
+web_archive = out/'CareSphere-Web.zip'
+with zipfile.ZipFile(web_archive, 'w', zipfile.ZIP_DEFLATED) as z:
+    for name, path in web_files.items(): z.write(path, 'CareSphere-Web/'+name)
+    z.writestr('CareSphere-Web/START_HERE.txt', """CARESPHERE WEB 1.1.0
+
+DEVELOP: Node.js 20.19+ or 22.12+, then npm ci and npm run dev.
+HOST: Upload the CONTENTS of production/ to a static HTTPS site's root.
+Do not double-click index.html or use file://. See docs/web-deployment.md.
+
+Eleven optional activities, private favorites, searchable/editable notes, routines,
+mood check-ins, user-confirmed medication schedules, and real BLE where supported.
+No health readings or pretend contacts are generated. Not a medical device.
+Offline features require a completed first online installation. Video and links
+need internet. Installation and Bluetooth support depend on the browser/OS.
+Native iPhone/Android projects are in the separate CareSphere-Mobile.zip.
+
+BUILD_VERIFICATION.json lists successful CI and hashes of source/production files.
+No accounts, personal records, keys, node_modules or native installers are included.
+""")
+    z.writestr('CareSphere-Web/BUILD_VERIFICATION.json',json.dumps(web_manifest,indent=2)+'\n')
+with zipfile.ZipFile(web_archive) as z:
+    assert z.testzip() is None
+    for path,sha in web_manifest['files'].items():
+        assert hashlib.sha256(z.read('CareSphere-Web/'+path)).hexdigest() == sha
+for p in [apk_path,archive,web_archive]:
     sha = hashlib.sha256(p.read_bytes()).hexdigest()
     p.with_name(p.name+'.sha256').write_text(f'{sha}  {p.name}\n')
     print(f'Verified: {p} ({p.stat().st_size:,} bytes) SHA256 {sha}')

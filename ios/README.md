@@ -1,6 +1,14 @@
-# CareSphere for iPhone — 3.0
+# CareSphere for iPhone — 3.1
 
 Open **CareSphere.xcodeproj** directly. No XcodeGen, remote Swift packages, binary SDKs, or model downloads are needed to build the app. The only package is `ActivityKit/`, included locally.
+
+## New in 3.1.0 (8)
+
+- Save favorites privately and filter the 11-activity library.
+- Search, edit and confirm deletion of care notes. Edits retain the original date, show an updated date and refresh the on-device text sentiment label; this label is not a clinical assessment.
+- Unsaved note edits require an explicit discard decision. Notes are capped at 4,000 characters.
+- Existing encrypted records remain readable; the new fields are optional during migration.
+- 25 Swift activity/preference/packet tests pass in CI, alongside unsigned device/HealthKit builds and Simulator launch.
 
 ## Start without signing
 

@@ -2,9 +2,18 @@
 
 Local routines, connection, and optional accessible activities. **Native iPhone and Android apps**, plus a separate React web app. No generated vital signs, pretend contacts, prefilled medication lists, or automatic caregiver messages.
 
+## This release — October 14, 2026
+
+- **All three platforms:** searchable activity libraries, private favorites, searchable/editable care notes and confirmed deletion.
+- **iPhone 3.1.0 (8):** favorite filtering, note-edit discard protection and updated timestamps. Existing encrypted care data migrates without a reset.
+- **Android 1.1.0 (2):** system/light/dark appearance, native themed dialogs, live search that retains the keyboard, and a two-row navigation layout at large font sizes.
+- **Web 1.1.0:** 11 optional activities, one focused session at a time, five added supported-choice/conversation activities, note-edit discard protection and verified offline reopening after the first completed installation.
+
+Downloads are documented in [DOWNLOAD.md](DOWNLOAD.md). See [release verification](docs/release-2026-10-14.md) and [web deployment](docs/web-deployment.md).
+
 ## Native apps
 
-| | iPhone 3.0 | Android 1.0 |
+| | iPhone 3.1 | Android 1.1 |
 |---|---|---|
 | Project | `ios/CareSphere.xcodeproj` | `android/` in Android Studio |
 | Minimum OS | iOS 16 | Android 8 / API 26 |
@@ -22,7 +31,7 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 The iOS standard scheme requires no HealthKit capability and has no remote Swift package downloads. Simulator builds do not need signing credentials. Apple Intelligence requires Xcode 26+, iOS 26+, compatible hardware, enabled Apple Intelligence and a ready model in a supported language/region; unavailable/error states are shown, never a fake answer. Standard iPhone builds work without it.
 
-Android is a first native release, **not full iOS feature parity**. Hosted debug signing is for testing, not production security. Physical Bluetooth, accessibility with intended users, and actual Apple Intelligence responses still require device testing.
+Android is a native development release, **not full iOS feature parity**. Hosted debug signing is for testing, not production security. Physical Bluetooth, accessibility with intended users, and actual Apple Intelligence responses still require device testing.
 
 ## Web app
 
@@ -48,10 +57,12 @@ Node.js 20.19+ or 22.12+ required. Real Web Bluetooth requires a supported brows
 ```bash
 npx playwright install chromium
 npm run test:ui
+npm run build
+npm run test:offline
 ```
 
 The browser suite checks task shortcuts, mood check-ins, medication form validation,
-settings focus retention, dialog keyboard behavior, no generated-vitals controls,
+settings focus retention, favorites persistence, note editing/deletion, dialog keyboard behavior, no generated-vitals controls,
 and navigation without horizontal overflow at 320–1440px with default and largest
 text. Light, dark, and high-contrast settings remain available. Tests do not call
 video services, pair hardware or request notification permissions.

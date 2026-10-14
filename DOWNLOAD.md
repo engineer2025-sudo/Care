@@ -1,5 +1,13 @@
 # Install CareSphere
 
+## Current downloadable files
+
+- **CareSphere-Mobile.zip** — iPhone 3.1.0 (8) Xcode project, Android 1.1.0 (2) source and verified debug APK, install guides and `BUILD_VERIFICATION.json`.
+- **CareSphere-Android.apk** — the same verified Android development build separately.
+- **CareSphere-Web.zip** — web 1.1.0 source, locked dependencies, tests and the built `production/` website. No `node_modules` or personal data included.
+
+Each archive has a `.sha256` checksum. These replace the earlier 3.0/1.0 mobile downloads; do not mix old APKs with the new source. See [release checks](docs/release-2026-10-14.md).
+
 ## Android
 
 Use the APK attached with the current build or the **CareSphere-Android** artifact in the repository's **Android Build** Actions run. The artifact ZIP includes `app/outputs/apk/debug/app-debug.apk` (look for `app-debug.apk` if the artifact directory layout differs).
@@ -35,6 +43,12 @@ There are no remote Swift packages to retrieve. Keep `ios/ActivityKit/` with the
 Apple Intelligence in the app requires iOS 26+, eligible hardware, Apple Intelligence enabled and its model ready. It never runs on Android. On unsupported iPhones, references and all activities still work; there is no fake AI fallback.
 
 See [iPhone guide](ios/README.md). No App Store/TestFlight/signed IPA release is provided. Automated compile/tests are not physical-device verification.
+
+## Web
+
+Unzip **CareSphere-Web.zip**. For local development run `npm ci` then `npm run dev` (Node.js 20.19+ or 22.12+). To host the prepared build, upload the **contents** of `production/` to a static HTTPS site's root. Do not double-click `index.html`: browser encryption, service workers and Bluetooth need a proper secure origin.
+
+Offline routines, notes and activities work after the first completed online installation. Video, external references and new downloads still need internet. Web Bluetooth is browser-dependent and is not supported in iPhone Safari; use the native iPhone app for BLE. See [web deployment](docs/web-deployment.md).
 
 ## Real data and safety
 
