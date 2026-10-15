@@ -1,3 +1,4 @@
+import { reminderDate } from './lib/medicationTime.js';
 import {speak as speakLocally} from './lib/support'
 import {useLanguage,getLanguage,languageTag} from './lib/i18n'
 import LanguagePicker from './components/LanguagePicker'
@@ -1472,45 +1473,36 @@ export default function App() {
   const fireMedReminder = (med, key) => {
     pushToast({
       kind: 'med',
-      title: `Time for ${med.name.split(' (')[0]}`,
+      title: `Review your reminder: ${med.name}`,
       body: `Scheduled at ${med.time}. Tap "Mark taken" to save a self-report, or snooze.`,
       ttl: 30000,
       actions: [
-      { label: '✓ Taken', onClick: () => {toggleMed(med.id);if (settings.voice) speak(tr('Thank you. Dose check-in saved.'));} },
+      { label: '✓ Taken', onClick: () => {const current = medsRef.current.find(item => item.id === med.id); if (!medsConfirmedRef.current || !current || isMedicationTakenToday(current)) return; toggleMed(med.id); if (settings.voice) speak(tr('Thank you. Dose check-in saved.'));} },
       { label: 'Snooze 10 min', onClick: () => {
           window.clearTimeout(snoozeTimersRef.current[key]);
           snoozeTimersRef.current[key] = window.setTimeout(() => {
             delete snoozeTimersRef.current[key];
             const latest = medsRef.current.find((item) => item.id === med.id);
-            if (!medsConfirmedRef.current || !latest || isMedicationTakenToday(latest, new Date())) return;
+            if (!medsConfirmedRef.current || !latest || latest.time !== med.time || latest.name !== med.name || isMedicationTakenToday(latest, new Date())) return;
             fireMedReminder(latest, key);
           }, 10 * 60 * 1000);
         } }]
 
     });
-    if (settings.voice) speak(tr('This is your CareSphere reminder. Time to take {0}.',[med.name.split(' (')[0]]));
+    if (settings.voice) speak(tr('Open your confirmed medication schedule.'));
     if (notifyState === 'granted' && typeof Notification !== 'undefined') {
-      try {new Notification('CareSphere — medication reminder', { body: `${med.name} — scheduled ${med.time}`, tag: key });} catch {}
+      try {new Notification('CareSphere — medication reminder', { body: tr('Open your confirmed medication schedule.'), tag: key });} catch {}
     }
   };
 
   useEffect(() => {
-    const parseMedTime = (t) => {
-      const m = /(\d{1,2}):(\d{2})\s*(AM|PM)/i.exec(t);
-      if (!m) return null;
-      let h = Number(m[1]) % 12;
-      if (/pm/i.test(m[3])) h += 12;
-      const d = new Date();
-      d.setHours(h, Number(m[2]), 0, 0);
-      return d;
-    };
     const check = () => {
       if (!medsConfirmed) return;
       const now = new Date();
       const day = localDayKey(now);
       meds.forEach((med) => {
         if (!med || isMedicationTakenToday(med, now) || typeof med.name !== 'string' || !med.name.trim()) return;
-        const due = parseMedTime(med.time);
+        const due = reminderDate(med.time, now);
         if (!due) return;
         const diff = now - due;
         const key = `${med.id}-${day}`;

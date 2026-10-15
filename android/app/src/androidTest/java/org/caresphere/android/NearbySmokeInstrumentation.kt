@@ -57,8 +57,35 @@ class NearbySmokeInstrumentation : Instrumentation() {
             check(browser!!.peers.isEmpty() && !browser!!.scanning && publisher!!.advertisedName.isEmpty())
             server.close()
             check(runCatching { LocalTransferReceiver().use { it.receive(chosen.address,offer.second) } }.isFailure)
+            val bitmap=ConnectionQR.image(offer.first,offer.second)
+            val image=java.io.ByteArrayOutputStream();bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,image);bitmap.recycle()
+            check(ConnectionQR.read(image.toByteArray())==offer)
+            runOnMainSync {
+                val data=CareData(targetContext,false)
+                data.put("storageRegressionMarker","saved")
+                check(data.error==null)
+                val obstacle=java.io.File(targetContext.filesDir,"care.enc.new")
+                check(obstacle.mkdir())
+                try {
+                    data.put("storageRegressionMarker","must-not-look-saved")
+                    check(data.error!=null && data.json.getString("storageRegressionMarker")=="saved")
+                } finally { obstacle.delete() }
+                val persisted=CareData(targetContext,false)
+                check(persisted.json.getString("storageRegressionMarker")=="saved")
+                persisted.put("medicationConfirmed",true)
+                val snapshot=persisted.json.toString()
+                persisted.restoreSnapshot(snapshot)
+                check(!persisted.json.optBoolean("medicationConfirmed") && !MedicationReminders.enabled(targetContext))
+                val file=java.io.File(targetContext.filesDir,"care.enc");val before=file.readBytes()
+                try{
+                    file.writeBytes(byteArrayOf(1,2,3))
+                    val locked=CareData(targetContext,false);check(!locked.canWrite)
+                    locked.put("storageRegressionMarker","forbidden")
+                    check(file.readBytes().contentEquals(byteArrayOf(1,2,3)))
+                }finally{file.writeBytes(before)}
+            }
             outcome = Activity.RESULT_OK
-            report = "PASS: native DNS-SD publish/discover/resolve, private endpoint validation, encrypted socket transfer/decryption, and explicit stop."
+            report = "PASS: native DNS-SD publish/discover/resolve, private endpoint validation, encrypted socket transfer/decryption, and explicit stop; QR image roundtrip; Keystore save rollback/corruption protection; restored medication reminders paused."
         } catch(error: Throwable) {
             report = "FAIL: ${error.javaClass.simpleName}: ${error.message}"
         } finally {

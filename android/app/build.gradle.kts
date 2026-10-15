@@ -1,7 +1,7 @@
 plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
 android {
     namespace = "org.caresphere.android"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "org.caresphere.android"
         testInstrumentationRunner = "org.caresphere.android.NearbySmokeInstrumentation"

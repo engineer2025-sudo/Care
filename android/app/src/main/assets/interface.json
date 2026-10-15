@@ -89,6 +89,12 @@
     "vi": "Bổ sung hệ thống giao tiếp hiện có. Chạm để hiển thị, rồi chọn đọc.",
     "zh-Hans": "补充您已有的沟通方式。点按显示，然后选择朗读。"
   },
+  "A taken check-in is your self-report, not proof that a medicine was taken.": {
+    "es": "La marca de tomado es tu declaración, no una prueba de que se haya tomado el medicamento.",
+    "fil": "Ang markang nainom ay sariling ulat mo, hindi patunay na nainom ang gamot.",
+    "vi": "Dấu đã dùng là ghi nhận của bạn, không phải bằng chứng đã dùng thuốc.",
+    "zh-Hans": "已服用标记是您的自我记录，并非服药证明。"
+  },
   "About": {
     "es": "Acerca de",
     "fil": "Tungkol sa",
@@ -178,6 +184,18 @@
     "fil": "Magdagdag ng gawain",
     "vi": "Thêm việc hằng ngày",
     "zh-Hans": "添加日常安排"
+  },
+  "Add blood oxygen": {
+    "es": "Añadir oxígeno en sangre",
+    "fil": "Magdagdag ng oxygen sa dugo",
+    "vi": "Thêm độ bão hòa oxy máu",
+    "zh-Hans": "添加血氧"
+  },
+  "Add blood pressure": {
+    "es": "Añadir presión arterial",
+    "fil": "Magdagdag ng presyon ng dugo",
+    "vi": "Thêm huyết áp",
+    "zh-Hans": "添加血压"
   },
   "Add date of birth (optional)": {
     "es": "Añadir fecha de nacimiento (opcional)",
@@ -395,6 +413,12 @@
     "vi": "Trước khi ra ngoài trời mưa, bạn có thể mang theo gì?",
     "zh-Hans": "下雨天出门前，可以带什么？"
   },
+  "Blood oxygen · percent": {
+    "es": "Oxígeno en sangre · porcentaje",
+    "fil": "Oxygen sa dugo · porsiyento",
+    "vi": "Độ bão hòa oxy máu · phần trăm",
+    "zh-Hans": "血氧 · 百分比"
+  },
   "Blue": {
     "es": "Azul",
     "fil": "Asul",
@@ -491,6 +515,12 @@
     "vi": "Ghế",
     "zh-Hans": "椅子"
   },
+  "Changes could not be saved securely. The last saved records were restored. Free device storage and try again.": {
+    "es": "No se pudieron guardar los cambios de forma segura. Se restauraron los últimos registros guardados. Libera espacio e inténtalo de nuevo.",
+    "fil": "Hindi ligtas na na-save ang mga pagbabago. Naibalik ang huling na-save na mga rekord. Magbakante ng storage at subukang muli.",
+    "vi": "Không lưu được thay đổi một cách an toàn. Đã khôi phục hồ sơ lưu gần nhất. Giải phóng bộ nhớ thiết bị rồi thử lại.",
+    "zh-Hans": "无法安全保存更改。已恢复上次保存的记录。请释放设备存储空间后重试。"
+  },
   "Check in with yourself, follow a routine, or simply take a break. You choose what feels right.": {
     "es": "Observa cómo te sientes, sigue una rutina o simplemente descansa. Tú eliges lo que te haga sentir bien.",
     "fil": "Kumustahin ang sarili, sundin ang gawain o magpahinga lang. Piliin kung ano ang angkop sa iyo.",
@@ -502,6 +532,12 @@
     "fil": "Mga pagpipilian sa pagtutugma ng sariling larawan",
     "vi": "Số lựa chọn khi ghép ảnh cá nhân",
     "zh-Hans": "个人照片配对的选项数"
+  },
+  "Choose Health Connect read permissions": {
+    "es": "Elegir permisos de lectura de Health Connect",
+    "fil": "Piliin ang mga pahintulot sa pagbasa ng Health Connect",
+    "vi": "Chọn quyền đọc Health Connect",
+    "zh-Hans": "选择Health Connect读取权限"
   },
   "Choose a familiar everyday task to talk about.": {
     "es": "Describe una tarea cotidiana conocida.",
@@ -767,6 +803,12 @@
     "vi": "Đang kết nối cục bộ…",
     "zh-Hans": "正在本地连接…"
   },
+  "Connection QR code. The address and code are also written below.": {
+    "es": "Código QR de conexión. La dirección y el código también aparecen escritos abajo.",
+    "fil": "QR code ng koneksyon. Nakasulat din sa ibaba ang address at code.",
+    "vi": "Mã QR kết nối. Địa chỉ và mã cũng được ghi bên dưới.",
+    "zh-Hans": "连接二维码。地址和代码也写在下方。"
+  },
   "Connection code: {0}": {
     "es": "Código de conexión: {0}",
     "fil": "Code ng koneksyon: {0}",
@@ -802,6 +844,12 @@
     "fil": "Mga kard sa pag-uusap",
     "vi": "Thẻ trò chuyện",
     "zh-Hans": "交谈卡片"
+  },
+  "Could not read a valid CareSphere connection QR. Use the written address and code instead.": {
+    "es": "No se pudo leer un QR de conexión válido de CareSphere. Usa la dirección y el código escritos.",
+    "fil": "Hindi mabasa ang wastong QR ng koneksyon ng CareSphere. Gamitin ang nakasulat na address at code.",
+    "vi": "Không đọc được QR kết nối CareSphere hợp lệ. Hãy dùng địa chỉ và mã được ghi bằng chữ.",
+    "zh-Hans": "无法读取有效的CareSphere连接二维码。请改用文字地址和代码。"
   },
   "Create encrypted backup": {
     "es": "Crear copia de seguridad cifrada",
@@ -875,6 +923,12 @@
     "vi": "Xóa thói quen",
     "zh-Hans": "删除日常安排"
   },
+  "Delete this manually entered record?": {
+    "es": "¿Eliminar este registro introducido manualmente?",
+    "fil": "Burahin ang rekord na ito na mano-manong inilagay?",
+    "vi": "Xóa hồ sơ nhập thủ công này?",
+    "zh-Hans": "删除此手动输入的记录？"
+  },
   "Delete this note?": {
     "es": "¿Eliminar esta nota?",
     "fil": "Burahin ang talang ito?",
@@ -917,6 +971,12 @@
     "vi": "Địa chỉ thiết bị: {0}",
     "zh-Hans": "设备地址：{0}"
   },
+  "Device authentication is unavailable. Your data remains locked. Check device security settings and try again.": {
+    "es": "La autenticación del dispositivo no está disponible. Tus datos siguen bloqueados. Revisa los ajustes de seguridad del dispositivo e inténtalo de nuevo.",
+    "fil": "Hindi magagamit ang pagpapatunay ng device. Nananatiling naka-lock ang datos mo. Tingnan ang mga setting ng seguridad ng device at subukang muli.",
+    "vi": "Không thể xác thực thiết bị. Dữ liệu vẫn bị khóa. Kiểm tra cài đặt bảo mật thiết bị rồi thử lại.",
+    "zh-Hans": "设备身份验证不可用。您的数据仍被锁定。请检查设备安全设置后重试。"
+  },
   "Device sharing": {
     "es": "Compartir entre dispositivos",
     "fil": "Pagbabahagi sa mga device",
@@ -940,6 +1000,12 @@
     "fil": "Sa mga device · walang backend",
     "vi": "Giữa các thiết bị · không cần máy chủ",
     "zh-Hans": "设备间共享 · 无需后端"
+  },
+  "Diastolic · mmHg": {
+    "es": "Diastólica · mmHg",
+    "fil": "Diastolic · mmHg",
+    "vi": "Tâm trương · mmHg",
+    "zh-Hans": "舒张压 · mmHg"
   },
   "Discard changes": {
     "es": "Descartar cambios",
@@ -1337,11 +1403,23 @@
     "vi": "Sức khỏe",
     "zh-Hans": "健康"
   },
+  "Health Connect is unavailable or needs an update. Manual records below remain available.": {
+    "es": "Health Connect no está disponible o necesita una actualización. Puedes seguir usando los registros manuales de abajo.",
+    "fil": "Hindi magagamit ang Health Connect o kailangan itong i-update. Magagamit pa rin ang mga manu-manong rekord sa ibaba.",
+    "vi": "Health Connect không khả dụng hoặc cần cập nhật. Bạn vẫn có thể dùng hồ sơ thủ công bên dưới.",
+    "zh-Hans": "Health Connect不可用或需要更新。下方手动记录仍可使用。"
+  },
   "Health Guide": {
     "es": "Guía de salud",
     "fil": "Gabay sa kalusugan",
     "vi": "Hướng dẫn sức khỏe",
     "zh-Hans": "健康指南"
+  },
+  "Health history": {
+    "es": "Historial de salud",
+    "fil": "Kasaysayan ng kalusugan",
+    "vi": "Lịch sử sức khỏe",
+    "zh-Hans": "健康历史记录"
   },
   "Heart rate": {
     "es": "Frecuencia cardíaca",
@@ -1385,6 +1463,12 @@
     "vi": "Độ tương phản cao hơn",
     "zh-Hans": "更高对比度"
   },
+  "History, not live monitoring. Source and measurement time are shown. Nothing is invented, interpreted, or sent to an AI service.": {
+    "es": "Es un historial, no monitorización en vivo. Se muestran la fuente y la hora de medición. No se inventa ni interpreta nada, ni se envía a un servicio de IA.",
+    "fil": "Kasaysayan ito, hindi live na pagsubaybay. Ipinapakita ang pinagmulan at oras ng pagsukat. Walang iniimbento, binibigyang-kahulugan, o ipinapadala sa serbisyo ng AI.",
+    "vi": "Đây là lịch sử, không phải theo dõi trực tiếp. Nguồn và thời gian đo được hiển thị. Không tạo dữ liệu giả, diễn giải hay gửi đến dịch vụ AI.",
+    "zh-Hans": "这是历史记录，不是实时监测。显示来源和测量时间。不会编造、解读数据或将其发送到AI服务。"
+  },
   "How are you feeling right now?": {
     "es": "¿Cómo te sientes ahora mismo?",
     "fil": "Kumusta ang pakiramdam mo sa ngayon?",
@@ -1414,6 +1498,12 @@
     "fil": "Kailangan ko ng pahinga",
     "vi": "Tôi cần nghỉ một chút",
     "zh-Hans": "我需要休息一下"
+  },
+  "I reviewed the schedule · enable reminders": {
+    "es": "He revisado el horario · activar recordatorios",
+    "fil": "Nasuri ko ang iskedyul · i-enable ang mga paalala",
+    "vi": "Tôi đã kiểm tra lịch · bật lời nhắc",
+    "zh-Hans": "我已核对时间表 · 启用提醒"
   },
   "I would like help": {
     "es": "Me gustaría recibir ayuda",
@@ -1666,6 +1756,18 @@
     "fil": "Pamahalaan",
     "vi": "Quản lý",
     "zh-Hans": "管理"
+  },
+  "Manually entered": {
+    "es": "Introducido manualmente",
+    "fil": "Mano-manong inilagay",
+    "vi": "Nhập thủ công",
+    "zh-Hans": "手动输入"
+  },
+  "Mark taken today": {
+    "es": "Marcar como tomado hoy",
+    "fil": "Markahang nainom ngayong araw",
+    "vi": "Đánh dấu đã dùng hôm nay",
+    "zh-Hans": "标记今天已服用"
   },
   "Matching": {
     "es": "Emparejar",
@@ -2015,6 +2117,12 @@
     "vi": "Thông báo",
     "zh-Hans": "通知"
   },
+  "Notifications may be delayed by Android or Samsung battery settings. They are not a medication safety system.": {
+    "es": "Los ajustes de batería de Android o Samsung pueden retrasar las notificaciones. No son un sistema de seguridad de medicamentos.",
+    "fil": "Maaaring maantala ang mga notification dahil sa mga setting ng baterya ng Android o Samsung. Hindi ito sistemang pangkaligtasan sa gamot.",
+    "vi": "Cài đặt pin Android hoặc Samsung có thể làm chậm thông báo. Đây không phải hệ thống bảo đảm an toàn dùng thuốc.",
+    "zh-Hans": "Android或三星的电池设置可能延迟通知。这不是用药安全系统。"
+  },
   "OK": {
     "es": "Aceptar",
     "fil": "OK",
@@ -2080,6 +2188,12 @@
     "fil": "Magbukas ng ibang app?",
     "vi": "Mở ứng dụng khác?",
     "zh-Hans": "打开另一个应用？"
+  },
+  "Open your confirmed medication schedule.": {
+    "es": "Abre tu horario de medicamentos confirmado.",
+    "fil": "Buksan ang nakumpirma mong iskedyul ng gamot.",
+    "vi": "Mở lịch dùng thuốc bạn đã xác nhận.",
+    "zh-Hans": "打开您已确认的用药提醒时间表。"
   },
   "Optional": {
     "es": "Opcional",
@@ -2164,6 +2278,12 @@
     "fil": "I-pause ang aktibidad",
     "vi": "Tạm dừng hoạt động",
     "zh-Hans": "暂停活动"
+  },
+  "Pause reminders": {
+    "es": "Pausar recordatorios",
+    "fil": "I-pause ang mga paalala",
+    "vi": "Tạm dừng lời nhắc",
+    "zh-Hans": "暂停提醒"
   },
   "Paused": {
     "es": "En pausa",
@@ -2339,6 +2459,18 @@
     "vi": "Đeo găng tay",
     "zh-Hans": "戴上手套"
   },
+  "QR contains only connection details. Keep this offer open. It does not contain your records or passphrase.": {
+    "es": "El QR solo contiene datos de conexión. Mantén abierta esta oferta. No contiene tus registros ni tu frase de contraseña.",
+    "fil": "Detalye lamang ng koneksyon ang nasa QR. Panatilihing bukas ang alok na ito. Wala rito ang mga rekord o passphrase mo.",
+    "vi": "QR chỉ chứa thông tin kết nối. Giữ lượt chia sẻ này mở. QR không chứa hồ sơ hay cụm mật khẩu.",
+    "zh-Hans": "二维码仅包含连接信息。请保持此传输开放。它不包含您的记录或口令。"
+  },
+  "QR details loaded. Check the sender, enter the separate passphrase, then connect. Nothing has been imported.": {
+    "es": "Datos del QR cargados. Comprueba el remitente, introduce la frase de contraseña separada y conecta. No se ha importado nada.",
+    "fil": "Na-load ang detalye ng QR. Suriin ang nagpadala, ilagay ang hiwalay na passphrase, saka kumonekta. Wala pang na-import.",
+    "vi": "Đã tải thông tin QR. Kiểm tra người gửi, nhập cụm mật khẩu riêng rồi kết nối. Chưa nhập dữ liệu nào.",
+    "zh-Hans": "已载入二维码信息。请核对发送方，输入单独的口令，然后连接。尚未导入任何内容。"
+  },
   "Question": {
     "es": "Pregunta",
     "fil": "Tanong",
@@ -2350,6 +2482,18 @@
     "fil": "Tahimik",
     "vi": "Yên tĩnh",
     "zh-Hans": "安静"
+  },
+  "Read connection QR from a photo": {
+    "es": "Leer QR de conexión desde una foto",
+    "fil": "Basahin ang QR ng koneksyon mula sa larawan",
+    "vi": "Đọc mã QR kết nối từ ảnh",
+    "zh-Hans": "从照片读取连接二维码"
+  },
+  "Read recent history": {
+    "es": "Leer historial reciente",
+    "fil": "Basahin ang kamakailang kasaysayan",
+    "vi": "Đọc lịch sử gần đây",
+    "zh-Hans": "读取近期历史记录"
   },
   "Read this step": {
     "es": "Leer este paso",
@@ -2380,6 +2524,12 @@
     "fil": "Mga kamakailang binurang tala · 30 araw",
     "vi": "Ghi chú đã xóa gần đây · 30 ngày",
     "zh-Hans": "最近删除的笔记 · 30 天"
+  },
+  "Record a measurement taken now": {
+    "es": "Registrar una medición tomada ahora",
+    "fil": "Itala ang sukat na kinuha ngayon",
+    "vi": "Ghi số đo vừa đo",
+    "zh-Hans": "记录刚测量的数值"
   },
   "Recovery & backup": {
     "es": "Recuperación y copia de seguridad",
@@ -2429,6 +2579,18 @@
     "vi": "Giọng đọc lời nhắc",
     "zh-Hans": "提醒语音"
   },
+  "Reminders enabled · delivery can be delayed": {
+    "es": "Recordatorios activados · pueden llegar con retraso",
+    "fil": "Naka-enable ang mga paalala · maaaring maantala",
+    "vi": "Đã bật lời nhắc · có thể bị chậm",
+    "zh-Hans": "提醒已启用 · 可能延迟送达"
+  },
+  "Reminders paused": {
+    "es": "Recordatorios en pausa",
+    "fil": "Naka-pause ang mga paalala",
+    "vi": "Lời nhắc đã tạm dừng",
+    "zh-Hans": "提醒已暂停"
+  },
   "Remove": {
     "es": "Quitar",
     "fil": "Alisin",
@@ -2452,6 +2614,12 @@
     "fil": "Alisin sa mga paborito",
     "vi": "Xóa khỏi yêu thích",
     "zh-Hans": "取消收藏"
+  },
+  "Remove this reminder? This does not change your prescription.": {
+    "es": "¿Eliminar este recordatorio? Esto no cambia tu receta.",
+    "fil": "Alisin ang paalalang ito? Hindi nito binabago ang reseta mo.",
+    "vi": "Xóa lời nhắc này? Thao tác này không thay đổi đơn thuốc.",
+    "zh-Hans": "删除此提醒？这不会改变您的处方。"
   },
   "Remove {0}": {
     "es": "Quitar {0}",
@@ -2981,6 +3149,12 @@
     "vi": "Hệ thống",
     "zh-Hans": "跟随系统"
   },
+  "Systolic · mmHg": {
+    "es": "Sistólica · mmHg",
+    "fil": "Systolic · mmHg",
+    "vi": "Tâm thu · mmHg",
+    "zh-Hans": "收缩压 · mmHg"
+  },
   "Take a break": {
     "es": "Tomar un descanso",
     "fil": "Magpahinga",
@@ -3041,6 +3215,12 @@
     "vi": "Phù hợp rồi. Tiếp tục khi bạn sẵn sàng.",
     "zh-Hans": "这样合适。准备好后再继续。"
   },
+  "These are self-entered values, not verified sensor readings. They do not change your care plan.": {
+    "es": "Son valores introducidos por ti, no lecturas verificadas de sensores. No cambian tu plan de atención.",
+    "fil": "Ikaw ang naglagay ng mga halagang ito; hindi ito beripikadong sukat ng sensor. Hindi nito binabago ang plano ng pangangalaga mo.",
+    "vi": "Đây là giá trị bạn tự nhập, không phải số đo cảm biến đã được xác minh. Chúng không thay đổi kế hoạch chăm sóc.",
+    "zh-Hans": "这些是您自行输入的数值，并非经验证的传感器读数。它们不会改变您的照护计划。"
+  },
   "This is not a medical device.": {
     "es": "Este no es un dispositivo médico.",
     "fil": "Hindi ito isang medikal na device.",
@@ -3076,6 +3256,12 @@
     "fil": "Oras",
     "vi": "Thời gian",
     "zh-Hans": "时间"
+  },
+  "Time · HH:mm": {
+    "es": "Hora · HH:mm",
+    "fil": "Oras · HH:mm",
+    "vi": "Giờ · HH:mm",
+    "zh-Hans": "时间 · HH:mm"
   },
   "Tired": {
     "es": "Cansado",
@@ -3191,6 +3377,12 @@
     "vi": "Hoàn tác thay đổi việc hằng ngày gần nhất",
     "zh-Hans": "撤销上一次日常安排更改"
   },
+  "Undo taken check-in": {
+    "es": "Deshacer la marca de tomado",
+    "fil": "I-undo ang markang nainom",
+    "vi": "Bỏ đánh dấu đã dùng",
+    "zh-Hans": "撤销已服用标记"
+  },
   "Unlock a CareSphere transfer": {
     "es": "Desbloquear transferencia de CareSphere",
     "fil": "I-unlock ang CareSphere transfer",
@@ -3208,6 +3400,18 @@
     "fil": "Na-unlock nang lokal. Walang mase-save hangga't hindi ka pumipili at nag-i-import ng rekord.",
     "vi": "Đã mở khóa cục bộ. Chưa lưu gì cho đến khi bạn chọn hồ sơ và nhập.",
     "zh-Hans": "已在本地解锁。在您选择记录并导入之前，不会保存任何内容。"
+  },
+  "Use 24-hour time, for example 09:30.": {
+    "es": "Usa el formato de 24 horas, por ejemplo 09:30.",
+    "fil": "Gumamit ng 24-oras na format, halimbawa 09:30.",
+    "vi": "Dùng định dạng 24 giờ, ví dụ 09:30.",
+    "zh-Hans": "请使用24小时制，例如09:30。"
+  },
+  "Use Passcode": {
+    "es": "Usar código de acceso",
+    "fil": "Gamitin ang passcode",
+    "vi": "Dùng mật mã",
+    "zh-Hans": "使用密码"
   },
   "Use a unique passphrase of at least 12 characters. There is no passphrase recovery.": {
     "es": "Usa una frase de contraseña única de al menos 12 caracteres. No se puede recuperar.",
@@ -3431,6 +3635,12 @@
     "vi": "Ứng dụng của bạn. Lựa chọn của bạn.",
     "zh-Hans": "您的应用。您的选择。"
   },
+  "Your confirmed instructions (optional)": {
+    "es": "Tus instrucciones confirmadas (opcional)",
+    "fil": "Nakumpirma mong mga tagubilin (opsyonal)",
+    "vi": "Hướng dẫn bạn đã xác nhận (không bắt buộc)",
+    "zh-Hans": "您已确认的说明（可选）"
+  },
   "Your day, at your pace.": {
     "es": "Tu día, a tu ritmo.",
     "fil": "Araw mo, sa sarili mong bilis.",
@@ -3448,6 +3658,12 @@
     "fil": "Sarili mong tagubilin, isang hakbang bawat linya. Huwag baguhin dito ang tagubilin sa iniresetang gamot.",
     "vi": "Hướng dẫn của bạn, mỗi dòng một bước. Không thay đổi chỉ dẫn dùng thuốc theo đơn tại đây.",
     "zh-Hans": "编写自己的说明，每行一个步骤。请勿在此更改处方用药说明。"
+  },
+  "Your manually entered records": {
+    "es": "Tus registros introducidos manualmente",
+    "fil": "Mga rekord na mano-mano mong inilagay",
+    "vi": "Hồ sơ bạn nhập thủ công",
+    "zh-Hans": "您手动输入的记录"
   },
   "Your medications": {
     "es": "Tus medicamentos",

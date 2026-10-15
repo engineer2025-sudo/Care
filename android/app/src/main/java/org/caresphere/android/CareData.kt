@@ -21,6 +21,7 @@ class CareData(private val context: Context, private val refreshOnOpen:Boolean =
     var error: String? = null
         private set
     private var writable = true
+    private var lastSaved = "{}"
     private val file get() = AtomicFile(File(context.filesDir, "care.enc"))
     private val alias = "caresphere.local.v1"
 
@@ -37,6 +38,7 @@ class CareData(private val context: Context, private val refreshOnOpen:Boolean =
                 error = "Saved data could not be unlocked. It has not been overwritten. You can retry after restarting or explicitly erase it in Settings."
             }
         }
+        lastSaved=json.toString()
         if(refreshOnOpen)refreshDay()
     }
     private fun key(create: Boolean): SecretKey {
@@ -55,6 +57,7 @@ class CareData(private val context: Context, private val refreshOnOpen:Boolean =
     fun toggleFavorite(id: String) { put("favorites", JSONArray(LibraryPreferences.toggle(id, favorites()))) }
     fun list(name: String): JSONArray = json.optJSONArray(name) ?: JSONArray()
     fun put(name: String, value: Any) {
+        if(!writable)return
         if(name == "routines" || name == "done") json.put("routineUndo", JSONObject()
             .put("routines", JSONArray(list("routines").toString())).put("done", JSONArray(list("done").toString())).put("day", LocalDate.now().toString()))
         json.put(name, value); save()
@@ -79,7 +82,7 @@ class CareData(private val context: Context, private val refreshOnOpen:Boolean =
         }
     }
     fun save() {
-        if (!writable) return
+        if (!writable) { json=JSONObject(lastSaved);return }
         try {
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
             cipher.init(Cipher.ENCRYPT_MODE, key(true))
@@ -87,8 +90,11 @@ class CareData(private val context: Context, private val refreshOnOpen:Boolean =
             val output = file.startWrite()
             try { output.write(bytes); file.finishWrite(output) }
             catch (e: Exception) { file.failWrite(output); throw e }
-            error = null
-        } catch (_: Exception) { error = "Changes could not be saved securely. Keep the app open and free device storage before retrying." }
+            lastSaved=json.toString();error = null
+        } catch (_: Exception) {
+            json=JSONObject(lastSaved)
+            error = "Changes could not be saved securely. The last saved records were restored. Free device storage and try again."
+        }
     }
     companion object {
         fun validateSnapshot(raw: String) {
@@ -144,7 +150,7 @@ class CareData(private val context: Context, private val refreshOnOpen:Boolean =
             file.delete()
             check(!file.baseFile.exists())
             KeyStore.getInstance("AndroidKeyStore").apply { load(null); deleteEntry(alias) }
-            json = JSONObject(); writable = true; error = null
+            json = JSONObject(); lastSaved="{}"; writable = true; error = null
             refreshDay()
         } catch (_: Exception) { error = "Not all local data could be erased. Try again in Settings." }
     }

@@ -12,35 +12,36 @@ object MedicationReminders {
     private const val CHANNEL="care-medications"
     private fun prefs(c:Context)=c.getSharedPreferences("medication-reminders",Context.MODE_PRIVATE)
     fun enabled(c:Context)=prefs(c).getBoolean("enabled",false)
-    fun permitted(c:Context)=c.getSystemService(NotificationManager::class.java).areNotificationsEnabled() && (Build.VERSION.SDK_INT<33 || c.checkSelfPermission("android.permission.POST_NOTIFICATIONS")==PackageManager.PERMISSION_GRANTED)
+    fun permitted(c:Context)=c.getSystemService(NotificationManager::class.java).areNotificationsEnabled() && c.getSystemService(NotificationManager::class.java).getNotificationChannel(CHANNEL)?.importance != NotificationManager.IMPORTANCE_NONE && (Build.VERSION.SDK_INT<33 || c.checkSelfPermission("android.permission.POST_NOTIFICATIONS")==PackageManager.PERMISSION_GRANTED)
     private fun pending(c:Context,id:String)=PendingIntent.getBroadcast(c,0,Intent(c,MedicationReceiver::class.java).setAction("org.caresphere.MEDICATION_DUE").setData(Uri.fromParts("caremed",id,null)).putExtra("id",id),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     private fun cancel(c:Context, clearNotification:Boolean=true){
         val alarms=c.getSystemService(AlarmManager::class.java)
         prefs(c).getStringSet("ids",emptySet())!!.forEach{alarms.cancel(pending(c,it))}
         if(clearNotification)c.getSystemService(NotificationManager::class.java).cancel(701)
     }
-    fun pause(c:Context):Boolean { cancel(c);return prefs(c).edit().putBoolean("enabled",false).commit() }
-    fun enable(c:Context):Boolean {
+    @Synchronized fun pause(c:Context):Boolean { val saved=prefs(c).edit().putBoolean("enabled",false).commit();cancel(c);return saved }
+    @Synchronized fun enable(c:Context):Boolean {
         if(!permitted(c))return false
         if(!prefs(c).edit().putBoolean("enabled",true).commit())return false
-        sync(c);return true
+        return try{sync(c);true}catch(_:Exception){pause(c);false}
     }
     @Synchronized fun sync(c:Context, clearNotification:Boolean=true) {
         cancel(c,clearNotification)
         if(!enabled(c)||!permitted(c))return
         val data=CareData(c,false)
         if(data.error!=null||!data.json.optBoolean("medicationConfirmed"))return
-        val meds=data.list("medications");val ids=mutableSetOf<String>()
-        for(i in 0 until meds.length()){
-            val med=meds.optJSONObject(i)?:continue
-            val id=med.optString("id");val time=med.optString("time")
-            if(id.isEmpty()||!MedicationRules.validTime(time)||med.optString("name").isBlank())continue
-            val whenAt=MedicationRules.next(time,ZonedDateTime.now()).toInstant().toEpochMilli()
-            c.getSystemService(AlarmManager::class.java).setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,whenAt,pending(c,id));ids.add(id)
+        val meds=data.list("medications")
+        val valid=(0 until meds.length()).mapNotNull{meds.optJSONObject(it)}.filter{
+            it.optString("id").isNotEmpty()&&MedicationRules.validTime(it.optString("time"))&&it.optString("name").isNotBlank()
         }
-        prefs(c).edit().putStringSet("ids",ids).apply()
+        // Persist cancellation identities BEFORE scheduling; safe across process death.
+        check(prefs(c).edit().putStringSet("ids",valid.map{it.getString("id")}.toSet()).commit())
+        valid.forEach{med->
+            val whenAt=MedicationRules.next(med.getString("time"),ZonedDateTime.now()).toInstant().toEpochMilli()
+            c.getSystemService(AlarmManager::class.java).setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,whenAt,pending(c,med.getString("id")))
+        }
     }
-    fun due(c:Context,id:String) {
+    @Synchronized fun due(c:Context,id:String) {
         if(!enabled(c)||!permitted(c))return
         val data=CareData(c,false)
         if(data.error!=null||!data.json.optBoolean("medicationConfirmed"))return

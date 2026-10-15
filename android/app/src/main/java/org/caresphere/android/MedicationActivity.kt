@@ -11,7 +11,7 @@ import java.util.UUID
 class MedicationActivity:ToolActivity(){
     private lateinit var data:CareData
     override fun onCreate(state:Bundle?){super.onCreate(state);data=CareData(this);render()}
-    override fun onResume(){super.onResume();if(::data.isInitialized){data=CareData(this);MedicationReminders.sync(this);render()}}
+    override fun onResume(){super.onResume();if(::data.isInitialized){data=CareData(this);runCatching{MedicationReminders.sync(this)}.onFailure{MedicationReminders.pause(this)};render()}}
     override fun onRequestPermissionsResult(requestCode:Int,permissions:Array<out String>,results:IntArray){super.onRequestPermissionsResult(requestCode,permissions,results);render()}
     private fun render(){
         begin(tx("Medication reminders"))
@@ -30,7 +30,7 @@ class MedicationActivity:ToolActivity(){
             button(tx("Edit")){editMedication(med)}.isEnabled=data.canWrite
             button(tx("Remove")){
                 AlertDialog.Builder(this).setMessage(tx("Remove this reminder? This does not change your prescription.")).setNegativeButton(tx("Cancel"),null).setPositiveButton(tx("Remove")){_,_->
-                    MedicationReminders.pause(this);data.json.put("medicationConfirmed",false)
+                    if(!MedicationReminders.pause(this)){message(tx("Changes could not be saved."));return@setPositiveButton};data.json.put("medicationConfirmed",false)
                     data.put("medications",JSONArray((0 until meds.length()).filter{it!=i}.map{meds.getJSONObject(it)}));render()
                 }.show()
             }.isEnabled=data.canWrite
