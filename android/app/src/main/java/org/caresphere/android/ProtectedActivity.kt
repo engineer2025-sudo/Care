@@ -36,6 +36,11 @@ open class ProtectedActivity:ComponentActivity(){
     override fun setContentView(layoutResID:Int){setContentView(layoutInflater.inflate(layoutResID,null))}
     override fun onStart(){super.onStart();AppLock.start()}
     override fun onResume(){super.onResume();resumed=true;refreshPrivacy()}
+    override fun onPostResume(){super.onPostResume();releasePendingResults()}
+    private fun releasePendingResults(){
+        if(!resumed||AppLock.locked(this)||isFinishing||isDestroyed)return
+        val results=pendingResults.toList();pendingResults.clear();results.forEach{it()}
+    }
     override fun onPause(){
         resumed=false
         if(AppLock.enabled(this)){
@@ -124,7 +129,7 @@ open class ProtectedActivity:ComponentActivity(){
                 }
                 gateMessage="Your private care information is hidden until you unlock."
                 refreshPrivacy();onPrivacyUnlocked();onChanged()
-                val results=pendingResults.toList();pendingResults.clear();results.forEach{it()}
+                releasePendingResults()
             }
             override fun onAuthenticationError(errorCode:Int,errString:CharSequence){
                 if(attempt!=operation)return
