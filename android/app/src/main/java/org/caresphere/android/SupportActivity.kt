@@ -78,11 +78,38 @@ class SupportActivity : Activity() {
     override fun onResume(){super.onResume();foreground=true;if(section=="Device sharing")render()}
     override fun onStop(){foreground=false;stopNearby();super.onStop();tts?.stop();pendingSpeech=null;paused=true}
     override fun onDestroy(){stopNearby();tts?.shutdown();password?.fill('\u0000');backupBytes?.fill(0);super.onDestroy()}
+    private fun configureSpeechVoice(): Boolean {
+        val engine = tts ?: return false
+        return runCatching {
+            val voice = engine.voices.orEmpty().firstOrNull {
+                !it.isNetworkConnectionRequired &&
+                it.features?.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED) != true &&
+                AppLanguage.voiceMatches(it.locale.toLanguageTag(), AppLanguage.current(this))
+            }
+            voice != null && engine.setVoice(voice) == TextToSpeech.SUCCESS
+        }.getOrDefault(false)
+    }
     private fun say(value:String){
         pendingSpeech=value
-        if(tts==null){tts=TextToSpeech(this){status->if(status==TextToSpeech.SUCCESS){val voice=tts?.voices?.firstOrNull{!it.isNetworkConnectionRequired && AppLanguage.voiceMatches(it.locale.toLanguageTag(),AppLanguage.current(this))};if(voice!=null){tts?.voice=voice;speechReady=true;pendingSpeech?.let{say(it)}}else message(tx("No installed voice for this language. The words remain visible."))}else message(tx("Speech is unavailable. The phrase stays visible."))};return}
-        if(!speechReady){pendingSpeech=null;message(tx("No installed offline voice is ready. The phrase remains visible."));return}
-        tts?.speak(value,TextToSpeech.QUEUE_FLUSH,null,UUID.randomUUID().toString());pendingSpeech=null
+        if(tts==null){
+            tts=TextToSpeech(this){status->
+                speechReady=status==TextToSpeech.SUCCESS
+                if(!foreground || isFinishing || isDestroyed){pendingSpeech=null}
+                else if(speechReady){pendingSpeech?.let{say(it)}}
+                else {pendingSpeech=null;message(tx("No installed voice for this language. The words remain visible."))}
+            }
+            return
+        }
+        if(!speechReady)return // Initialization keeps only the most recently requested text.
+        // Recheck on every request: a resumed activity may have a different UI language.
+        if(!configureSpeechVoice()){
+            pendingSpeech=null
+            message(tx("No installed voice for this language. The words remain visible."))
+            return
+        }
+        val result=tts?.speak(value,TextToSpeech.QUEUE_FLUSH,null,UUID.randomUUID().toString())
+        pendingSpeech=null
+        if(result!=TextToSpeech.SUCCESS)message(tx("No installed voice for this language. The words remain visible."))
     }
     private fun render(){
         val scroll=ScrollView(this);page=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(dp(20),dp(16),dp(20),dp(28));setBackgroundColor(bg)};scroll.addView(page);setContentView(scroll)
