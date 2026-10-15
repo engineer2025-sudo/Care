@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 import Charts
 
@@ -43,7 +44,7 @@ struct VitalsView: View {
                 .carePagePadding()
             }
             .background(Color.ink)
-            .navigationTitle("Vitals & Telehealth")
+            .navigationTitle(AppLanguage.text("Vitals & Telehealth"))
             .inlineTitle()
             .onAppear {
                 if healthKit.hasRequestedAuthorization { healthKit.refreshAll() }
@@ -57,9 +58,9 @@ struct VitalsView: View {
     }
 
     private var sensorBar: some View {
-        SectionCard(title: "Connect your health data", systemImage: "antenna.radiowaves.left.and.right") {
+        SectionCard(title: AppLanguage.text("Connect your health data"), systemImage: "antenna.radiowaves.left.and.right") {
             VStack(alignment: .leading, spacing: 12) {
-                Label("Bluetooth heart-rate monitor", systemImage: "waveform.path.ecg")
+                Label(AppLanguage.text("Bluetooth heart-rate monitor"), systemImage: "waveform.path.ecg")
                     .font(.headline)
                 StatusChip(text: bluetooth.bpm != nil ? "LIVE BLE" : bluetooth.isConnected ? "CONNECTED · WAITING" : "NOT CONNECTED",
                            color: bluetooth.isConnected ? .emeraldText : .secondary)
@@ -79,7 +80,7 @@ struct VitalsView: View {
                         }
                         .buttonStyle(.bordered)
                     }
-                    Button("Cancel pairing") { bluetooth.cancelPairing() }
+                    Button(AppLanguage.text("Cancel pairing")) { bluetooth.cancelPairing() }
                         .buttonStyle(.bordered).controlSize(.large)
                 } else {
                     Button(bluetooth.isConnected ? "Disconnect monitor" : "Pair a heart-rate monitor") {
@@ -89,7 +90,7 @@ struct VitalsView: View {
                 }
 
                 Divider().padding(.vertical, 4)
-                Label("Apple Health", systemImage: "heart.text.square")
+                Label(AppLanguage.text("Apple Health"), systemImage: "heart.text.square")
                     .font(.headline)
                 StatusChip(text: healthKit.canRequestAuthorization
                            ? (healthKit.hasRequestedAuthorization ? "READ ACCESS REQUESTED" : "NOT ENABLED")
@@ -101,7 +102,7 @@ struct VitalsView: View {
                 }
                 .buttonStyle(.bordered).controlSize(.large)
                 .disabled(!healthKit.canRequestAuthorization)
-                Text("Both are optional. If no records are available, readings stay blank. You can use routines and activities without connecting either.")
+                Text(AppLanguage.text("Both are optional. If no records are available, readings stay blank. You can use routines and activities without connecting either."))
                     .font(.footnote).foregroundStyle(.secondary)
             }
         }
@@ -110,25 +111,25 @@ struct VitalsView: View {
     /// Garmin wearables broadcast the *standard* Bluetooth Heart Rate profile
     /// (0x180D), so the same CoreBluetooth pairing flow connects to them.
     private var garminCard: some View {
-        SectionCard(title: "Connect Garmin", systemImage: "figure.run") {
+        SectionCard(title: AppLanguage.text("Connect Garmin"), systemImage: "figure.run") {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Garmin watches (Forerunner, Venu, Fenix, vivoactive) broadcast standard Bluetooth heart rate — pair them exactly like any chest strap:")
+                Text(AppLanguage.text("Garmin watches (Forerunner, Venu, Fenix, vivoactive) broadcast standard Bluetooth heart rate — pair them exactly like any chest strap:"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Label {
-                    Text("On the watch: **Settings → Health & Wellness → Wrist Heart Rate → Broadcast Heart Rate** (Venu/vivoactive) or **Settings → Sensors & Accessories → Wrist Heart Rate → Broadcast Heart Rate** (Forerunner/Fenix).")
+                    Text(AppLanguage.text("On the watch: **Settings → Health & Wellness → Wrist Heart Rate → Broadcast Heart Rate** (Venu/vivoactive) or **Settings → Sensors & Accessories → Wrist Heart Rate → Broadcast Heart Rate** (Forerunner/Fenix)."))
                         .font(.caption)
                 } icon: {
                     Image(systemName: "1.circle.fill").foregroundStyle(Color.emeraldText)
                 }
                 Label {
-                    Text("Keep the watch on the broadcast screen nearby, then tap **Pair** above — it appears as a heart-rate monitor.")
+                    Text(AppLanguage.text("Keep the watch on the broadcast screen nearby, then tap **Pair** above — it appears as a heart-rate monitor."))
                         .font(.caption)
                 } icon: {
                     Image(systemName: "2.circle.fill").foregroundStyle(Color.emeraldText)
                 }
                 Label {
-                    Text("Live BPM streams here and into the sparkline. Turn off broadcast on the watch afterwards to save battery.")
+                    Text(AppLanguage.text("Live BPM streams here and into the sparkline. Turn off broadcast on the watch afterwards to save battery."))
                         .font(.caption)
                 } icon: {
                     Image(systemName: "3.circle.fill").foregroundStyle(Color.emeraldText)
@@ -138,11 +139,11 @@ struct VitalsView: View {
     }
 
     private var workoutsCard: some View {
-        SectionCard(title: "Recent workouts", systemImage: "figure.run") {
+        SectionCard(title: AppLanguage.text("Recent workouts"), systemImage: "figure.run") {
             HStack(alignment: .top, spacing: 10) {
                 VStack(alignment: .leading, spacing: 4) {
                     StatusChip(text: "READ-ONLY · APPLE HEALTH", color: .skyBlue)
-                    Text("CareSphere reads workout summaries; it never writes or edits Health records.")
+                    Text(AppLanguage.text("CareSphere reads workout summaries; it never writes or edits Health records."))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -153,33 +154,33 @@ struct VitalsView: View {
                     if healthKit.isLoadingWorkouts {
                         ProgressView().controlSize(.small)
                     } else {
-                        Label("Refresh", systemImage: "arrow.clockwise")
+                        Label(AppLanguage.text("Refresh"), systemImage: "arrow.clockwise")
                             .font(.caption.weight(.bold))
                     }
                 }
                 .buttonStyle(.bordered)
                 .disabled(!healthKit.canRequestAuthorization || !healthKit.hasRequestedAuthorization || healthKit.isLoadingWorkouts)
-                .accessibilityLabel("Refresh workouts from Apple Health")
+                .accessibilityLabel(AppLanguage.text("Refresh workouts from Apple Health"))
             }
 
             if !healthKit.canRequestAuthorization {
-                Label("Apple Health workout readings are available on a supported iPhone or iPad.",
+                Label(AppLanguage.text("Apple Health workout readings are available on a supported iPhone or iPad."),
                       systemImage: "iphone")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else if !healthKit.hasRequestedAuthorization {
-                Label("Tap Enable above to request Health access. You can choose which categories to share.",
+                Label(AppLanguage.text("Tap Enable above to request Health access. You can choose which categories to share."),
                       systemImage: "hand.tap")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else if healthKit.isLoadingWorkouts && healthKit.workouts.isEmpty {
-                ProgressView("Checking Apple Health…")
+                ProgressView(AppLanguage.text("Checking Apple Health…"))
                     .font(.caption)
                     .tint(.emerald)
             } else if healthKit.workouts.isEmpty {
-                Label("No workouts are visible yet. HealthKit hides read-permission decisions, so check CareSphere's Workouts access and confirm a workout exists in Apple Health.",
+                Label(AppLanguage.text("No workouts are visible yet. HealthKit hides read-permission decisions, so check CareSphere's Workouts access and confirm a workout exists in Apple Health."),
                       systemImage: "figure.run")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -201,14 +202,14 @@ struct VitalsView: View {
             }
 
             #if os(iOS)
-            Text("Garmin setup: Garmin Connect → More → Settings → Connect Apps → Apple Health → Connect with Apple Health. Allow Workouts, then keep Garmin Connect open while the watch syncs; Garmin says Health transfer pauses when Connect closes. Apple Health receives workout summaries, not Garmin GPS tracks.")
+            Text(AppLanguage.text("Garmin setup: Garmin Connect → More → Settings → Connect Apps → Apple Health → Connect with Apple Health. Allow Workouts, then keep Garmin Connect open while the watch syncs; Garmin says Health transfer pauses when Connect closes. Apple Health receives workout summaries, not Garmin GPS tracks."))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .fixedSize(horizontal: false, vertical: true)
             Link("Garmin's Apple Health instructions", destination: URL(string: "https://support.garmin.com/en-US/?faq=lK5FPB9iPF5PXFkIpFlFPA")!)
                 .font(.caption2.weight(.semibold))
             #else
-            Text("Garmin workouts must first be shared to Apple Health on iPhone. Direct Garmin-account syncing is not available.")
+            Text(AppLanguage.text("Garmin workouts must first be shared to Apple Health on iPhone. Direct Garmin-account syncing is not available."))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -229,7 +230,7 @@ struct VitalsView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(anyFlag ? "A reading is outside a broad reference band" : hasAnyReading ? "No displayed reading is outside these broad bands" : "No readings available to compare")
                     .font(.footnote.weight(.black))
-                Text("Informational only—not triage or diagnosis. Broad examples: HR 50–110 bpm · SpO₂ ≥ 94% · BP < 140/90 mmHg. An optional check-in uses sustained live Bluetooth HR only; CareSphere does not send alerts or create a clinical summary.")
+                Text(AppLanguage.text("Informational only—not triage or diagnosis. Broad examples: HR 50–110 bpm · SpO₂ ≥ 94% · BP < 140/90 mmHg. An optional check-in uses sustained live Bluetooth HR only; CareSphere does not send alerts or create a clinical summary."))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -241,11 +242,11 @@ struct VitalsView: View {
     }
 
     private var heartRateCard: some View {
-        SectionCard(title: "Heart rate", systemImage: "waveform.path.ecg") {
+        SectionCard(title: AppLanguage.text("Heart rate"), systemImage: "waveform.path.ecg") {
             HStack(alignment: .firstTextBaseline) {
                 Text(effectiveHR.map { String(Int($0)) } ?? "—")
                     .font(.system(size: 40, weight: .black))
-                Text("bpm").font(.caption).foregroundStyle(.secondary)
+                Text(AppLanguage.text("bpm")).font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 StatusChip(
                     text: bluetooth.bpm != nil ? "LIVE BLE" : healthKit.heartRate != nil ? "APPLE HEALTH" : "NO DATA",
@@ -260,7 +261,7 @@ struct VitalsView: View {
                 .chartYAxis(.hidden)
                 .frame(height: 90)
             } else {
-                Text("Live sparkline appears once a sensor streams readings.")
+                Text(AppLanguage.text("Live sparkline appears once a sensor streams readings."))
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                     .frame(height: 90, alignment: .center)
@@ -272,14 +273,14 @@ struct VitalsView: View {
             } else if let date = healthKit.heartRateRecordedAt, healthKit.heartRate != nil {
                 Text("Recorded \(date.formatted()) · \(healthKit.heartRateSource ?? "Apple Health") · historical, not live").font(.footnote)
             }
-            Text("BLE: Bluetooth SIG Heart Rate profile (0x180D/0x2A37). Apple Health shows the latest record shared by your source app, not continuous live monitoring.")
+            Text(AppLanguage.text("BLE: Bluetooth SIG Heart Rate profile (0x180D/0x2A37). Apple Health shows the latest record shared by your source app, not continuous live monitoring."))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
     }
 
     private var spo2Card: some View {
-        SectionCard(title: "Blood oxygen (SpO₂)", systemImage: "lungs.fill") {
+        SectionCard(title: AppLanguage.text("Blood oxygen (SpO₂)"), systemImage: "lungs.fill") {
             if let date = healthKit.oxygenRecordedAt {
                 Text("Recorded \(date.formatted()) · \(healthKit.oxygenSource ?? "Apple Health") · historical").font(.footnote)
             }
@@ -292,32 +293,32 @@ struct VitalsView: View {
             }
             ProgressView(value: min(max((healthKit.spo2 ?? 88) - 88, 0), 12), total: 12)
                 .tint(healthKit.spo2FlagView ? .orange : .blue)
-            Text("Read from Apple Health — Apple Watch records SpO₂ automatically; enable it in the Watch app under Blood Oxygen.")
+            Text(AppLanguage.text("Read from Apple Health — Apple Watch records SpO₂ automatically; enable it in the Watch app under Blood Oxygen."))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
     }
 
     private var bloodPressureCard: some View {
-        SectionCard(title: "Blood pressure", systemImage: "stethoscope") {
+        SectionCard(title: AppLanguage.text("Blood pressure"), systemImage: "stethoscope") {
             if let date = healthKit.bloodPressureRecordedAt {
                 Text("Recorded \(date.formatted()) · \(healthKit.bloodPressureSource ?? "Apple Health") · historical").font(.footnote)
             }
             HStack(alignment: .firstTextBaseline) {
                 Text(healthKit.systolic.map { "\(Int($0)) / \(Int(healthKit.diastolic ?? 0))" } ?? "—")
                     .font(.system(size: 34, weight: .black))
-                Text("mmHg").font(.caption).foregroundStyle(.secondary)
+                Text(AppLanguage.text("mmHg")).font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 StatusChip(text: healthKit.systolic != nil ? "APPLE HEALTH" : "NO READING",
                            color: healthKit.systolic != nil ? .skyBlue : .gray)
             }
-            Text("iOS doesn't measure BP on-wrist — readings arrive from FDA-cleared Bluetooth cuffs (Omron, Withings) that sync to Apple Health. Refresh after taking a reading.")
+            Text(AppLanguage.text("iOS doesn't measure BP on-wrist — readings arrive from FDA-cleared Bluetooth cuffs (Omron, Withings) that sync to Apple Health. Refresh after taking a reading."))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
             Button {
                 healthKit.refreshAll()
             } label: {
-                Label("Refresh from Apple Health", systemImage: "arrow.clockwise")
+                Label(AppLanguage.text("Refresh from Apple Health"), systemImage: "arrow.clockwise")
                     .font(.caption.weight(.bold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 9)
@@ -328,11 +329,11 @@ struct VitalsView: View {
 
     private var howItWorks: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("How vitals really reach this screen", systemImage: "info.circle.fill")
+            Label(AppLanguage.text("How vitals really reach this screen"), systemImage: "info.circle.fill")
                 .font(.subheadline.weight(.bold))
-            Text("Live BLE: Pairing scans for standard Bluetooth heart-rate monitors and subscribes to GATT notifications — real telemetry, parsed per the Bluetooth SIG spec.")
-            Text("Apple Health: heart rate, SpO₂ and blood pressure come from your Apple Watch and connected cuff apps via HealthKit — the official, consent-gated health store on iOS.")
-            Text("CareSphere never fabricates numbers: every card is labeled with its true source.")
+            Text(AppLanguage.text("Live BLE: Pairing scans for standard Bluetooth heart-rate monitors and subscribes to GATT notifications — real telemetry, parsed per the Bluetooth SIG spec."))
+            Text(AppLanguage.text("Apple Health: heart rate, SpO₂ and blood pressure come from your Apple Watch and connected cuff apps via HealthKit — the official, consent-gated health store on iOS."))
+            Text(AppLanguage.text("CareSphere never fabricates numbers: every card is labeled with its true source."))
         }
         .font(.caption)
         .foregroundStyle(.secondary)

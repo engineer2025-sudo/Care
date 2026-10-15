@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 import UserNotifications
 import UniformTypeIdentifiers
@@ -45,6 +46,7 @@ struct SettingsView: View {
         NavigationStack {
             ScrollViewReader { proxy in
             Form {
+                Section(AppLanguage.text("Language")) { InterfaceLanguagePicker() }
                 profileSection
                 emergencySection
                 medicationSection.id(SectionDestination.medications)
@@ -59,11 +61,11 @@ struct SettingsView: View {
                 if let initialSection { proxy.scrollTo(initialSection, anchor: .top) }
             }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(AppLanguage.text("Settings"))
             .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(AppLanguage.text("Done")) { dismiss() }
                 }
             }
         }
@@ -80,17 +82,16 @@ struct SettingsView: View {
                 }
                 exportDocument = nil
             }
-        .confirmationDialog(
-            "Erase all saved CareSphere care data?",
+        .confirmationDialog(AppLanguage.text("Erase all saved CareSphere care data?"),
             isPresented: $showingEraseConfirmation,
             titleVisibility: .visible) {
-                Button("Erase All Care Data", role: .destructive) {
+                Button(AppLanguage.text("Erase All Care Data"), role: .destructive) {
                     store.eraseAllLocalCareData()
                     privacyActionMessage = store.persistenceIssue ?? "Saved care data and medication notifications were removed."
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(AppLanguage.text("Cancel"), role: .cancel) {}
             } message: {
-                Text("This removes your profile, emergency contact, routines, medication schedule, notes, mood history and scores, then returns to onboarding. It does not change system permissions or remove separately downloaded models and reference libraries.")
+                Text(AppLanguage.text("This removes your profile, emergency contact, routines, medication schedule, notes, mood history and scores, then returns to onboarding. It does not change system permissions or remove separately downloaded models and reference libraries."))
             }
     }
 
@@ -107,11 +108,11 @@ struct SettingsView: View {
     // MARK: Profile
 
     private var profileSection: some View {
-        Section("Profile") {
+        Section(AppLanguage.text("Profile")) {
             HStack {
-                Text("Display name")
+                Text(AppLanguage.text("Display name"))
                 Spacer()
-                TextField("Name", text: $store.displayName)
+                TextField(AppLanguage.text("Name"), text: $store.displayName)
                     .multilineTextAlignment(.trailing)
                     .foregroundStyle(.secondary)
             }
@@ -121,7 +122,7 @@ struct SettingsView: View {
             if let age = store.profile.age {
                 LabeledContent("Age", value: "\(age)")
             }
-            Picker("Care focus", selection: $store.profile.careMode) {
+            Picker(AppLanguage.text("Care focus"), selection: $store.profile.careMode) {
                 ForEach(CareMode.allCases) { mode in
                     Text("\(mode.emoji) \(mode.label)").tag(mode)
                 }
@@ -138,9 +139,9 @@ struct SettingsView: View {
     // MARK: Emergency contact
 
     private var emergencySection: some View {
-        Section("Emergency contact (SOS)") {
-            TextField("Name", text: $store.profile.emergencyContact.name)
-            TextField("Phone", text: $store.profile.emergencyContact.phone)
+        Section(AppLanguage.text("Emergency contact (SOS)")) {
+            TextField(AppLanguage.text("Name"), text: $store.profile.emergencyContact.name)
+            TextField(AppLanguage.text("Phone"), text: $store.profile.emergencyContact.phone)
                 #if os(iOS)
                 .keyboardType(.phonePad)
                 #endif
@@ -148,7 +149,7 @@ struct SettingsView: View {
             Button {
                 contactPickerShown = true
             } label: {
-                Label("Import from Contacts", systemImage: "person.crop.rectangle.stack")
+                Label(AppLanguage.text("Import from Contacts"), systemImage: "person.crop.rectangle.stack")
             }
             #endif
         }
@@ -157,20 +158,20 @@ struct SettingsView: View {
     // MARK: Medication schedule
 
     private var medicationSection: some View {
-        Section("Medication reminders") {
+        Section(AppLanguage.text("Medication reminders")) {
             if store.configuredMedications.isEmpty {
-                Text("No medication schedule entered.")
+                Text(AppLanguage.text("No medication schedule entered."))
                     .font(.caption).foregroundStyle(.secondary)
             }
             ForEach($store.medications) { $medication in
                 VStack(alignment: .leading, spacing: 8) {
-                    TextField("Medication name", text: $medication.name)
-                    TextField("Purpose (optional)", text: $medication.purpose)
+                    TextField(AppLanguage.text("Medication name"), text: $medication.name)
+                    TextField(AppLanguage.text("Purpose (optional)"), text: $medication.purpose)
                     DatePicker("Reminder time", selection: medicationTimeBinding($medication), displayedComponents: .hourAndMinute)
                     Button(role: .destructive) {
                         store.medications.removeAll { $0.id == medication.id }
                     } label: {
-                        Label("Remove reminder", systemImage: "trash")
+                        Label(AppLanguage.text("Remove reminder"), systemImage: "trash")
                     }
                     .font(.caption)
                 }
@@ -178,15 +179,15 @@ struct SettingsView: View {
             }
 
             if !store.configuredMedications.isEmpty {
-                Toggle("Enable reminders for this schedule", isOn: $store.medicationScheduleConfirmed)
+                Toggle(AppLanguage.text("Enable reminders for this schedule"), isOn: $store.medicationScheduleConfirmed)
                 Text(store.medicationScheduleConfirmed
                      ? "Reminders are enabled. Editing a medication name or time will pause them until you confirm again."
                      : "Reminders are paused. Review every saved name and time above, including schedules from earlier versions, then confirm here.")
                     .font(.caption2).foregroundStyle(.secondary)
             }
 
-            TextField("New medication name", text: $newMedicationName)
-            TextField("Purpose (optional)", text: $newMedicationPurpose)
+            TextField(AppLanguage.text("New medication name"), text: $newMedicationName)
+            TextField(AppLanguage.text("Purpose (optional)"), text: $newMedicationPurpose)
             DatePicker("Reminder time", selection: $newMedicationTime, displayedComponents: .hourAndMinute)
             Button {
                 let name = newMedicationName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -200,11 +201,11 @@ struct SettingsView: View {
                 newMedicationName = ""
                 newMedicationPurpose = ""
             } label: {
-                Label("Add daily reminder", systemImage: "plus.circle.fill")
+                Label(AppLanguage.text("Add daily reminder"), systemImage: "plus.circle.fill")
             }
             .disabled(newMedicationName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
-            Text("Only add schedules you have confirmed with your care team or medication label. CareSphere stores your reminder times; it does not prescribe, verify a dose, or check drug interactions.")
+            Text(AppLanguage.text("Only add schedules you have confirmed with your care team or medication label. CareSphere stores your reminder times; it does not prescribe, verify a dose, or check drug interactions."))
                 .font(.caption2).foregroundStyle(.secondary)
         }
     }
@@ -222,7 +223,7 @@ struct SettingsView: View {
     // MARK: Security (Touch ID / Face ID)
 
     private var securitySection: some View {
-        Section("Security") {
+        Section(AppLanguage.text("Security")) {
             Toggle("Lock with \(BiometricService.biometryName)", isOn: biometricsBinding)
             if store.biometricEnabled {
                 Button {
@@ -238,7 +239,7 @@ struct SettingsView: View {
                     Text(result).font(.caption).foregroundStyle(.secondary)
                 }
             }
-            Text("The app locks whenever it leaves the foreground. Your device passcode always works as a fallback — you can never be locked out.")
+            Text(AppLanguage.text("The app locks whenever it leaves the foreground. Your device passcode always works as a fallback — you can never be locked out."))
                 .font(.caption2).foregroundStyle(.secondary)
         }
     }
@@ -264,41 +265,42 @@ struct SettingsView: View {
     // MARK: Accessibility
 
     private var accessibilitySection: some View {
-        Section("Accessibility") {
-            Text("Choose an appearance or follow your device. Dynamic Type, increased contrast, and Reduce Motion also follow system accessibility settings; the options below add contrast or further reduce activity motion. Buttons include VoiceOver labels.")
+        Section(AppLanguage.text("Accessibility")) {
+            Text(AppLanguage.text("Choose an appearance or follow your device. Dynamic Type, increased contrast, and Reduce Motion also follow system accessibility settings; the options below add contrast or further reduce activity motion. Buttons include VoiceOver labels."))
                 .font(.caption2).foregroundStyle(.secondary)
-            Picker("Color appearance", selection: $store.colorAppearance) {
-                Text("Follow device").tag("system")
-                Text("Light").tag("light")
-                Text("Dark").tag("dark")
+            Picker(AppLanguage.text("Color appearance"), selection: $store.colorAppearance) {
+                Text(AppLanguage.text("Follow device")).tag("system")
+                Text(AppLanguage.text("Light")).tag("light")
+                Text(AppLanguage.text("Dark")).tag("dark")
             }
-            Toggle("Increase in-app contrast", isOn: $store.highContrast)
-                .accessibilityHint("Adds stronger outlines around section cards and status chips.")
-            Toggle("Reduce visual motion in activities", isOn: $store.reduceVisualMotion)
-            Toggle("Spoken in-app prompts", isOn: $store.voiceReminders)
-            Picker("Reminder voice", selection: $store.voiceIdentifier) {
-                Text("Automatic · best installed Apple voice").tag("")
-                Section("Apple · installed on this device") {
-                    ForEach(SpeechService.englishVoices, id: \.identifier) { voice in
+            Toggle(AppLanguage.text("Increase in-app contrast"), isOn: $store.highContrast)
+                .accessibilityHint(AppLanguage.text("Adds stronger outlines around section cards and status chips."))
+            Toggle(AppLanguage.text("Reduce visual motion in activities"), isOn: $store.reduceVisualMotion)
+            Toggle(AppLanguage.text("Spoken in-app prompts"), isOn: $store.voiceReminders)
+            Picker(AppLanguage.text("Reminder voice"), selection: $store.voiceIdentifier) {
+                Text(AppLanguage.text("Automatic · best installed Apple voice")).tag("")
+                Section(AppLanguage.text("Apple · installed on this device")) {
+                    ForEach(SpeechService.matchingVoices, id: \.identifier) { voice in
                         Text("\(voice.name) · \(SpeechService.qualityLabel(for: voice))")
                             .tag(voice.identifier)
                     }
                 }
 
             }
-            Text("Speech is generated on this device. In-app prompts and previews can use the selected voice; scheduled notifications still use the normal system notification sound when CareSphere is closed.")
+            Text(AppLanguage.text("Speech is generated on this device. In-app prompts and previews can use the selected voice; scheduled notifications still use the normal system notification sound when CareSphere is closed."))
                 .font(.caption2).foregroundStyle(.secondary)
+            if SpeechService.matchingVoices.isEmpty { Text(AppLanguage.text("No installed voice for this language. The words remain visible.")).font(.caption) }
             Button {
-                SpeechService.shared.speak("This is your CareSphere reminder. Please check your medication label and follow the schedule agreed with your care team.", enabled: true, voiceIdentifier: store.voiceIdentifier)
+                SpeechService.shared.speak(AppLanguage.text("This is your CareSphere reminder. Please check your medication label and follow the schedule agreed with your care team."), enabled: true, voiceIdentifier: store.voiceIdentifier)
             } label: {
-                Label("Preview selected voice", systemImage: "play.circle")
+                Label(AppLanguage.text("Preview selected voice"), systemImage: "play.circle")
             }
         }
     }
 
     private var supportCheckInSection: some View {
-        Section("Support check-ins") {
-            Toggle("Offer heart-rate check-ins", isOn: $store.heartRateCheckInEnabled)
+        Section(AppLanguage.text("Support check-ins")) {
+            Toggle(AppLanguage.text("Offer heart-rate check-ins"), isOn: $store.heartRateCheckInEnabled)
             Text("Uses only a paired Bluetooth monitor while CareSphere is open and unlocked. It prompts after live heart rate stays above \(CareSupportCoordinator.promptThresholdBPM) BPM for \(Int(CareSupportCoordinator.sustainedDuration)) seconds. Activity can raise heart rate; the app asks how you feel and never calls or messages anyone automatically.")
                 .font(.caption2).foregroundStyle(.secondary)
         }
@@ -306,17 +308,17 @@ struct SettingsView: View {
 
 
     private var notificationsSection: some View {
-        Section("Notifications") {
+        Section(AppLanguage.text("Notifications")) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Medication reminders")
+                    Text(AppLanguage.text("Medication reminders"))
                     Text(statusHint).font(.caption2).foregroundStyle(.secondary)
                 }
                 Spacer()
                 if notifications.authorizationStatus == .authorized {
                     Image(systemName: "checkmark.seal.fill").foregroundStyle(Color.emeraldText)
                 } else {
-                    Button("Enable") { notifications.requestAuthorization() }
+                    Button(AppLanguage.text("Enable")) { notifications.requestAuthorization() }
                         .buttonStyle(.bordered)
                         .font(.caption.weight(.bold))
                 }
@@ -331,35 +333,35 @@ struct SettingsView: View {
     // MARK: Privacy
 
     private var privacySection: some View {
-        Section("Privacy & data") {
+        Section(AppLanguage.text("Privacy & data")) {
             if store.persistenceIssue == nil {
-                Label("Your profile, routines, medications, notes, moods and scores are encrypted on this device with AES-256-GCM. The key is stored in Keychain.", systemImage: "lock.shield")
+                Label(AppLanguage.text("Your profile, routines, medications, notes, moods and scores are encrypted on this device with AES-256-GCM. The key is stored in Keychain."), systemImage: "lock.shield")
                     .font(.caption)
             } else {
-                Label("CareSphere could not confirm that all saved data is protected. Review the storage warning above.", systemImage: "exclamationmark.triangle.fill")
+                Label(AppLanguage.text("CareSphere could not confirm that all saved data is protected. Review the storage warning above."), systemImage: "exclamationmark.triangle.fill")
                     .font(.caption).foregroundStyle(.orange)
             }
             #if os(iOS)
-            Text("The encrypted file also uses iOS Complete File Protection and is excluded from device backups; its Keychain key is available only while unlocked and is not migrated to another device. Older plaintext data is removed only after an encrypted copy is saved. Face ID / Touch ID is an additional app lock, not the encryption key.")
+            Text(AppLanguage.text("The encrypted file also uses iOS Complete File Protection and is excluded from device backups; its Keychain key is available only while unlocked and is not migrated to another device. Older plaintext data is removed only after an encrypted copy is saved. Face ID / Touch ID is an additional app lock, not the encryption key."))
                 .font(.caption2).foregroundStyle(.secondary)
             #else
-            Text("The encrypted file is restricted to your macOS user account (POSIX permissions 0600); the key is held in the user's login Keychain. The biometric screen lock is separate from the encryption key.")
+            Text(AppLanguage.text("The encrypted file is restricted to your macOS user account (POSIX permissions 0600); the key is held in the user's login Keychain. The biometric screen lock is separate from the encryption key."))
                 .font(.caption2).foregroundStyle(.secondary)
             #endif
 
             Button(action: prepareCareDataExport) {
-                Label("Export my care data as JSON…", systemImage: "square.and.arrow.up")
+                Label(AppLanguage.text("Export my care data as JSON…"), systemImage: "square.and.arrow.up")
             }
             .disabled(!store.canExportCareData)
-            Text("The system save sheet lets you choose where to place the export. It contains sensitive profile, medication and journal information; the exported copy is outside CareSphere's app-storage protections.")
+            Text(AppLanguage.text("The system save sheet lets you choose where to place the export. It contains sensitive profile, medication and journal information; the exported copy is outside CareSphere's app-storage protections."))
                 .font(.caption2).foregroundStyle(.secondary)
 
             Button(role: .destructive) {
                 showingEraseConfirmation = true
             } label: {
-                Label("Erase all saved care data…", systemImage: "trash")
+                Label(AppLanguage.text("Erase all saved care data…"), systemImage: "trash")
             }
-            Text("Erasing removes saved care data and pending medication notifications, then returns you to onboarding. Notification permission and downloaded MedlinePlus and external Kiwix files are not removed.")
+            Text(AppLanguage.text("Erasing removes saved care data and pending medication notifications, then returns you to onboarding. Notification permission and downloaded MedlinePlus and external Kiwix files are not removed."))
                 .font(.caption2).foregroundStyle(.secondary)
 
             if let message = privacyActionMessage {
@@ -370,9 +372,9 @@ struct SettingsView: View {
                     .font(.caption).foregroundStyle(.orange)
             }
 
-            Label("Apple Intelligence summaries and installed Apple speech voices run on this device; questions are not sent to a cloud AI. Kiwix searches go only to the private/local server address you enter.", systemImage: "cpu")
+            Label(AppLanguage.text("Apple Intelligence summaries and installed Apple speech voices run on this device; questions are not sent to a cloud AI. Kiwix searches go only to the private/local server address you enter."), systemImage: "cpu")
                 .font(.caption)
-            Label("MedlinePlus content is downloaded only when you choose. HealthKit access is explicit and read-only; workouts appear only if Apple Health can see them, and readings retain their true source labels.", systemImage: "heart.text.square")
+            Label(AppLanguage.text("MedlinePlus content is downloaded only when you choose. HealthKit access is explicit and read-only; workouts appear only if Apple Health can see them, and readings retain their true source labels."), systemImage: "heart.text.square")
                 .font(.caption)
         }
     }
@@ -380,7 +382,7 @@ struct SettingsView: View {
     // MARK: About
 
     private var aboutSection: some View {
-        Section("About") {
+        Section(AppLanguage.text("About")) {
             LabeledContent("Version", value: appVersionLabel)
             LabeledContent("Video", value: "Browser handoff · meet.jit.si")
             #if os(iOS)
@@ -389,9 +391,9 @@ struct SettingsView: View {
             LabeledContent("Health", value: "CoreBluetooth · Apple Health is iPhone-only")
             #endif
             VStack(alignment: .leading, spacing: 4) {
-                Text("Built on Apple's native stacks")
+                Text(AppLanguage.text("Built on Apple's native stacks"))
                     .font(.caption.weight(.bold))
-                Text("SwiftUI · HealthKit · CoreBluetooth · UserNotifications · LocalAuthentication (Touch ID / Face ID) · CoreHaptics · NaturalLanguage · CoreMotion · AVAudioEngine · AVSpeechSynthesizer · CoreLocation · MapKit · Swift Charts · Contacts · Foundation Models (optional Apple Intelligence) · FoundationXML (MedlinePlus)")
+                Text(AppLanguage.text("SwiftUI · HealthKit · CoreBluetooth · UserNotifications · LocalAuthentication (Touch ID / Face ID) · CoreHaptics · NaturalLanguage · CoreMotion · AVAudioEngine · AVSpeechSynthesizer · CoreLocation · MapKit · Swift Charts · Contacts · Foundation Models (optional Apple Intelligence) · FoundationXML (MedlinePlus)"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -419,6 +421,26 @@ struct SettingsView: View {
             return store.configuredMedications.isEmpty
                 ? "Add a personal schedule, review each entry against your current instructions, and allow notifications to use reminders."
                 : "No reminders are active until permission and schedule confirmation are both in place."
+        }
+    }
+}
+
+
+/// Native names make the language selector usable even before reading the current UI.
+struct InterfaceLanguagePicker: View {
+    @AppStorage(AppLanguage.preferenceKey) private var choice = "auto"
+    var compact = false
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Picker(selection: $choice) {
+                ForEach(AppLanguage.options, id: \.id) { option in
+                    Text(verbatim: option.id == "auto" ? AppLanguage.text(option.name) : option.name).tag(option.id)
+                }
+            } label: { Label(AppLanguage.text("App language"), systemImage: "globe") }
+            if !compact {
+                Text(AppLanguage.text("Your notes and care records stay in their original language.")).font(.caption)
+                Text(AppLanguage.text("Some advanced instructions and external content remain in English.")).font(.caption).foregroundStyle(.secondary)
+            }
         }
     }
 }

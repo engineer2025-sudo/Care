@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 import MapKit
 
@@ -11,21 +12,21 @@ struct SosView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("Need urgent help?")
+                    Text(AppLanguage.text("Need urgent help?"))
                         .font(.title.weight(.bold))
                         .accessibilityAddTraits(.isHeader)
-                    Text("In the United States, call 911 for immediate danger. Outside the US, use the local emergency number. CareSphere does not contact anyone automatically.")
+                    Text(AppLanguage.text("In the United States, call 911 for immediate danger. Outside the US, use the local emergency number. CareSphere does not contact anyone automatically."))
                         .font(.body)
                     Link(destination: URL(string: "tel:911")!) {
-                        Label("Call 911", systemImage: "phone.fill")
+                        Label(AppLanguage.text("Call 911"), systemImage: "phone.fill")
                             .font(.title3.weight(.bold))
                             .frame(maxWidth: .infinity, minHeight: 52)
                             .padding(.vertical, 8)
                             .background(Color.red, in: RoundedRectangle(cornerRadius: 16))
                             .foregroundStyle(.white)
                     }
-                    SectionCard(title: "Share a request for help", systemImage: "square.and.arrow.up") {
-                        Text("Choose a messaging app and recipient, then review and send the message yourself. CareSphere cannot confirm delivery or a response.")
+                    SectionCard(title: AppLanguage.text("Share a request for help"), systemImage: "square.and.arrow.up") {
+                        Text(AppLanguage.text("Choose a messaging app and recipient, then review and send the message yourself. CareSphere cannot confirm delivery or a response."))
                             .foregroundStyle(.secondary)
 
                         if includeLocation, let fix = location.location {
@@ -46,33 +47,33 @@ struct SosView: View {
                         .disabled(location.isLocating)
 
                         if includeLocation {
-                            Button("Remove location from message") { includeLocation = false }
+                            Button(AppLanguage.text("Remove location from message")) { includeLocation = false }
                                 .frame(minHeight: 44)
                         }
-                        Text("Message preview").font(.headline)
+                        Text(AppLanguage.text("Message preview")).font(.headline)
                         Text(emergencyShareMessage)
                             .textSelection(.enabled)
                             .padding(14)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14))
                         ShareLink(item: emergencyShareMessage) {
-                            Label("Choose how to share", systemImage: "square.and.arrow.up")
+                            Label(AppLanguage.text("Choose how to share"), systemImage: "square.and.arrow.up")
                                 .frame(maxWidth: .infinity, minHeight: 44)
                         }
                         .buttonStyle(.borderedProminent)
                     }
-                    Text("No medical profile is attached. Only the name and optional location shown above are included.")
+                    Text(AppLanguage.text("No medical profile is attached. Only the name and optional location shown above are included."))
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 .carePagePadding()
             }
             .background(Color.ink)
-            .navigationTitle("Emergency SOS")
+            .navigationTitle(AppLanguage.text("Emergency SOS"))
             .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Close") { dismiss() }
-                        .accessibilityLabel("Close emergency actions")
+                    Button(AppLanguage.text("Close")) { dismiss() }
+                        .accessibilityLabel(AppLanguage.text("Close emergency actions"))
                 }
             }
         }

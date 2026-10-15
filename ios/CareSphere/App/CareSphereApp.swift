@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 #if os(iOS)
 import UIKit
@@ -7,6 +8,8 @@ import AppKit
 
 @main
 struct CareSphereApp: App {
+    @AppStorage(AppLanguage.preferenceKey) private var interfaceLanguage = "auto"
+    @StateObject private var speech = SpeechService.shared
     @StateObject private var store = CareStore()
     @StateObject private var healthKit = HealthKitService()
     @StateObject private var bluetooth = BluetoothHeartRateService()
@@ -44,6 +47,8 @@ struct CareSphereApp: App {
                     RootTabView()
                 }
             }
+            .environment(\.locale, Locale(identifier: interfaceLanguage == "auto" ? AppLanguage.resolve(Locale.preferredLanguages) : interfaceLanguage))
+            .onChange(of: interfaceLanguage) { _ in SpeechService.shared.stop(); speech.unavailableMessage = nil }
             .environmentObject(store)
             .environmentObject(healthKit)
             .environmentObject(bluetooth)
@@ -56,6 +61,12 @@ struct CareSphereApp: App {
             .environment(\.careSphereHighContrast, store.highContrast)
             .tint(.emerald)
             .safeAreaInset(edge: .top, spacing: 0) {
+                if let issue = speech.unavailableMessage {
+                    HStack {
+                        Text(issue).font(.caption)
+                        Button(AppLanguage.text("Close")) { speech.unavailableMessage = nil }
+                    }.padding(10).background(.regularMaterial).accessibilityAddTraits(.updatesFrequently)
+                }
                 if let issue = store.persistenceIssue {
                     Label(issue, systemImage: "exclamationmark.triangle.fill")
                         .font(.caption.weight(.medium))

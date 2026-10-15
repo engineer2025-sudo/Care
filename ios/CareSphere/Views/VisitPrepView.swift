@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 
 /// Local, user-selected visit-preparation text. This is not an official record,
@@ -94,34 +95,34 @@ struct VisitPrepView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Choose what to include") {
-                    Toggle("Display name", isOn: $includeName)
-                    Toggle("Medication reminders", isOn: $includeMedications)
-                    Toggle("Mood check-ins", isOn: $includeMoods)
-                    Toggle("Care notes", isOn: $includeNotes)
+                Section(AppLanguage.text("Choose what to include")) {
+                    Toggle(AppLanguage.text("Display name"), isOn: $includeName)
+                    Toggle(AppLanguage.text("Medication reminders"), isOn: $includeMedications)
+                    Toggle(AppLanguage.text("Mood check-ins"), isOn: $includeMoods)
+                    Toggle(AppLanguage.text("Care notes"), isOn: $includeNotes)
                     if includeMoods || includeNotes {
-                        Picker("Look back", selection: $lookbackDays) {
-                            Text("7 days").tag(7)
-                            Text("30 days").tag(30)
-                            Text("90 days").tag(90)
-                            Text("All saved").tag(0)
+                        Picker(AppLanguage.text("Look back"), selection: $lookbackDays) {
+                            Text(AppLanguage.text("7 days")).tag(7)
+                            Text(AppLanguage.text("30 days")).tag(30)
+                            Text(AppLanguage.text("90 days")).tag(90)
+                            Text(AppLanguage.text("All saved")).tag(0)
                         }
                     }
-                    Text("Selections are off by default. The date range applies to notes and mood self-reports; the current medication schedule is shown only if you choose it.")
+                    Text(AppLanguage.text("Selections are off by default. The date range applies to notes and mood self-reports; the current medication schedule is shown only if you choose it."))
                         .font(.caption2).foregroundStyle(.secondary)
                 }
 
-                Section("Questions or topics · optional") {
-                    TextField("Write a question to discuss", text: $questions, axis: .vertical)
+                Section(AppLanguage.text("Questions or topics · optional")) {
+                    TextField(AppLanguage.text("Write a question to discuss"), text: $questions, axis: .vertical)
                         .lineLimit(3...6)
                         .onChange(of: questions) { newValue in
                             if newValue.count > 1200 { questions = String(newValue.prefix(1200)) }
                         }
-                    Text("This draft stays in memory until you close this screen. It is not saved in your journal.")
+                    Text(AppLanguage.text("This draft stays in memory until you close this screen. It is not saved in your journal."))
                         .font(.caption2).foregroundStyle(.secondary)
                 }
 
-                Section("Exact share preview") {
+                Section(AppLanguage.text("Exact share preview")) {
                     Text(brief)
                         .font(.system(.caption2, design: .monospaced))
                         .textSelection(.enabled)
@@ -130,24 +131,24 @@ struct VisitPrepView: View {
 
                 Section {
                     ShareLink(item: brief) {
-                        Label("Share selected brief…", systemImage: "square.and.arrow.up")
+                        Label(AppLanguage.text("Share selected brief…"), systemImage: "square.and.arrow.up")
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .disabled(!hasSelectedContent)
-                    Text("CareSphere makes no network request to build this preview. The system share sheet opens only when you tap Share; review the destination before sending.")
+                    Text(AppLanguage.text("CareSphere makes no network request to build this preview. The system share sheet opens only when you tap Share; review the destination before sending."))
                         .font(.caption2).foregroundStyle(.secondary)
                 }
 
-                Section("Limitations") {
-                    Text("This prototype includes only the selected local profile name, user-entered medication reminders, mood self-reports, notes, and your questions. It does not include HealthKit readings, a clinician-verified medication list, or automatic vital-sign summaries, and it does not provide diagnosis or treatment advice.")
+                Section(AppLanguage.text("Limitations")) {
+                    Text(AppLanguage.text("This prototype includes only the selected local profile name, user-entered medication reminders, mood self-reports, notes, and your questions. It does not include HealthKit readings, a clinician-verified medication list, or automatic vital-sign summaries, and it does not provide diagnosis or treatment advice."))
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("Visit preparation")
+            .navigationTitle(AppLanguage.text("Visit preparation"))
             .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(AppLanguage.text("Done")) { dismiss() }
                 }
             }
         }

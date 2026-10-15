@@ -2,9 +2,9 @@ name: iOS Build
 on:
   push:
     branches: ['arena/**', main]
-    paths: ['ios/**', '.github/workflows/ios.yml']
+    paths: ['localization/**', 'scripts/generate_localizations.py', 'ios/**', '.github/workflows/ios.yml']
   pull_request:
-    paths: ['ios/**', '.github/workflows/ios.yml']
+    paths: ['localization/**', 'scripts/generate_localizations.py', 'ios/**', '.github/workflows/ios.yml']
   workflow_dispatch:
 jobs:
   ios-build:
@@ -15,6 +15,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
+      - name: Check offline translation catalogs
+        run: python3 scripts/generate_localizations.py --check
       - name: Select Xcode 26 for real Foundation Models compilation
         run: |
           XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)

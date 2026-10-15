@@ -11,7 +11,7 @@ private struct ActivityPictureTile: View {
                 .font(.largeTitle)
                 .foregroundStyle(Color.emeraldText)
                 .accessibilityHidden(true)
-            Text(picture.label)
+            Text(AppLanguage.text(picture.label))
                 .font(.body.weight(.semibold))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -27,14 +27,14 @@ private struct ActivityPictureTile: View {
 struct ActivityFeedback: View {
     let text: String
     var body: some View {
-        Text(text)
+        Text(AppLanguage.text(text))
             .font(.body)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
             .background(Color.emerald.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
             .onChange(of: text) { message in
                 if UIAccessibility.isVoiceOverRunning {
-                    UIAccessibility.post(notification: .announcement, argument: message)
+                    UIAccessibility.post(notification: .announcement, argument: AppLanguage.text(message))
                 }
             }
     }
@@ -52,14 +52,14 @@ struct ChoiceActivityView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            SectionCard(title: "Make it comfortable", systemImage: "slider.horizontal.3") {
-                Toggle("Fewer choices", isOn: $fewerChoices)
-                Text("You can change this anytime. Hints and skipping are always okay.")
+            SectionCard(title: AppLanguage.text("Make it comfortable"), systemImage: "slider.horizontal.3") {
+                Toggle(AppLanguage.text("Fewer choices"), isOn: $fewerChoices)
+                Text(AppLanguage.text("You can change this anytime. Hints and skipping are always okay."))
                     .font(.footnote).foregroundStyle(.secondary)
             }
-            SectionCard(title: session.round.prompt, systemImage: "hand.tap") {
+            SectionCard(title: AppLanguage.text(session.round.prompt), systemImage: "hand.tap") {
                 if session.exercise == .patterns {
-                    Text("Read the row from left to right, then top to bottom.")
+                    Text(AppLanguage.text("Read the row from left to right, then top to bottom."))
                         .font(.footnote).foregroundStyle(.secondary)
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: typeSize.isAccessibilitySize ? 140 : 90))], spacing: 8) {
                         ForEach(Array(session.round.pictures.enumerated()), id: \.offset) { index, picture in
@@ -71,7 +71,7 @@ struct ChoiceActivityView: View {
                             .accessibilityLabel("Position \(index + 1): \(picture.label)")
                         }
                     }
-                    Label("What comes next?", systemImage: "questionmark.circle")
+                    Label(AppLanguage.text("What comes next?"), systemImage: "questionmark.circle")
                         .font(.headline).padding(.vertical, 8)
                 } else if let picture = session.round.pictures.first {
                     ActivityPictureTile(picture: picture, emphasized: true)
@@ -85,20 +85,20 @@ struct ChoiceActivityView: View {
                             VStack(spacing: 6) {
                                 ActivityPictureTile(picture: option, emphasized: session.completed && option.id == session.round.answerID)
                                 if session.completed && option.id == session.round.answerID {
-                                    Label("Matched", systemImage: "checkmark.circle.fill").font(.subheadline)
+                                    Label(AppLanguage.text("Matched"), systemImage: "checkmark.circle.fill").font(.subheadline)
                                 }
                             }
                         }
                         .buttonStyle(.plain)
                         .disabled(session.completed)
-                        .accessibilityLabel(option.label)
+                        .accessibilityLabel(AppLanguage.text(option.label))
                         .accessibilityValue(session.completed && option.id == session.round.answerID ? "Matched" : "")
                     }
                 }
                 ActivityFeedback(text: session.message)
-                Button(showHint ? "Hide hint" : "Show a hint") { showHint.toggle() }
+                Button(AppLanguage.text(showHint ? "Hide hint" : "Show a hint")) { showHint.toggle() }
                     .buttonStyle(.bordered).controlSize(.large)
-                    .accessibilityHint("Shows a written cue including the answer.")
+                    .accessibilityHint(AppLanguage.text("Shows a written cue including the answer."))
                 Button {
                     session.next()
                     showHint = false
@@ -107,7 +107,7 @@ struct ChoiceActivityView: View {
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.borderedProminent)
-                Button("Start again") { session.restart(); showHint = false }
+                Button(AppLanguage.text("Start again")) { session.restart(); showHint = false }
                     .frame(minHeight: 44)
             }
         }
@@ -120,7 +120,7 @@ struct EverydayOrderView: View {
 
     var body: some View {
         SectionCard(title: session.sequence.title, systemImage: "list.number") {
-            Text("Tap the steps in order for this example. No dragging or timer. Your own routine may be different.")
+            Text(AppLanguage.text("Tap the steps in order for this example. No dragging or timer. Your own routine may be different."))
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 10) {
                 ForEach(Array(session.placedIDs.enumerated()), id: \.offset) { index, id in
@@ -158,10 +158,10 @@ struct EverydayOrderView: View {
             }
             ActivityFeedback(text: session.message)
             if !session.complete {
-                Toggle("Show the next step", isOn: $showHint)
+                Toggle(AppLanguage.text("Show the next step"), isOn: $showHint)
                     .padding(.vertical, 8)
             }
-            Button("Undo last step") { session.undo() }
+            Button(AppLanguage.text("Undo last step")) { session.undo() }
                 .buttonStyle(.bordered).controlSize(.large)
                 .disabled(session.placedIDs.isEmpty)
             Button {
@@ -171,7 +171,7 @@ struct EverydayOrderView: View {
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
             .buttonStyle(.borderedProminent)
-            Button("Start this example again") { session.restart() }.frame(minHeight: 44)
+            Button(AppLanguage.text("Start this example again")) { session.restart() }.frame(minHeight: 44)
         }
     }
 }
@@ -183,7 +183,7 @@ struct ConversationCardsView: View {
 
     var body: some View {
         SectionCard(title: prompt.title, systemImage: "bubble.left.and.bubble.right") {
-            Text("Talk, point, imagine, or simply listen. There is no right answer. Nothing is recorded.")
+            Text(AppLanguage.text("Talk, point, imagine, or simply listen. There is no right answer. Nothing is recorded."))
                 .foregroundStyle(.secondary)
             VStack(spacing: 18) {
                 Image(systemName: prompt.symbol).font(.largeTitle).foregroundStyle(Color.emeraldText).accessibilityHidden(true)
@@ -200,15 +200,15 @@ struct ConversationCardsView: View {
                 index = (index + 1) % ActivityExercises.conversations.count
                 showIdeas = false
             } label: {
-                Label("Next or skip card", systemImage: "arrow.right")
+                Label(AppLanguage.text("Next or skip card"), systemImage: "arrow.right")
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
             .buttonStyle(.borderedProminent)
-            Button("Previous card") {
+            Button(AppLanguage.text("Previous card")) {
                 index = (index + ActivityExercises.conversations.count - 1) % ActivityExercises.conversations.count
                 showIdeas = false
             }.frame(minHeight: 44)
-            Text("Playing together? Follow their interests. Do not quiz, correct memories, or press for personal details. Skip any topic that feels uncomfortable.")
+            Text(AppLanguage.text("Playing together? Follow their interests. Do not quiz, correct memories, or press for personal details. Skip any topic that feels uncomfortable."))
                 .font(.footnote).foregroundStyle(.secondary)
         }
     }

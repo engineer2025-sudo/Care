@@ -1,16 +1,19 @@
+import CareActivityKit
+import Combine
 import Foundation
 import AVFoundation
 import CoreLocation
 
 /// Spoken medication/routine prompts. Speech synthesis and installed voice data
 /// stay on-device; users can choose an installed Apple voice.
-final class SpeechService {
+final class SpeechService: ObservableObject {
+    @Published var unavailableMessage: String?
     static let shared = SpeechService()
     private let synthesizer = AVSpeechSynthesizer()
 
-    static var englishVoices: [AVSpeechSynthesisVoice] {
+    static var matchingVoices: [AVSpeechSynthesisVoice] {
         AVSpeechSynthesisVoice.speechVoices()
-            .filter { $0.language.lowercased().hasPrefix("en") }
+            .filter { AppLanguage.voiceMatches($0.language) }
             .sorted {
                 if $0.quality.rawValue != $1.quality.rawValue {
                     return $0.quality.rawValue > $1.quality.rawValue
@@ -28,30 +31,31 @@ final class SpeechService {
         }
     }
 
-    func speak(_ text: String, enabled: Bool, voiceIdentifier: String? = nil) {
-        guard enabled else { return }
+    @discardableResult
+    func speak(_ text: String, enabled: Bool, voiceIdentifier: String? = nil) -> Bool {
+        guard enabled else { return false }
+        guard let voice = selectedVoice(identifier: voiceIdentifier) else {
+            synthesizer.stopSpeaking(at: .immediate)
+            unavailableMessage = AppLanguage.text("No installed voice for this language. The words remain visible.")
+            return false
+        }
+        unavailableMessage = nil
 
         let utterance = AVSpeechUtterance(string: text)
         utterance.rate = 0.46          // slower, senior-friendly cadence
         utterance.pitchMultiplier = 1.0
-        utterance.voice = selectedVoice(identifier: voiceIdentifier)
+        utterance.voice = voice
         synthesizer.stopSpeaking(at: .immediate)
         synthesizer.speak(utterance)
+        return true
     }
 
     func stop() { synthesizer.stopSpeaking(at: .immediate) }
 
     private func selectedVoice(identifier: String?) -> AVSpeechSynthesisVoice? {
-        if let identifier, !identifier.isEmpty,
-           let selected = AVSpeechSynthesisVoice(identifier: identifier) {
-            return selected
-        }
-        // Prefer the best-quality installed voice matching the device language.
-        let preferredLanguage = Locale.preferredLanguages.first ?? "en-US"
-        return AVSpeechSynthesisVoice.speechVoices()
-            .filter { $0.language == preferredLanguage }
-            .max { $0.quality.rawValue < $1.quality.rawValue }
-            ?? AVSpeechSynthesisVoice(language: "en-US")
+        let installed = Self.matchingVoices
+        if let identifier, let selected = installed.first(where: { $0.identifier == identifier }) { return selected }
+        return installed.first
     }
 }
 

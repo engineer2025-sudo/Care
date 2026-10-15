@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 
 struct HealthGuideView: View {
@@ -36,7 +37,7 @@ struct HealthGuideView: View {
                 .frame(maxWidth: .infinity)
             }
             .background(Color.ink)
-            .navigationTitle("Health Guide")
+            .navigationTitle(AppLanguage.text("Health Guide"))
             .inlineTitle()
             .onAppear { assistant.refreshAvailability() }
             .onDisappear {
@@ -51,20 +52,20 @@ struct HealthGuideView: View {
     private var heroCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Label("PRIVATE BY DESIGN", systemImage: "lock.shield.fill")
+                Label(AppLanguage.text("PRIVATE BY DESIGN"), systemImage: "lock.shield.fill")
                     .font(.caption.weight(.heavy))
                     .foregroundStyle(Color.emeraldText)
                 Spacer()
                 StatusChip(text: "ON DEVICE", color: .emeraldText)
             }
-            Text("A calmer way to find answers.")
+            Text(AppLanguage.text("A calmer way to find answers."))
                 .font(.title2.weight(.black))
-            Text("Search built-in general references offline. On supported devices, Apple Intelligence can summarize matching passages locally. It is optional and may make mistakes.")
+            Text(AppLanguage.text("Search built-in general references offline. On supported devices, Apple Intelligence can summarize matching passages locally. It is optional and may make mistakes."))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             HStack(spacing: 8) {
-                Label("MedlinePlus", systemImage: "cross.case.fill")
-                Label("Kiwix / ZIM", systemImage: "books.vertical.fill")
+                Label(AppLanguage.text("MedlinePlus"), systemImage: "cross.case.fill")
+                Label(AppLanguage.text("Kiwix / ZIM"), systemImage: "books.vertical.fill")
             }
             .font(.caption2.weight(.semibold))
             .foregroundStyle(.secondary)
@@ -77,29 +78,29 @@ struct HealthGuideView: View {
     }
 
     private var modelCard: some View {
-        SectionCard(title: "Apple Intelligence", systemImage: "sparkles") {
+        SectionCard(title: AppLanguage.text("Apple Intelligence"), systemImage: "sparkles") {
             StatusChip(text: assistant.isAvailable ? "AVAILABLE ON DEVICE" : "NOT AVAILABLE", color: assistant.isAvailable ? .emeraldText : .secondary)
             Text(assistant.availabilityMessage).font(.body).fixedSize(horizontal: false, vertical: true)
-            Text("Optional reference summaries using Apple's Foundation Models framework. Requires iOS 26+ and compatible hardware. No account, API key, or third-party model download. No care notes, medications, or sensor data are sent to the model automatically.")
+            Text(AppLanguage.text("Optional reference summaries using Apple's Foundation Models framework. Requires iOS 26+ and compatible hardware. No account, API key, or third-party model download. No care notes, medications, or sensor data are sent to the model automatically."))
                 .font(.footnote).foregroundStyle(.secondary)
-            Button("Check availability again") { assistant.refreshAvailability() }
+            Button(AppLanguage.text("Check availability again")) { assistant.refreshAvailability() }
                 .buttonStyle(.bordered).controlSize(.large)
             if assistant.isGenerating {
-                Button("Cancel summary") { assistant.cancel() }.buttonStyle(.bordered)
+                Button(AppLanguage.text("Cancel summary")) { assistant.cancel() }.buttonStyle(.bordered)
             }
         }
     }
 
     private var questionCard: some View {
-        SectionCard(title: "Ask using local references", systemImage: "text.magnifyingglass") {
-            TextField("Ask a general health-information question…", text: $question, axis: .vertical)
+        SectionCard(title: AppLanguage.text("Ask using local references"), systemImage: "text.magnifyingglass") {
+            TextField(AppLanguage.text("Ask a general health-information question…"), text: $question, axis: .vertical)
                 .lineLimit(1...4)
                 .focused($questionFocused)
                 .padding(12)
                 .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .submitLabel(.search)
                 .onSubmit { searchAndAsk() }
-                .accessibilityLabel("Health reference question")
+                .accessibilityLabel(AppLanguage.text("Health reference question"))
 
             Button {
                 searchAndAsk()
@@ -119,7 +120,7 @@ struct HealthGuideView: View {
             .buttonStyle(.borderedProminent)
             .disabled(question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSearching || assistant.isGenerating)
 
-            Button("Clear question and answer") {
+            Button(AppLanguage.text("Clear question and answer")) {
                 searchGenerationID = UUID()
                 isSearching = false
                 question = ""
@@ -137,13 +138,13 @@ struct HealthGuideView: View {
                         .font(.caption2)
                         .foregroundStyle(.orange)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Your source results are still available. Retrying runs only the local model; it does not repeat the reference search.")
+                    Text(AppLanguage.text("Your source results are still available. Retrying runs only the local model; it does not repeat the reference search."))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     Button {
                         Task { await askLocalModelSafely(question: question, references: references) }
                     } label: {
-                        Label("Retry local generation", systemImage: "arrow.clockwise")
+                        Label(AppLanguage.text("Retry local generation"), systemImage: "arrow.clockwise")
                             .font(.caption.weight(.bold))
                     }
                     .buttonStyle(.bordered)
@@ -160,7 +161,7 @@ struct HealthGuideView: View {
             }
 
             VStack(alignment: .leading, spacing: 7) {
-                Text("Try a question")
+                Text(AppLanguage.text("Try a question"))
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.secondary)
                 ForEach(quickQuestions, id: \.self) { suggestion in
@@ -220,10 +221,10 @@ struct HealthGuideView: View {
     }
 
     private var answerCard: some View {
-        SectionCard(title: "On-device summary", systemImage: "sparkles") {
+        SectionCard(title: AppLanguage.text("On-device summary"), systemImage: "sparkles") {
             HStack {
                 StatusChip(text: "LOCAL MODEL", color: .teal)
-                Text("Generated on this device")
+                Text(AppLanguage.text("Generated on this device"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -231,7 +232,7 @@ struct HealthGuideView: View {
                 .font(.body)
                 .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("Educational information only. The small model can be wrong; verify with your care team or pharmacist. Do not use for emergencies, diagnosis, or medication decisions.")
+            Text(AppLanguage.text("Educational information only. The small model can be wrong; verify with your care team or pharmacist. Do not use for emergencies, diagnosis, or medication decisions."))
                 .font(.caption2)
                 .foregroundStyle(.orange)
                 .fixedSize(horizontal: false, vertical: true)
@@ -239,8 +240,8 @@ struct HealthGuideView: View {
     }
 
     private var medlinePlusCard: some View {
-        SectionCard(title: "MedlinePlus offline library", systemImage: "cross.case.fill") {
-            Text("Get the current English health-topic dataset from the U.S. National Library of Medicine. It is about 30 MB as XML and stays in CareSphere's private app storage after import.")
+        SectionCard(title: AppLanguage.text("MedlinePlus offline library"), systemImage: "cross.case.fill") {
+            Text(AppLanguage.text("Get the current English health-topic dataset from the U.S. National Library of Medicine. It is about 30 MB as XML and stays in CareSphere's private app storage after import."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             HStack {
@@ -270,35 +271,35 @@ struct HealthGuideView: View {
             }
             Link("Data, update schedule & attribution", destination: URL(string: "https://medlineplus.gov/xml.html")!)
                 .font(.caption2.weight(.semibold))
-            Text("MedlinePlus content is general patient education—not individualized treatment. Search works offline after the dataset is downloaded.")
+            Text(AppLanguage.text("MedlinePlus content is general patient education—not individualized treatment. Search works offline after the dataset is downloaded."))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
     }
 
     private var kiwixCard: some View {
-        SectionCard(title: "Wikipedia ZIM · Kiwix server", systemImage: "books.vertical") {
-            Text("This build does not include a ZIM reader: keep your existing archive where it is and run Kiwix Server separately. CareSphere sends searches only to the private server address below; it does not bundle or copy the archive.")
+        SectionCard(title: AppLanguage.text("Wikipedia ZIM · Kiwix server"), systemImage: "books.vertical") {
+            Text(AppLanguage.text("This build does not include a ZIM reader: keep your existing archive where it is and run Kiwix Server separately. CareSphere sends searches only to the private server address below; it does not bundle or copy the archive."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
             VStack(alignment: .leading, spacing: 9) {
-                TextField("Kiwix server · http://computer.local:8080", text: $library.kiwixServerURL)
+                TextField(AppLanguage.text("Kiwix server · http://computer.local:8080"), text: $library.kiwixServerURL)
                     .disableKiwixTextCorrections()
                     .padding(10)
                     .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .accessibilityLabel("Local Kiwix server address")
-                TextField("Kiwix content name · usually the .zim filename", text: $library.kiwixContentName)
+                    .accessibilityLabel(AppLanguage.text("Local Kiwix server address"))
+                TextField(AppLanguage.text("Kiwix content name · usually the .zim filename"), text: $library.kiwixContentName)
                     .disableKiwixTextCorrections()
                     .padding(10)
                     .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .accessibilityLabel("Kiwix content name")
+                    .accessibilityLabel(AppLanguage.text("Kiwix content name"))
                 Button {
                     Task { await library.testKiwixConnection() }
                 } label: {
                     HStack {
                         if library.isTestingKiwix { ProgressView().tint(.white) }
-                        Label("Test private connection", systemImage: "point.3.connected.trianglepath.dotted")
+                        Label(AppLanguage.text("Test private connection"), systemImage: "point.3.connected.trianglepath.dotted")
                     }
                     .font(.caption.weight(.bold))
                     .frame(maxWidth: .infinity)
@@ -316,18 +317,18 @@ struct HealthGuideView: View {
             .background(Color.cardInner.opacity(0.65), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("One-time setup on Mac")
+                Text(AppLanguage.text("One-time setup on Mac"))
                     .font(.caption.weight(.bold))
-                Text("Install Kiwix Tools, then serve the existing file:")
+                Text(AppLanguage.text("Install Kiwix Tools, then serve the existing file:"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                Text("brew install kiwix-tools\nkiwix-serve --port=8080 --address=0.0.0.0 \"/path/to/your-library.zim\"")
+                Text(AppLanguage.text("brew install kiwix-tools\nkiwix-serve --port=8080 --address=0.0.0.0 \"/path/to/your-library.zim\""))
                     .font(.system(.caption2, design: .monospaced))
                     .textSelection(.enabled)
                     .padding(9)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.black.opacity(0.22), in: RoundedRectangle(cornerRadius: 10))
-                Text("Use the .zim content name (normally its filename without .zim). The command listens on the Mac's network interfaces so iPhone/iPad can connect; use it only on a trusted Wi-Fi, do not port-forward it, and enter the Mac's private IP or MacBook.local address on the iPhone. For Mac-only access, bind to 127.0.0.1 instead. HTTP is restricted to private/local hosts.")
+                Text(AppLanguage.text("Use the .zim content name (normally its filename without .zim). The command listens on the Mac's network interfaces so iPhone/iPad can connect; use it only on a trusted Wi-Fi, do not port-forward it, and enter the Mac's private IP or MacBook.local address on the iPhone. For Mac-only access, bind to 127.0.0.1 instead. HTTP is restricted to private/local hosts."))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -335,8 +336,8 @@ struct HealthGuideView: View {
     }
 
     private var safetyCard: some View {
-        SectionCard(title: "Important safety boundary", systemImage: "cross.case") {
-            Text("CareSphere is not a medical device and cannot diagnose, triage, check drug interactions, or recommend a dose. AI summaries may be wrong. For an emergency, call local emergency services; in the U.S., call 911.")
+        SectionCard(title: AppLanguage.text("Important safety boundary"), systemImage: "cross.case") {
+            Text(AppLanguage.text("CareSphere is not a medical device and cannot diagnose, triage, check drug interactions, or recommend a dose. AI summaries may be wrong. For an emergency, call local emergency services; in the U.S., call 911."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

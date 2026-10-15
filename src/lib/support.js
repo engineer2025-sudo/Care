@@ -1,3 +1,4 @@
+import {getLanguage,languageTag,voiceMatches,tr} from './i18n.js'
 const text = (v, n = 240) => typeof v === 'string' ? v.slice(0, n).trim() : ''
 const rows = (v, n) => Array.isArray(v) ? v.filter(x => x && typeof x === 'object').slice(0, n) : []
 export const PHRASES = ['I need a break', 'It is too loud', 'Please explain again', 'Yes', 'No', 'I would like some help']
@@ -25,7 +26,9 @@ export function normalizeSupport(v = {}) {
 }
 export function speak(text) {
   if (!globalThis.speechSynthesis) throw new Error('Speech is unavailable in this browser. The words remain visible.')
-  speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.85; speechSynthesis.speak(utterance)
+  const voice=speechSynthesis.getVoices().find(v=>v.localService&&voiceMatches(getLanguage(),v.lang));
+  if(!voice)throw Error(tr('No installed voice for this language. The words remain visible.'));
+  speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.voice=voice;utterance.lang=languageTag();utterance.rate = 0.85; speechSynthesis.speak(utterance)
 }
 export function downloadFile(name, value, type = 'application/json') {
   const url=URL.createObjectURL(new Blob([value],{type})); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000)

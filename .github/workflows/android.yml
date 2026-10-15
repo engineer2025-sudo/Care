@@ -2,9 +2,9 @@ name: Android Build
 on:
   push:
     branches: ['arena/**', main]
-    paths: ['android/**', 'scripts/android_smoke.py', '.github/workflows/android.yml']
+    paths: ['localization/**', 'scripts/generate_localizations.py', 'android/**', 'scripts/android_smoke.py', '.github/workflows/android.yml']
   pull_request:
-    paths: ['android/**', 'scripts/android_smoke.py', '.github/workflows/android.yml']
+    paths: ['localization/**', 'scripts/generate_localizations.py', 'android/**', 'scripts/android_smoke.py', '.github/workflows/android.yml']
   workflow_dispatch:
 jobs:
   android:
@@ -14,6 +14,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
+      - name: Check offline translation catalogs
+        run: python3 scripts/generate_localizations.py --check
       - uses: actions/setup-java@v5
         with:
           distribution: temurin

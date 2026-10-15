@@ -11,17 +11,17 @@ struct TherapyView: View {
     @State private var selectedActivity: CareActivity?
     @State private var showingEvidence = false
 
-    private var activities: [CareActivity] { CareActivity.filtered(category: category, query: query).filter { !favoritesOnly || store.favoriteActivities.contains($0.id) } }
+    private var activities: [CareActivity] { CareActivity.allCases.filter { (category == .all || $0.category == category) && ActivityPreferences.matches($0.title + " " + $0.summary + " " + AppLanguage.text($0.title) + " " + AppLanguage.text($0.summary), query: query) }.filter { !favoritesOnly || store.favoriteActivities.contains($0.id) } }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("A little curiosity. Your own pace.")
+                        Text(AppLanguage.text("A little curiosity. Your own pace."))
                             .font(.title2.weight(.bold))
                             .accessibilityAddTraits(.isHeader)
-                        Text("Choose something you enjoy. Play alone or with someone you trust. No scores, streaks, or pressure to finish.")
+                        Text(AppLanguage.text("Choose something you enjoy. Play alone or with someone you trust. No scores, streaks, or pressure to finish."))
                             .foregroundStyle(.secondary)
                         Label("\(CareActivity.allCases.count) activities · available offline", systemImage: "checkmark.circle")
                             .font(.subheadline.weight(.semibold))
@@ -31,23 +31,23 @@ struct TherapyView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.emerald.opacity(0.09), in: RoundedRectangle(cornerRadius: 24))
 
-                    Picker("Explore activities", selection: $category) {
+                    Picker(AppLanguage.text("Explore activities"), selection: $category) {
                         ForEach(ActivityCategory.allCases) { category in
-                            Text(category.rawValue).tag(category)
+                            Text(AppLanguage.text(category.rawValue)).tag(category)
                         }
                     }
                     .pickerStyle(.menu)
-                    .accessibilityHint("Filter activities by what you would like to do.")
+                    .accessibilityHint(AppLanguage.text("Filter activities by what you would like to do."))
 
-                    Toggle("Favorites only", isOn: $favoritesOnly)
+                    Toggle(AppLanguage.text("Favorites only"), isOn: $favoritesOnly)
                         .tint(.emerald)
-                    Text("Save activities you enjoy. Favorites stay on this device; playing is never tracked.")
+                    Text(AppLanguage.text("Save activities you enjoy. Favorites stay on this device; playing is never tracked."))
                         .font(.footnote).foregroundStyle(.secondary)
                     if activities.isEmpty {
-                        SectionCard(title: "No activities found", systemImage: "magnifyingglass") {
-                            Text("Try a different word or browse all activities.")
+                        SectionCard(title: AppLanguage.text("No activities found"), systemImage: "magnifyingglass") {
+                            Text(AppLanguage.text("Try a different word or browse all activities."))
                                 .foregroundStyle(.secondary)
-                            Button("Show all activities") { query = ""; category = .all; favoritesOnly = false }
+                            Button(AppLanguage.text("Show all activities")) { query = ""; category = .all; favoritesOnly = false }
                                 .buttonStyle(.bordered)
                                 .frame(minHeight: 44)
                         }
@@ -62,9 +62,9 @@ struct TherapyView: View {
                                 }
                                 .buttonStyle(.plain)
                                 .accessibilityIdentifier("activity.\(activity.id)")
-                                .accessibilityHint("Opens one activity. You can leave at any time.")
+                                .accessibilityHint(AppLanguage.text("Opens one activity. You can leave at any time."))
                                     Button { store.toggleFavorite(activity.id) } label: {
-                                        Label(store.favoriteActivities.contains(activity.id) ? "Saved to favorites" : "Save to favorites", systemImage: store.favoriteActivities.contains(activity.id) ? "heart.fill" : "heart")
+                                        Label(AppLanguage.text(store.favoriteActivities.contains(activity.id) ? "Saved to favorites" : "Save to favorites"), systemImage: store.favoriteActivities.contains(activity.id) ? "heart.fill" : "heart")
                                             .font(.subheadline).frame(maxWidth: .infinity, minHeight: 44)
                                     }
                                     .buttonStyle(.bordered)
@@ -76,18 +76,18 @@ struct TherapyView: View {
                         }
                     }
                     Button { showingEvidence = true } label: {
-                        Label("Research, safety & playing together", systemImage: "info.circle")
+                        Label(AppLanguage.text("Research, safety & playing together"), systemImage: "info.circle")
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }
                     .buttonStyle(.bordered)
-                    Text("Designed with accessibility principles in mind. These activities have not been clinically validated to treat dementia or autism.")
+                    Text(AppLanguage.text("Designed with accessibility principles in mind. These activities have not been clinically validated to treat dementia or autism."))
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 .carePagePadding()
             }
             .background(Color.ink)
-            .navigationTitle("Activities")
-            .searchable(text: $query, prompt: "Find an activity")
+            .navigationTitle(AppLanguage.text("Activities"))
+            .searchable(text: $query, prompt: Text(AppLanguage.text("Find an activity")))
             .fullScreenCover(item: $selectedActivity) { ActivitySessionView(activity: $0) }
             .sheet(isPresented: $showingEvidence) { ActivityEvidenceView() }
         }
@@ -110,10 +110,10 @@ private struct ActivityLibraryTile: View {
                 Spacer()
                 Image(systemName: "arrow.up.right").foregroundStyle(.secondary).accessibilityHidden(true)
             }
-            Text(activity.title).font(.headline).foregroundStyle(.primary)
-            Text(activity.summary).font(.subheadline).foregroundStyle(.secondary)
+            Text(AppLanguage.text(activity.title)).font(.headline).foregroundStyle(.primary)
+            Text(AppLanguage.text(activity.summary)).font(.subheadline).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(activity.support).font(.footnote.weight(.medium)).foregroundStyle(Color.emeraldText)
+            Text(AppLanguage.text(activity.support)).font(.footnote.weight(.medium)).foregroundStyle(Color.emeraldText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(18)
@@ -136,7 +136,7 @@ struct ActivitySessionView: View {
             ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Label("No score · stop whenever you like", systemImage: "leaf")
+                    Label(AppLanguage.text("No score · stop whenever you like"), systemImage: "leaf")
                         .font(.subheadline).foregroundStyle(Color.emeraldText)
                     // Keep the session mounted while paused so choices are not lost.
                     // Activity lifecycle handlers stop sound/playback on backgrounding.
@@ -148,10 +148,10 @@ struct ActivitySessionView: View {
                         if paused {
                             VStack(spacing: 16) {
                                 Image(systemName: "pause.circle").font(.largeTitle).foregroundStyle(Color.emeraldText)
-                                Text("Take your time").font(.title2.weight(.bold))
-                                Text("Your place is kept while this activity is open.")
+                                Text(AppLanguage.text("Take your time")).font(.title2.weight(.bold))
+                                Text(AppLanguage.text("Your place is kept while this activity is open."))
                                     .multilineTextAlignment(.center).foregroundStyle(.secondary)
-                                Button("Continue activity") { paused = false }
+                                Button(AppLanguage.text("Continue activity")) { paused = false }
                                     .buttonStyle(.borderedProminent).controlSize(.large)
                             }
                             .padding(20)
@@ -161,7 +161,7 @@ struct ActivitySessionView: View {
                     if !paused {
                         DisclosureGroup("About this activity") {
                             Text(activity.purpose).font(.subheadline).foregroundStyle(.secondary).padding(.top, 8)
-                            Button("Research & limits") { showingEvidence = true }
+                            Button(AppLanguage.text("Research & limits")) { showingEvidence = true }
                                 .frame(minHeight: 44)
                         }
                         .padding(16)
@@ -174,11 +174,11 @@ struct ActivitySessionView: View {
             .onChange(of: paused) { _ in proxy.scrollTo("session-top", anchor: .top) }
             }
             .background(Color.ink)
-            .navigationTitle(activity.title)
+            .navigationTitle(AppLanguage.text(activity.title))
             .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }.accessibilityLabel("Leave activity")
+                    Button(AppLanguage.text("Done")) { dismiss() }.accessibilityLabel(AppLanguage.text("Leave activity"))
                 }
                 // Sound and breathing have their own explicit pause controls.
                 if activity != .soundscapes && activity != .breathing {
@@ -219,40 +219,40 @@ struct ActivityEvidenceView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    SectionCard(title: "Enjoyment, not a clinical test", systemImage: "heart.text.square") {
-                        Text("CareSphere's games have not been clinically evaluated. They do not diagnose, prevent, slow, or treat dementia or autism. Research on a structured, facilitated program cannot be transferred to these standalone games.")
-                        Text("Choose activities around the person's interests, not a diagnosis. There is no prescribed daily dose and no need to complete a session.")
+                    SectionCard(title: AppLanguage.text("Enjoyment, not a clinical test"), systemImage: "heart.text.square") {
+                        Text(AppLanguage.text("CareSphere's games have not been clinically evaluated. They do not diagnose, prevent, slow, or treat dementia or autism. Research on a structured, facilitated program cannot be transferred to these standalone games."))
+                        Text(AppLanguage.text("Choose activities around the person's interests, not a diagnosis. There is no prescribed daily dose and no need to complete a session."))
                             .foregroundStyle(.secondary)
                     }
-                    SectionCard(title: "Playing together", systemImage: "person.2") {
-                        Text("Ask whether the person wants to play. Offer a hint or demonstrate, without testing or correcting personal memories. Speaking, pointing, typing elsewhere, or staying quiet are all welcome.")
-                        Text("Stop or change activities if they become tiring, frustrating, distressing, or overstimulating. Never insist on eye contact, speed, or a particular emotional response.")
+                    SectionCard(title: AppLanguage.text("Playing together"), systemImage: "person.2") {
+                        Text(AppLanguage.text("Ask whether the person wants to play. Offer a hint or demonstrate, without testing or correcting personal memories. Speaking, pointing, typing elsewhere, or staying quiet are all welcome."))
+                        Text(AppLanguage.text("Stop or change activities if they become tiring, frustrating, distressing, or overstimulating. Never insist on eye contact, speed, or a particular emotional response."))
                             .foregroundStyle(.secondary)
                     }
-                    SectionCard(title: "Make it comfortable", systemImage: "accessibility") {
-                        Text("Try fewer choices, visible hints, and one step at a time. Change text size in iPhone Settings → Accessibility → Display & Text Size. CareSphere Settings offers appearance, higher contrast, and reduced visual movement.")
-                        Text("New games are silent, without timers or automatic advancement. Soundscapes play only on request. Game answers are not saved, shared, or turned into health scores.")
+                    SectionCard(title: AppLanguage.text("Make it comfortable"), systemImage: "accessibility") {
+                        Text(AppLanguage.text("Try fewer choices, visible hints, and one step at a time. Change text size in iPhone Settings → Accessibility → Display & Text Size. CareSphere Settings offers appearance, higher contrast, and reduced visual movement."))
+                        Text(AppLanguage.text("New games are silent, without timers or automatic advancement. Soundscapes play only on request. Game answers are not saved, shared, or turned into health scores."))
                             .foregroundStyle(.secondary)
                     }
-                    Text("Research & guidance").font(.title2.weight(.bold)).accessibilityAddTraits(.isHeader)
+                    Text(AppLanguage.text("Research & guidance")).font(.title2.weight(.bold)).accessibilityAddTraits(.isHeader)
                     ForEach(ActivityReference.all) { source in
                         SectionCard(title: source.title, systemImage: "book.closed") {
                             Text(source.summary).foregroundStyle(.secondary)
                             Link(destination: source.url) {
-                                Label("Read source in browser", systemImage: "arrow.up.right.square")
+                                Label(AppLanguage.text("Read source in browser"), systemImage: "arrow.up.right.square")
                                     .frame(minHeight: 44, alignment: .leading)
                             }
                         }
                     }
-                    Text("These sources concern different populations and interventions. Adult autism recommendations should not be generalized to children; clinical choices for a child require age-appropriate professional guidance.")
+                    Text(AppLanguage.text("These sources concern different populations and interventions. Adult autism recommendations should not be generalized to children; clinical choices for a child require age-appropriate professional guidance."))
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 .carePagePadding()
             }
             .background(Color.ink)
-            .navigationTitle("Research & safety")
+            .navigationTitle(AppLanguage.text("Research & safety"))
             .inlineTitle()
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(AppLanguage.text("Done")) { dismiss() } } }
         }
     }
 }

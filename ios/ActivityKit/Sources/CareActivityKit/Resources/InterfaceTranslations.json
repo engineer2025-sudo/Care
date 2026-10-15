@@ -1,0 +1,2750 @@
+{
+  "8-digit connection code": {
+    "es": "Código de conexión de 8 dígitos",
+    "fil": "8-digit na code ng koneksyon",
+    "vi": "Mã kết nối gồm 8 chữ số",
+    "zh-Hans": "8 位连接代码"
+  },
+  "A gentle pace with clear pause and stop controls.": {
+    "es": "Un ritmo suave con controles claros para pausar y detener.",
+    "fil": "Banayad na ritmo na may malinaw na pause at stop.",
+    "vi": "Nhịp nhẹ nhàng với nút tạm dừng và dừng rõ ràng.",
+    "zh-Hans": "节奏轻柔，暂停和停止按钮清晰可见。"
+  },
+  "A hat goes on your head.": {
+    "es": "Un sombrero se pone en la cabeza.",
+    "fil": "Isinusuot ang sombrero sa ulo.",
+    "vi": "Mũ được đội trên đầu.",
+    "zh-Hans": "帽子戴在头上。"
+  },
+  "A little support, every day": {
+    "es": "Un poco de apoyo, cada día",
+    "fil": "Kaunting suporta, araw-araw",
+    "vi": "Một chút hỗ trợ mỗi ngày",
+    "zh-Hans": "每天多一点支持"
+  },
+  "A pillow": {
+    "es": "Una almohada",
+    "fil": "Unan",
+    "vi": "Gối",
+    "zh-Hans": "枕头"
+  },
+  "A plate": {
+    "es": "Un plato",
+    "fil": "Plato",
+    "vi": "Đĩa",
+    "zh-Hans": "盘子"
+  },
+  "A question, update, or reminder for your next visit…": {
+    "es": "Una pregunta, novedad o recordatorio para tu próxima consulta…",
+    "fil": "Tanong, balita o paalala para sa susunod mong pagbisita…",
+    "vi": "Câu hỏi, cập nhật hoặc lời nhắc cho lần khám tới…",
+    "zh-Hans": "下次就诊的问题、近况或提醒…"
+  },
+  "A short reminder": {
+    "es": "Un recordatorio breve",
+    "fil": "Maikling paalala",
+    "vi": "Lời nhắc ngắn",
+    "zh-Hans": "简短提醒"
+  },
+  "About": {
+    "es": "Acerca de",
+    "fil": "Tungkol sa",
+    "vi": "Giới thiệu",
+    "zh-Hans": "关于"
+  },
+  "Accessibility": {
+    "es": "Accesibilidad",
+    "fil": "Accessibility",
+    "vi": "Trợ năng",
+    "zh-Hans": "无障碍"
+  },
+  "Activities": {
+    "es": "Actividades",
+    "fil": "Mga aktibidad",
+    "vi": "Hoạt động",
+    "zh-Hans": "活动"
+  },
+  "Add": {
+    "es": "Añadir",
+    "fil": "Magdagdag",
+    "vi": "Thêm",
+    "zh-Hans": "添加"
+  },
+  "Add a contact": {
+    "es": "Añadir un contacto",
+    "fil": "Magdagdag ng contact",
+    "vi": "Thêm liên hệ",
+    "zh-Hans": "添加联系人"
+  },
+  "Add a medication": {
+    "es": "Añadir un medicamento",
+    "fil": "Magdagdag ng gamot",
+    "vi": "Thêm thuốc",
+    "zh-Hans": "添加药物"
+  },
+  "Add a note": {
+    "es": "Añadir una nota",
+    "fil": "Magdagdag ng tala",
+    "vi": "Thêm ghi chú",
+    "zh-Hans": "添加笔记"
+  },
+  "Add a phrase": {
+    "es": "Añadir una frase",
+    "fil": "Magdagdag ng parirala",
+    "vi": "Thêm câu",
+    "zh-Hans": "添加短语"
+  },
+  "Add a question": {
+    "es": "Añadir una pregunta",
+    "fil": "Magdagdag ng tanong",
+    "vi": "Thêm câu hỏi",
+    "zh-Hans": "添加问题"
+  },
+  "Add a routine": {
+    "es": "Añadir una rutina",
+    "fil": "Magdagdag ng gawain",
+    "vi": "Thêm việc hằng ngày",
+    "zh-Hans": "添加日常安排"
+  },
+  "Add my own phrase": {
+    "es": "Añadir una frase",
+    "fil": "Magdagdag ng parirala",
+    "vi": "Thêm câu",
+    "zh-Hans": "添加短语"
+  },
+  "Add photo": {
+    "es": "Añadir foto",
+    "fil": "Magdagdag ng larawan",
+    "vi": "Thêm ảnh",
+    "zh-Hans": "添加照片"
+  },
+  "Add phrase": {
+    "es": "Añadir una frase",
+    "fil": "Magdagdag ng parirala",
+    "vi": "Thêm câu",
+    "zh-Hans": "添加短语"
+  },
+  "Add soap": {
+    "es": "Añadir jabón",
+    "fil": "Lagyan ng sabon",
+    "vi": "Thêm xà phòng",
+    "zh-Hans": "涂抹肥皂"
+  },
+  "Add your own note or routine first. No sample records are supplied.": {
+    "es": "Primero añade tu propia nota o rutina. No se incluyen registros de ejemplo.",
+    "fil": "Magdagdag muna ng sarili mong tala o gawain. Walang ibinigay na halimbawang rekord.",
+    "vi": "Trước tiên hãy thêm ghi chú hoặc việc hằng ngày của bạn. Không có hồ sơ mẫu.",
+    "zh-Hans": "请先添加自己的笔记或日常安排。不提供示例记录。"
+  },
+  "All activities": {
+    "es": "Todas las actividades",
+    "fil": "Lahat ng aktibidad",
+    "vi": "Tất cả hoạt động",
+    "zh-Hans": "全部活动"
+  },
+  "Already imported": {
+    "es": "Ya importado",
+    "fil": "Na-import na",
+    "vi": "Đã nhập",
+    "zh-Hans": "已导入"
+  },
+  "An apple grows on a tree.": {
+    "es": "Una manzana crece en un árbol.",
+    "fil": "Ang mansanas ay tumutubo sa puno.",
+    "vi": "Táo mọc trên cây.",
+    "zh-Hans": "苹果长在树上。"
+  },
+  "An umbrella": {
+    "es": "Un paraguas",
+    "fil": "Payong",
+    "vi": "Ô",
+    "zh-Hans": "雨伞"
+  },
+  "An umbrella keeps the rain off.": {
+    "es": "Un paraguas te protege de la lluvia.",
+    "fil": "Pinoprotektahan ka ng payong sa ulan.",
+    "vi": "Ô giúp che mưa.",
+    "zh-Hans": "雨伞可以挡雨。"
+  },
+  "App language": {
+    "es": "Idioma de la aplicación",
+    "fil": "Wika ng app",
+    "vi": "Ngôn ngữ ứng dụng",
+    "zh-Hans": "应用语言"
+  },
+  "Appearance": {
+    "es": "Apariencia",
+    "fil": "Hitsura",
+    "vi": "Giao diện",
+    "zh-Hans": "外观"
+  },
+  "Apple": {
+    "es": "Manzana",
+    "fil": "Mansanas",
+    "vi": "Táo",
+    "zh-Hans": "苹果"
+  },
+  "Apple · installed on this device": {
+    "es": "Apple · instalada en este dispositivo",
+    "fil": "Apple · naka-install sa device na ito",
+    "vi": "Apple · đã cài trên thiết bị",
+    "zh-Hans": "Apple · 已安装在此设备"
+  },
+  "Appointment questions": {
+    "es": "Preguntas para la cita",
+    "fil": "Mga tanong para sa appointment",
+    "vi": "Câu hỏi cho cuộc hẹn",
+    "zh-Hans": "就诊问题"
+  },
+  "Appointments": {
+    "es": "Citas",
+    "fil": "Mga appointment",
+    "vi": "Cuộc hẹn",
+    "zh-Hans": "预约"
+  },
+  "Automatic · best installed Apple voice": {
+    "es": "Automática · mejor voz de Apple instalada",
+    "fil": "Awtomatiko · pinakamahusay na naka-install na boses ng Apple",
+    "vi": "Tự động · giọng Apple tốt nhất đã cài",
+    "zh-Hans": "自动 · 已安装的最佳 Apple 语音"
+  },
+  "Available offline · no account": {
+    "es": "Disponible sin conexión · sin cuenta",
+    "fil": "Magagamit offline · walang account",
+    "vi": "Dùng ngoại tuyến · không cần tài khoản",
+    "zh-Hans": "离线可用 · 无需账户"
+  },
+  "Back": {
+    "es": "Volver",
+    "fil": "Bumalik",
+    "vi": "Quay lại",
+    "zh-Hans": "返回"
+  },
+  "Back to CareSphere": {
+    "es": "Volver a CareSphere",
+    "fil": "Bumalik sa CareSphere",
+    "vi": "Quay lại CareSphere",
+    "zh-Hans": "返回 CareSphere"
+  },
+  "Back to My Day": {
+    "es": "Volver a Mi día",
+    "fil": "Bumalik sa Araw ko",
+    "vi": "Quay lại Ngày của tôi",
+    "zh-Hans": "返回我的一天"
+  },
+  "Back to Today": {
+    "es": "Volver a Hoy",
+    "fil": "Bumalik sa Ngayon",
+    "vi": "Quay lại Hôm nay",
+    "zh-Hans": "返回今天"
+  },
+  "Back to activities": {
+    "es": "Actividades",
+    "fil": "Mga aktibidad",
+    "vi": "Hoạt động",
+    "zh-Hans": "活动"
+  },
+  "Back to my day": {
+    "es": "Volver a Mi día",
+    "fil": "Bumalik sa Araw ko",
+    "vi": "Quay lại Ngày của tôi",
+    "zh-Hans": "返回我的一天"
+  },
+  "Backup passphrase": {
+    "es": "Frase de contraseña de la copia",
+    "fil": "Passphrase ng backup",
+    "vi": "Mật khẩu bản sao lưu",
+    "zh-Hans": "备份口令"
+  },
+  "Banana": {
+    "es": "Plátano",
+    "fil": "Saging",
+    "vi": "Chuối",
+    "zh-Hans": "香蕉"
+  },
+  "Before going out in the rain, what could you take?": {
+    "es": "Antes de salir bajo la lluvia, ¿qué podrías llevar?",
+    "fil": "Bago lumabas sa ulan, ano ang maaari mong dalhin?",
+    "vi": "Trước khi ra ngoài trời mưa, bạn có thể mang theo gì?",
+    "zh-Hans": "下雨天出门前，可以带什么？"
+  },
+  "Blue": {
+    "es": "Azul",
+    "fil": "Asul",
+    "vi": "Xanh dương",
+    "zh-Hans": "蓝色"
+  },
+  "Bluetooth settings": {
+    "es": "Ajustes de Bluetooth",
+    "fil": "Mga setting ng Bluetooth",
+    "vi": "Cài đặt Bluetooth",
+    "zh-Hans": "蓝牙设置"
+  },
+  "Breathe in": {
+    "es": "Inspirar",
+    "fil": "Huminga papasok",
+    "vi": "Hít vào",
+    "zh-Hans": "吸气"
+  },
+  "Breathe out": {
+    "es": "Espirar",
+    "fil": "Huminga palabas",
+    "vi": "Thở ra",
+    "zh-Hans": "呼气"
+  },
+  "Call": {
+    "es": "Llamar",
+    "fil": "Tumawag",
+    "vi": "Gọi",
+    "zh-Hans": "拨打电话"
+  },
+  "Call {0}": {
+    "es": "Llamar a {0}",
+    "fil": "Tawagan si {0}",
+    "vi": "Gọi {0}",
+    "zh-Hans": "呼叫 {0}"
+  },
+  "Cancel": {
+    "es": "Cancelar",
+    "fil": "Kanselahin",
+    "vi": "Hủy",
+    "zh-Hans": "取消"
+  },
+  "Cancel import": {
+    "es": "Cancelar importación",
+    "fil": "Kanselahin ang pag-import",
+    "vi": "Hủy nhập",
+    "zh-Hans": "取消导入"
+  },
+  "Cancel restore": {
+    "es": "Cancelar restauración",
+    "fil": "Kanselahin ang pagbabalik",
+    "vi": "Hủy khôi phục",
+    "zh-Hans": "取消恢复"
+  },
+  "Care": {
+    "es": "Cuidado",
+    "fil": "Pangangalaga",
+    "vi": "Chăm sóc",
+    "zh-Hans": "照护"
+  },
+  "Care Circle": {
+    "es": "Círculo de cuidado",
+    "fil": "Pangkat ng pangangalaga",
+    "vi": "Nhóm chăm sóc",
+    "zh-Hans": "照护圈"
+  },
+  "Care notes": {
+    "es": "Notas de cuidado",
+    "fil": "Mga tala ng pangangalaga",
+    "vi": "Ghi chú chăm sóc",
+    "zh-Hans": "照护笔记"
+  },
+  "Care notes · local only": {
+    "es": "Notas de cuidado · solo locales",
+    "fil": "Mga tala ng pangangalaga · lokal lamang",
+    "vi": "Ghi chú chăm sóc · chỉ lưu cục bộ",
+    "zh-Hans": "照护笔记 · 仅限本地"
+  },
+  "CareSphere Setup": {
+    "es": "Configuración de CareSphere",
+    "fil": "Pag-set up ng CareSphere",
+    "vi": "Thiết lập CareSphere",
+    "zh-Hans": "CareSphere 设置"
+  },
+  "Chair": {
+    "es": "Silla",
+    "fil": "Upuan",
+    "vi": "Ghế",
+    "zh-Hans": "椅子"
+  },
+  "Choose a familiar everyday task to talk about.": {
+    "es": "Describe una tarea cotidiana conocida.",
+    "fil": "Ilarawan ang isang pamilyar na pang-araw-araw na gawain.",
+    "vi": "Mô tả một việc hằng ngày quen thuộc.",
+    "zh-Hans": "描述一件熟悉的日常小事。"
+  },
+  "Choose a photo": {
+    "es": "Elegir una foto",
+    "fil": "Pumili ng larawan",
+    "vi": "Chọn ảnh",
+    "zh-Hans": "选择照片"
+  },
+  "Choose a tool": {
+    "es": "Elegir una herramienta",
+    "fil": "Pumili ng pantulong",
+    "vi": "Chọn công cụ",
+    "zh-Hans": "选择工具"
+  },
+  "Choose a tool · {0}": {
+    "es": "Elegir una herramienta · {0}",
+    "fil": "Pumili ng pantulong · {0}",
+    "vi": "Chọn công cụ · {0}",
+    "zh-Hans": "选择工具 · {0}"
+  },
+  "Choose backup to preview": {
+    "es": "Elegir copia de seguridad para revisar",
+    "fil": "Pumili ng backup na susuriin",
+    "vi": "Chọn bản sao lưu để xem trước",
+    "zh-Hans": "选择备份以预览"
+  },
+  "Choose comfort settings": {
+    "es": "Elegir ajustes de comodidad",
+    "fil": "Pumili ng mga setting ng ginhawa",
+    "vi": "Chọn cài đặt thoải mái",
+    "zh-Hans": "选择舒适设置"
+  },
+  "Choose exactly what to share": {
+    "es": "Elige exactamente qué compartir",
+    "fil": "Piliin lamang ang nais ibahagi",
+    "vi": "Chọn chính xác nội dung chia sẻ",
+    "zh-Hans": "准确选择要共享的内容"
+  },
+  "Choose network": {
+    "es": "Elegir red",
+    "fil": "Pumili ng network",
+    "vi": "Chọn mạng",
+    "zh-Hans": "选择网络"
+  },
+  "Choose the label shown on the sending phone. Labels are not verified identities. You still need its code and passphrase.": {
+    "es": "Elige el nombre que aparece en el teléfono remitente. Los nombres no verifican la identidad. Aún necesitas el código y la frase de contraseña.",
+    "fil": "Piliin ang label sa telepono ng nagpapadala. Hindi patunay ng pagkakakilanlan ang label. Kailangan pa rin ang code at passphrase.",
+    "vi": "Chọn nhãn hiển thị trên điện thoại người gửi. Nhãn không xác minh danh tính. Vẫn cần mã và mật khẩu.",
+    "zh-Hans": "选择发送方手机上显示的标签。标签不能证明身份。您仍需连接代码和口令。"
+  },
+  "Choose what helps. Nothing here is required.": {
+    "es": "Elige lo que te ayude. Nada es obligatorio.",
+    "fil": "Piliin ang makakatulong. Walang kailangang pilitin dito.",
+    "vi": "Chọn điều hữu ích. Không có gì là bắt buộc.",
+    "zh-Hans": "选择对您有帮助的内容。这里没有必做事项。"
+  },
+  "Choose {0}": {
+    "es": "Elegir {0}",
+    "fil": "Piliin ang {0}",
+    "vi": "Chọn {0}",
+    "zh-Hans": "选择 {0}"
+  },
+  "Circle": {
+    "es": "Círculo",
+    "fil": "Bilog",
+    "vi": "Hình tròn",
+    "zh-Hans": "圆形"
+  },
+  "Circle and star take turns.": {
+    "es": "El círculo y la estrella se alternan.",
+    "fil": "Nagsasalitan ang bilog at bituin.",
+    "vi": "Hình tròn và ngôi sao xen kẽ nhau.",
+    "zh-Hans": "圆形和星星交替出现。"
+  },
+  "Circle · Star · Circle · …": {
+    "es": "Círculo · Estrella · Círculo · …",
+    "fil": "Bilog · Bituin · Bilog · …",
+    "vi": "Hình tròn · Ngôi sao · Hình tròn · …",
+    "zh-Hans": "圆形 · 星星 · 圆形 · …"
+  },
+  "Clear": {
+    "es": "Borrar",
+    "fil": "I-clear",
+    "vi": "Xóa",
+    "zh-Hans": "清除"
+  },
+  "Clear / stop": {
+    "es": "Borrar / detener",
+    "fil": "I-clear / itigil",
+    "vi": "Xóa / dừng",
+    "zh-Hans": "清除／停止"
+  },
+  "Clear / stop speech": {
+    "es": "Borrar / detener",
+    "fil": "I-clear / itigil",
+    "vi": "Xóa / dừng",
+    "zh-Hans": "清除／停止"
+  },
+  "Clear prepared file": {
+    "es": "Borrar archivo preparado",
+    "fil": "Burahin ang inihandang file",
+    "vi": "Xóa tệp đã chuẩn bị",
+    "zh-Hans": "清除已准备的文件"
+  },
+  "Clear prepared transfer": {
+    "es": "Borrar transferencia preparada",
+    "fil": "Burahin ang inihandang paglilipat",
+    "vi": "Xóa dữ liệu truyền đã chuẩn bị",
+    "zh-Hans": "清除已准备的传输"
+  },
+  "Clear search": {
+    "es": "Borrar búsqueda",
+    "fil": "I-clear ang paghahanap",
+    "vi": "Xóa tìm kiếm",
+    "zh-Hans": "清除搜索"
+  },
+  "Close": {
+    "es": "Cerrar",
+    "fil": "Isara",
+    "vi": "Đóng",
+    "zh-Hans": "关闭"
+  },
+  "Close settings": {
+    "es": "Cerrar ajustes",
+    "fil": "Isara ang mga setting",
+    "vi": "Đóng cài đặt",
+    "zh-Hans": "关闭设置"
+  },
+  "Coffee Circles": {
+    "es": "Círculos de café",
+    "fil": "Mga kuwentuhan sa kape",
+    "vi": "Nhóm trò chuyện cà phê",
+    "zh-Hans": "咖啡交流圈"
+  },
+  "Color appearance": {
+    "es": "Apariencia de color",
+    "fil": "Hitsura ng kulay",
+    "vi": "Giao diện màu sắc",
+    "zh-Hans": "颜色外观"
+  },
+  "Comfort": {
+    "es": "Comodidad",
+    "fil": "Kaginhawahan",
+    "vi": "Sự thoải mái",
+    "zh-Hans": "舒适设置"
+  },
+  "Comfortable": {
+    "es": "A gusto",
+    "fil": "Maginhawa",
+    "vi": "Thoải mái",
+    "zh-Hans": "舒适"
+  },
+  "Communication": {
+    "es": "Comunicación",
+    "fil": "Komunikasyon",
+    "vi": "Giao tiếp",
+    "zh-Hans": "沟通"
+  },
+  "Communication cards": {
+    "es": "Tarjetas de comunicación",
+    "fil": "Mga kard sa komunikasyon",
+    "vi": "Thẻ giao tiếp",
+    "zh-Hans": "沟通卡片"
+  },
+  "Complete the pattern": {
+    "es": "Completar el patrón",
+    "fil": "Kumpletuhin ang pattern",
+    "vi": "Hoàn thành quy luật",
+    "zh-Hans": "补全规律"
+  },
+  "Connect": {
+    "es": "Conectar",
+    "fil": "Kumonekta",
+    "vi": "Kết nối",
+    "zh-Hans": "联系"
+  },
+  "Connect & express": {
+    "es": "Conectar y expresar",
+    "fil": "Kumonekta at magpahayag",
+    "vi": "Kết nối và biểu đạt",
+    "zh-Hans": "联系与表达"
+  },
+  "Connect and receive encrypted copy": {
+    "es": "Conectar y recibir copia cifrada",
+    "fil": "Kumonekta at tumanggap ng naka-encrypt na kopya",
+    "vi": "Kết nối và nhận bản sao được mã hóa",
+    "zh-Hans": "连接并接收加密副本"
+  },
+  "Connect nearby · iPhone or Android": {
+    "es": "Conectar cerca · iPhone o Android",
+    "fil": "Kumonekta sa malapit · iPhone o Android",
+    "vi": "Kết nối gần đây · iPhone hoặc Android",
+    "zh-Hans": "连接附近设备 · iPhone 或 Android"
+  },
+  "Connect to a nearby device": {
+    "es": "Conectar a un dispositivo cercano",
+    "fil": "Kumonekta sa malapit na device",
+    "vi": "Kết nối với thiết bị ở gần",
+    "zh-Hans": "连接附近设备"
+  },
+  "Connecting locally…": {
+    "es": "Conectando localmente…",
+    "fil": "Kumokonekta nang lokal…",
+    "vi": "Đang kết nối cục bộ…",
+    "zh-Hans": "正在本地连接…"
+  },
+  "Connection code: {0}": {
+    "es": "Código de conexión: {0}",
+    "fil": "Code ng koneksyon: {0}",
+    "vi": "Mã kết nối: {0}",
+    "zh-Hans": "连接代码：{0}"
+  },
+  "Contact name": {
+    "es": "Nombre del contacto",
+    "fil": "Pangalan ng contact",
+    "vi": "Tên liên hệ",
+    "zh-Hans": "联系人姓名"
+  },
+  "Continue": {
+    "es": "Continuar",
+    "fil": "Magpatuloy",
+    "vi": "Tiếp tục",
+    "zh-Hans": "继续"
+  },
+  "Continue activity": {
+    "es": "Continuar actividad",
+    "fil": "Ipagpatuloy ang aktibidad",
+    "vi": "Tiếp tục hoạt động",
+    "zh-Hans": "继续活动"
+  },
+  "Conversation": {
+    "es": "Conversación",
+    "fil": "Pag-uusap",
+    "vi": "Trò chuyện",
+    "zh-Hans": "交谈"
+  },
+  "Conversation cards": {
+    "es": "Tarjetas de conversación",
+    "fil": "Mga kard sa pag-uusap",
+    "vi": "Thẻ trò chuyện",
+    "zh-Hans": "交谈卡片"
+  },
+  "Create encrypted backup": {
+    "es": "Crear copia de seguridad cifrada",
+    "fil": "Gumawa ng naka-encrypt na backup",
+    "vi": "Tạo bản sao lưu được mã hóa",
+    "zh-Hans": "创建加密备份"
+  },
+  "Created": {
+    "es": "Creado",
+    "fil": "Nagawa",
+    "vi": "Đã tạo",
+    "zh-Hans": "创建时间"
+  },
+  "Cup": {
+    "es": "Taza",
+    "fil": "Tasa",
+    "vi": "Cốc",
+    "zh-Hans": "杯子"
+  },
+  "Dark": {
+    "es": "Oscuro",
+    "fil": "Madilim",
+    "vi": "Tối",
+    "zh-Hans": "深色"
+  },
+  "Delete": {
+    "es": "Eliminar",
+    "fil": "Burahin",
+    "vi": "Xóa",
+    "zh-Hans": "删除"
+  },
+  "Delete note": {
+    "es": "Eliminar nota",
+    "fil": "Burahin ang tala",
+    "vi": "Xóa ghi chú",
+    "zh-Hans": "删除笔记"
+  },
+  "Delete this note?": {
+    "es": "¿Eliminar esta nota?",
+    "fil": "Burahin ang talang ito?",
+    "vi": "Xóa ghi chú này?",
+    "zh-Hans": "删除这条笔记？"
+  },
+  "Delete this visual routine? This cannot be undone.": {
+    "es": "¿Eliminar esta rutina visual? No se puede deshacer.",
+    "fil": "Burahin ang biswal na gawaing ito? Hindi ito maibabalik.",
+    "vi": "Xóa thói quen bằng hình ảnh này? Không thể hoàn tác.",
+    "zh-Hans": "删除此图示日常安排？此操作无法撤销。"
+  },
+  "Delete {0}": {
+    "es": "Eliminar {0}",
+    "fil": "Burahin ang {0}",
+    "vi": "Xóa {0}",
+    "zh-Hans": "删除 {0}"
+  },
+  "Describe a familiar everyday task.": {
+    "es": "Describe una tarea cotidiana conocida.",
+    "fil": "Ilarawan ang isang pamilyar na pang-araw-araw na gawain.",
+    "vi": "Mô tả một việc hằng ngày quen thuộc.",
+    "zh-Hans": "描述一件熟悉的日常小事。"
+  },
+  "Description": {
+    "es": "Descripción",
+    "fil": "Paglalarawan",
+    "vi": "Mô tả",
+    "zh-Hans": "描述"
+  },
+  "Device address": {
+    "es": "Dirección del dispositivo",
+    "fil": "Address ng device",
+    "vi": "Địa chỉ thiết bị",
+    "zh-Hans": "设备地址"
+  },
+  "Device address: {0}": {
+    "es": "Dirección del dispositivo: {0}",
+    "fil": "Address ng device: {0}",
+    "vi": "Địa chỉ thiết bị: {0}",
+    "zh-Hans": "设备地址：{0}"
+  },
+  "Device sharing": {
+    "es": "Compartir entre dispositivos",
+    "fil": "Pagbabahagi sa mga device",
+    "vi": "Chia sẻ giữa các thiết bị",
+    "zh-Hans": "设备间共享"
+  },
+  "Device-to-device sharing": {
+    "es": "Compartir entre dispositivos",
+    "fil": "Pagbabahagi sa mga device",
+    "vi": "Chia sẻ giữa các thiết bị",
+    "zh-Hans": "设备间共享"
+  },
+  "Device-to-device sharing · no backend": {
+    "es": "Compartir entre dispositivos · sin servidor externo",
+    "fil": "Pagbabahagi sa mga device · walang backend",
+    "vi": "Chia sẻ giữa các thiết bị · không cần máy chủ",
+    "zh-Hans": "设备间共享 · 无需后端"
+  },
+  "Device-to-device · no backend": {
+    "es": "Entre dispositivos · sin servidor externo",
+    "fil": "Sa mga device · walang backend",
+    "vi": "Giữa các thiết bị · không cần máy chủ",
+    "zh-Hans": "设备间共享 · 无需后端"
+  },
+  "Discard changes": {
+    "es": "Descartar cambios",
+    "fil": "Huwag i-save ang mga pagbabago",
+    "vi": "Bỏ thay đổi",
+    "zh-Hans": "放弃更改"
+  },
+  "Discard unsaved changes?": {
+    "es": "¿Descartar cambios sin guardar?",
+    "fil": "Huwag i-save ang mga pagbabago?",
+    "vi": "Bỏ thay đổi chưa lưu?",
+    "zh-Hans": "放弃未保存的更改？"
+  },
+  "Disconnect": {
+    "es": "Desconectar",
+    "fil": "Idiskonekta",
+    "vi": "Ngắt kết nối",
+    "zh-Hans": "断开连接"
+  },
+  "Discussed": {
+    "es": "Comentado",
+    "fil": "Natalakay na",
+    "vi": "Đã trao đổi",
+    "zh-Hans": "已讨论"
+  },
+  "Display name": {
+    "es": "Nombre visible",
+    "fil": "Pangalang ipinapakita",
+    "vi": "Tên hiển thị",
+    "zh-Hans": "显示名称"
+  },
+  "Done": {
+    "es": "Listo",
+    "fil": "Tapos na",
+    "vi": "Xong",
+    "zh-Hans": "完成"
+  },
+  "Done / next": {
+    "es": "Listo / siguiente",
+    "fil": "Tapos na / susunod",
+    "vi": "Xong / tiếp theo",
+    "zh-Hans": "完成／下一步"
+  },
+  "Dose check-in saved.": {
+    "es": "Registro de la dosis guardado.",
+    "fil": "Na-save ang tala ng dosis.",
+    "vi": "Đã lưu ghi nhận liều thuốc.",
+    "zh-Hans": "用药记录已保存。"
+  },
+  "Dry hands": {
+    "es": "Secar las manos",
+    "fil": "Patuyuin ang mga kamay",
+    "vi": "Lau khô tay",
+    "zh-Hans": "擦干双手"
+  },
+  "Edit": {
+    "es": "Editar",
+    "fil": "I-edit",
+    "vi": "Sửa",
+    "zh-Hans": "编辑"
+  },
+  "Edit care note": {
+    "es": "Editar nota de cuidado",
+    "fil": "I-edit ang tala ng pangangalaga",
+    "vi": "Sửa ghi chú chăm sóc",
+    "zh-Hans": "编辑照护笔记"
+  },
+  "Edit note": {
+    "es": "Editar nota",
+    "fil": "I-edit ang tala",
+    "vi": "Sửa ghi chú",
+    "zh-Hans": "编辑笔记"
+  },
+  "Edited": {
+    "es": "Editado",
+    "fil": "Na-edit",
+    "vi": "Đã sửa",
+    "zh-Hans": "编辑时间"
+  },
+  "Emergency SOS": {
+    "es": "SOS de emergencia",
+    "fil": "Pang-emergency na SOS",
+    "vi": "SOS khẩn cấp",
+    "zh-Hans": "紧急 SOS"
+  },
+  "Emergency contact": {
+    "es": "Contacto de emergencia",
+    "fil": "Pang-emergency na contact",
+    "vi": "Liên hệ khẩn cấp",
+    "zh-Hans": "紧急联系人"
+  },
+  "Encrypted Android backup": {
+    "es": "Copia de seguridad cifrada de Android",
+    "fil": "Naka-encrypt na Android backup",
+    "vi": "Bản sao lưu Android được mã hóa",
+    "zh-Hans": "Android 加密备份"
+  },
+  "Encrypted backup": {
+    "es": "Copia de seguridad cifrada",
+    "fil": "Naka-encrypt na backup",
+    "vi": "Bản sao lưu được mã hóa",
+    "zh-Hans": "加密备份"
+  },
+  "End": {
+    "es": "Terminar",
+    "fil": "Tapusin",
+    "vi": "Kết thúc",
+    "zh-Hans": "结束"
+  },
+  "End routine": {
+    "es": "Terminar rutina",
+    "fil": "Tapusin ang gawain",
+    "vi": "Kết thúc thói quen",
+    "zh-Hans": "结束日常安排"
+  },
+  "English": {
+    "es": "Inglés",
+    "fil": "Ingles",
+    "vi": "Tiếng Anh",
+    "zh-Hans": "英语"
+  },
+  "Erase all local data": {
+    "es": "Borrar todos los datos locales",
+    "fil": "Burahin ang lahat ng lokal na datos",
+    "vi": "Xóa mọi dữ liệu cục bộ",
+    "zh-Hans": "删除所有本地数据"
+  },
+  "Erase everything?": {
+    "es": "¿Borrar todo?",
+    "fil": "Burahin ang lahat?",
+    "vi": "Xóa tất cả?",
+    "zh-Hans": "删除所有内容？"
+  },
+  "Erase note permanently": {
+    "es": "Borrar nota para siempre",
+    "fil": "Permanenteng burahin ang tala",
+    "vi": "Xóa vĩnh viễn ghi chú",
+    "zh-Hans": "永久删除笔记"
+  },
+  "Everyday order": {
+    "es": "Orden cotidiano",
+    "fil": "Pagkakasunod-sunod ng gawain",
+    "vi": "Trình tự hằng ngày",
+    "zh-Hans": "日常顺序"
+  },
+  "Everyday steps": {
+    "es": "Pasos cotidianos",
+    "fil": "Mga pang-araw-araw na hakbang",
+    "vi": "Các bước hằng ngày",
+    "zh-Hans": "日常步骤"
+  },
+  "Excited": {
+    "es": "Entusiasmado",
+    "fil": "Nasasabik",
+    "vi": "Háo hức",
+    "zh-Hans": "兴奋"
+  },
+  "Explore a familiar task, one step at a time.": {
+    "es": "Explora una tarea conocida, paso a paso.",
+    "fil": "Tuklasin ang isang pamilyar na gawain, paisa-isang hakbang.",
+    "vi": "Khám phá việc quen thuộc từng bước một.",
+    "zh-Hans": "一步一步地探索熟悉的日常任务。"
+  },
+  "Explore by interest": {
+    "es": "Explorar por interés",
+    "fil": "Tuklasin ayon sa hilig",
+    "vi": "Khám phá theo sở thích",
+    "zh-Hans": "按兴趣探索"
+  },
+  "Explore feeling words. Every choice is welcome.": {
+    "es": "Explora palabras sobre emociones. Toda elección es válida.",
+    "fil": "Tuklasin ang mga salita sa pakiramdam. Tinatanggap ang bawat pagpili.",
+    "vi": "Khám phá từ chỉ cảm xúc. Mọi lựa chọn đều được đón nhận.",
+    "zh-Hans": "探索表达感受的词语。欢迎任何选择。"
+  },
+  "Familiar objects": {
+    "es": "Objetos familiares",
+    "fil": "Mga pamilyar na bagay",
+    "vi": "Đồ vật quen thuộc",
+    "zh-Hans": "熟悉的物品"
+  },
+  "Favorites": {
+    "es": "Favoritos",
+    "fil": "Mga paborito",
+    "vi": "Yêu thích",
+    "zh-Hans": "收藏"
+  },
+  "Favorites only": {
+    "es": "Solo favoritos",
+    "fil": "Mga paborito lamang",
+    "vi": "Chỉ mục yêu thích",
+    "zh-Hans": "仅看收藏"
+  },
+  "Feelings explorer": {
+    "es": "Explorar emociones",
+    "fil": "Tuklasin ang pakiramdam",
+    "vi": "Khám phá cảm xúc",
+    "zh-Hans": "探索感受"
+  },
+  "Find a word or a person": {
+    "es": "Buscar una palabra o persona",
+    "fil": "Maghanap ng salita o tao",
+    "vi": "Tìm từ hoặc người",
+    "zh-Hans": "查找词语或人员"
+  },
+  "Find an activity": {
+    "es": "Buscar una actividad",
+    "fil": "Maghanap ng aktibidad",
+    "vi": "Tìm hoạt động",
+    "zh-Hans": "查找活动"
+  },
+  "Find calm": {
+    "es": "Encontrar calma",
+    "fil": "Humanap ng kapanatagan",
+    "vi": "Tìm sự bình yên",
+    "zh-Hans": "寻找平静"
+  },
+  "Find nearby devices": {
+    "es": "Buscar dispositivos cercanos",
+    "fil": "Maghanap ng mga kalapit na device",
+    "vi": "Tìm thiết bị ở gần",
+    "zh-Hans": "查找附近设备"
+  },
+  "Find the same": {
+    "es": "Encontrar el igual",
+    "fil": "Hanapin ang kapareho",
+    "vi": "Tìm mục giống nhau",
+    "zh-Hans": "找出相同项"
+  },
+  "Find the same: Circle": {
+    "es": "Encuentra el igual: Círculo",
+    "fil": "Hanapin ang kapareho: Bilog",
+    "vi": "Tìm mục giống nhau: Hình tròn",
+    "zh-Hans": "找出相同项：圆形"
+  },
+  "Find the same: Flower": {
+    "es": "Encuentra el igual: Flor",
+    "fil": "Hanapin ang kapareho: Bulaklak",
+    "vi": "Tìm mục giống nhau: Hoa",
+    "zh-Hans": "找出相同项：花"
+  },
+  "Find what belongs together. Hints whenever you want.": {
+    "es": "Encuentra lo que va junto. Pide pistas cuando quieras.",
+    "fil": "Hanapin ang magkakasama. Humingi ng pahiwatig anumang oras.",
+    "vi": "Tìm những thứ cùng nhóm. Xem gợi ý bất cứ lúc nào.",
+    "zh-Hans": "找出同一类的物品。随时可以查看提示。"
+  },
+  "Find your kind of pause.": {
+    "es": "Encuentra tu forma de descansar.",
+    "fil": "Hanapin ang pahingang bagay sa iyo.",
+    "vi": "Tìm cách nghỉ ngơi phù hợp với bạn.",
+    "zh-Hans": "找到适合自己的放松方式。"
+  },
+  "Finish introduction": {
+    "es": "Terminar la introducción",
+    "fil": "Tapusin ang pagpapakilala",
+    "vi": "Hoàn tất giới thiệu",
+    "zh-Hans": "结束介绍"
+  },
+  "Flower": {
+    "es": "Flor",
+    "fil": "Bulaklak",
+    "vi": "Hoa",
+    "zh-Hans": "花"
+  },
+  "Follow device": {
+    "es": "Seguir el dispositivo",
+    "fil": "Sundin ang device",
+    "vi": "Theo thiết bị",
+    "zh-Hans": "跟随设备"
+  },
+  "Follow-up": {
+    "es": "Seguimiento",
+    "fil": "Follow-up",
+    "vi": "Theo dõi sau hẹn",
+    "zh-Hans": "后续事项"
+  },
+  "Follow-up notes": {
+    "es": "Notas de seguimiento",
+    "fil": "Mga tala ng follow-up",
+    "vi": "Ghi chú sau hẹn",
+    "zh-Hans": "后续笔记"
+  },
+  "Gentle breathing": {
+    "es": "Respiración suave",
+    "fil": "Banayad na paghinga",
+    "vi": "Thở nhẹ nhàng",
+    "zh-Hans": "轻柔呼吸"
+  },
+  "Get started": {
+    "es": "Empezar",
+    "fil": "Magsimula",
+    "vi": "Bắt đầu",
+    "zh-Hans": "开始使用"
+  },
+  "Green": {
+    "es": "Verde",
+    "fil": "Berde",
+    "vi": "Xanh lá",
+    "zh-Hans": "绿色"
+  },
+  "Hat": {
+    "es": "Sombrero",
+    "fil": "Sombrero",
+    "vi": "Mũ",
+    "zh-Hans": "帽子"
+  },
+  "Health": {
+    "es": "Salud",
+    "fil": "Kalusugan",
+    "vi": "Sức khỏe",
+    "zh-Hans": "健康"
+  },
+  "Health Guide": {
+    "es": "Guía de salud",
+    "fil": "Gabay sa kalusugan",
+    "vi": "Hướng dẫn sức khỏe",
+    "zh-Hans": "健康指南"
+  },
+  "Heart rate": {
+    "es": "Frecuencia cardíaca",
+    "fil": "Bilis ng tibok ng puso",
+    "vi": "Nhịp tim",
+    "zh-Hans": "心率"
+  },
+  "Hello, {0}.": {
+    "es": "Hola, {0}.",
+    "fil": "Kumusta, {0}.",
+    "vi": "Xin chào, {0}.",
+    "zh-Hans": "您好，{0}。"
+  },
+  "Help": {
+    "es": "Ayuda",
+    "fil": "Tulong",
+    "vi": "Trợ giúp",
+    "zh-Hans": "帮助"
+  },
+  "Help me communicate": {
+    "es": "Ayúdame a comunicarme",
+    "fil": "Tulungan akong makipag-usap",
+    "vi": "Giúp tôi giao tiếp",
+    "zh-Hans": "帮助我沟通"
+  },
+  "High contrast": {
+    "es": "Alto contraste",
+    "fil": "Mataas na contrast",
+    "vi": "Độ tương phản cao",
+    "zh-Hans": "高对比度"
+  },
+  "How are you feeling?": {
+    "es": "¿Cómo te sientes?",
+    "fil": "Kumusta ang pakiramdam mo?",
+    "vi": "Bạn cảm thấy thế nào?",
+    "zh-Hans": "您感觉如何？"
+  },
+  "I need a break": {
+    "es": "Necesito un descanso",
+    "fil": "Kailangan ko ng pahinga",
+    "vi": "Tôi cần nghỉ một chút",
+    "zh-Hans": "我需要休息一下"
+  },
+  "I would like help": {
+    "es": "Me gustaría recibir ayuda",
+    "fil": "Gusto ko ng tulong",
+    "vi": "Tôi muốn được giúp đỡ",
+    "zh-Hans": "我想得到帮助"
+  },
+  "I would like some help": {
+    "es": "Me gustaría recibir ayuda",
+    "fil": "Gusto ko ng tulong",
+    "vi": "Tôi muốn được giúp đỡ",
+    "zh-Hans": "我想得到帮助"
+  },
+  "Import selected copies": {
+    "es": "Importar copias seleccionadas",
+    "fil": "I-import ang mga napiling kopya",
+    "vi": "Nhập các bản sao đã chọn",
+    "zh-Hans": "导入所选副本"
+  },
+  "Important": {
+    "es": "Importante",
+    "fil": "Mahalaga",
+    "vi": "Quan trọng",
+    "zh-Hans": "重要"
+  },
+  "Imported selected copies. Existing records were not replaced.": {
+    "es": "Copias seleccionadas importadas. No se reemplazaron registros existentes.",
+    "fil": "Na-import ang mga napiling kopya. Hindi napalitan ang mga umiiral na rekord.",
+    "vi": "Đã nhập các bản sao đã chọn. Không thay thế hồ sơ hiện có.",
+    "zh-Hans": "已导入所选副本。未替换现有记录。"
+  },
+  "Interest activities": {
+    "es": "Actividades de interés",
+    "fil": "Mga aktibidad na kinagigiliwan",
+    "vi": "Hoạt động theo sở thích",
+    "zh-Hans": "兴趣活动"
+  },
+  "Is there a texture, food, or scent you enjoy?": {
+    "es": "¿Hay una textura, comida o aroma que te guste?",
+    "fil": "May tekstura, pagkain o amoy ka bang gusto?",
+    "vi": "Có chất liệu, món ăn hay mùi hương nào bạn thích không?",
+    "zh-Hans": "有没有您喜欢的质地、食物或气味？"
+  },
+  "It is too loud": {
+    "es": "Hay demasiado ruido",
+    "fil": "Masyadong maingay",
+    "vi": "Ồn quá",
+    "zh-Hans": "太吵了"
+  },
+  "Keep a word in view and find its matching choice.": {
+    "es": "Mira una palabra y encuentra su igual.",
+    "fil": "Tingnan ang salita at hanapin ang kapareho nito.",
+    "vi": "Nhìn từ đang hiển thị và tìm lựa chọn giống nhau.",
+    "zh-Hans": "看着一个词，找出相同的选项。"
+  },
+  "Keep editing": {
+    "es": "Seguir editando",
+    "fil": "Magpatuloy sa pag-edit",
+    "vi": "Tiếp tục sửa",
+    "zh-Hans": "继续编辑"
+  },
+  "Keep it simple": {
+    "es": "Mantenerlo sencillo",
+    "fil": "Panatilihing simple",
+    "vi": "Giữ đơn giản",
+    "zh-Hans": "保持简洁"
+  },
+  "Keep your questions and reminders together. Nothing is sent to anyone.": {
+    "es": "Guarda juntas tus preguntas y recordatorios. No se envía nada a nadie.",
+    "fil": "Pagsamahin ang mga tanong at paalala mo. Walang ipinapadala kaninuman.",
+    "vi": "Giữ câu hỏi và lời nhắc cùng nhau. Không gửi gì cho bất kỳ ai.",
+    "zh-Hans": "将问题和提醒放在一起。不会向任何人发送内容。"
+  },
+  "Language": {
+    "es": "Idioma",
+    "fil": "Wika",
+    "vi": "Ngôn ngữ",
+    "zh-Hans": "语言"
+  },
+  "Language preference could not be saved.": {
+    "es": "No se pudo guardar el idioma preferido.",
+    "fil": "Hindi na-save ang napiling wika.",
+    "vi": "Không lưu được ngôn ngữ đã chọn.",
+    "zh-Hans": "无法保存语言偏好。"
+  },
+  "Large text": {
+    "es": "Texto grande",
+    "fil": "Malaking teksto",
+    "vi": "Chữ lớn",
+    "zh-Hans": "大号文字"
+  },
+  "Leaf": {
+    "es": "Hoja",
+    "fil": "Dahon",
+    "vi": "Lá",
+    "zh-Hans": "叶子"
+  },
+  "Leaf · Leaf · Flower · Leaf · Leaf · …": {
+    "es": "Hoja · Hoja · Flor · Hoja · Hoja · …",
+    "fil": "Dahon · Dahon · Bulaklak · Dahon · Dahon · …",
+    "vi": "Lá · Lá · Hoa · Lá · Lá · …",
+    "zh-Hans": "叶子 · 叶子 · 花 · 叶子 · 叶子 · …"
+  },
+  "Leave activity": {
+    "es": "Salir de la actividad",
+    "fil": "Umalis sa aktibidad",
+    "vi": "Rời hoạt động",
+    "zh-Hans": "退出活动"
+  },
+  "Let's look together. You can try another choice or use a hint.": {
+    "es": "Miremos juntos. Puedes probar otra opción o usar una pista.",
+    "fil": "Tingnan natin nang magkasama. Maaari kang pumili ng iba o gumamit ng pahiwatig.",
+    "vi": "Cùng xem nhé. Bạn có thể thử lựa chọn khác hoặc dùng gợi ý.",
+    "zh-Hans": "一起看看。您可以试试其他选项或查看提示。"
+  },
+  "Let’s look together. Try another choice, or ask for a hint.": {
+    "es": "Miremos juntos. Puedes probar otra opción o usar una pista.",
+    "fil": "Tingnan natin nang magkasama. Maaari kang pumili ng iba o gumamit ng pahiwatig.",
+    "vi": "Cùng xem nhé. Bạn có thể thử lựa chọn khác hoặc dùng gợi ý.",
+    "zh-Hans": "一起看看。您可以试试其他选项或查看提示。"
+  },
+  "Light": {
+    "es": "Claro",
+    "fil": "Maliwanag",
+    "vi": "Sáng",
+    "zh-Hans": "浅色"
+  },
+  "Local by default · You choose what to share.": {
+    "es": "Local de forma predeterminada · Tú eliges qué compartir.",
+    "fil": "Lokal bilang default · Ikaw ang pipili ng ibabahagi.",
+    "vi": "Mặc định lưu cục bộ · Bạn chọn nội dung chia sẻ.",
+    "zh-Hans": "默认保存在本地 · 由您选择共享内容。"
+  },
+  "Local connection stopped. Received copies cannot be recalled.": {
+    "es": "Conexión local detenida. Las copias recibidas no se pueden recuperar a distancia.",
+    "fil": "Itinigil ang lokal na koneksyon. Hindi mababawi ang mga natanggap na kopya.",
+    "vi": "Đã dừng kết nối cục bộ. Không thể thu hồi bản sao đã nhận.",
+    "zh-Hans": "本地连接已停止。已收到的副本无法撤回。"
+  },
+  "Local offer ended. Start a new offer to try again.": {
+    "es": "La oferta local terminó. Inicia otra para volver a intentar.",
+    "fil": "Natapos ang lokal na alok. Magsimula ng bago upang subukan muli.",
+    "vi": "Chia sẻ cục bộ đã kết thúc. Bắt đầu lại để thử lần nữa.",
+    "zh-Hans": "本地传输已结束。请重新提供传输后重试。"
+  },
+  "Local offer ready.": {
+    "es": "Oferta local lista.",
+    "fil": "Handa na ang lokal na alok.",
+    "vi": "Chia sẻ cục bộ đã sẵn sàng.",
+    "zh-Hans": "本地传输已就绪。"
+  },
+  "Look for Circle.": {
+    "es": "Busca Círculo.",
+    "fil": "Hanapin ang Bilog.",
+    "vi": "Tìm Hình tròn.",
+    "zh-Hans": "找一找圆形。"
+  },
+  "Look for Flower.": {
+    "es": "Busca Flor.",
+    "fil": "Hanapin ang Bulaklak.",
+    "vi": "Tìm Hoa.",
+    "zh-Hans": "找一找花。"
+  },
+  "Look, recall, and try again. No timer or score.": {
+    "es": "Mira, recuerda e inténtalo otra vez. Sin tiempo límite ni puntuación.",
+    "fil": "Tumingin, alalahanin at subukang muli. Walang timer o puntos.",
+    "vi": "Quan sát, nhớ lại và thử lại. Không tính giờ hay điểm.",
+    "zh-Hans": "观察、回忆、再次尝试。没有计时或评分。"
+  },
+  "Looking for open CareSphere offers on this network…": {
+    "es": "Buscando ofertas de CareSphere en esta red…",
+    "fil": "Naghahanap ng mga bukas na CareSphere offer sa network…",
+    "vi": "Đang tìm lượt chia sẻ CareSphere trên mạng này…",
+    "zh-Hans": "正在此网络中查找可用的 CareSphere 传输…"
+  },
+  "Main navigation": {
+    "es": "Navegación principal",
+    "fil": "Pangunahing nabigasyon",
+    "vi": "Điều hướng chính",
+    "zh-Hans": "主导航"
+  },
+  "Make a visual routine": {
+    "es": "Crear una rutina visual",
+    "fil": "Gumawa ng biswal na gawain",
+    "vi": "Tạo thói quen bằng hình ảnh",
+    "zh-Hans": "创建图示日常安排"
+  },
+  "Making this offer visible nearby…": {
+    "es": "Haciendo visible esta oferta cerca…",
+    "fil": "Ginagawang nakikita sa malapit ang alok…",
+    "vi": "Đang cho phép thiết bị gần đây tìm thấy…",
+    "zh-Hans": "正在让附近设备发现此传输…"
+  },
+  "Manage": {
+    "es": "Gestionar",
+    "fil": "Pamahalaan",
+    "vi": "Quản lý",
+    "zh-Hans": "管理"
+  },
+  "Matching": {
+    "es": "Emparejar",
+    "fil": "Pagtutugma",
+    "vi": "Ghép đôi",
+    "zh-Hans": "配对"
+  },
+  "Medication reminders": {
+    "es": "Recordatorios de medicamentos",
+    "fil": "Mga paalala sa gamot",
+    "vi": "Nhắc dùng thuốc",
+    "zh-Hans": "用药提醒"
+  },
+  "Medications": {
+    "es": "Medicamentos",
+    "fil": "Mga gamot",
+    "vi": "Thuốc",
+    "zh-Hans": "用药"
+  },
+  "Message": {
+    "es": "Mensaje",
+    "fil": "Magpadala ng mensahe",
+    "vi": "Nhắn tin",
+    "zh-Hans": "发消息"
+  },
+  "Message {0}": {
+    "es": "Enviar mensaje a {0}",
+    "fil": "Padalhan ng mensahe si {0}",
+    "vi": "Nhắn tin cho {0}",
+    "zh-Hans": "向 {0} 发消息"
+  },
+  "Mood": {
+    "es": "Estado de ánimo",
+    "fil": "Pakiramdam",
+    "vi": "Tâm trạng",
+    "zh-Hans": "心情"
+  },
+  "Move through an imagined story at your own pace.": {
+    "es": "Avanza por una historia imaginaria a tu ritmo.",
+    "fil": "Sundan ang isang kuwentong likha ng isip sa sarili mong bilis.",
+    "vi": "Theo dõi câu chuyện tưởng tượng theo nhịp của bạn.",
+    "zh-Hans": "按自己的节奏展开一个想象的故事。"
+  },
+  "Move to recently deleted": {
+    "es": "Mover a eliminados recientemente",
+    "fil": "Ilipat sa kamakailang binura",
+    "vi": "Chuyển vào mục đã xóa gần đây",
+    "zh-Hans": "移至最近删除"
+  },
+  "Music": {
+    "es": "Música",
+    "fil": "Musika",
+    "vi": "Âm nhạc",
+    "zh-Hans": "音乐"
+  },
+  "My Day": {
+    "es": "Mi día",
+    "fil": "Araw ko",
+    "vi": "Ngày của tôi",
+    "zh-Hans": "我的一天"
+  },
+  "My People": {
+    "es": "Mis personas de confianza",
+    "fil": "Mga taong pinagkakatiwalaan ko",
+    "vi": "Người tôi tin cậy",
+    "zh-Hans": "我信任的人"
+  },
+  "My People & Tools": {
+    "es": "Mis personas y herramientas",
+    "fil": "Mga tao at pantulong ko",
+    "vi": "Người thân và công cụ của tôi",
+    "zh-Hans": "我信任的人与工具"
+  },
+  "My comfort": {
+    "es": "Mi comodidad",
+    "fil": "Aking kaginhawahan",
+    "vi": "Sự thoải mái của tôi",
+    "zh-Hans": "我的舒适设置"
+  },
+  "My day": {
+    "es": "Mi día",
+    "fil": "Araw ko",
+    "vi": "Ngày của tôi",
+    "zh-Hans": "我的一天"
+  },
+  "My own phrase": {
+    "es": "Mi propia frase",
+    "fil": "Sarili kong parirala",
+    "vi": "Câu của riêng tôi",
+    "zh-Hans": "我自己的短语"
+  },
+  "My people": {
+    "es": "Mis personas de confianza",
+    "fil": "Mga taong pinagkakatiwalaan ko",
+    "vi": "Người tôi tin cậy",
+    "zh-Hans": "我信任的人"
+  },
+  "My photo": {
+    "es": "Mi foto",
+    "fil": "Larawan ko",
+    "vi": "Ảnh của tôi",
+    "zh-Hans": "我的照片"
+  },
+  "My photos": {
+    "es": "Mis fotos",
+    "fil": "Mga larawan ko",
+    "vi": "Ảnh của tôi",
+    "zh-Hans": "我的照片"
+  },
+  "My phrase": {
+    "es": "Mi propia frase",
+    "fil": "Sarili kong parirala",
+    "vi": "Câu của riêng tôi",
+    "zh-Hans": "我自己的短语"
+  },
+  "My support tools": {
+    "es": "Mis herramientas de apoyo",
+    "fil": "Mga pantulong ko",
+    "vi": "Công cụ hỗ trợ của tôi",
+    "zh-Hans": "我的辅助工具"
+  },
+  "Name": {
+    "es": "Nombre",
+    "fil": "Pangalan",
+    "vi": "Tên",
+    "zh-Hans": "姓名"
+  },
+  "Name or point to something that grows.": {
+    "es": "Señala algo que crezca.",
+    "fil": "Ituro ang isang bagay na lumalaki.",
+    "vi": "Chỉ vào một thứ có thể phát triển.",
+    "zh-Hans": "指一指会生长的东西。"
+  },
+  "Nature": {
+    "es": "Naturaleza",
+    "fil": "Kalikasan",
+    "vi": "Thiên nhiên",
+    "zh-Hans": "自然"
+  },
+  "Nearby search is unavailable. Use the address and code instead.": {
+    "es": "La búsqueda cercana no está disponible. Usa la dirección y el código.",
+    "fil": "Hindi magagamit ang paghahanap sa malapit. Gamitin ang address at code.",
+    "vi": "Không thể tìm thiết bị ở gần. Dùng địa chỉ và mã.",
+    "zh-Hans": "附近查找不可用。请使用地址和代码。"
+  },
+  "Nearby search stopped. Search again or enter an address manually.": {
+    "es": "La búsqueda cercana se detuvo. Busca de nuevo o introduce una dirección.",
+    "fil": "Itinigil ang paghahanap sa malapit. Maghanap muli o ilagay ang address.",
+    "vi": "Đã dừng tìm kiếm. Tìm lại hoặc nhập địa chỉ thủ công.",
+    "zh-Hans": "附近查找已停止。请重新查找或手动输入地址。"
+  },
+  "Nearby visibility is unavailable. Use the address and code instead.": {
+    "es": "La visibilidad cercana no está disponible. Usa la dirección y el código.",
+    "fil": "Hindi magagamit ang pagpapakita sa malapit. Gamitin ang address at code.",
+    "vi": "Không thể hiển thị cho thiết bị ở gần. Dùng địa chỉ và mã.",
+    "zh-Hans": "附近发现不可用。请使用地址和代码。"
+  },
+  "Nearby visibility is unavailable. Use the displayed address and code instead.": {
+    "es": "La visibilidad cercana no está disponible. Usa la dirección y el código mostrados.",
+    "fil": "Hindi magagamit ang pagpapakita sa malapit. Gamitin ang nakasaad na address at code.",
+    "vi": "Không thể hiển thị cho thiết bị ở gần. Dùng địa chỉ và mã được hiển thị.",
+    "zh-Hans": "附近发现不可用。请使用显示的地址和代码。"
+  },
+  "New care note": {
+    "es": "Nueva nota de cuidado",
+    "fil": "Bagong tala ng pangangalaga",
+    "vi": "Ghi chú chăm sóc mới",
+    "zh-Hans": "新照护笔记"
+  },
+  "Next": {
+    "es": "Siguiente",
+    "fil": "Susunod",
+    "vi": "Tiếp theo",
+    "zh-Hans": "下一步"
+  },
+  "Next / skip": {
+    "es": "Siguiente / omitir",
+    "fil": "Susunod / laktawan",
+    "vi": "Tiếp theo / bỏ qua",
+    "zh-Hans": "下一个／跳过"
+  },
+  "Next / skip prompt": {
+    "es": "Siguiente / omitir",
+    "fil": "Susunod / laktawan",
+    "vi": "Tiếp theo / bỏ qua",
+    "zh-Hans": "下一个／跳过"
+  },
+  "Next photo": {
+    "es": "Foto siguiente",
+    "fil": "Susunod na larawan",
+    "vi": "Ảnh tiếp theo",
+    "zh-Hans": "下一张照片"
+  },
+  "No": {
+    "es": "No",
+    "fil": "Hindi",
+    "vi": "Không",
+    "zh-Hans": "否"
+  },
+  "No care notes yet. Save a question, update, or reminder for your next visit.": {
+    "es": "Aún no hay notas de cuidado. Guarda una pregunta, novedad o recordatorio para tu próxima consulta.",
+    "fil": "Wala pang tala ng pangangalaga. Mag-save ng tanong, balita o paalala para sa susunod na pagbisita.",
+    "vi": "Chưa có ghi chú chăm sóc. Lưu câu hỏi, cập nhật hoặc lời nhắc cho lần khám tới.",
+    "zh-Hans": "还没有照护笔记。为下次就诊保存问题、近况或提醒。"
+  },
+  "No current measurement": {
+    "es": "Sin medición actual",
+    "fil": "Walang kasalukuyang sukat",
+    "vi": "Chưa có số đo hiện tại",
+    "zh-Hans": "暂无测量值"
+  },
+  "No data": {
+    "es": "Sin datos",
+    "fil": "Walang datos",
+    "vi": "Chưa có dữ liệu",
+    "zh-Hans": "暂无数据"
+  },
+  "No installed voice for this language. The words remain visible.": {
+    "es": "No hay una voz instalada para este idioma. El texto sigue visible.",
+    "fil": "Walang naka-install na boses para sa wikang ito. Mananatiling nakikita ang mga salita.",
+    "vi": "Chưa cài giọng đọc cho ngôn ngữ này. Nội dung vẫn hiển thị.",
+    "zh-Hans": "未安装此语言的语音。文字仍会显示。"
+  },
+  "No notes match your search.": {
+    "es": "Ninguna nota coincide con la búsqueda.",
+    "fil": "Walang talang tumutugma sa paghahanap.",
+    "vi": "Không có ghi chú phù hợp.",
+    "zh-Hans": "没有符合搜索条件的笔记。"
+  },
+  "No notes yet": {
+    "es": "Aún no hay notas",
+    "fil": "Wala pang mga tala",
+    "vi": "Chưa có ghi chú",
+    "zh-Hans": "还没有笔记"
+  },
+  "No photo": {
+    "es": "Sin foto",
+    "fil": "Walang larawan",
+    "vi": "Không có ảnh",
+    "zh-Hans": "无照片"
+  },
+  "No records selected.": {
+    "es": "No se seleccionaron registros.",
+    "fil": "Walang napiling rekord.",
+    "vi": "Chưa chọn hồ sơ.",
+    "zh-Hans": "尚未选择记录。"
+  },
+  "No routines yet. Add something that matters to you.": {
+    "es": "Aún no hay rutinas. Añade algo importante para ti.",
+    "fil": "Wala pang gawain. Magdagdag ng bagay na mahalaga sa iyo.",
+    "vi": "Chưa có việc hằng ngày. Thêm điều quan trọng với bạn.",
+    "zh-Hans": "还没有日常安排。添加一件对您重要的事。"
+  },
+  "No scores or countdowns. Stop whenever you like.": {
+    "es": "Sin puntuaciones ni cuenta atrás. Detente cuando quieras.",
+    "fil": "Walang puntos o countdown. Huminto anumang oras.",
+    "vi": "Không chấm điểm hay đếm ngược. Dừng bất cứ khi nào bạn muốn.",
+    "zh-Hans": "没有评分或倒计时。随时可以停止。"
+  },
+  "Not now": {
+    "es": "Ahora no",
+    "fil": "Hindi muna",
+    "vi": "Để sau",
+    "zh-Hans": "暂时不要"
+  },
+  "Not sure": {
+    "es": "No estoy seguro",
+    "fil": "Hindi sigurado",
+    "vi": "Không chắc",
+    "zh-Hans": "不确定"
+  },
+  "Note": {
+    "es": "Nota",
+    "fil": "Tala",
+    "vi": "Ghi chú",
+    "zh-Hans": "笔记"
+  },
+  "Notes": {
+    "es": "Notas",
+    "fil": "Mga tala",
+    "vi": "Ghi chú",
+    "zh-Hans": "笔记"
+  },
+  "Notice & think": {
+    "es": "Observar y pensar",
+    "fil": "Pansinin at mag-isip",
+    "vi": "Quan sát và suy nghĩ",
+    "zh-Hans": "观察与思考"
+  },
+  "Notice what comes next in a repeating row.": {
+    "es": "Observa qué sigue en una serie repetida.",
+    "fil": "Pansinin kung ano ang kasunod sa umuulit na hanay.",
+    "vi": "Tìm mục tiếp theo trong dãy lặp lại.",
+    "zh-Hans": "观察重复排列中接下来是什么。"
+  },
+  "Notifications": {
+    "es": "Notificaciones",
+    "fil": "Mga abiso",
+    "vi": "Thông báo",
+    "zh-Hans": "通知"
+  },
+  "OK": {
+    "es": "Aceptar",
+    "fil": "OK",
+    "vi": "OK",
+    "zh-Hans": "确定"
+  },
+  "Offer to a nearby device": {
+    "es": "Ofrecer a un dispositivo cercano",
+    "fil": "Mag-alok sa malapit na device",
+    "vi": "Cho phép thiết bị ở gần nhận",
+    "zh-Hans": "向附近设备提供传输"
+  },
+  "One step at a time": {
+    "es": "Un paso a la vez",
+    "fil": "Paisa-isang hakbang",
+    "vi": "Từng bước một",
+    "zh-Hans": "一次一步"
+  },
+  "Only your selected notes and routines are included. Recipients can keep or forward copies. You cannot recall them remotely. Tell the recipient the passphrase separately.": {
+    "es": "Solo se incluyen las notas y rutinas seleccionadas. El destinatario puede guardar o reenviar copias. No puedes retirarlas a distancia. Comunica la frase de contraseña por separado.",
+    "fil": "Kasama lamang ang napiling tala at gawain. Maaaring itago o ipasa ng tatanggap ang mga kopya. Hindi mo ito mababawi nang malayuan. Ibigay nang hiwalay ang passphrase.",
+    "vi": "Chỉ gồm ghi chú và việc hằng ngày đã chọn. Người nhận có thể giữ hoặc chuyển tiếp bản sao. Không thể thu hồi từ xa. Gửi mật khẩu riêng cho người nhận.",
+    "zh-Hans": "只包含所选笔记和日常安排。接收者可以保留或转发副本。您无法远程撤回。请另行告知接收者口令。"
+  },
+  "Open activity": {
+    "es": "Abrir actividad",
+    "fil": "Buksan ang aktibidad",
+    "vi": "Mở hoạt động",
+    "zh-Hans": "打开活动"
+  },
+  "Open another app": {
+    "es": "Abrir otra aplicación",
+    "fil": "Magbukas ng ibang app",
+    "vi": "Mở ứng dụng khác",
+    "zh-Hans": "打开另一个应用"
+  },
+  "Open another app?": {
+    "es": "¿Abrir otra aplicación?",
+    "fil": "Magbukas ng ibang app?",
+    "vi": "Mở ứng dụng khác?",
+    "zh-Hans": "打开另一个应用？"
+  },
+  "Optional": {
+    "es": "Opcional",
+    "fil": "Opsyonal",
+    "vi": "Không bắt buộc",
+    "zh-Hans": "可选"
+  },
+  "Optional photo for these steps": {
+    "es": "Foto opcional para estos pasos",
+    "fil": "Opsyonal na larawan para sa mga hakbang",
+    "vi": "Ảnh tùy chọn cho các bước này",
+    "zh-Hans": "这些步骤的可选照片"
+  },
+  "Optional sound. Nothing plays until you choose.": {
+    "es": "Sonido opcional. Nada suena hasta que lo elijas.",
+    "fil": "Opsyonal ang tunog. Walang tutunog hangga't hindi mo pinipili.",
+    "vi": "Âm thanh là tùy chọn. Chỉ phát khi bạn chọn.",
+    "zh-Hans": "声音为可选项。只有您选择后才会播放。"
+  },
+  "Orange": {
+    "es": "Naranja",
+    "fil": "Kahel",
+    "vi": "Cam",
+    "zh-Hans": "橙子"
+  },
+  "Overview": {
+    "es": "Resumen",
+    "fil": "Pangkalahatang-ideya",
+    "vi": "Tổng quan",
+    "zh-Hans": "概览"
+  },
+  "Overwhelmed": {
+    "es": "Abrumado",
+    "fil": "Nabibigatan",
+    "vi": "Quá tải",
+    "zh-Hans": "不堪重负"
+  },
+  "Paced breathing": {
+    "es": "Respiración guiada",
+    "fil": "Paghinga na may ritmo",
+    "vi": "Thở theo nhịp",
+    "zh-Hans": "节律呼吸"
+  },
+  "Pair a heart-rate monitor": {
+    "es": "Vincular un monitor cardíaco",
+    "fil": "Ipares ang monitor ng tibok ng puso",
+    "vi": "Ghép đôi máy đo nhịp tim",
+    "zh-Hans": "配对心率监测器"
+  },
+  "Passphrase": {
+    "es": "Frase de contraseña",
+    "fil": "Passphrase",
+    "vi": "Mật khẩu",
+    "zh-Hans": "口令"
+  },
+  "Pattern practice": {
+    "es": "Practicar patrones",
+    "fil": "Pagsasanay sa pattern",
+    "vi": "Luyện tìm quy luật",
+    "zh-Hans": "规律练习"
+  },
+  "Pause": {
+    "es": "Pausar",
+    "fil": "I-pause",
+    "vi": "Tạm dừng",
+    "zh-Hans": "暂停"
+  },
+  "Pause activity": {
+    "es": "Pausar actividad",
+    "fil": "I-pause ang aktibidad",
+    "vi": "Tạm dừng hoạt động",
+    "zh-Hans": "暂停活动"
+  },
+  "Paused": {
+    "es": "En pausa",
+    "fil": "Naka-pause",
+    "vi": "Đã tạm dừng",
+    "zh-Hans": "已暂停"
+  },
+  "Pear": {
+    "es": "Pera",
+    "fil": "Peras",
+    "vi": "Lê",
+    "zh-Hans": "梨"
+  },
+  "Phone number": {
+    "es": "Número de teléfono",
+    "fil": "Numero ng telepono",
+    "vi": "Số điện thoại",
+    "zh-Hans": "电话号码"
+  },
+  "Photo description": {
+    "es": "Descripción de la foto",
+    "fil": "Paglalarawan ng larawan",
+    "vi": "Mô tả ảnh",
+    "zh-Hans": "照片描述"
+  },
+  "Picture pairs": {
+    "es": "Pares de imágenes",
+    "fil": "Mga pares ng larawan",
+    "vi": "Ghép cặp hình ảnh",
+    "zh-Hans": "图片配对"
+  },
+  "Picture story": {
+    "es": "Historia con imágenes",
+    "fil": "Kuwentong may larawan",
+    "vi": "Câu chuyện bằng hình ảnh",
+    "zh-Hans": "图片故事"
+  },
+  "Please explain again": {
+    "es": "Por favor, explícalo otra vez",
+    "fil": "Pakipaliwanag muli",
+    "vi": "Xin giải thích lại",
+    "zh-Hans": "请再解释一遍"
+  },
+  "Point to something that grows.": {
+    "es": "Señala algo que crezca.",
+    "fil": "Ituro ang isang bagay na lumalaki.",
+    "vi": "Chỉ vào một thứ có thể phát triển.",
+    "zh-Hans": "指一指会生长的东西。"
+  },
+  "Point, display or speak": {
+    "es": "Señalar, mostrar o hablar",
+    "fil": "Ituro, ipakita o bigkasin",
+    "vi": "Chỉ, hiển thị hoặc đọc",
+    "zh-Hans": "指示、显示或朗读"
+  },
+  "Point, speak, write elsewhere, listen or skip. Answers are not recorded. These are leisure prompts, not treatment.": {
+    "es": "Habla, señala, escucha u omite. No se registran las respuestas; son propuestas recreativas, no un tratamiento.",
+    "fil": "Magsalita, tumuro, makinig o lumaktaw. Hindi itinatala ang mga sagot; mga mungkahi ito sa paglilibang, hindi paggamot.",
+    "vi": "Nói, chỉ, nghe hoặc bỏ qua. Không ghi lại câu trả lời; đây là gợi ý giải trí, không phải điều trị.",
+    "zh-Hans": "您可以说、指、听或跳过。不记录回答；这些是休闲提示，不是治疗。"
+  },
+  "Point, tap to display, or choose Speak. These cards supplement—not replace—your existing communication system.": {
+    "es": "Señala, toca para mostrar o elige Hablar. Estas tarjetas complementan, no reemplazan, tu sistema de comunicación actual.",
+    "fil": "Ituro, i-tap upang ipakita o piliing bigkasin. Karagdagan lamang ang mga kard na ito, hindi kapalit ng kasalukuyan mong sistema ng komunikasyon.",
+    "vi": "Chỉ, chạm để hiển thị hoặc chọn đọc. Các thẻ này bổ sung, không thay thế hệ thống giao tiếp hiện có của bạn.",
+    "zh-Hans": "指一指、点按显示或选择朗读。这些卡片用于补充而非替代您已有的沟通方式。"
+  },
+  "Prepare encrypted file": {
+    "es": "Preparar archivo cifrado",
+    "fil": "Ihanda ang naka-encrypt na file",
+    "vi": "Chuẩn bị tệp được mã hóa",
+    "zh-Hans": "准备加密文件"
+  },
+  "Prepare encrypted transfer": {
+    "es": "Preparar transferencia cifrada",
+    "fil": "Ihanda ang naka-encrypt na paglilipat",
+    "vi": "Chuẩn bị truyền dữ liệu được mã hóa",
+    "zh-Hans": "准备加密传输"
+  },
+  "Prepare selected copies?": {
+    "es": "¿Preparar las copias seleccionadas?",
+    "fil": "Ihanda ang mga napiling kopya?",
+    "vi": "Chuẩn bị các bản sao đã chọn?",
+    "zh-Hans": "准备所选内容的副本？"
+  },
+  "Preview received copies": {
+    "es": "Vista previa de las copias recibidas",
+    "fil": "Suriin ang mga natanggap na kopya",
+    "vi": "Xem trước các bản sao đã nhận",
+    "zh-Hans": "预览收到的副本"
+  },
+  "Preview received copies. Not verified clinical information. Existing records are never replaced.": {
+    "es": "Revisa las copias recibidas. No son información clínica verificada. Nunca se reemplazan registros existentes.",
+    "fil": "Suriin ang mga natanggap na kopya. Hindi ito beripikadong klinikal na impormasyon. Hindi papalitan ang mga umiiral na rekord.",
+    "vi": "Xem trước bản sao đã nhận. Đây không phải thông tin lâm sàng được xác minh. Không thay thế hồ sơ hiện có.",
+    "zh-Hans": "预览收到的副本。这不是经过核实的临床信息。不会替换现有记录。"
+  },
+  "Preview selected voice": {
+    "es": "Probar la voz elegida",
+    "fil": "Pakinggan ang napiling boses",
+    "vi": "Nghe thử giọng đã chọn",
+    "zh-Hans": "试听所选语音"
+  },
+  "Previous": {
+    "es": "Anterior",
+    "fil": "Nakaraan",
+    "vi": "Trước",
+    "zh-Hans": "上一个"
+  },
+  "Privacy": {
+    "es": "Privacidad",
+    "fil": "Pagkapribado",
+    "vi": "Quyền riêng tư",
+    "zh-Hans": "隐私"
+  },
+  "Privacy & data": {
+    "es": "Privacidad y datos",
+    "fil": "Pagkapribado at datos",
+    "vi": "Quyền riêng tư và dữ liệu",
+    "zh-Hans": "隐私与数据"
+  },
+  "Profile": {
+    "es": "Perfil",
+    "fil": "Profile",
+    "vi": "Hồ sơ",
+    "zh-Hans": "个人资料"
+  },
+  "Protecting your data…": {
+    "es": "Protegiendo tus datos…",
+    "fil": "Pinoprotektahan ang iyong datos…",
+    "vi": "Đang bảo vệ dữ liệu…",
+    "zh-Hans": "正在保护您的数据…"
+  },
+  "Put on gloves": {
+    "es": "Ponerse guantes",
+    "fil": "Magsuot ng guwantes",
+    "vi": "Đeo găng tay",
+    "zh-Hans": "戴上手套"
+  },
+  "Question": {
+    "es": "Pregunta",
+    "fil": "Tanong",
+    "vi": "Câu hỏi",
+    "zh-Hans": "问题"
+  },
+  "Quiet": {
+    "es": "Silencio",
+    "fil": "Tahimik",
+    "vi": "Yên tĩnh",
+    "zh-Hans": "安静"
+  },
+  "Read this step": {
+    "es": "Leer este paso",
+    "fil": "Basahin ang hakbang",
+    "vi": "Đọc bước này",
+    "zh-Hans": "朗读此步骤"
+  },
+  "Receive: choose a CareSphere transfer": {
+    "es": "Recibir: elegir transferencia de CareSphere",
+    "fil": "Tumanggap: pumili ng CareSphere transfer",
+    "vi": "Nhận: chọn tệp CareSphere",
+    "zh-Hans": "接收：选择 CareSphere 传输"
+  },
+  "Receive: choose a transfer file": {
+    "es": "Recibir: elegir archivo de transferencia",
+    "fil": "Tumanggap: pumili ng file",
+    "vi": "Nhận: chọn tệp truyền",
+    "zh-Hans": "接收：选择传输文件"
+  },
+  "Received and unlocked locally. Review and select copies below. Nothing has been imported.": {
+    "es": "Recibido y desbloqueado localmente. Revisa y selecciona las copias. Aún no se ha importado nada.",
+    "fil": "Natanggap at na-unlock nang lokal. Suriin at piliin ang mga kopya sa ibaba. Wala pang na-import.",
+    "vi": "Đã nhận và mở khóa cục bộ. Kiểm tra và chọn bản sao bên dưới. Chưa nhập nội dung nào.",
+    "zh-Hans": "已在本地接收并解锁。请检查并选择下方副本。尚未导入任何内容。"
+  },
+  "Recently deleted notes · 30 days": {
+    "es": "Notas eliminadas recientemente · 30 días",
+    "fil": "Mga kamakailang binurang tala · 30 araw",
+    "vi": "Ghi chú đã xóa gần đây · 30 ngày",
+    "zh-Hans": "最近删除的笔记 · 30 天"
+  },
+  "Recovery & backup": {
+    "es": "Recuperación y copia de seguridad",
+    "fil": "Pagbawi at backup",
+    "vi": "Khôi phục và sao lưu",
+    "zh-Hans": "恢复与备份"
+  },
+  "Red": {
+    "es": "Rojo",
+    "fil": "Pula",
+    "vi": "Đỏ",
+    "zh-Hans": "红色"
+  },
+  "Reduce motion": {
+    "es": "Reducir movimiento",
+    "fil": "Bawasan ang galaw",
+    "vi": "Giảm chuyển động",
+    "zh-Hans": "减少动态效果"
+  },
+  "Remember a pattern": {
+    "es": "Recordar un patrón",
+    "fil": "Tandaan ang isang pattern",
+    "vi": "Ghi nhớ quy luật",
+    "zh-Hans": "记住规律"
+  },
+  "Remember together": {
+    "es": "Recordar juntos",
+    "fil": "Sabay na alalahanin",
+    "vi": "Cùng ghi nhớ",
+    "zh-Hans": "一起记忆"
+  },
+  "Reminder voice": {
+    "es": "Voz de los recordatorios",
+    "fil": "Boses ng paalala",
+    "vi": "Giọng đọc lời nhắc",
+    "zh-Hans": "提醒语音"
+  },
+  "Remove": {
+    "es": "Quitar",
+    "fil": "Alisin",
+    "vi": "Gỡ bỏ",
+    "zh-Hans": "移除"
+  },
+  "Remove contact": {
+    "es": "Quitar contacto",
+    "fil": "Alisin ang contact",
+    "vi": "Gỡ liên hệ",
+    "zh-Hans": "移除联系人"
+  },
+  "Remove from favorites": {
+    "es": "Quitar de favoritos",
+    "fil": "Alisin sa mga paborito",
+    "vi": "Xóa khỏi yêu thích",
+    "zh-Hans": "取消收藏"
+  },
+  "Remove {0}": {
+    "es": "Quitar {0}",
+    "fil": "Alisin ang {0}",
+    "vi": "Gỡ bỏ {0}",
+    "zh-Hans": "移除 {0}"
+  },
+  "Restore": {
+    "es": "Restaurar",
+    "fil": "Ibalik",
+    "vi": "Khôi phục",
+    "zh-Hans": "恢复"
+  },
+  "Restore note": {
+    "es": "Restaurar nota",
+    "fil": "Ibalik ang tala",
+    "vi": "Khôi phục ghi chú",
+    "zh-Hans": "恢复笔记"
+  },
+  "Resume": {
+    "es": "Reanudar",
+    "fil": "Ipagpatuloy",
+    "vi": "Tiếp tục",
+    "zh-Hans": "继续"
+  },
+  "Reveal familiar pictures and find a matching pair.": {
+    "es": "Descubre imágenes conocidas y encuentra una pareja.",
+    "fil": "Buksan ang mga pamilyar na larawan at hanapin ang kapareha.",
+    "vi": "Lật hình quen thuộc và tìm cặp giống nhau.",
+    "zh-Hans": "翻开熟悉的图片，找出相同的一对。"
+  },
+  "Review and prepare transfer": {
+    "es": "Revisar y preparar transferencia",
+    "fil": "Suriin at ihanda ang paglilipat",
+    "vi": "Kiểm tra và chuẩn bị truyền",
+    "zh-Hans": "检查并准备传输"
+  },
+  "Review selection": {
+    "es": "Revisar selección",
+    "fil": "Suriin ang napili",
+    "vi": "Kiểm tra lựa chọn",
+    "zh-Hans": "检查所选内容"
+  },
+  "Review the recipient in the next app. Nothing is sent automatically.": {
+    "es": "Revisa el destinatario en la siguiente aplicación. No se envía nada automáticamente.",
+    "fil": "Suriin ang tatanggap sa susunod na app. Walang awtomatikong ipapadala.",
+    "vi": "Kiểm tra người nhận trong ứng dụng tiếp theo. Không có gì được gửi tự động.",
+    "zh-Hans": "请在下一个应用中核对接收者。不会自动发送任何内容。"
+  },
+  "Review the recipient in the next app. Nothing is sent automatically. External providers have their own privacy terms.": {
+    "es": "Revisa el destinatario en la siguiente aplicación. No se envía nada automáticamente. Los proveedores externos tienen sus propias condiciones de privacidad.",
+    "fil": "Suriin ang tatanggap sa susunod na app. Walang awtomatikong ipapadala. May sariling tuntunin sa pagkapribado ang mga panlabas na provider.",
+    "vi": "Kiểm tra người nhận trong ứng dụng tiếp theo. Không gửi gì tự động. Nhà cung cấp bên ngoài có điều khoản riêng về quyền riêng tư.",
+    "zh-Hans": "请在下一个应用中核对接收者。不会自动发送任何内容。外部服务商有其自身的隐私条款。"
+  },
+  "Routine": {
+    "es": "Rutina",
+    "fil": "Gawain",
+    "vi": "Thói quen",
+    "zh-Hans": "日常安排"
+  },
+  "Routine title": {
+    "es": "Título de la rutina",
+    "fil": "Pamagat ng gawain",
+    "vi": "Tên thói quen",
+    "zh-Hans": "日常安排标题"
+  },
+  "Routines": {
+    "es": "Rutinas",
+    "fil": "Mga gawain",
+    "vi": "Thói quen hằng ngày",
+    "zh-Hans": "日常安排"
+  },
+  "Save": {
+    "es": "Guardar",
+    "fil": "I-save",
+    "vi": "Lưu",
+    "zh-Hans": "保存"
+  },
+  "Save changes": {
+    "es": "Guardar cambios",
+    "fil": "I-save ang mga pagbabago",
+    "vi": "Lưu thay đổi",
+    "zh-Hans": "保存更改"
+  },
+  "Save contact": {
+    "es": "Guardar contacto",
+    "fil": "I-save ang contact",
+    "vi": "Lưu liên hệ",
+    "zh-Hans": "保存联系人"
+  },
+  "Save encrypted transfer file": {
+    "es": "Guardar archivo de transferencia cifrado",
+    "fil": "I-save ang naka-encrypt na file",
+    "vi": "Lưu tệp truyền được mã hóa",
+    "zh-Hans": "保存加密传输文件"
+  },
+  "Save note": {
+    "es": "Guardar nota",
+    "fil": "I-save ang tala",
+    "vi": "Lưu ghi chú",
+    "zh-Hans": "保存笔记"
+  },
+  "Save to favorites": {
+    "es": "Guardar en favoritos",
+    "fil": "I-save sa mga paborito",
+    "vi": "Lưu vào yêu thích",
+    "zh-Hans": "添加到收藏"
+  },
+  "Save visual routine": {
+    "es": "Guardar rutina visual",
+    "fil": "I-save ang biswal na gawain",
+    "vi": "Lưu thói quen bằng hình ảnh",
+    "zh-Hans": "保存图示日常安排"
+  },
+  "Saved routines": {
+    "es": "Rutinas guardadas",
+    "fil": "Mga naka-save na gawain",
+    "vi": "Thói quen đã lưu",
+    "zh-Hans": "已保存的日常安排"
+  },
+  "Saved to favorites": {
+    "es": "Guardado en favoritos",
+    "fil": "Na-save sa mga paborito",
+    "vi": "Đã lưu vào yêu thích",
+    "zh-Hans": "已添加到收藏"
+  },
+  "Search": {
+    "es": "Buscar",
+    "fil": "Maghanap",
+    "vi": "Tìm kiếm",
+    "zh-Hans": "搜索"
+  },
+  "Search activities": {
+    "es": "Buscar actividades",
+    "fil": "Maghanap ng aktibidad",
+    "vi": "Tìm hoạt động",
+    "zh-Hans": "搜索活动"
+  },
+  "Search care notes": {
+    "es": "Buscar notas de cuidado",
+    "fil": "Maghanap ng tala ng pangangalaga",
+    "vi": "Tìm ghi chú chăm sóc",
+    "zh-Hans": "搜索照护笔记"
+  },
+  "Search ended after one minute. Search again or enter an address manually.": {
+    "es": "La búsqueda terminó después de un minuto. Busca de nuevo o introduce una dirección.",
+    "fil": "Natapos ang paghahanap pagkalipas ng isang minuto. Maghanap muli o ilagay ang address.",
+    "vi": "Tìm kiếm kết thúc sau một phút. Tìm lại hoặc nhập địa chỉ thủ công.",
+    "zh-Hans": "查找已在一分钟后结束。请重新查找或手动输入地址。"
+  },
+  "Search notes": {
+    "es": "Buscar notas",
+    "fil": "Maghanap ng tala",
+    "vi": "Tìm ghi chú",
+    "zh-Hans": "搜索笔记"
+  },
+  "Security": {
+    "es": "Seguridad",
+    "fil": "Seguridad",
+    "vi": "Bảo mật",
+    "zh-Hans": "安全"
+  },
+  "Select all": {
+    "es": "Seleccionar todo",
+    "fil": "Piliin lahat",
+    "vi": "Chọn tất cả",
+    "zh-Hans": "全选"
+  },
+  "Select records to send": {
+    "es": "Seleccionar registros para enviar",
+    "fil": "Piliin ang mga rekord na ipapadala",
+    "vi": "Chọn hồ sơ để gửi",
+    "zh-Hans": "选择要发送的记录"
+  },
+  "Send encrypted file · AirDrop / share sheet": {
+    "es": "Enviar archivo cifrado · AirDrop / compartir",
+    "fil": "Ipadala ang naka-encrypt na file · AirDrop / menu ng pagbabahagi",
+    "vi": "Gửi tệp được mã hóa · AirDrop / menu chia sẻ",
+    "zh-Hans": "发送加密文件 · AirDrop／共享菜单"
+  },
+  "Send encrypted file · Quick Share / apps": {
+    "es": "Enviar archivo cifrado · Quick Share / aplicaciones",
+    "fil": "Ipadala ang naka-encrypt na file · Quick Share / mga app",
+    "vi": "Gửi tệp được mã hóa · Quick Share / ứng dụng",
+    "zh-Hans": "发送加密文件 · Quick Share／应用"
+  },
+  "Send with device share sheet": {
+    "es": "Enviar con las opciones de compartir",
+    "fil": "Ipadala gamit ang menu ng pagbabahagi",
+    "vi": "Gửi bằng menu chia sẻ của thiết bị",
+    "zh-Hans": "通过设备共享菜单发送"
+  },
+  "Sender address · e.g. 192.168.1.5:12345": {
+    "es": "Dirección del remitente · ej. 192.168.1.5:12345",
+    "fil": "Address ng nagpapadala · hal. 192.168.1.5:12345",
+    "vi": "Địa chỉ người gửi · ví dụ 192.168.1.5:12345",
+    "zh-Hans": "发送方地址 · 例如 192.168.1.5:12345"
+  },
+  "Sender connection details": {
+    "es": "Datos de conexión del remitente",
+    "fil": "Mga detalye ng koneksyon ng nagpapadala",
+    "vi": "Thông tin kết nối của người gửi",
+    "zh-Hans": "发送方连接信息"
+  },
+  "Sender's 8-digit connection code": {
+    "es": "Código de 8 dígitos del remitente",
+    "fil": "8-digit na code ng nagpapadala",
+    "vi": "Mã kết nối 8 chữ số của người gửi",
+    "zh-Hans": "发送方的 8 位连接代码"
+  },
+  "Sending network address": {
+    "es": "Dirección de red para enviar",
+    "fil": "Address ng network para sa pagpapadala",
+    "vi": "Địa chỉ mạng để gửi",
+    "zh-Hans": "发送网络地址"
+  },
+  "Set up": {
+    "es": "Configurar",
+    "fil": "I-set up",
+    "vi": "Thiết lập",
+    "zh-Hans": "设置"
+  },
+  "Settings": {
+    "es": "Ajustes",
+    "fil": "Mga setting",
+    "vi": "Cài đặt",
+    "zh-Hans": "设置"
+  },
+  "Settings & Accessibility": {
+    "es": "Ajustes y accesibilidad",
+    "fil": "Mga setting at accessibility",
+    "vi": "Cài đặt và trợ năng",
+    "zh-Hans": "设置与无障碍"
+  },
+  "Settings & privacy": {
+    "es": "Ajustes y privacidad",
+    "fil": "Mga setting at pagkapribado",
+    "vi": "Cài đặt và quyền riêng tư",
+    "zh-Hans": "设置与隐私"
+  },
+  "Settings and accessibility": {
+    "es": "Ajustes y accesibilidad",
+    "fil": "Mga setting at accessibility",
+    "vi": "Cài đặt và trợ năng",
+    "zh-Hans": "设置与无障碍"
+  },
+  "Share a preference or imagine a story. Nothing is recorded.": {
+    "es": "Comparte una preferencia o imagina una historia. No se registra nada.",
+    "fil": "Magbahagi ng gusto o bumuo ng kuwento. Walang itinatala.",
+    "vi": "Chia sẻ sở thích hoặc tưởng tượng câu chuyện. Không ghi lại nội dung.",
+    "zh-Hans": "分享喜好或想象一个故事。不记录任何内容。"
+  },
+  "Shoe": {
+    "es": "Zapato",
+    "fil": "Sapatos",
+    "vi": "Giày",
+    "zh-Hans": "鞋子"
+  },
+  "Show a hint": {
+    "es": "Mostrar pista",
+    "fil": "Magpakita ng pahiwatig",
+    "vi": "Hiện gợi ý",
+    "zh-Hans": "显示提示"
+  },
+  "Show all activities": {
+    "es": "Mostrar todas las actividades",
+    "fil": "Ipakita ang lahat ng aktibidad",
+    "vi": "Hiện tất cả hoạt động",
+    "zh-Hans": "显示全部活动"
+  },
+  "Simple Mode": {
+    "es": "Modo sencillo",
+    "fil": "Simpleng mode",
+    "vi": "Chế độ đơn giản",
+    "zh-Hans": "简易模式"
+  },
+  "Simple mode": {
+    "es": "Modo sencillo",
+    "fil": "Simpleng mode",
+    "vi": "Chế độ đơn giản",
+    "zh-Hans": "简易模式"
+  },
+  "Skip": {
+    "es": "Omitir",
+    "fil": "Laktawan",
+    "vi": "Bỏ qua",
+    "zh-Hans": "跳过"
+  },
+  "Soap helps clean your hands.": {
+    "es": "El jabón ayuda a limpiar las manos.",
+    "fil": "Nakatutulong ang sabon sa paglilinis ng kamay.",
+    "vi": "Xà phòng giúp làm sạch tay.",
+    "zh-Hans": "肥皂帮助清洁双手。"
+  },
+  "Sock": {
+    "es": "Calcetín",
+    "fil": "Medyas",
+    "vi": "Tất",
+    "zh-Hans": "袜子"
+  },
+  "Some advanced instructions and external content remain in English.": {
+    "es": "Algunas instrucciones avanzadas y contenidos externos siguen en inglés.",
+    "fil": "Nananatili sa Ingles ang ilang advanced na tagubilin at panlabas na nilalaman.",
+    "vi": "Một số hướng dẫn nâng cao và nội dung bên ngoài vẫn bằng tiếng Anh.",
+    "zh-Hans": "部分高级说明和外部内容仍为英语。"
+  },
+  "Something else": {
+    "es": "Otra cosa",
+    "fil": "Iba pa",
+    "vi": "Điều khác",
+    "zh-Hans": "其他感受"
+  },
+  "Sort together": {
+    "es": "Clasificar juntos",
+    "fil": "Mag-uri nang magkasama",
+    "vi": "Cùng phân loại",
+    "zh-Hans": "一起分类"
+  },
+  "Sound": {
+    "es": "Sonido",
+    "fil": "Tunog",
+    "vi": "Âm thanh",
+    "zh-Hans": "声音"
+  },
+  "Soundscapes": {
+    "es": "Ambientes sonoros",
+    "fil": "Mga tunog ng kapaligiran",
+    "vi": "Âm thanh môi trường",
+    "zh-Hans": "环境音"
+  },
+  "Speak this phrase": {
+    "es": "Leer esta frase en voz alta",
+    "fil": "Bigkasin ang pariralang ito",
+    "vi": "Đọc câu này",
+    "zh-Hans": "朗读这句话"
+  },
+  "Speak, point, listen or skip. Answers are not recorded. These are leisure prompts, not treatment.": {
+    "es": "Habla, señala, escucha u omite. No se registran las respuestas; son propuestas recreativas, no un tratamiento.",
+    "fil": "Magsalita, tumuro, makinig o lumaktaw. Hindi itinatala ang mga sagot; mga mungkahi ito sa paglilibang, hindi paggamot.",
+    "vi": "Nói, chỉ, nghe hoặc bỏ qua. Không ghi lại câu trả lời; đây là gợi ý giải trí, không phải điều trị.",
+    "zh-Hans": "您可以说、指、听或跳过。不记录回答；这些是休闲提示，不是治疗。"
+  },
+  "Speak, point, listen or skip. Answers are not recorded; these are leisure prompts, not treatment.": {
+    "es": "Habla, señala, escucha u omite. No se registran las respuestas; son propuestas recreativas, no un tratamiento.",
+    "fil": "Magsalita, tumuro, makinig o lumaktaw. Hindi itinatala ang mga sagot; mga mungkahi ito sa paglilibang, hindi paggamot.",
+    "vi": "Nói, chỉ, nghe hoặc bỏ qua. Không ghi lại câu trả lời; đây là gợi ý giải trí, không phải điều trị.",
+    "zh-Hans": "您可以说、指、听或跳过。不记录回答；这些是休闲提示，不是治疗。"
+  },
+  "Speak, point, listen, write elsewhere, or skip. There is no right answer. Your response is not recorded.": {
+    "es": "Habla, señala, escucha, escribe en otro lugar u omite. No hay respuesta correcta. Tu respuesta no se registra.",
+    "fil": "Magsalita, tumuro, makinig, sumulat sa iba o lumaktaw. Walang tamang sagot. Hindi itinatala ang sagot mo.",
+    "vi": "Nói, chỉ, nghe, viết ở nơi khác hoặc bỏ qua. Không có đáp án đúng. Không ghi lại câu trả lời.",
+    "zh-Hans": "您可以说、指、听、在别处写下或跳过。没有标准答案。不会记录您的回答。"
+  },
+  "Spoken in-app prompts": {
+    "es": "Indicaciones habladas en la aplicación",
+    "fil": "Binibigkas na mga paalala sa app",
+    "vi": "Lời nhắc bằng giọng nói trong ứng dụng",
+    "zh-Hans": "应用内语音提示"
+  },
+  "Square": {
+    "es": "Cuadrado",
+    "fil": "Parisukat",
+    "vi": "Hình vuông",
+    "zh-Hans": "正方形"
+  },
+  "Star": {
+    "es": "Estrella",
+    "fil": "Bituin",
+    "vi": "Ngôi sao",
+    "zh-Hans": "星星"
+  },
+  "Start": {
+    "es": "Empezar",
+    "fil": "Magsimula",
+    "vi": "Bắt đầu",
+    "zh-Hans": "开始"
+  },
+  "Start here": {
+    "es": "Empieza aquí",
+    "fil": "Magsimula rito",
+    "vi": "Bắt đầu tại đây",
+    "zh-Hans": "从这里开始"
+  },
+  "Start with one thing": {
+    "es": "Empezar con una cosa",
+    "fil": "Magsimula sa isang bagay",
+    "vi": "Bắt đầu với một việc",
+    "zh-Hans": "先做一件事"
+  },
+  "Starting local offer…": {
+    "es": "Iniciando oferta local…",
+    "fil": "Sinisimulan ang lokal na alok…",
+    "vi": "Đang bắt đầu chia sẻ cục bộ…",
+    "zh-Hans": "正在启动本地传输…"
+  },
+  "Step {0} of {1}": {
+    "es": "Paso {0} de {1}",
+    "fil": "Hakbang {0} ng {1}",
+    "vi": "Bước {0} trên {1}",
+    "zh-Hans": "第 {0} 步，共 {1} 步"
+  },
+  "Steps, one per line": {
+    "es": "Pasos, uno por línea",
+    "fil": "Mga hakbang, isa bawat linya",
+    "vi": "Các bước, mỗi dòng một bước",
+    "zh-Hans": "步骤，每行一个"
+  },
+  "Stop": {
+    "es": "Detener",
+    "fil": "Itigil",
+    "vi": "Dừng",
+    "zh-Hans": "停止"
+  },
+  "Stop nearby connection": {
+    "es": "Detener conexión cercana",
+    "fil": "Itigil ang koneksyon sa malapit",
+    "vi": "Dừng kết nối gần đây",
+    "zh-Hans": "停止附近连接"
+  },
+  "Stop searching": {
+    "es": "Detener búsqueda",
+    "fil": "Itigil ang paghahanap",
+    "vi": "Dừng tìm kiếm",
+    "zh-Hans": "停止查找"
+  },
+  "Stop speaking": {
+    "es": "Detener la lectura",
+    "fil": "Itigil ang pagsasalita",
+    "vi": "Dừng đọc",
+    "zh-Hans": "停止朗读"
+  },
+  "System": {
+    "es": "Sistema",
+    "fil": "System",
+    "vi": "Hệ thống",
+    "zh-Hans": "跟随系统"
+  },
+  "Take a break": {
+    "es": "Tomar un descanso",
+    "fil": "Magpahinga",
+    "vi": "Nghỉ một chút",
+    "zh-Hans": "休息一下"
+  },
+  "Take your time. You can skip, ask for a hint, or stop.": {
+    "es": "Tómate tu tiempo. Puedes omitir, pedir una pista o detenerte.",
+    "fil": "Huwag magmadali. Maaari kang lumaktaw, humingi ng pahiwatig o huminto.",
+    "vi": "Cứ từ từ. Bạn có thể bỏ qua, xem gợi ý hoặc dừng.",
+    "zh-Hans": "慢慢来。您可以跳过、查看提示或停止。"
+  },
+  "Tell a story about a song, or skip.": {
+    "es": "Cuenta una historia sobre una canción, o pasa a la siguiente.",
+    "fil": "Magkuwento tungkol sa isang kanta, o laktawan.",
+    "vi": "Kể một câu chuyện về bài hát, hoặc bỏ qua.",
+    "zh-Hans": "讲一段与歌曲有关的故事，也可以跳过。"
+  },
+  "Text size": {
+    "es": "Tamaño del texto",
+    "fil": "Laki ng teksto",
+    "vi": "Cỡ chữ",
+    "zh-Hans": "文字大小"
+  },
+  "Thank you. Dose check-in saved.": {
+    "es": "Gracias. Registro de la dosis guardado.",
+    "fil": "Salamat. Na-save ang tala ng dosis.",
+    "vi": "Cảm ơn. Đã lưu ghi nhận liều thuốc.",
+    "zh-Hans": "谢谢。用药记录已保存。"
+  },
+  "That fits. Continue when you're ready.": {
+    "es": "Eso encaja. Continúa cuando estés listo.",
+    "fil": "Tama iyon. Magpatuloy kapag handa ka na.",
+    "vi": "Phù hợp rồi. Tiếp tục khi bạn sẵn sàng.",
+    "zh-Hans": "这样合适。准备好后再继续。"
+  },
+  "That fits. Continue when you’re ready.": {
+    "es": "Eso encaja. Continúa cuando estés listo.",
+    "fil": "Tama iyon. Magpatuloy kapag handa ka na.",
+    "vi": "Phù hợp rồi. Tiếp tục khi bạn sẵn sàng.",
+    "zh-Hans": "这样合适。准备好后再继续。"
+  },
+  "This is not a medical device.": {
+    "es": "Este no es un dispositivo médico.",
+    "fil": "Hindi ito isang medikal na device.",
+    "vi": "Đây không phải thiết bị y tế.",
+    "zh-Hans": "这不是医疗设备。"
+  },
+  "This is your CareSphere reminder. Please check your medication label and follow the schedule agreed with your care team.": {
+    "es": "Este es tu recordatorio de CareSphere. Revisa la etiqueta del medicamento y sigue el horario acordado con tu equipo de atención.",
+    "fil": "Ito ang iyong paalala sa CareSphere. Pakisuri ang label ng gamot at sundin ang iskedyul na napagkasunduan ninyo ng iyong pangkat ng pangangalaga.",
+    "vi": "Đây là lời nhắc CareSphere. Hãy kiểm tra nhãn thuốc và tuân theo lịch đã thống nhất với nhóm chăm sóc.",
+    "zh-Hans": "这是您的 CareSphere 提醒。请核对药品标签，并遵循与照护团队商定的用药时间。"
+  },
+  "This is your CareSphere reminder. Time to take {0}.": {
+    "es": "Este es tu recordatorio de CareSphere. Es hora de tomar {0}.",
+    "fil": "Ito ang iyong paalala sa CareSphere. Oras na para uminom ng {0}.",
+    "vi": "Đây là lời nhắc CareSphere. Đã đến giờ dùng {0}.",
+    "zh-Hans": "这是您的 CareSphere 提醒。该服用 {0} 了。"
+  },
+  "This moves the note to Recently deleted for 30 days. Restore or permanently erase it in My support tools → Recovery & backup. Previously shared copies cannot be removed.": {
+    "es": "Esto mueve la nota a Eliminados recientemente durante 30 días. Restáurala o bórrala para siempre en Mis herramientas de apoyo → Recuperación y copia de seguridad. No se pueden eliminar las copias ya compartidas.",
+    "fil": "Ililipat ang tala sa Kamakailang binura sa loob ng 30 araw. Ibalik o permanenteng burahin sa Mga pantulong ko → Pagbawi at backup. Hindi mabubura ang mga kopyang naibahagi na.",
+    "vi": "Ghi chú được chuyển vào mục Đã xóa gần đây trong 30 ngày. Khôi phục hoặc xóa vĩnh viễn trong Công cụ hỗ trợ của tôi → Khôi phục và sao lưu. Không thể xóa các bản sao đã chia sẻ.",
+    "zh-Hans": "这会将笔记移至“最近删除”并保留 30 天。在“我的辅助工具 → 恢复与备份”中可恢复或永久删除。无法删除之前已共享的副本。"
+  },
+  "This permanently removes your saved care information and encryption key from this app. Copies you previously shared cannot be removed.": {
+    "es": "Esto elimina permanentemente la información de cuidado y la clave de cifrado de esta aplicación. Las copias ya compartidas no se pueden eliminar.",
+    "fil": "Permanenteng mabubura ang naka-save na impormasyon ng pangangalaga at encryption key sa app na ito. Hindi mabubura ang mga kopyang naibahagi na.",
+    "vi": "Thao tác này xóa vĩnh viễn thông tin chăm sóc và khóa mã hóa khỏi ứng dụng. Không thể xóa các bản sao đã chia sẻ.",
+    "zh-Hans": "这将从此应用永久删除已保存的照护信息和加密密钥。无法删除之前已共享的副本。"
+  },
+  "Time": {
+    "es": "Hora",
+    "fil": "Oras",
+    "vi": "Thời gian",
+    "zh-Hans": "时间"
+  },
+  "Tired": {
+    "es": "Cansado",
+    "fil": "Pagod",
+    "vi": "Mệt",
+    "zh-Hans": "疲倦"
+  },
+  "Title": {
+    "es": "Título",
+    "fil": "Pamagat",
+    "vi": "Tiêu đề",
+    "zh-Hans": "标题"
+  },
+  "Today": {
+    "es": "Hoy",
+    "fil": "Ngayon",
+    "vi": "Hôm nay",
+    "zh-Hans": "今天"
+  },
+  "Today's routines": {
+    "es": "Rutinas de hoy",
+    "fil": "Mga gawain ngayon",
+    "vi": "Việc hằng ngày hôm nay",
+    "zh-Hans": "今天的日常安排"
+  },
+  "Transfer passphrase": {
+    "es": "Frase de contraseña de transferencia",
+    "fil": "Passphrase ng paglilipat",
+    "vi": "Mật khẩu truyền dữ liệu",
+    "zh-Hans": "传输口令"
+  },
+  "Transfer passphrase · 12+ characters": {
+    "es": "Frase de contraseña · 12 caracteres o más",
+    "fil": "Passphrase · 12 o higit pang character",
+    "vi": "Mật khẩu truyền · ít nhất 12 ký tự",
+    "zh-Hans": "传输口令 · 至少 12 个字符"
+  },
+  "Triangle": {
+    "es": "Triángulo",
+    "fil": "Tatsulok",
+    "vi": "Hình tam giác",
+    "zh-Hans": "三角形"
+  },
+  "Try a word, like calm or story": {
+    "es": "Prueba una palabra, como calma o historia",
+    "fil": "Subukan ang salita tulad ng kalma o kuwento",
+    "vi": "Thử một từ như bình yên hoặc câu chuyện",
+    "zh-Hans": "试试输入平静或故事等词语"
+  },
+  "Try again": {
+    "es": "Intentar de nuevo",
+    "fil": "Subukan muli",
+    "vi": "Thử lại",
+    "zh-Hans": "重试"
+  },
+  "Try an activity": {
+    "es": "Probar una actividad",
+    "fil": "Subukan ang isang aktibidad",
+    "vi": "Thử hoạt động",
+    "zh-Hans": "试试活动"
+  },
+  "Two leaves, then a flower.": {
+    "es": "Dos hojas y luego una flor.",
+    "fil": "Dalawang dahon, tapos isang bulaklak.",
+    "vi": "Hai chiếc lá, rồi một bông hoa.",
+    "zh-Hans": "两片叶子，然后是一朵花。"
+  },
+  "Undo": {
+    "es": "Deshacer",
+    "fil": "I-undo",
+    "vi": "Hoàn tác",
+    "zh-Hans": "撤销"
+  },
+  "Undo last routine change": {
+    "es": "Deshacer el último cambio de rutina",
+    "fil": "I-undo ang huling pagbabago sa gawain",
+    "vi": "Hoàn tác thay đổi việc hằng ngày gần nhất",
+    "zh-Hans": "撤销上一次日常安排更改"
+  },
+  "Unlock a CareSphere transfer": {
+    "es": "Desbloquear transferencia de CareSphere",
+    "fil": "I-unlock ang CareSphere transfer",
+    "vi": "Mở khóa dữ liệu CareSphere",
+    "zh-Hans": "解锁 CareSphere 传输"
+  },
+  "Unlock nearby copy": {
+    "es": "Desbloquear copia cercana",
+    "fil": "I-unlock ang kopya mula sa malapit",
+    "vi": "Mở khóa bản sao từ thiết bị gần đây",
+    "zh-Hans": "解锁附近设备的副本"
+  },
+  "Unlocked locally. Nothing is saved until you select records and import.": {
+    "es": "Desbloqueado localmente. No se guarda nada hasta que selecciones e importes registros.",
+    "fil": "Na-unlock nang lokal. Walang mase-save hangga't hindi ka pumipili at nag-i-import ng rekord.",
+    "vi": "Đã mở khóa cục bộ. Chưa lưu gì cho đến khi bạn chọn hồ sơ và nhập.",
+    "zh-Hans": "已在本地解锁。在您选择记录并导入之前，不会保存任何内容。"
+  },
+  "Use a unique passphrase of at least 12 characters. There is no passphrase recovery.": {
+    "es": "Usa una frase de contraseña única de al menos 12 caracteres. No se puede recuperar.",
+    "fil": "Gumamit ng natatanging passphrase na may hindi bababa sa 12 character. Hindi ito mababawi kapag nakalimutan.",
+    "vi": "Dùng mật khẩu riêng ít nhất 12 ký tự. Không thể khôi phục mật khẩu đã quên.",
+    "zh-Hans": "请使用至少 12 个字符的独特口令。无法恢复遗忘的口令。"
+  },
+  "Use device language": {
+    "es": "Usar el idioma del dispositivo",
+    "fil": "Gamitin ang wika ng device",
+    "vi": "Dùng ngôn ngữ của thiết bị",
+    "zh-Hans": "使用设备语言"
+  },
+  "Video": {
+    "es": "Videollamada",
+    "fil": "Video call",
+    "vi": "Gọi video",
+    "zh-Hans": "视频通话"
+  },
+  "Visit preparation": {
+    "es": "Preparación para la consulta",
+    "fil": "Paghahanda sa pagbisita",
+    "vi": "Chuẩn bị đi khám",
+    "zh-Hans": "就诊准备"
+  },
+  "Visit summary": {
+    "es": "Resumen de la consulta",
+    "fil": "Buod ng pagbisita",
+    "vi": "Tóm tắt buổi khám",
+    "zh-Hans": "就诊摘要"
+  },
+  "Visual routines": {
+    "es": "Rutinas visuales",
+    "fil": "Mga biswal na gawain",
+    "vi": "Thói quen bằng hình ảnh",
+    "zh-Hans": "图示日常安排"
+  },
+  "Vitals": {
+    "es": "Signos vitales",
+    "fil": "Mga vital sign",
+    "vi": "Dấu hiệu sinh tồn",
+    "zh-Hans": "生命体征"
+  },
+  "Vitals & Telehealth": {
+    "es": "Signos vitales y telesalud",
+    "fil": "Mga vital sign at telehealth",
+    "vi": "Dấu hiệu sinh tồn và khám từ xa",
+    "zh-Hans": "生命体征与远程医疗"
+  },
+  "Welcome to CareSphere": {
+    "es": "Bienvenido a CareSphere",
+    "fil": "Maligayang pagdating sa CareSphere",
+    "vi": "Chào mừng đến với CareSphere",
+    "zh-Hans": "欢迎使用 CareSphere"
+  },
+  "What do you notice outside?": {
+    "es": "¿Qué observas afuera?",
+    "fil": "Ano ang napapansin mo sa labas?",
+    "vi": "Bạn thấy gì ở bên ngoài?",
+    "zh-Hans": "您注意到外面有什么？"
+  },
+  "What makes a place comfortable to you?": {
+    "es": "¿Qué hace que un lugar te resulte cómodo?",
+    "fil": "Ano ang nagpapaginhawa sa iyo sa isang lugar?",
+    "vi": "Điều gì khiến bạn thấy dễ chịu ở một nơi?",
+    "zh-Hans": "什么让您觉得一个地方舒适？"
+  },
+  "What makes a place comfortable?": {
+    "es": "¿Qué hace que un lugar sea cómodo?",
+    "fil": "Ano ang nagpapaginhawa sa isang lugar?",
+    "vi": "Điều gì khiến một nơi dễ chịu?",
+    "zh-Hans": "什么让一个地方感到舒适？"
+  },
+  "What makes a place feel comfortable to you?": {
+    "es": "¿Qué hace que un lugar te resulte cómodo?",
+    "fil": "Ano ang nagpapaginhawa sa iyo sa isang lugar?",
+    "vi": "Điều gì khiến bạn thấy dễ chịu ở một nơi?",
+    "zh-Hans": "什么让您觉得一个地方舒适？"
+  },
+  "What music do you enjoy?": {
+    "es": "¿Qué música te gusta?",
+    "fil": "Anong musika ang gusto mo?",
+    "vi": "Bạn thích loại nhạc nào?",
+    "zh-Hans": "您喜欢什么音乐？"
+  },
+  "What object do you like to have nearby?": {
+    "es": "¿Qué objeto te gusta tener cerca?",
+    "fil": "Anong bagay ang gusto mong malapit sa iyo?",
+    "vi": "Bạn thích để đồ vật nào ở gần?",
+    "zh-Hans": "您喜欢把什么物品放在身边？"
+  },
+  "What sounds do you enjoy?": {
+    "es": "¿Qué sonidos te gustan?",
+    "fil": "Anong mga tunog ang gusto mo?",
+    "vi": "Bạn thích âm thanh nào?",
+    "zh-Hans": "您喜欢什么声音？"
+  },
+  "What would make today a little easier?": {
+    "es": "¿Qué haría que hoy fuera un poco más fácil?",
+    "fil": "Ano ang makapagpapagaan ng araw na ito?",
+    "vi": "Điều gì giúp hôm nay dễ dàng hơn một chút?",
+    "zh-Hans": "什么能让今天轻松一点？"
+  },
+  "What would you like to remember?": {
+    "es": "¿Qué te gustaría recordar?",
+    "fil": "Ano ang gusto mong tandaan?",
+    "vi": "Bạn muốn ghi nhớ điều gì?",
+    "zh-Hans": "您想记下什么？"
+  },
+  "When washing your hands, what comes after wetting them?": {
+    "es": "Al lavarte las manos, ¿qué haces después de mojarlas?",
+    "fil": "Kapag naghuhugas ng kamay, ano ang kasunod ng pagbasa nito?",
+    "vi": "Khi rửa tay, sau khi làm ướt tay bạn làm gì?",
+    "zh-Hans": "洗手时，弄湿双手后做什么？"
+  },
+  "Which object do you like nearby?": {
+    "es": "¿Qué objeto te gusta tener cerca?",
+    "fil": "Anong bagay ang gusto mong malapit sa iyo?",
+    "vi": "Bạn thích để đồ vật nào ở gần?",
+    "zh-Hans": "您喜欢把什么物品放在身边？"
+  },
+  "Which one do you wear?": {
+    "es": "¿Cuál te pones?",
+    "fil": "Alin ang isinusuot?",
+    "vi": "Mục nào để mặc hoặc đội?",
+    "zh-Hans": "哪一个可以穿戴？"
+  },
+  "Which one is a fruit?": {
+    "es": "¿Cuál es una fruta?",
+    "fil": "Alin ang prutas?",
+    "vi": "Mục nào là trái cây?",
+    "zh-Hans": "哪一个是水果？"
+  },
+  "Which one is used for a drink?": {
+    "es": "¿Cuál se usa para beber?",
+    "fil": "Alin ang ginagamit sa pag-inom?",
+    "vi": "Mục nào dùng để uống?",
+    "zh-Hans": "哪一个用于喝水？"
+  },
+  "Would you choose a garden, beach or forest?": {
+    "es": "¿Elegirías un jardín, una playa o un bosque?",
+    "fil": "Pipili ka ba ng hardin, dalampasigan o gubat?",
+    "vi": "Bạn sẽ chọn khu vườn, bãi biển hay khu rừng?",
+    "zh-Hans": "您会选择花园、海滩还是森林？"
+  },
+  "Would you choose a garden, beach, or forest?": {
+    "es": "¿Elegirías un jardín, una playa o un bosque?",
+    "fil": "Pipili ka ba ng hardin, dalampasigan o gubat?",
+    "vi": "Bạn sẽ chọn khu vườn, bãi biển hay khu rừng?",
+    "zh-Hans": "您会选择花园、海滩还是森林？"
+  },
+  "Would you like music or quiet?": {
+    "es": "¿Prefieres música o silencio?",
+    "fil": "Gusto mo ba ng musika o katahimikan?",
+    "vi": "Bạn muốn nghe nhạc hay yên tĩnh?",
+    "zh-Hans": "您想听音乐还是保持安静？"
+  },
+  "Write a care note": {
+    "es": "Escribir una nota de cuidado",
+    "fil": "Sumulat ng tala ng pangangalaga",
+    "vi": "Viết ghi chú chăm sóc",
+    "zh-Hans": "写照护笔记"
+  },
+  "Write your own instructions, one step per line. Optional photos come from My photos. Do not use this to change prescribed medication instructions.": {
+    "es": "Escribe tus instrucciones, un paso por línea. Puedes añadir fotos de Mis fotos. No uses esto para cambiar las indicaciones de medicamentos recetados.",
+    "fil": "Isulat ang sarili mong tagubilin, isang hakbang bawat linya. Opsyonal ang mga larawan mula sa Mga larawan ko. Huwag gamitin ito upang baguhin ang tagubilin sa iniresetang gamot.",
+    "vi": "Viết hướng dẫn của bạn, mỗi dòng một bước. Có thể thêm ảnh từ Ảnh của tôi. Không dùng tính năng này để thay đổi chỉ dẫn dùng thuốc theo đơn.",
+    "zh-Hans": "编写自己的说明，每行一个步骤。可从“我的照片”中选取照片。请勿用此功能更改处方用药说明。"
+  },
+  "Yellow": {
+    "es": "Amarillo",
+    "fil": "Dilaw",
+    "vi": "Vàng",
+    "zh-Hans": "黄色"
+  },
+  "Yes": {
+    "es": "Sí",
+    "fil": "Oo",
+    "vi": "Có",
+    "zh-Hans": "是"
+  },
+  "You can fill a cup with water.": {
+    "es": "Puedes llenar una taza con agua.",
+    "fil": "Maaari mong lagyan ng tubig ang tasa.",
+    "vi": "Bạn có thể rót nước vào cốc.",
+    "zh-Hans": "杯子可以装水。"
+  },
+  "Your day, at your pace.": {
+    "es": "Tu día, a tu ritmo.",
+    "fil": "Araw mo, sa sarili mong bilis.",
+    "vi": "Ngày của bạn, theo nhịp của bạn.",
+    "zh-Hans": "您的一天，由您掌握节奏。"
+  },
+  "Your name": {
+    "es": "Tu nombre",
+    "fil": "Pangalan mo",
+    "vi": "Tên của bạn",
+    "zh-Hans": "您的姓名"
+  },
+  "Your notes and care records stay in their original language.": {
+    "es": "Tus notas y registros de cuidado conservan su idioma original.",
+    "fil": "Mananatili sa orihinal na wika ang iyong mga tala at rekord ng pangangalaga.",
+    "vi": "Ghi chú và hồ sơ chăm sóc giữ nguyên ngôn ngữ ban đầu.",
+    "zh-Hans": "您的笔记和照护记录保留原始语言。"
+  },
+  "Your phrase": {
+    "es": "Tu frase",
+    "fil": "Parirala mo",
+    "vi": "Câu của bạn",
+    "zh-Hans": "您的短语"
+  },
+  "Your saved note has not changed.": {
+    "es": "Tu nota guardada no ha cambiado.",
+    "fil": "Hindi nagbago ang naka-save mong tala.",
+    "vi": "Ghi chú đã lưu không thay đổi.",
+    "zh-Hans": "已保存的笔记没有改变。"
+  },
+  "Your support tools": {
+    "es": "Tus herramientas de apoyo",
+    "fil": "Mga pantulong mo",
+    "vi": "Công cụ hỗ trợ của bạn",
+    "zh-Hans": "您的辅助工具"
+  }
+}

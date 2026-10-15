@@ -24,9 +24,9 @@ export function matchesSearch(text, query) {
   const haystack = fold(text)
   return fold(query).trim().split(/\s+/).every(word => haystack.includes(word))
 }
-export function filterActivities({ query = '', category = 'all', favoritesOnly = false, favorites = [] } = {}) {
+export function filterActivities({ query = '', category = 'all', favoritesOnly = false, favorites = [], translate = value => value } = {}) {
   const saved = normalizeFavorites(favorites)
-  return ACTIVITIES.filter(a => (category === 'all' || a.category === category) && (!favoritesOnly || saved.includes(a.id)) && matchesSearch(`${a.title} ${a.summary}`, query))
+  return ACTIVITIES.filter(a => (category === 'all' || a.category === category) && (!favoritesOnly || saved.includes(a.id)) && matchesSearch(`${a.title} ${a.summary} ${translate(a.title)} ${translate(a.summary)}`, query))
 }
 export const CHOICE_ROUNDS = {
   sortTogether: [

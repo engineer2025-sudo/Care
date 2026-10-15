@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 
 /// Opaque, full-window biometric gate. CareSphereApp switches its root view to
@@ -29,9 +30,9 @@ struct AppLockView: View {
                         .foregroundStyle(Color.emeraldText)
                 }
                 VStack(spacing: 8) {
-                    Text("CareSphere is locked")
+                    Text(AppLanguage.text("CareSphere is locked"))
                         .font(.title2.weight(.heavy))
-                    Text("Your private care information is hidden until you unlock.")
+                    Text(AppLanguage.text("Your private care information is hidden until you unlock."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -53,7 +54,7 @@ struct AppLockView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(isAuthenticating)
                 Spacer(minLength: 24)
-                Text("Your care data stays on this device.")
+                Text(AppLanguage.text("Your care data stays on this device."))
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }

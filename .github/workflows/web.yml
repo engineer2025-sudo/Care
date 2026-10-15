@@ -4,6 +4,8 @@ on:
   push:
     branches: ['arena/**', main]
     paths:
+      - 'localization/**'
+      - 'scripts/generate_localizations.py'
       - 'src/**'
       - 'test/**'
       - 'e2e/**'
@@ -19,6 +21,8 @@ on:
       - '.github/workflows/web.yml'
   pull_request:
     paths:
+      - 'localization/**'
+      - 'scripts/generate_localizations.py'
       - 'src/**'
       - 'test/**'
       - 'e2e/**'
@@ -53,6 +57,9 @@ jobs:
 
       - name: Install locked dependencies
         run: npm ci
+
+      - name: Check offline translation catalogs
+        run: npm run test:translations
 
       - name: Run local privacy and visit-prep tests
         run: npm test

@@ -30,7 +30,7 @@ struct OverviewView: View {
                         if !store.personalSupport.simple { metricsGrid(proxy: proxy) }
                         moodCheckIn
                         routinesCard.id("routines")
-                        if store.routineUndo != nil { Button("Undo last routine change") { store.undoRoutineChange() }.buttonStyle(.bordered) }
+                        if store.routineUndo != nil { Button(AppLanguage.text("Undo last routine change")) { store.undoRoutineChange() }.buttonStyle(.bordered) }
                         if !store.personalSupport.simple { medicationsCard.id("medications") }
                         #if os(iOS)
                         if !store.personalSupport.simple { stepsCard }
@@ -40,7 +40,7 @@ struct OverviewView: View {
                 }
             }
             .background(Color.ink)
-            .navigationTitle("Today")
+            .navigationTitle(AppLanguage.text("Today"))
             .inlineTitle()
             .onAppear {
                 store.refreshMedicationReminders()
@@ -84,15 +84,15 @@ struct OverviewView: View {
                 .font(.largeTitle.weight(.bold))
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
-            Text("A little structure, a moment of calm, or a familiar face. Choose what feels right today.")
+            Text(AppLanguage.text("A little structure, a moment of calm, or a familiar face. Choose what feels right today."))
                 .font(.body).foregroundStyle(.secondary)
             Button { navigation.selectedTab = .activities } label: {
-                Label("Find an activity", systemImage: "square.grid.2x2")
+                Label(AppLanguage.text("Find an activity"), systemImage: "square.grid.2x2")
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
             .buttonStyle(.borderedProminent)
             Button { navigation.selectedTab = .connect } label: {
-                Label("Connect with someone", systemImage: "person.2")
+                Label(AppLanguage.text("Connect with someone"), systemImage: "person.2")
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
             .buttonStyle(.bordered)
@@ -104,7 +104,7 @@ struct OverviewView: View {
 
     private func metricsGrid(proxy: ScrollViewProxy) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Today at a glance").font(.headline).accessibilityAddTraits(.isHeader)
+            Text(AppLanguage.text("Today at a glance")).font(.headline).accessibilityAddTraits(.isHeader)
             LazyVGrid(columns: typeSize.isAccessibilitySize ? [GridItem(.flexible())] : [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 BigMetricButton(title: "\(store.routinesDone) of \(store.routines.count)", subtitle: "My daily routine") {
                     Image(systemName: "checklist").foregroundStyle(Color.emeraldText)
@@ -128,7 +128,7 @@ struct OverviewView: View {
     }
 
     private var moodCheckIn: some View {
-        SectionCard(title: "How are you feeling?", systemImage: "face.smiling") {
+        SectionCard(title: AppLanguage.text("How are you feeling?"), systemImage: "face.smiling") {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: typeSize.isAccessibilitySize ? 130 : 82))], spacing: 10) {
                 ForEach(1...5, id: \.self) { score in
                     moodButton(score: score)
@@ -151,7 +151,7 @@ struct OverviewView: View {
             Button {
                 support.begin(.selfReportedStress)
             } label: {
-                Label("I'm stressed", systemImage: "wind")
+                Label(AppLanguage.text("I'm stressed"), systemImage: "wind")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.vertical, 4)
             }
@@ -196,7 +196,7 @@ struct OverviewView: View {
 
     #if os(iOS)
     private var stepsCard: some View {
-        SectionCard(title: "Today's steps", systemImage: "figure.walk") {
+        SectionCard(title: AppLanguage.text("Today's steps"), systemImage: "figure.walk") {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(steps.hasStarted && steps.isAvailable ? "\(steps.todaySteps)" : "—")
@@ -206,7 +206,7 @@ struct OverviewView: View {
                         .foregroundStyle(.secondary)
                 }
                 if !steps.hasStarted {
-                    Button("Enable step counting") { steps.start() }
+                    Button(AppLanguage.text("Enable step counting")) { steps.start() }
                         .buttonStyle(.bordered).controlSize(.large)
                 }
                 ProgressView(value: Double(min(steps.todaySteps, store.profile.dailyStepGoal)),
@@ -219,24 +219,24 @@ struct OverviewView: View {
     #endif
 
     private var routinesCard: some View {
-        SectionCard(title: "My daily routine", systemImage: "calendar") {
+        SectionCard(title: AppLanguage.text("My daily routine"), systemImage: "calendar") {
             HStack {
-                Text("Check off what feels right today. Your list resets each local day.")
+                Text(AppLanguage.text("Check off what feels right today. Your list resets each local day."))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer(minLength: 8)
                 Button {
                     showRoutineEditor = true
                 } label: {
-                    Label("Edit", systemImage: "slider.horizontal.3")
+                    Label(AppLanguage.text("Edit"), systemImage: "slider.horizontal.3")
                         .font(.caption.weight(.bold))
                 }
                 .buttonStyle(.bordered)
-                .accessibilityLabel("Add or remove daily routines")
+                .accessibilityLabel(AppLanguage.text("Add or remove daily routines"))
             }
 
             if store.routines.isEmpty {
-                Text("No routines yet. Add a few gentle reminders that work for you.")
+                Text(AppLanguage.text("No routines yet. Add a few gentle reminders that work for you."))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -271,7 +271,7 @@ struct OverviewView: View {
     }
 
     private var medicationsCard: some View {
-        SectionCard(title: "Today's medications", systemImage: "pills") {
+        SectionCard(title: AppLanguage.text("Today's medications"), systemImage: "pills") {
             Button { showMedicationSettings = true } label: {
                 Label(store.configuredMedications.isEmpty ? "Add a medication reminder" : "Manage my schedule", systemImage: "plus.circle")
                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
@@ -279,14 +279,14 @@ struct OverviewView: View {
             .buttonStyle(.bordered)
             VStack(spacing: 8) {
                 if store.configuredMedications.isEmpty {
-                    Text("No schedule yet. Add only medicines and times confirmed by your care team in Settings.")
+                    Text(AppLanguage.text("No schedule yet. Add only medicines and times confirmed by your care team in Settings."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(12)
                         .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 } else if !store.medicationScheduleConfirmed {
-                    Text("A saved schedule needs review in Settings. Reminders and dose check-ins are paused until you confirm every name and time.")
+                    Text(AppLanguage.text("A saved schedule needs review in Settings. Reminders and dose check-ins are paused until you confirm every name and time."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -299,7 +299,7 @@ struct OverviewView: View {
                             Button {
                                 store.toggleMedication(med)
                                 if !med.isTaken && !store.reduceVisualMotion { celebrate() }
-                                SpeechService.shared.speak("Dose check-in saved.", enabled: store.voiceReminders, voiceIdentifier: store.voiceIdentifier)
+                                SpeechService.shared.speak(AppLanguage.text("Dose check-in saved."), enabled: store.voiceReminders, voiceIdentifier: store.voiceIdentifier)
                             } label: {
                                 Image(systemName: med.isTaken ? "checkmark.circle.fill" : "circle.dashed")
                                     .font(.title2)
@@ -325,7 +325,7 @@ struct OverviewView: View {
                 }
             }
             if store.medicationScheduleConfirmed {
-                Text("Check-ins are self-reported, reset at local midnight, and do not verify that a dose was taken.")
+                Text(AppLanguage.text("Check-ins are self-reported, reset at local midnight, and do not verify that a dose was taken."))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                 Label {
@@ -355,9 +355,9 @@ private struct RoutineEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Your routines") {
+                Section(AppLanguage.text("Your routines")) {
                     if store.routines.isEmpty {
-                        Text("No routines yet. Add a reminder that fits your day.")
+                        Text(AppLanguage.text("No routines yet. Add a reminder that fits your day."))
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(store.routines) { routine in
@@ -368,7 +368,7 @@ private struct RoutineEditorView: View {
                                     .lineLimit(2)
                                 Spacer(minLength: 8)
                                 if routine.isDone {
-                                    Label("Done today", systemImage: "checkmark.circle.fill")
+                                    Label(AppLanguage.text("Done today"), systemImage: "checkmark.circle.fill")
                                         .font(.caption)
                                         .foregroundStyle(Color.emeraldText)
                                         .labelStyle(.titleAndIcon)
@@ -386,19 +386,19 @@ private struct RoutineEditorView: View {
                         }
                     }
                     if store.routines.count >= 24 {
-                        Text("You can save up to 24 routines.")
+                        Text(AppLanguage.text("You can save up to 24 routines."))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
 
-                Section("Add a routine") {
+                Section(AppLanguage.text("Add a routine")) {
                     HStack {
-                        TextField("Emoji", text: $emoji)
+                        TextField(AppLanguage.text("Emoji"), text: $emoji)
                             .frame(width: 68)
-                            .accessibilityLabel("Routine emoji")
-                        TextField("Routine name", text: $title)
-                            .accessibilityLabel("Routine name")
+                            .accessibilityLabel(AppLanguage.text("Routine emoji"))
+                        TextField(AppLanguage.text("Routine name"), text: $title)
+                            .accessibilityLabel(AppLanguage.text("Routine name"))
                     }
                     Button {
                         guard canAdd else { return }
@@ -406,21 +406,21 @@ private struct RoutineEditorView: View {
                         title = ""
                         emoji = "✨"
                     } label: {
-                        Label("Add to my routine", systemImage: "plus.circle.fill")
+                        Label(AppLanguage.text("Add to my routine"), systemImage: "plus.circle.fill")
                     }
                     .disabled(!canAdd)
                 }
 
                 Section {
-                    Text("Routine check-ins are stored on this device. A checkmark resets at local midnight; it is a personal checklist, not proof of an activity.")
+                    Text(AppLanguage.text("Routine check-ins are stored on this device. A checkmark resets at local midnight; it is a personal checklist, not proof of an activity."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("Customize routine")
+            .navigationTitle(AppLanguage.text("Customize routine"))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(AppLanguage.text("Done")) { dismiss() }
                 }
             }
         }

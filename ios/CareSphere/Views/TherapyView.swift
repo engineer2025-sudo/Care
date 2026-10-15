@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 
 // MARK: - Untimed feelings-word activity
@@ -17,8 +18,8 @@ struct FeelingsExplorerCard: View {
     @State private var choice: String?
 
     var body: some View {
-        SectionCard(title: "Feelings explorer", systemImage: "face.smiling") {
-            Text("What might this person be feeling? Choose any word—or “Not sure.” These emoji are simplified illustrations, not rules for reading real people; there is no right answer or score.")
+        SectionCard(title: AppLanguage.text("Feelings explorer"), systemImage: "face.smiling") {
+            Text(AppLanguage.text("What might this person be feeling? Choose any word—or “Not sure.” These emoji are simplified illustrations, not rules for reading real people; there is no right answer or score."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             VStack(spacing: 10) {
@@ -59,7 +60,7 @@ struct FeelingsExplorerCard: View {
                 pictureIndex = (pictureIndex + 1) % feelingPictures.count
                 choice = nil
             } label: {
-                Label("Next picture", systemImage: "arrow.right")
+                Label(AppLanguage.text("Next picture"), systemImage: "arrow.right")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
             }
@@ -81,23 +82,23 @@ struct PatternRecallCard: View {
     private var complete: Bool { started && inputIndex == sequence.count }
 
     var body: some View {
-        SectionCard(title: "Remember a pattern", systemImage: "hand.tap") {
-            Text("Tap the numbered pads in the order shown. Keep the guide visible or hide it if you want to try recalling. There is no timer or flashing playback.")
+        SectionCard(title: AppLanguage.text("Remember a pattern"), systemImage: "hand.tap") {
+            Text(AppLanguage.text("Tap the numbered pads in the order shown. Keep the guide visible or hide it if you want to try recalling. There is no timer or flashing playback."))
                 .foregroundStyle(.secondary)
-            Picker("Pattern length", selection: $length) {
+            Picker(AppLanguage.text("Pattern length"), selection: $length) {
                 ForEach(1...4, id: \.self) { Text("\($0) \($0 == 1 ? "step" : "steps")").tag($0) }
             }
             .pickerStyle(.menu)
             .onChange(of: length) { _ in started = false; inputIndex = 0; message = "Start a new pattern when you are ready." }
             if started {
-                Toggle("Keep the pattern visible", isOn: $showGuide)
+                Toggle(AppLanguage.text("Keep the pattern visible"), isOn: $showGuide)
                 if showGuide {
                     Text(sequence.map(String.init).joined(separator: " → "))
                         .font(.title2.weight(.bold))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(16)
                         .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 14))
-                        .accessibilityLabel("Pattern: " + sequence.map(String.init).joined(separator: ", then "))
+                        .accessibilityLabel(AppLanguage.text("Pattern: ") + sequence.map(String.init).joined(separator: ", then "))
                 }
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ForEach(1...4, id: \.self) { pad in
@@ -124,7 +125,7 @@ struct PatternRecallCard: View {
             }
             .buttonStyle(.borderedProminent)
             if started {
-                Button("Try the same pattern again") {
+                Button(AppLanguage.text("Try the same pattern again")) {
                     inputIndex = 0; showGuide = true
                     message = "The same pattern is ready. Start with step 1."
                 }.buttonStyle(.bordered).controlSize(.large)
@@ -176,19 +177,19 @@ struct PicturePairsCard: View {
     @State private var message = "Choose two picture cards to look for a pair."
 
     var body: some View {
-        SectionCard(title: "Picture pairs", systemImage: "square.grid.2x2") {
-            Text("Match familiar picture symbols at your own pace. There is no timer or score; unmatched cards stay open until you choose to hide them. This is an optional game, not a memory test.")
+        SectionCard(title: AppLanguage.text("Picture pairs"), systemImage: "square.grid.2x2") {
+            Text(AppLanguage.text("Match familiar picture symbols at your own pace. There is no timer or score; unmatched cards stay open until you choose to hide them. This is an optional game, not a memory test."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Picker("Number of pairs", selection: $pairCount) {
-                Text("2 pairs").tag(2)
-                Text("3 pairs").tag(3)
-                Text("4 pairs").tag(4)
+            Picker(AppLanguage.text("Number of pairs"), selection: $pairCount) {
+                Text(AppLanguage.text("2 pairs")).tag(2)
+                Text(AppLanguage.text("3 pairs")).tag(3)
+                Text(AppLanguage.text("4 pairs")).tag(4)
             }
             .pickerStyle(.menu)
             .onChange(of: pairCount) { _ in reset() }
 
-            Toggle("Keep all pictures visible", isOn: $revealAll)
+            Toggle(AppLanguage.text("Keep all pictures visible"), isOn: $revealAll)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                 ForEach(cards.indices, id: \.self) { index in
                     let card = cards[index]
@@ -202,9 +203,9 @@ struct PicturePairsCard: View {
                                 .font(.title2)
                                 .accessibilityHidden(true)
                             if isMatched {
-                                Label("Matched", systemImage: "checkmark.circle.fill").font(.caption)
+                                Label(AppLanguage.text("Matched"), systemImage: "checkmark.circle.fill").font(.caption)
                             } else if opened.contains(card.id) {
-                                Label("Chosen", systemImage: "checkmark.circle").font(.caption)
+                                Label(AppLanguage.text("Chosen"), systemImage: "checkmark.circle").font(.caption)
                             }
                             Text(isOpen ? card.label : "Card \(index + 1)")
                                 .font(.caption.weight(.semibold))
@@ -237,7 +238,7 @@ struct PicturePairsCard: View {
                     }
                     .buttonStyle(.bordered)
                 }
-                Button("Start over", action: reset)
+                Button(AppLanguage.text("Start over"), action: reset)
                     .buttonStyle(.borderedProminent)
                     .tint(.emerald)
             }
@@ -308,11 +309,11 @@ struct PictureStoryCard: View {
     private var step: PictureStoryStep { story.steps[stepIndex] }
 
     var body: some View {
-        SectionCard(title: "Picture story", systemImage: "text.book.closed") {
-            Text("Explore a short, predictable picture sequence. These are examples, not instructions—people’s routines and preferences differ. Move forward or back whenever you like.")
+        SectionCard(title: AppLanguage.text("Picture story"), systemImage: "text.book.closed") {
+            Text(AppLanguage.text("Explore a short, predictable picture sequence. These are examples, not instructions—people’s routines and preferences differ. Move forward or back whenever you like."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Picker("Choose a story", selection: $storyIndex) {
+            Picker(AppLanguage.text("Choose a story"), selection: $storyIndex) {
                 ForEach(pictureStories.indices, id: \.self) { index in
                     Text(pictureStories[index].title).tag(index)
                 }
@@ -337,7 +338,7 @@ struct PictureStoryCard: View {
                 Button {
                     stepIndex = max(0, stepIndex - 1)
                 } label: {
-                    Label("Previous picture", systemImage: "arrow.left")
+                    Label(AppLanguage.text("Previous picture"), systemImage: "arrow.left")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -365,8 +366,8 @@ struct SoundscapesCard: View {
     private let engine = SoundScapeEngine.shared
 
     var body: some View {
-        SectionCard(title: "Sensory Soundscapes", systemImage: "speaker.wave.2.fill") {
-            Text("Generated on-device and available offline. Start at a comfortable volume. Sound respects Silent mode; you can stop anytime.")
+        SectionCard(title: AppLanguage.text("Sensory Soundscapes"), systemImage: "speaker.wave.2.fill") {
+            Text(AppLanguage.text("Generated on-device and available offline. Start at a comfortable volume. Sound respects Silent mode; you can stop anytime."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if let audioError {
@@ -422,7 +423,7 @@ struct SoundscapesCard: View {
 
 struct BreathingCard: View {
     var body: some View {
-        SectionCard(title: "Paced breathing", systemImage: "wind") {
+        SectionCard(title: AppLanguage.text("Paced breathing"), systemImage: "wind") {
             PacedBreathingActivity()
         }
     }
@@ -467,10 +468,10 @@ struct PacedBreathingActivity: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Breathe naturally if this pace is not comfortable. Stop if you feel dizzy or short of breath. This does not measure breathing.")
+            Text(AppLanguage.text("Breathe naturally if this pace is not comfortable. Stop if you feel dizzy or short of breath. This does not measure breathing."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Toggle("Include a 4-second hold", isOn: $includeHold)
+            Toggle(AppLanguage.text("Include a 4-second hold"), isOn: $includeHold)
                 .disabled(running)
                 .onChange(of: includeHold) { _ in phaseIndex = 0; count = 4 }
             HStack {
@@ -518,7 +519,7 @@ struct PacedBreathingActivity: View {
                     running = false
                     onStop()
                 } label: {
-                    Label("Stop activity", systemImage: "stop.fill")
+                    Label(AppLanguage.text("Stop activity"), systemImage: "stop.fill")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                 }

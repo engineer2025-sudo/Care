@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 import MessageUI
 
@@ -57,11 +58,11 @@ struct CareSupportFlowView: View {
                 .frame(maxWidth: .infinity)
             }
             .background(Color.ink)
-            .navigationTitle("Check-in")
+            .navigationTitle(AppLanguage.text("Check-in"))
             .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Close") { finish() }
+                    Button(AppLanguage.text("Close")) { finish() }
                 }
             }
         }
@@ -79,9 +80,9 @@ struct CareSupportFlowView: View {
 
     private var movementCheck: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("A quick check-in")
+            Text(AppLanguage.text("A quick check-in"))
                 .font(.title2.weight(.bold))
-            Text("Are you moving or exercising right now?")
+            Text(AppLanguage.text("Are you moving or exercising right now?"))
                 .font(.title3)
             actionButton("Yes, I'm moving", systemImage: "figure.walk", prominent: true) {
                 finish()
@@ -97,7 +98,7 @@ struct CareSupportFlowView: View {
 
     private var feelingCheck: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("How are you feeling?")
+            Text(AppLanguage.text("How are you feeling?"))
                 .font(.title2.weight(.bold))
             actionButton("I'm okay", systemImage: "checkmark.circle") {
                 finish()
@@ -113,7 +114,7 @@ struct CareSupportFlowView: View {
 
     private var breathingStep: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Let's pause together")
+            Text(AppLanguage.text("Let's pause together"))
                 .font(.title2.weight(.bold))
             PacedBreathingActivity(
                 targetCycles: 3,
@@ -130,7 +131,7 @@ struct CareSupportFlowView: View {
 
     private var afterBreathing: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("How are you now?")
+            Text(AppLanguage.text("How are you now?"))
                 .font(.title2.weight(.bold))
             actionButton("Better", systemImage: "checkmark.circle", prominent: true) {
                 finish()
@@ -158,7 +159,7 @@ struct CareSupportFlowView: View {
                 .font(.body)
             emergencyCallActions
             contactActions
-            Button("I'm safe right now") { finish() }
+            Button(AppLanguage.text("I'm safe right now")) { finish() }
                 .font(.subheadline.weight(.semibold))
                 .padding(.vertical, 8)
         }
@@ -166,10 +167,10 @@ struct CareSupportFlowView: View {
 
     private var supportOptions: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Would you like someone with you?")
+            Text(AppLanguage.text("Would you like someone with you?"))
                 .font(.title2.weight(.bold))
             contactActions
-            Button("Close") { finish() }
+            Button(AppLanguage.text("Close")) { finish() }
                 .font(.subheadline.weight(.semibold))
                 .padding(.vertical, 8)
         }
@@ -179,7 +180,7 @@ struct CareSupportFlowView: View {
     private var emergencyCallActions: some View {
         if Locale.current.region?.identifier == "US" {
             Link(destination: URL(string: "tel:911")!) {
-                Label("Call 911", systemImage: "phone.fill")
+                Label(AppLanguage.text("Call 911"), systemImage: "phone.fill")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
             }
@@ -188,27 +189,27 @@ struct CareSupportFlowView: View {
 
             if urgentReason == .possiblePoisoning {
                 Link(destination: URL(string: "tel:18002221222")!) {
-                    Label("Call Poison Control", systemImage: "phone.fill")
+                    Label(AppLanguage.text("Call Poison Control"), systemImage: "phone.fill")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                 }
                 .buttonStyle(.bordered)
             } else if urgentReason == .selfHarm {
                 Link(destination: URL(string: "tel:988")!) {
-                    Label("Call 988", systemImage: "phone.fill")
+                    Label(AppLanguage.text("Call 988"), systemImage: "phone.fill")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                 }
                 .buttonStyle(.bordered)
                 Link(destination: URL(string: "sms:988")!) {
-                    Label("Text 988", systemImage: "message.fill")
+                    Label(AppLanguage.text("Text 988"), systemImage: "message.fill")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                 }
                 .buttonStyle(.bordered)
             }
         } else {
-            Text("Call your local emergency number or poison center.")
+            Text(AppLanguage.text("Call your local emergency number or poison center."))
                 .font(.subheadline.weight(.semibold))
         }
     }
@@ -226,7 +227,7 @@ struct CareSupportFlowView: View {
             .buttonStyle(.borderedProminent)
         } else {
             ShareLink(item: caregiverMessage) {
-                Label("Share a support message", systemImage: "square.and.arrow.up")
+                Label(AppLanguage.text("Share a support message"), systemImage: "square.and.arrow.up")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
             }
@@ -236,7 +237,7 @@ struct CareSupportFlowView: View {
         Button {
             showingVideo = true
         } label: {
-            Label("Open video support", systemImage: "video.fill")
+            Label(AppLanguage.text("Open video support"), systemImage: "video.fill")
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
         }
