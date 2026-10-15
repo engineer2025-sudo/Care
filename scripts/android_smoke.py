@@ -82,6 +82,80 @@ if adb('shell','getprop','ro.kernel.qemu').strip() != '1':
 
 adb('install', '-r', 'android/app/build/outputs/apk/debug/app-debug.apk')
 adb('shell', 'pm', 'clear', package)
+# Run new security checks first so failures surface before the longer UI suite.
+adb('push','android/app/src/test/resources/browser-transfer.caretransfer','/sdcard/Download/CareSphere-test.caretransfer')
+# Separate test APK; no test publisher, fixture or debug switch is shipped in the app.
+adb('install','-r','android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk')
+result = adb('shell','am','instrument','-w','-r',package+'.test/'+package+'.NearbySmokeInstrumentation')
+print(result)
+assert 'PASS: native DNS-SD publish/discover/resolve' in result and 'INSTRUMENTATION_CODE: -1' in result, result
+adb('uninstall',package+'.test')
+# Test-only public PIN on an emulator (the destructive physical-device guard is above).
+# Never copy these locksettings commands to a user's phone.
+def enter_system_test_pin():
+    deadline=time.monotonic()+20
+    while time.monotonic()<deadline:
+        fields=[n for n in screen().iter('node') if n.attrib.get('class')=='android.widget.EditText' and n.attrib.get('package')!=package]
+        if fields:
+            x1,y1,x2,y2=map(int,re.findall(r'\d+',fields[0].attrib['bounds']))
+            adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+            adb('shell','input','text','246810')
+            adb('shell','input','keyevent','66')
+            return
+        time.sleep(.5)
+    raise AssertionError('System device-credential field not found')
+adb('shell','locksettings','set-pin','246810')
+try:
+    adb('shell','am','force-stop',package)
+    adb('shell','am','start','-W',f'{package}/.MainActivity')
+    tap('Settings & privacy')
+    tap('Enable app lock')
+    enter_system_test_pin()
+    find('Disable app lock')
+    adb('shell','input','keyevent','3')
+    adb('shell','am','start','-W',f'{package}/.MainActivity')
+    find('CareSphere is locked')
+    assert not any(n.attrib.get('text') in ['Reminder test only','Settings & privacy','My support tools'] for n in screen().iter('node'))
+    tap('Unlock CareSphere')
+    adb('shell','input','keyevent','4')
+    find('Authentication was cancelled or unavailable. Tap Unlock to try again.')
+    find('CareSphere is locked')
+    tap('Unlock CareSphere')
+    enter_system_test_pin()
+    find('Disable app lock')
+    # Internal navigation remains usable; an external picker relocks before its result is processed.
+    tap('Back to Today')
+    tap('My support tools')
+    tap('Choose a tool · Start here')
+    tap('Device sharing')
+    tap('Receive: choose a transfer file')
+    tap('Passphrase')
+    adb('shell','input','text','cross%sdevice%stest%sphrase')
+    tap('Continue')
+    try:
+        tap('Show roots')
+        tap('Downloads')
+    except AssertionError:
+        pass
+    tap('CareSphere-test.caretransfer')
+    find('CareSphere is locked')
+    assert not any(n.attrib.get('text')=='Preview received copies' for n in screen().iter('node'))
+    tap('Unlock CareSphere')
+    enter_system_test_pin()
+    find('Preview received copies')
+    tap('Cancel import')
+    tap('Back to CareSphere')
+    tap('Settings & privacy')
+    find('Disable app lock')
+    tap('Disable app lock')
+    enter_system_test_pin()
+    find('Enable app lock')
+finally:
+    adb('shell','locksettings','clear','--old','246810')
+
+print('PASS: system credentials, cancel/relock, locked-file return and snooze checks')
+adb('shell','am','force-stop',package)
+adb('shell','pm','clear',package)
 adb('shell', 'am', 'start', '-W', f'{package}/.MainActivity')
 find('Your day, at your pace.')
 find('No routines yet. Add something that matters to you.')
@@ -277,74 +351,6 @@ find('Remove')
 assert any('120/80 mmHg' in n.attrib.get('text','') and 'Manually entered' in n.attrib.get('text','') for n in screen().iter('node'))
 tap('Back')
 adb('shell','am','force-stop',package)
-# Separate test APK; no test publisher, fixture or debug switch is shipped in the app.
-adb('install','-r','android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk')
-result = adb('shell','am','instrument','-w','-r',package+'.test/'+package+'.NearbySmokeInstrumentation')
-print(result)
-assert 'PASS: native DNS-SD publish/discover/resolve' in result and 'INSTRUMENTATION_CODE: -1' in result, result
-adb('uninstall',package+'.test')
-# Test-only public PIN on an emulator (the destructive physical-device guard is above).
-# Never copy these locksettings commands to a user's phone.
-def enter_system_test_pin():
-    deadline=time.monotonic()+20
-    while time.monotonic()<deadline:
-        fields=[n for n in screen().iter('node') if n.attrib.get('class')=='android.widget.EditText' and n.attrib.get('package')!=package]
-        if fields:
-            x1,y1,x2,y2=map(int,re.findall(r'\d+',fields[0].attrib['bounds']))
-            adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
-            adb('shell','input','text','246810')
-            adb('shell','input','keyevent','66')
-            return
-        time.sleep(.5)
-    raise AssertionError('System device-credential field not found')
-adb('shell','locksettings','set-pin','246810')
-try:
-    adb('shell','am','force-stop',package)
-    adb('shell','am','start','-W',f'{package}/.MainActivity')
-    tap('Settings & privacy')
-    tap('Enable app lock')
-    enter_system_test_pin()
-    find('Disable app lock')
-    adb('shell','input','keyevent','3')
-    adb('shell','am','start','-W',f'{package}/.MainActivity')
-    find('CareSphere is locked')
-    assert not any(n.attrib.get('text') in ['Reminder test only','Settings & privacy','My support tools'] for n in screen().iter('node'))
-    tap('Unlock CareSphere')
-    adb('shell','input','keyevent','4')
-    find('Authentication was cancelled or unavailable. Tap Unlock to try again.')
-    find('CareSphere is locked')
-    tap('Unlock CareSphere')
-    enter_system_test_pin()
-    find('Disable app lock')
-    # Internal navigation remains usable; an external picker relocks before its result is processed.
-    tap('Back to Today')
-    tap('My support tools')
-    tap('Choose a tool · Start here')
-    tap('Device sharing')
-    tap('Receive: choose a transfer file')
-    tap('Passphrase')
-    adb('shell','input','text','cross%sdevice%stest%sphrase')
-    tap('Continue')
-    try:
-        tap('Show roots')
-        tap('Downloads')
-    except AssertionError:
-        pass
-    tap('CareSphere-test.caretransfer')
-    find('CareSphere is locked')
-    assert not any(n.attrib.get('text')=='Preview received copies' for n in screen().iter('node'))
-    tap('Unlock CareSphere')
-    enter_system_test_pin()
-    find('Preview received copies')
-    tap('Cancel import')
-    tap('Back to CareSphere')
-    tap('Settings & privacy')
-    find('Disable app lock')
-    tap('Disable app lock')
-    enter_system_test_pin()
-    find('Enable app lock')
-finally:
-    adb('shell','locksettings','clear','--old','246810')
 
 adb('shell','am','force-stop',package)
 # Leave the emulator with an empty installation, not a saved test routine.
