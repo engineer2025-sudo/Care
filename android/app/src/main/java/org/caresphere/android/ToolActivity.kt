@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.graphics.Color
 import android.widget.*
 
-open class ToolActivity:androidx.activity.ComponentActivity(){
+open class ToolActivity:ProtectedActivity(){
     protected lateinit var page:LinearLayout
     private var dark=false
     private val ink get()=if(dark)Color.rgb(237,244,237)else Color.rgb(28,46,36)
@@ -24,5 +24,5 @@ open class ToolActivity:androidx.activity.ComponentActivity(){
     }
     protected fun text(s:String,size:Float=18f):TextView=TextView(this).apply{text=s;textSize=size;setTextColor(ink);setPadding(0,dp(12),0,dp(12));setTextIsSelectable(true);page.addView(this)}
     protected fun button(s:String,action:()->Unit):Button=Button(this).apply{text=s;isAllCaps=false;setTextColor(ink);backgroundTintList=android.content.res.ColorStateList.valueOf(if(dark)Color.rgb(45,62,49)else Color.rgb(233,240,232));minHeight=(52*resources.displayMetrics.density).toInt();page.addView(this,LinearLayout.LayoutParams(-1,-2));setOnClickListener{action()}}
-    protected fun message(s:String){if(!isFinishing&&!isDestroyed)AlertDialog.Builder(this).setMessage(s).setPositiveButton(tx("OK"),null).show()}
+    protected fun message(s:String){if(!isFinishing&&!isDestroyed)AlertDialog.Builder(this).setMessage(s).setPositiveButton(tx("OK"),null).showProtected()}
 }

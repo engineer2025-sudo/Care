@@ -54,7 +54,7 @@ class HealthHistoryActivity:ToolActivity(){
         for(i in records.length()-1 downTo 0){val r=records.getJSONObject(i)
             val value=if(r.getString("kind")=="bp")"${r.getInt("first")}/${r.getInt("second")} mmHg" else "${r.getInt("first")}% SpO₂"
             text(value+" · "+tx("Manually entered")+"\n"+stamp(Instant.parse(r.getString("at"))))
-            button(tx("Remove")){android.app.AlertDialog.Builder(this).setMessage(tx("Delete this manually entered record?")).setNegativeButton(tx("Cancel"),null).setPositiveButton(tx("Remove")){_,_->records.remove(i);data.put("manualVitals",records);render()}.show()}
+            button(tx("Remove")){android.app.AlertDialog.Builder(this).setMessage(tx("Delete this manually entered record?")).setNegativeButton(tx("Cancel"),null).setPositiveButton(tx("Remove")){_,_->records.remove(i);data.put("manualVitals",records);render()}.showProtected()}
         }
     }
     private fun readRecent(){
@@ -92,7 +92,7 @@ class HealthHistoryActivity:ToolActivity(){
             if(a==null || !VitalRules.valid(if(bp)"bp" else "oxygen",a,b)){first.error=tx("Check the units and values. This is not a medical interpretation.");return@setOnClickListener}
             val row=JSONObject().put("id",UUID.randomUUID().toString()).put("kind",if(bp)"bp" else "oxygen").put("first",a).put("at",Instant.now().toString());b?.let{row.put("second",it)}
             data.put("manualVitals",data.list("manualVitals").put(row));dialog.dismiss();render()
-        }};dialog.show()
+        }};dialog.showProtected()
     }
 }
 class HealthPermissionsActivity:ToolActivity(){

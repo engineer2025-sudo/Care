@@ -19,7 +19,7 @@ import java.util.Locale
 import java.time.format.DateTimeFormatter
 
 /** Native Android UI; no web wrapper, fake records, or network-backed dashboard. */
-class MainActivity : Activity() {
+class MainActivity : ProtectedActivity() {
     private fun tx(value:String)=AppLanguage.text(this,value)
     private lateinit var data: CareData
     private lateinit var monitor: HeartRateMonitor
@@ -409,7 +409,7 @@ class MainActivity : Activity() {
                 val url = "https://meet.jit.si/CareSphere-${java.util.UUID.randomUUID()}"
                 dialogBuilder().setTitle(tx("Your room invitation")).setMessage(url)
                     .setPositiveButton(tx("Open provider")) { _, _ -> openURL(url) }
-                    .setNeutralButton(tx("Share link")) { _, _ -> share(url) }.setNegativeButton(tx("Cancel"), null).show()
+                    .setNeutralButton(tx("Share link")) { _, _ -> share(url) }.setNegativeButton(tx("Cancel"), null).showProtected()
             }
         }
     }
@@ -482,7 +482,8 @@ class MainActivity : Activity() {
             }
         }
     }
-    override fun onRequestPermissionsResult(code: Int, permissions: Array<out String>, results: IntArray) {
+    override fun onRequestPermissionsResult(code: Int, permissions: Array<String>, results: IntArray) {
+        if(holdUntilUnlocked{onRequestPermissionsResult(code,permissions,results)})return
         super.onRequestPermissionsResult(code, permissions, results)
         if(code == 18) {
             if (results.isNotEmpty() && monitor.permitted()) monitor.scan()
@@ -495,7 +496,7 @@ class MainActivity : Activity() {
                 val options=AppLanguage.options
                 dialogBuilder().setTitle(tx("App language")).setSingleChoiceItems(options.map{if(it.first=="auto")tx(it.second) else it.second}.toTypedArray(),options.indexOfFirst{it.first==AppLanguage.preference(this)}){d,i->
                     if(AppLanguage.set(this,options[i].first)){stopComfort();d.dismiss();render()}else message(tx("Language preference could not be saved."))
-                }.setNegativeButton(tx("Cancel"),null).show()
+                }.setNegativeButton(tx("Cancel"),null).showProtected()
             }
             text(tx("Your notes and care records stay in their original language."),parent=c)
             text(tx("Some advanced instructions and external content remain in English."),parent=c)
@@ -503,6 +504,10 @@ class MainActivity : Activity() {
 
         button(tx("Back to Today")) { settings = false; tab = 0; render() }
         text(tx("Your app. Your choices."), 29f, bold = true)
+        card(tx("App lock")) { c ->
+            text(tx("Lock private screens when CareSphere leaves the foreground. Android 11+ and a secure device screen lock are required. Screenshots are blocked while enabled."),parent=c)
+            button(tx(if(AppLock.enabled(this))"Disable app lock" else "Enable app lock"),c){configureAppLock(!AppLock.enabled(this)){render()}}.isEnabled=Build.VERSION.SDK_INT>=30
+        }
         card(tx("Profile")) { c ->
             text("Display name: ${data.json.optString("name").ifBlank { "Not entered" }}", parent = c)
             button(tx("Set display name"), c) { input(tx("Your name"), tx("Optional display name"), 60) { data.put("name", it); render() } }.isEnabled = data.canWrite
@@ -540,7 +545,7 @@ class MainActivity : Activity() {
             button(tx("Erase all local data"), c) { confirm(tx("Erase everything?"), tx("This permanently removes your saved care information and encryption key from this app. Copies you previously shared cannot be removed.")) { monitor.disconnect(); data.erase(); settings = false; tab = 0; render() } }
         }
         card(tx("About this Android release")) { c ->
-            text(tx("CareSphere 1.2 · Native Android\nEleven optional activities, local routines and notes, daily mood self-report, real Bluetooth heart rate, and deliberate sharing. No generated health measurements."), parent = c)
+            text("CareSphere "+packageManager.getPackageInfo(packageName,0).versionName+" · "+tx("Native Android"),parent=c)
             text(tx("Apple Intelligence is an Apple-only capability and is not available in this Android app. No AI answers are fabricated or substituted. This is a first Android release, not full iOS feature parity."), parent = c)
         }
     }
@@ -550,12 +555,12 @@ class MainActivity : Activity() {
         dialog.setOnShowListener { dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val value = input.text.toString().trim()
             if(value.isBlank()) input.error = "Enter some text, or cancel." else { save(value); dialog.dismiss() }
-        } }; dialog.show()
+        } }; dialog.showProtected()
     }
     private fun confirm(title: String, body: String, action: () -> Unit) {
-        dialogBuilder().setTitle(title).setMessage(body).setPositiveButton(tx("Continue")) { _, _ -> action() }.setNegativeButton(tx("Cancel"), null).show()
+        dialogBuilder().setTitle(title).setMessage(body).setPositiveButton(tx("Continue")) { _, _ -> action() }.setNegativeButton(tx("Cancel"), null).showProtected()
     }
-    private fun message(value: String) { dialogBuilder().setMessage(value).setPositiveButton(tx("OK"), null).show() }
+    private fun message(value: String) { dialogBuilder().setMessage(value).setPositiveButton(tx("OK"), null).showProtected() }
     private fun share(value: String) {
         runCatching { startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, value), "Choose who receives this")) }
             .onFailure { message(tx("No compatible sharing app is available. Nothing was sent.")) }

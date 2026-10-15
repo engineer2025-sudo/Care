@@ -25,14 +25,22 @@ class MedicationActivity:ToolActivity(){
             if(med.optString("instructions").isNotEmpty())text(med.getString("instructions"))
             button(tx(if(med.optString("takenOn")==LocalDate.now().toString())"Undo taken check-in" else "Mark taken today")){
                 med.put("takenOn",if(med.optString("takenOn")==LocalDate.now().toString())"" else LocalDate.now().toString())
-                data.put("medications",meds);render()
+                data.put("medications",meds);if(data.error==null)MedicationReminders.cancelSnooze(this,med.getString("id"));render()
             }.isEnabled=data.canWrite
+            MedicationReminders.snoozedUntil(this,med.getString("id"))?.let{at->
+                text(tx("Review reminder pending")+" · "+java.time.Instant.ofEpochMilli(at).atZone(java.time.ZoneId.systemDefault()).toLocalTime().withSecond(0).withNano(0))
+                button(tx("Cancel snooze")){if(!MedicationReminders.cancelSnooze(this,med.getString("id")))message(tx("Changes could not be saved."));render()}
+            }
+            button(tx("Snooze 10 min")){
+                if(!MedicationReminders.snooze(this,med.getString("id")))message(tx("Snooze is unavailable. Check confirmation, notification permission and storage. Snooze cannot cross midnight."))
+                render()
+            }.isEnabled=data.canWrite&&data.json.optBoolean("medicationConfirmed")&&MedicationReminders.enabled(this)&&med.optString("takenOn")!=LocalDate.now().toString()
             button(tx("Edit")){editMedication(med)}.isEnabled=data.canWrite
             button(tx("Remove")){
                 AlertDialog.Builder(this).setMessage(tx("Remove this reminder? This does not change your prescription.")).setNegativeButton(tx("Cancel"),null).setPositiveButton(tx("Remove")){_,_->
                     if(!MedicationReminders.pause(this)){message(tx("Changes could not be saved."));return@setPositiveButton};data.json.put("medicationConfirmed",false)
                     data.put("medications",JSONArray((0 until meds.length()).filter{it!=i}.map{meds.getJSONObject(it)}));render()
-                }.show()
+                }.showProtected()
             }.isEnabled=data.canWrite
         }
         button(tx("Add medication")){editMedication(null)}.isEnabled=data.canWrite&&meds.length()<24
@@ -44,9 +52,10 @@ class MedicationActivity:ToolActivity(){
                 data.put("medicationConfirmed",true)
                 if(data.error==null){if(!MedicationReminders.enable(this))message(tx("Reminders could not be enabled."))}
                 render()
-            }.show()
+            }.showProtected()
         }.isEnabled=data.canWrite&&meds.length()>0
-        button(tx("Pause reminders")){MedicationReminders.pause(this);render()}
+        button(tx("Pause reminders")){if(!MedicationReminders.pause(this))message(tx("The paused state could not be saved. Disable CareSphere notifications in Android Settings before restarting."));render()}
+        text(tx("Snooze adds one same-day review reminder. It does not change your prescribed schedule or tell you to take a dose. Delivery may be delayed."))
         text(tx("A taken check-in is your self-report, not proof that a medicine was taken."))
     }
     private fun editMedication(original:JSONObject?){
@@ -66,6 +75,6 @@ class MedicationActivity:ToolActivity(){
             val index=rows.indexOfFirst{it.optString("id")==value.getString("id")};if(index<0)rows.add(value)else rows[index]=value
             data.json.put("medicationConfirmed",false);data.put("medications",JSONArray(rows))
             if(data.error==null){dialog.dismiss();render()}else message(data.error!!)
-        }};dialog.show()
+        }};dialog.showProtected()
     }
 }

@@ -15,7 +15,7 @@ import java.util.UUID
 import java.util.Base64
 
 /** Personal tools are native controls backed by the same encrypted CareData store. */
-class SupportActivity : Activity() {
+class SupportActivity : ProtectedActivity() {
     private fun tx(value:String)=AppLanguage.text(this,value)
     private lateinit var data: CareData
     private lateinit var page: LinearLayout
@@ -62,8 +62,8 @@ class SupportActivity : Activity() {
     private fun dialog()=AlertDialog.Builder(ContextThemeWrapper(this, if(dark) android.R.style.Theme_Material_Dialog_Alert else android.R.style.Theme_Material_Light_Dialog_Alert))
     private fun text(value:String,size:Float=18f) { page.addView(TextView(this).apply { text=value;textSize=size;setTextColor(ink);setPadding(0,dp(10),0,dp(10));setTextIsSelectable(true) }) }
     private fun button(label:String, action:()->Unit):Button = Button(this).apply { text=label;isAllCaps=false;textSize=18f;minHeight=dp(52);setTextColor(ink);background=GradientDrawable().apply{setColor(soft);cornerRadius=dp(14).toFloat()};page.addView(this,LinearLayout.LayoutParams(-1,-2).apply{topMargin=dp(6);bottomMargin=dp(6)});setOnClickListener{action()} }
-    private fun message(value:String) { if(!isFinishing && !isDestroyed)dialog().setMessage(value).setPositiveButton(tx("OK"),null).show() }
-    private fun confirm(body:String,action:()->Unit) { dialog().setMessage(body).setNegativeButton(tx("Cancel"),null).setPositiveButton(tx("Continue")){_,_->action()}.show() }
+    private fun message(value:String) { if(!isFinishing && !isDestroyed)dialog().setMessage(value).setPositiveButton(tx("OK"),null).showProtected() }
+    private fun confirm(body:String,action:()->Unit) { dialog().setMessage(body).setNegativeButton(tx("Cancel"),null).setPositiveButton(tx("Continue")){_,_->action()}.showProtected() }
     private fun form(title:String, labels:List<Pair<String,String>>, passwordField:Boolean=false, action:(List<String>)->Unit) {
         val box=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(dp(20),0,dp(20),0)}
         val fields=labels.map{(label,value)->EditText(ContextThemeWrapper(this,if(dark)android.R.style.Theme_Material else android.R.style.Theme_Material_Light)).apply{hint=tx(label);contentDescription=tx(label);setText(value);minLines=1;maxLines=6;filters=arrayOf(android.text.InputFilter.LengthFilter(if(passwordField)1024 else 4000));if(passwordField)inputType=android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD;
@@ -72,11 +72,12 @@ class SupportActivity : Activity() {
             box.addView(this)}}
         val scroll=ScrollView(this);scroll.addView(box)
         val d=dialog().setTitle(title).setView(scroll).setNegativeButton(tx("Cancel"),null).setPositiveButton(tx("Continue"),null).create()
-        d.setOnShowListener{d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener{try{action(fields.map{it.text.toString()});d.dismiss()}catch(_:IllegalArgumentException){fields.first().error="Check the fields. Enter a title/text and valid details."}}};d.show()
+        d.setOnShowListener{d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener{try{action(fields.map{it.text.toString()});d.dismiss()}catch(_:IllegalArgumentException){fields.first().error="Check the fields. Enter a title/text and valid details."}}};d.showProtected()
     }
     override fun onCreate(state:Bundle?) {super.onCreate(state);nearbyDiscovery=NearbyDiscovery(this){if(foreground&&!isFinishing&&!isDestroyed&&section=="Device sharing")render()};data=CareData(this);section=state?.getString("section")?:"Start here";render()}
     override fun onSaveInstanceState(out:Bundle){super.onSaveInstanceState(out);out.putString("section",section)}
-    override fun onResume(){super.onResume();foreground=true;if(section=="Device sharing")render()}
+    override fun onResume(){super.onResume();foreground=!AppLock.locked(this);data=CareData(this);if(section=="Device sharing")render()}
+    override fun onPrivacyUnlocked(){foreground=true;data=CareData(this);render()}
     override fun onStop(){foreground=false;stopNearby();super.onStop();tts?.stop();pendingSpeech=null;paused=true}
     override fun onDestroy(){stopNearby();tts?.shutdown();password?.fill('\u0000');backupBytes?.fill(0);super.onDestroy()}
     private fun configureSpeechVoice(): Boolean {
@@ -115,7 +116,7 @@ class SupportActivity : Activity() {
     private fun render(){
         val scroll=ScrollView(this);page=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(dp(20),dp(16),dp(20),dp(28));setBackgroundColor(bg)};scroll.addView(page);setContentView(scroll)
         scroll.setOnApplyWindowInsetsListener{v,insets->if(android.os.Build.VERSION.SDK_INT>=30){val bars=insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime());v.setPadding(bars.left,bars.top,bars.right,bars.bottom)};insets};scroll.requestApplyInsets()
-        text(tx("My support tools"),28f);button(tx("Back to CareSphere")){finish()};button(AppLanguage.format(this,"Choose a tool · {0}",tx(section))){dialog().setItems(sections.map{tx(it)}.toTypedArray()){_,i->stopNearby();tts?.stop();section=sections[i];phrase="";planId=null;render()}.show()}
+        text(tx("My support tools"),28f);button(tx("Back to CareSphere")){finish()};button(AppLanguage.format(this,"Choose a tool · {0}",tx(section))){dialog().setItems(sections.map{tx(it)}.toTypedArray()){_,i->stopNearby();tts?.stop();section=sections[i];phrase="";planId=null;render()}.showProtected()}
         data.error?.let{text(it)}
         when(section){
             "Start here"->{text(tx("Try activities without a profile. Add only the tools you want. Permissions are requested when needed."));button(tx("Choose comfort settings")){section="Comfort";render()};button(tx("Make a visual routine")){section="Visual routines";render()};button(tx("Finish introduction")){save("introduced",true);message(tx("These tools stay available from Today."))}}
@@ -127,13 +128,13 @@ class SupportActivity : Activity() {
             "Appointments"->questions()
             "Visit summary"->visitSummary()
             "Recovery & backup"->recovery()
-            "Interest activities"->{button(AppLanguage.format(this,"Interest · {0}",tx(pack))){dialog().setItems(packs.keys.map{tx(it)}.toTypedArray()){_,i->pack=packs.keys.elementAt(i);promptIndex=0;render()}.show()};text(tx(packs.getValue(pack)[promptIndex%3]),24f);button(tx("Next / skip")){promptIndex++;render()};text(tx("Speak, point, listen or skip. Answers are not recorded. These are leisure prompts, not treatment."))}
+            "Interest activities"->{button(AppLanguage.format(this,"Interest · {0}",tx(pack))){dialog().setItems(packs.keys.map{tx(it)}.toTypedArray()){_,i->pack=packs.keys.elementAt(i);promptIndex=0;render()}.showProtected()};text(tx(packs.getValue(pack)[promptIndex%3]),24f);button(tx("Next / skip")){promptIndex++;render()};text(tx("Speak, point, listen or skip. Answers are not recorded. These are leisure prompts, not treatment."))}
             else->deviceSharing()
         }
     }
     private fun comfort(){
         listOf("simple" to "Simple Mode — three destinations", "speakSteps" to "Speak steps after I start or advance").forEach{(key,label)->page.addView(CheckBox(this).apply{text=tx(label);textSize=18f;setTextColor(ink);isChecked=tools.optBoolean(key);setOnCheckedChangeListener{_,value->save(key,value)}})}
-        button(AppLanguage.format(this,"Photo pairs · {0} choices",tools.optInt("choices",3))){dialog().setItems(arrayOf("2","3","4")){_,i->save("choices",i+2);render()}.show()}
+        button(AppLanguage.format(this,"Photo pairs · {0} choices",tools.optInt("choices",3))){dialog().setItems(arrayOf("2","3","4")){_,i->save("choices",i+2);render()}.showProtected()}
         text(tx("Turn Simple Mode off here to restore Care and Health. Text follows Android font settings. Sound never starts automatically; installed offline voices are used for speech when available."))
         button(tx("Android accessibility settings")){runCatching{startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))}.onFailure{message(tx("Open Accessibility in device Settings."))}}
     }
@@ -142,7 +143,7 @@ class SupportActivity : Activity() {
         if(phrase.isNotEmpty()){text(phrase,30f);button(tx("Speak this phrase")){say(phrase)};button(tx("Clear / stop")){tts?.stop();phrase="";render()}}
         (phrases.map{tx(it)}+rows("phrases").map{it.optString("text")}).forEach{value->button(value){tts?.stop();phrase=value;render()}}
         button(tx("Add my own phrase")){form(tx("My phrase"),listOf("Phrase" to "")){values->require(values[0].isNotBlank());require(rows("phrases").size<24);update("phrases",rows("phrases")+JSONObject().put("text",values[0].trim().take(240)))}}
-        if(rows("phrases").isNotEmpty())button(tx("Remove a custom phrase")){val values=rows("phrases");dialog().setItems(values.map{it.optString("text")}.toTypedArray()){_,i->update("phrases",values.filterIndexed{j,_->j!=i})}.show()}
+        if(rows("phrases").isNotEmpty())button(tx("Remove a custom phrase")){val values=rows("phrases");dialog().setItems(values.map{it.optString("text")}.toTypedArray()){_,i->update("phrases",values.filterIndexed{j,_->j!=i})}.showProtected()}
     }
     private fun plans(){
         val current=rows("plans").firstOrNull{it.optString("id")==planId}
@@ -155,7 +156,7 @@ class SupportActivity : Activity() {
         }
         text(tx("Your instructions, one step per line. Do not change prescribed medication instructions here."))
         button(tx("Create visual routine")){form(tx("Visual routine"),listOf("Title" to "","Steps, one per line" to "")){values->val steps=values[1].lines().map{it.trim().take(240)}.filter{it.isNotEmpty()}.take(40);require(values[0].isNotBlank()&&steps.isNotEmpty()&&rows("plans").size<30);update("plans",rows("plans")+JSONObject().put("id",UUID.randomUUID()).put("title",values[0].take(120)).put("steps",JSONArray(steps)))}}
-        rows("plans").forEach{p->text(p.optString("title"),22f);button(AppLanguage.format(this,"Start {0}",p.optString("title"))){planId=p.getString("id");step=0;paused=false;if(tools.optBoolean("speakSteps"))say(p.getJSONArray("steps").getString(0));render()};button(tx("Choose routine photo")){val photos=rows("photos");dialog().setItems((listOf(tx("No photo"))+photos.map{it.optString("caption")}).toTypedArray()){_,i->p.put("photo",if(i==0)"" else photos[i-1].optString("id"));update("plans",rows("plans").map{if(it.optString("id")==p.optString("id"))p else it})}.show()};button(tx("Delete routine")){confirm(tx("Delete this visual routine? This cannot be undone.")){update("plans",rows("plans").filter{it.optString("id")!=p.optString("id")})}}}
+        rows("plans").forEach{p->text(p.optString("title"),22f);button(AppLanguage.format(this,"Start {0}",p.optString("title"))){planId=p.getString("id");step=0;paused=false;if(tools.optBoolean("speakSteps"))say(p.getJSONArray("steps").getString(0));render()};button(tx("Choose routine photo")){val photos=rows("photos");dialog().setItems((listOf(tx("No photo"))+photos.map{it.optString("caption")}).toTypedArray()){_,i->p.put("photo",if(i==0)"" else photos[i-1].optString("id"));update("plans",rows("plans").map{if(it.optString("id")==p.optString("id"))p else it})}.showProtected()};button(tx("Delete routine")){confirm(tx("Delete this visual routine? This cannot be undone.")){update("plans",rows("plans").filter{it.optString("id")!=p.optString("id")})}}}
     }
     private fun people(){
         text(tx("Ask permission before saving someone's details. Nothing is sent automatically."))
@@ -238,7 +239,7 @@ class SupportActivity : Activity() {
                             }.start()
                         }
                     }
-                }.show()
+                }.showProtected()
         }
         transferFile?.takeIf{it.exists()}?.let { file->
             button(tx("Send encrypted file · Quick Share / apps")){
@@ -296,7 +297,7 @@ class SupportActivity : Activity() {
                 val addresses=runCatching{LocalTransferWire.addresses()}.getOrDefault(emptyList())
                 if(addresses.isEmpty()){message(tx("Join a private Wi-Fi or hotspot, then try again."));return@button}
                 if(addresses.size==1)offerNearby(file,addresses[0])
-                else dialog().setTitle(tx("Choose the sending network address")).setItems(addresses.toTypedArray()){_,i->offerNearby(file,addresses[i])}.show()
+                else dialog().setTitle(tx("Choose the sending network address")).setItems(addresses.toTypedArray()){_,i->offerNearby(file,addresses[i])}.showProtected()
             }.isEnabled=!nearbyBusy&&nearbyOffer==null
         }
         nearbyOffer?.let { info ->
@@ -363,6 +364,7 @@ class SupportActivity : Activity() {
     }
     @Deprecated("Platform activity results")
     override fun onActivityResult(requestCode:Int,resultCode:Int,intent:Intent?){
+        if(holdUntilUnlocked{onActivityResult(requestCode,resultCode,intent)})return
         super.onActivityResult(requestCode,resultCode,intent)
         val uri=intent?.data
         if(resultCode!=RESULT_OK||uri==null){password?.fill('\u0000');password=null;backupBytes?.fill(0);backupBytes=null;return}
