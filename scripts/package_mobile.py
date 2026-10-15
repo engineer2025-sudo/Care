@@ -86,24 +86,24 @@ paths += [ROOT / p for p in ['DOWNLOAD.md', 'docs/signing-troubleshooting.md',
     'docs/web-deployment.md', 'docs/device-sharing.md', 'docs/personal-tools.md', 'docs/languages.md', 'scripts/android_smoke.py']]
 # Refuse to silently label a later version using this release's metadata.
 project = (ROOT/'ios/CareSphere.xcodeproj/project.pbxproj').read_text()
-assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.5.0'}
-assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'12'}
+assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.5.1'}
+assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'13'}
 gradle = (ROOT/'android/app/build.gradle.kts').read_text()
-assert re.search(r'versionName\s*=\s*"1\.5\.0"', gradle)
-assert re.search(r'versionCode\s*=\s*6\b', gradle)
-assert json.loads((ROOT/'package.json').read_text())['version'] == '1.3.0'
-assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 458
-language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':458,
+assert re.search(r'versionName\s*=\s*"1\.5\.1"', gradle)
+assert re.search(r'versionCode\s*=\s*7\b', gradle)
+assert json.loads((ROOT/'package.json').read_text())['version'] == '1.3.1'
+assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 588
+language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':588,
     'offline_catalog':True, 'persistent_selector':True, 'automatic_patient_text_translation':False,
     'english_fallback_for_untranslated_content':True, 'complete_interface_translation':False,
     'professional_linguistic_review':False, 'physical_multilingual_speech_tested':False}
 manifest = {
     'source_commit': command('git','rev-parse','HEAD').strip(),
-    'ios': {'version':'3.5.0 (12)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
+    'ios': {'version':'3.5.1 (13)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
         'unsigned_device_build': True, 'healthkit_build': True, 'simulator_launch': True,
-        'tests':42, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
-    'android': {'version':'1.5.0 (6)', 'ci':android['url'], 'tested_commit':android['headSha'],
-        'tests':30, 'lint':'passed', 'apk_signing_verified_in_ci':True,
+        'tests':43, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
+    'android': {'version':'1.5.1 (7)', 'ci':android['url'], 'tested_commit':android['headSha'],
+        'tests':31, 'lint':'passed', 'apk_signing_verified_in_ci':True,
         'emulator_smoke':'passed', 'five_language_ui_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
         'apk_sha256':digest, 'apk_bytes':len(apk)},
     'device_sharing': {'app_backend_required':False, 'mode':'native direct LAN plus encrypted-file snapshots',
@@ -150,8 +150,8 @@ not full iOS feature parity. See android/README.md and ios/README.md for exact s
 
 VALIDATION
 See BUILD_VERIFICATION.json for successful CI runs and file hashes.
-iOS 3.5.0 (12): 42 logic/preference/packet/transfer/LAN/discovery/language tests; standard device, HealthKit and Simulator builds; launch.
-Android 1.5.0 (6): 30 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
+iOS 3.5.1 (13): 43 logic/preference/packet/transfer/LAN/discovery/language tests; standard device, HealthKit and Simulator builds; launch.
+Android 1.5.1 (7): 31 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
 Real-device BLE, actual Apple Intelligence responses, accessibility with users, and
 Mac signing remain manual acceptance work. No clinical effectiveness is claimed.
 
@@ -169,7 +169,7 @@ Alternatively use AirDrop/Quick Share/the system share sheet or save the file. R
 file picker, unlock, preview, then choose copies to import. Tell the recipient the
 passphrase separately. No built-in Bluetooth pairing, live sync or remote revocation.
 Read docs/device-sharing.md and docs/personal-tools.md before using these features.
-The separate CareSphere-Web.zip contains web 1.3.0 source and a built website.
+The separate CareSphere-Web.zip contains web 1.3.1 source and a built website.
 START_HERE.txt and DOWNLOAD.md explain installation. No slide deck is included.
 '''
 archive = out / 'CareSphere-Mobile.zip'
@@ -196,9 +196,9 @@ web_files = {str(p.relative_to(ROOT)):p for p in web_paths}
 web_files.update({'production/'+str(p.relative_to(ROOT/'dist')):p for p in (ROOT/'dist').rglob('*') if p.is_file()})
 web_manifest = {
     'interface_localization':language_manifest,
-    'version':'1.3.0', 'source_commit':command('git','rev-parse','HEAD').strip(),
+    'version':'1.3.1', 'source_commit':command('git','rev-parse','HEAD').strip(),
     'ci':web['url'], 'tested_commit':web['headSha'],
-    'unit_tests':37, 'browser_tests':26, 'offline_production_tests':1,
+    'unit_tests':39, 'browser_tests':30, 'offline_production_tests':1,
     'audit_known_vulnerabilities':0, 'audit_date':'2026-10-14',
     'production_build':'rebuilt locally from verified source with the locked dependencies',
     'node':command('node','--version').strip(),
@@ -208,7 +208,7 @@ web_manifest = {
 web_archive = out/'CareSphere-Web.zip'
 with zipfile.ZipFile(web_archive, 'w', zipfile.ZIP_DEFLATED) as z:
     for name, path in web_files.items(): z.write(path, 'CareSphere-Web/'+name)
-    z.writestr('CareSphere-Web/START_HERE.txt', """CARESPHERE WEB 1.3.0
+    z.writestr('CareSphere-Web/START_HERE.txt', """CARESPHERE WEB 1.3.1
 
 App language: English, Spanish, Simplified Chinese, Filipino/Tagalog, Vietnamese.
 Offline core-interface translations, with English fallback. Personal records

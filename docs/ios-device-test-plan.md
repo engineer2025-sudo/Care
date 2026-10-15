@@ -91,7 +91,7 @@ Record iPhone model, iOS version, Xcode version, build commit, checks passed/fai
 
 Use non-sensitive records and two consenting testers. Repeat in BOTH directions for iPhone/iPhone, Android/Android and iPhone/Android. Use the same private Wi-Fi first, then a phone hotspot with internet disabled where supported. Prepare one selected encrypted note/routine; offer locally, enter the shown address/code on the receiver, unlock and preview/select/import. Confirm unselected records are absent, originals unchanged and duplicate receipt marked. Test wrong code/passphrase, denied Local Network access and recovery in Settings, changing networks, multiple interfaces, interrupted receive, leaving the tool, screen lock/background, explicit Stop and five-minute expiry. Confirm a stopped/expired offer cannot be fetched with its old code, and already received copies are not described as revoked. Test a guest network that isolates clients and use the file fallback. IPv6-only Wi-Fi is deliberately unsupported. Test Find nearby devices and confirm that choosing a label only fills the address: the code, passphrase and import selection must still be required. Stop search, navigate away and background during a pending resolve; no late peer should reappear. Stop/expire the sender and verify service removal or a safe connection failure if the OS retains a stale record. Disable multicast while leaving unicast available and test manual fallback. Spoofed labels, wrong protocol versions and TXT addresses not in resolved host addresses must not bypass validation. No Bluetooth radio pairing should appear.
 
-## Multilingual interface acceptance (3.5.0)
+## Multilingual interface acceptance (3.5.1)
 
 Use test-only records, not real care data. In setup and Settings, choose English,
 Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese. Confirm preference
@@ -112,3 +112,14 @@ no matching voice, verify visible text plus an unavailability explanation, not a
 English-voice substitution. Check VoiceOver, largest Dynamic Type, narrow iPhones,
 Switch Control and mixed-script names/notes. OS dialogs and advanced/reference
 content may follow the OS/provider or remain English; see `docs/languages.md`.
+
+
+### Expanded home/setup/comfort checks
+
+In each language, inspect greetings, all mood choices, optional medication setup
+warnings and the comfort controls. At largest Dynamic Type, feeling words must
+wrap rather than clip. Test a display name containing `Save {0}`: Chinese can
+reorder the greeting, but the name and braces must remain verbatim. Persist a
+mood check-in, relaunch, and verify the same numeric choice remains selected.
+Run a visual routine with a title in another language: only action/step-counter
+labels should change, never the title or the person's instructions.

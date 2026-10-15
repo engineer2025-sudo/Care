@@ -2,9 +2,9 @@
 
 ## Current downloadable files
 
-- **CareSphere-Mobile.zip** — iPhone 3.5.0 (12) Xcode project, Android 1.5.0 (6) source and verified debug APK, install guides and `BUILD_VERIFICATION.json`.
+- **CareSphere-Mobile.zip** — iPhone 3.5.1 (13) Xcode project, Android 1.5.1 (7) source and verified debug APK, install guides and `BUILD_VERIFICATION.json`.
 - **CareSphere-Android.apk** — the same verified Android development build separately.
-- **CareSphere-Web.zip** — web 1.3.0 source, locked dependencies, tests and the built `production/` website. No `node_modules` or personal data included.
+- **CareSphere-Web.zip** — web 1.3.1 source, locked dependencies, tests and the built `production/` website. No `node_modules` or personal data included.
 
 Each archive has a `.sha256` checksum. These replace the earlier mobile downloads; do not mix old APKs with the new source. See [release checks](docs/release-2026-10-14.md).
 
