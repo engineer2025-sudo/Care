@@ -308,6 +308,7 @@ try:
     assert not any(n.attrib.get('text') in ['Reminder test only','Settings & privacy','My support tools'] for n in screen().iter('node'))
     tap('Unlock CareSphere')
     adb('shell','input','keyevent','4')
+    find('Authentication was cancelled or unavailable. Tap Unlock to try again.')
     find('CareSphere is locked')
     tap('Unlock CareSphere')
     enter_system_test_pin()

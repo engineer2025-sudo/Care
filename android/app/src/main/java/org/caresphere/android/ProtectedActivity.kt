@@ -102,7 +102,9 @@ open class ProtectedActivity:ComponentActivity(){
         val allowed=BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
         if(!getSystemService(KeyguardManager::class.java).isDeviceSecure || getSystemService(BiometricManager::class.java).canAuthenticate(allowed)!=BiometricManager.BIOMETRIC_SUCCESS){
             gateMessage="Device authentication is unavailable. Your data remains locked. Check device security settings and try again."
-            if(!AppLock.locked(this))AlertDialog.Builder(this).setMessage(label(gateMessage)).setPositiveButton(label("OK"),null).showProtected()
+            if(!AppLock.locked(this))AlertDialog.Builder(this)
+                .setMessage(label("Lock private screens when CareSphere leaves the foreground. Android 11+ and a secure device screen lock are required. Screenshots are blocked while enabled."))
+                .setPositiveButton(label("OK"),null).showProtected()
             refreshPrivacy();return
         }
         val operation=AppLock.session.begin();attempt=operation

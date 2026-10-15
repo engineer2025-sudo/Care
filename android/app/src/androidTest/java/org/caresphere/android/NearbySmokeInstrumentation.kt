@@ -113,6 +113,15 @@ class NearbySmokeInstrumentation : Instrumentation() {
                             return view is android.view.ViewGroup && (0 until view.childCount).any{containsGate(view.getChildAt(it))}
                         }
                         check(containsGate(screen.window.decorView))
+                        if(!targetContext.getSystemService(android.app.KeyguardManager::class.java).isDeviceSecure){
+                            fun unlockButton(view:android.view.View):android.widget.Button? {
+                                if(view is android.widget.Button && view.text.toString()=="Unlock CareSphere")return view
+                                if(view is android.view.ViewGroup)for(i in 0 until view.childCount)unlockButton(view.getChildAt(i))?.let{return it}
+                                return null
+                            }
+                            checkNotNull(unlockButton(screen.window.decorView)).performClick()
+                            check(containsGate(screen.window.decorView) && !AppLock.session.unlocked)
+                        }
                         check(screen.window.attributes.flags and android.view.WindowManager.LayoutParams.FLAG_SECURE != 0)
                     }
                 }
