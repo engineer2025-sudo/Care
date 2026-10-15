@@ -84,7 +84,13 @@ open class ProtectedActivity:ComponentActivity(){
         text("CareSphere is locked",26f);text(gateMessage,18f)
         panel.addView(Button(this).apply{text=label("Unlock CareSphere");isAllCaps=false;isEnabled=resumed&&authentication==null;setOnClickListener{authenticate(null){}}},LinearLayout.LayoutParams(-1,-2))
         panel.addView(Button(this).apply{text=label("Leave app");isAllCaps=false;setOnClickListener{moveTaskToBack(true)}},LinearLayout.LayoutParams(-1,-2))
-        val scroll=ScrollView(this).apply{isFillViewport=true;addView(panel)};shield=scroll;root.addView(scroll,FrameLayout.LayoutParams(-1,-1))
+        val scroll=ScrollView(this).apply{isFillViewport=true;addView(panel)}
+        scroll.setOnApplyWindowInsetsListener{view,insets->
+            if(Build.VERSION.SDK_INT>=30){val bars=insets.getInsets(android.view.WindowInsets.Type.systemBars() or android.view.WindowInsets.Type.ime());view.setPadding(bars.left,bars.top,bars.right,bars.bottom)}
+            else {@Suppress("DEPRECATION") view.setPadding(insets.systemWindowInsetLeft,insets.systemWindowInsetTop,insets.systemWindowInsetRight,insets.systemWindowInsetBottom)}
+            insets
+        }
+        shield=scroll;root.addView(scroll,FrameLayout.LayoutParams(-1,-1));scroll.requestApplyInsets()
     }
     private fun authenticate(setting:Boolean?,onChanged:()->Unit){
         if(authentication!=null||!resumed)return
