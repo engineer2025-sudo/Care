@@ -18,7 +18,7 @@ test('first completed install can reopen saved notes and activities offline', as
   await nav.getByRole('button', { name: 'Care Circle', exact: true }).click()
   await expect(page.getByText('Available without a connection', { exact: true })).toBeVisible()
   await nav.getByRole('button', { name: 'Activities', exact: true }).click()
-  await page.getByRole('button', { name: 'Open Conversation cards' }).click()
+  await page.getByRole('button', { name: 'Open activity: Conversation cards' }).click()
   await expect(page.getByText('What music do you enjoy?', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Next / skip' }).click()
   await expect(page.getByText('What makes a place feel comfortable to you?', { exact: true })).toBeVisible()
