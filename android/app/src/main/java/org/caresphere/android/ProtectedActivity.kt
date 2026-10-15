@@ -20,6 +20,7 @@ open class ProtectedActivity:ComponentActivity(){
     private var frame:FrameLayout?=null
     private var shield:View?=null
     private var resumed=false
+    private var internalDeparture=false
     private var authentication:CancellationSignal?=null
     private var attempt:Long?=null
     private var gateMessage="Your private care information is hidden until you unlock."
@@ -35,14 +36,23 @@ open class ProtectedActivity:ComponentActivity(){
     }
     override fun setContentView(layoutResID:Int){setContentView(layoutInflater.inflate(layoutResID,null))}
     override fun onStart(){super.onStart();AppLock.start()}
-    override fun onResume(){super.onResume();resumed=true;refreshPrivacy()}
+    override fun onResume(){super.onResume();internalDeparture=false;resumed=true;refreshPrivacy()}
     override fun onPostResume(){super.onPostResume();releasePendingResults()}
     private fun releasePendingResults(){
         if(!resumed||AppLock.locked(this)||isFinishing||isDestroyed)return
         val results=pendingResults.toList();pendingResults.clear();results.forEach{it()}
     }
+    protected fun openInternal(intent:android.content.Intent){
+        require(intent.component?.packageName==packageName)
+        internalDeparture=true
+        try{startActivity(intent)}catch(error:Exception){internalDeparture=false;throw error}
+    }
+    override fun finish(){internalDeparture=!isTaskRoot;super.finish()}
     override fun onPause(){
         resumed=false
+        // Home/another app can return before onStop runs. Invalidate immediately;
+        // only deliberate navigation to another CareSphere screen keeps the session.
+        if(!internalDeparture){cancelAuthentication();AppLock.session.lock()}
         if(AppLock.enabled(this)){
             window.decorView.findFocus()?.let{focus->getSystemService(android.view.inputmethod.InputMethodManager::class.java).hideSoftInputFromWindow(focus.windowToken,0);focus.clearFocus()}
             dialogs.toList().forEach{it.dismiss()};dialogs.clear()
