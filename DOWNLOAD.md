@@ -2,17 +2,21 @@
 
 ## Current downloadable files
 
-- **CareSphere-Mobile.zip** — iPhone 3.5.1 (13) Xcode project, Android 1.5.1 (7) source and verified debug APK, install guides and `BUILD_VERIFICATION.json`.
+- **CareSphere-Mobile.zip** — iPhone 3.6.0 (14) Xcode project, Android 1.6.0 (8) source and verified debug APK, install guides and `BUILD_VERIFICATION.json`.
 - **CareSphere-Android.apk** — the same verified Android development build separately.
-- **CareSphere-Web.zip** — web 1.3.1 source, locked dependencies, tests and the built `production/` website. No `node_modules` or personal data included.
+- **CareSphere-Web.zip** — web 1.4.0 source, locked dependencies, tests and the built `production/` website. No `node_modules` or personal data included.
 
-Each archive has a `.sha256` checksum. These replace the earlier mobile downloads; do not mix old APKs with the new source. See [release checks](docs/release-2026-10-14.md).
+Each archive has a `.sha256` checksum. These replace the earlier mobile downloads; do not mix old APKs with the new source. See [release checks](docs/release-parity-2026-10-14.md).
 
 ## Languages
 
 Use **Settings → App language** for English, Español, 中文（简体）, Filipino / Tagalog or Tiếng Việt. The iPhone setup wizard also has a globe picker. Core interface translation is offline; some advanced content remains English. Notes and records keep their original language. See [coverage and limitations](docs/languages.md).
 
 ## Android
+
+**Samsung Galaxy:** use the APK, not the iPhone ZIP. Follow the [Samsung-specific step-by-step guide](docs/samsung-install.md), including Auto Blocker, updates/backups, notifications and Health Connect.
+
+[Complete feature checklist](docs/feature-checklist.md) · [Current validation](docs/release-parity-2026-10-14.md)
 
 Use the APK attached with the current build or the **CareSphere-Android** artifact in the repository's **Android Build** Actions run. The artifact ZIP includes `app/outputs/apk/debug/app-debug.apk` (look for `app-debug.apk` if the artifact directory layout differs).
 
@@ -23,7 +27,7 @@ Use the APK attached with the current build or the **CareSphere-Android** artifa
 
 This is a **debug-signed development APK**, not a Play Store release. It is debuggable; do not entrust it with sensitive production data. It does not include every iOS feature. CI's ephemeral debug certificate may differ between builds; if Android refuses an update because signatures differ, export anything you want to retain before uninstalling the old development build (uninstalling erases its local data). A production release needs a stable protected release-signing key, not the CI debug key.
 
-To build it yourself: open `android/` in Android Studio, use JDK 17, let Gradle install SDK 35 components, and Run. Or:
+To build it yourself: open `android/` in Android Studio, use JDK 17, let Gradle install SDK 36 components, and Run. Or:
 
 ```bash
 cd android

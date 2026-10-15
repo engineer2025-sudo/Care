@@ -21,7 +21,7 @@ Find **My support tools** on the web/Android Today screen and in the iPhone head
 
 - Web backups use AES-256-GCM and a PBKDF2 passphrase key. iPhone/Android use their native authenticated encryption implementations and a passphrase-derived key, separately from the local Keychain/Keystore key.
 - Backups are **platform-specific**. Use the interoperable transfer flow for selected records moving between platforms.
-- Save a current backup before restoring an older one. Restoration replaces local records. Browser/iPhone medication schedules require fresh confirmation afterward; Android does not implement medication reminders.
+- Save a current backup before restoring an older one. Restoration replaces local records. Medication schedules on all three platforms require fresh confirmation afterward. Android reminders are inexact and may be delayed by battery settings.
 - Passphrases are not recoverable. Keep them separately from the file and do not post them in chat.
 - A recently deleted note is retained locally until restored, permanently erased or expired; expiration is purged when the relevant app data is refreshed. Previously exported/shared copies are outside CareSphere's control.
 - Native personal-photo matching resets when its screen is recreated. Activity practice is not a tracked assessment. Web's library-wide pause stops and unmounts the activity, so Continue starts that activity again; visual-routine pause retains the current step.
@@ -35,3 +35,7 @@ The older whole-data JSON exports on iPhone/web are unencrypted and can include 
 Use a consenting test partner and non-sensitive records for actual nearby sharing. Test the smallest intended phones, maximum font sizes, VoiceOver/TalkBack, interrupted file pickers and speech, real offline voices, wrong passphrases, cancelled restore, and device storage exhaustion. Confirm the original records remain intact on a rejected import. Do not test by placing emergency calls or acting on medication instructions.
 
 No production medical data should be entrusted to a debuggable Android build. All activity and AI outputs remain optional and unvalidated for clinical benefit.
+
+## Android non-AI alternative
+
+**Visit summary** copies only selected notes/questions into an editable draft saved explicitly as a new note. Nothing is paraphrased or diagnosed; text over the note limit is rejected, not silently truncated. Web/iPhone have their structured visit briefs. These are useful organizational alternatives, not pretend Apple Intelligence. See the [full feature checklist](feature-checklist.md).

@@ -1,8 +1,12 @@
-# CareSphere for iPhone — 3.5
+# CareSphere for iPhone — 3.6
 
 Open **CareSphere.xcodeproj** directly. No XcodeGen, remote Swift packages, binary SDKs, or model downloads are needed to build the app. The only package is `ActivityKit/`, included locally.
 
-## New in 3.5.1 (13)
+## New in 3.6.0 (14)
+
+Authentication now fails closed when system verification is unavailable; contexts are invalidated on background/disappearance and stale results cannot unlock. Returning from the authentication sheet itself does not automatically re-prompt after cancellation. Medication notification text no longer reveals names/doses, and late scheduling callbacks are ignored. Native sharing displays a connection QR and can read it from a chosen photo; it never includes the passphrase. Live-camera scanning and authenticated import receipts are still missing.
+
+[Full platform checklist](../docs/feature-checklist.md) · [Current validation](../docs/release-parity-2026-10-14.md)
 
 Offline core-interface localization in English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with a persistent App language selector. Untranslated advanced content falls back to English; private records are unchanged. [Coverage and review limits](../docs/languages.md).
 
@@ -10,7 +14,7 @@ Personal support tools in the header: Simple Mode, visual routines, communicatio
 
 **Device sharing needs no backend.** Select notes/routines, create an encrypted `.caretransfer` file, and send it through AirDrop/the share sheet or Files. Preview/select before importing on another CareSphere device. Existing records are not overwritten. No live synchronization or remote revocation is claimed. [Sharing guide](../docs/device-sharing.md) · [tools and limitations](../docs/personal-tools.md).
 
-CI now runs 43 Swift tests, including Web Crypto-to-Swift transfer decryption, tamper/wrong-passphrase checks and UTF-8 payload limits. Physical AirDrop and Apple Intelligence still need hardware validation.
+CI now runs 47 Swift tests, including Web Crypto-to-Swift transfer decryption, tamper/wrong-passphrase checks and UTF-8 payload limits. Physical AirDrop and Apple Intelligence still need hardware validation.
 
 ## Previously added in 3.1.0 (8)
 

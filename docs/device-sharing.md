@@ -15,6 +15,14 @@ Available in iPhone **3.4.0 (11)** and Android **1.4.0 (5)**, for iPhone ↔ iPh
 
 Discovery is a foreground **Find nearby devices** action, not continuous scanning or automatic pairing. It stops after one minute, on **Stop searching**, or when you leave/background the tool. The sender advertises only while offering. A list entry is not proof of the sender’s identity or successful delivery. Manual address-and-code connection remains available. No router configuration, port forwarding, external website or separate transfer app is required. Guest/public Wi-Fi may isolate devices; VPNs or hotspot restrictions can also block them. Try a private hotspot or the encrypted-file fallback. IPv6-only networks are not supported by this first direct-connection version.
 
+### Connection QR setup (iPhone 3.6 / Android 1.6)
+
+The sender displays a QR while offering. Receiver chooses **Read connection QR from a photo** to load its address/code, then separately enters the encryption passphrase and deliberately connects. This is **photo decoding**, not an in-app live camera scanner. Keep the sender foregrounded while the receiving phone takes/selects a photo. If the sender leaves to export a screenshot, its offer stops; start a fresh offer and use the new details.
+
+The QR encodes exactly `CARESPHERE-CONNECT-1|<privateIPv4>:<port>|<8-digit-code>`. It contains no records or passphrase. Both apps validate the existing strict private endpoint rules and reject extra fields, public IPs, DNS names and arbitrary paths. It is not a trusted identity. Reading a QR does not connect or import automatically.
+
+**Stages are not receipts:** prepared → offered → received/unlocked → selected/imported are local UI states. The sender does not receive authenticated confirmation of a saved import. Receipts and richer full-fidelity record types remain unimplemented; do not confuse these with duplicate-prevention markers stored only on the recipient.
+
 ### Transport privacy and limits
 
 - Only the deliberately prepared encrypted `.caretransfer` bytes are served; no arbitrary files, care database, passphrase, photos or local encryption key are exposed.

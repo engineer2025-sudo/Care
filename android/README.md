@@ -1,12 +1,22 @@
-# CareSphere for Android — 1.5
+# CareSphere for Android — 1.6
 
-Native Kotlin/Android Views app. Android 8+ (API 26), JDK 17, Gradle 8.9, Android SDK 35. Open this folder in Android Studio; no project-generation or Node toolchain needed. First Gradle sync requires internet for the Android build tools and Kotlin/JUnit. No third-party runtime UI, health, video, analytics, or AI SDK is bundled.
+Native Kotlin/Android Views app. Android 8+ (API 26), JDK 17, Gradle 8.11.1, Android SDK 36. Open this folder in Android Studio; no project-generation or Node toolchain needed. First Gradle sync requires internet for the Android build tools and Kotlin/JUnit. AndroidX Activity/Health Connect, Kotlin coroutines and ZXing QR support are included. No video, analytics or generative-AI SDK is bundled.
 
-## New in 1.5.1 (7)
+## New in 1.6.0 (8)
+
+- Confirmed medication schedules, taken/undo self-reports and optional private local notifications. Editing/recovery pauses reminders; note transfer does not. Android scheduling is inexact and Samsung battery controls can delay delivery.
+- Explicit foreground read-only Health Connect heart-rate/BP/oxygen history; no fake substitute when unavailable. Last 7 days, up to 100 records per type, latest sample per heart-rate record. No health writes, background reads, persistence or automatic exports.
+- Manually entered BP/oxygen records with source/time labels, kept separately in encrypted local storage.
+- Native connection QR display and reading from a selected photo; manual entry/discovery/file fallbacks remain. No live camera scanner or authenticated receipt yet.
+- Visit summary: select notes/questions, review/edit a deterministic copied-text draft, save as a new note. Not AI or medical advice.
+- Failed saves roll back the displayed store to the last successful save. Restore pauses medication scheduling. Emulator regression checks exercise real Keystore storage, failed writes and corrupt-store protection.
+- Owner-keystore environment configuration for non-debuggable release builds. The supplied APK is **still debug-signed**; [release-signing guide](../docs/android-release-signing.md).
+
+[Samsung installation](../docs/samsung-install.md) · [Every feature and remaining gap](../docs/feature-checklist.md) · [Current validation](../docs/release-parity-2026-10-14.md)
 
 Offline core-interface localization in English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with a persistent App language selector. Untranslated advanced content falls back to English; private records are unchanged. [Coverage and review limits](../docs/languages.md).
 
-Open **My support tools** on Today for Simple Mode, visual routines, communication cards and offline installed-voice speech, personal photos/conversation/matching, trusted contacts, appointment questions/follow-ups, note recovery, encrypted Android backup/restore and interest prompts. Routine changes can be undone. There is still no Apple Intelligence substitute.
+Open **My support tools** on Today for Simple Mode, visual routines, communication cards and offline installed-voice speech, personal photos/conversation/matching, trusted contacts, appointment questions/follow-ups, note recovery, encrypted Android backup/restore and interest prompts. Routine changes can be undone. Visit summary is an offline organizational alternative, not Apple Intelligence or a generative model.
 
 **Device sharing is backend-free.** Create an encrypted `.caretransfer` file from selected notes/routines, then choose Quick Share or another app in the system share sheet. Receive through the document picker, preview and selectively merge. No built-in phone-to-phone Bluetooth pairing, automatic synchronization or remote revocation is claimed. The read-only transfer provider grants temporary access only to deliberately shared encrypted files. The app now declares Android INTERNET permission for local sockets; direct sharing permits only private IPv4 endpoints, not an internet backend.
 
@@ -30,7 +40,7 @@ The emulator smoke also checks saved favorites after restart, note editing, dele
 
 ## Not included / not claimed
 
-No Health Connect, cloud Garmin sync, blood oxygen/pressure integrations, medication reminders, Apple Intelligence, AI chatbot, biometric lock, or remote family/clinician account. These are not mocked. This release is not full iOS parity. Apple Intelligence is an Apple-only framework. Activities are not clinically validated treatments. No real-device BLE/TalkBack or medical accuracy certification is claimed.
+No cloud Garmin/Samsung-account sync, Apple Intelligence, generative-AI chatbot, app-specific biometric lock, medication snooze, workout history or remote family/clinician account. These are not mocked. This release is not full iOS parity. Apple Intelligence is an Apple-only framework. Activities are not clinically validated treatments. No real-device BLE/TalkBack or medical accuracy certification is claimed.
 
 ## Build
 
@@ -39,7 +49,7 @@ No Health Connect, cloud Garmin sync, blood oxygen/pressure integrations, medica
 # APK: app/build/outputs/apk/debug/app-debug.apk
 ```
 
-CI builds the APK, runs 19 activity/preference/packet/backup/transfer tests and Android lint. Debug APKs are installable, but debuggable and not production releases. Android Studio maintains its own local debug signing key; hosted CI debug certificates can change between runs. Never commit a private production signing key. See [installation guide](../DOWNLOAD.md).
+CI builds the APK, runs 38 JVM activity/preference/packet/backup/transfer/clock/input tests and Android lint. Debug APKs are installable, but debuggable and not production releases. Android Studio maintains its own local debug signing key; hosted CI debug certificates can change between runs. Never commit a private production signing key. See [installation guide](../DOWNLOAD.md).
 
 ## Manual acceptance checklist (not completed by compilation)
 
