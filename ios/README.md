@@ -1,14 +1,16 @@
-# CareSphere for iPhone — 3.4
+# CareSphere for iPhone — 3.5
 
 Open **CareSphere.xcodeproj** directly. No XcodeGen, remote Swift packages, binary SDKs, or model downloads are needed to build the app. The only package is `ActivityKit/`, included locally.
 
-## New in 3.4.0 (11)
+## New in 3.5.0 (12)
+
+Offline core-interface localization in English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with a persistent App language selector. Untranslated advanced content falls back to English; private records are unchanged. [Coverage and review limits](../docs/languages.md).
 
 Personal support tools in the header: Simple Mode, visual routines, communication cards and installed-voice speech, personal photos/conversation/matching, trusted contacts, comfort settings, appointment questions/follow-ups, routine undo, retained-note recovery, encrypted backup/restore, interest prompts and optional Apple Intelligence drafting with human review.
 
 **Device sharing needs no backend.** Select notes/routines, create an encrypted `.caretransfer` file, and send it through AirDrop/the share sheet or Files. Preview/select before importing on another CareSphere device. Existing records are not overwritten. No live synchronization or remote revocation is claimed. [Sharing guide](../docs/device-sharing.md) · [tools and limitations](../docs/personal-tools.md).
 
-CI now runs 38 Swift tests, including Web Crypto-to-Swift transfer decryption, tamper/wrong-passphrase checks and UTF-8 payload limits. Physical AirDrop and Apple Intelligence still need hardware validation.
+CI now runs 42 Swift tests, including Web Crypto-to-Swift transfer decryption, tamper/wrong-passphrase checks and UTF-8 payload limits. Physical AirDrop and Apple Intelligence still need hardware validation.
 
 ## Previously added in 3.1.0 (8)
 
@@ -73,3 +75,7 @@ Built-in general references work offline. MedlinePlus data downloads only on req
 ## Direct local phone connection
 
 The native iPhone/Android apps now include **Offer to a nearby device** and a receive connection form. Join the same private Wi-Fi or hotspot, enter the sender's address and eight-digit code inside CareSphere, then unlock with the separate encryption passphrase and preview/select copies to import. Supports either phone as sender without a hosted backend or internet relay. Offers stop on leaving/backgrounding, after five minutes, or explicitly with Stop. Choose **Find nearby devices**, select the generic offer label shown on the sender, then enter its code and encryption passphrase. Discovery is opt-in, limited to one minute, and is not Bluetooth pairing or identity verification. Manual address/code entry remains available. Web retains encrypted-file sharing. See [the sharing guide](../docs/device-sharing.md) for limits and physical-device checks.
+
+## Five-language interface preview
+
+Settings → App language supports English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, plus automatic device-language selection. Core interface text is localized offline; some advanced text remains English. Private user content is not translated. Speech requires a matching installed local voice. See [scope, setup and review limitations](../docs/languages.md).

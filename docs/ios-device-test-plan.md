@@ -90,3 +90,25 @@ Record iPhone model, iOS version, Xcode version, build commit, checks passed/fai
 ## Direct nearby connections and discovery (3.4)
 
 Use non-sensitive records and two consenting testers. Repeat in BOTH directions for iPhone/iPhone, Android/Android and iPhone/Android. Use the same private Wi-Fi first, then a phone hotspot with internet disabled where supported. Prepare one selected encrypted note/routine; offer locally, enter the shown address/code on the receiver, unlock and preview/select/import. Confirm unselected records are absent, originals unchanged and duplicate receipt marked. Test wrong code/passphrase, denied Local Network access and recovery in Settings, changing networks, multiple interfaces, interrupted receive, leaving the tool, screen lock/background, explicit Stop and five-minute expiry. Confirm a stopped/expired offer cannot be fetched with its old code, and already received copies are not described as revoked. Test a guest network that isolates clients and use the file fallback. IPv6-only Wi-Fi is deliberately unsupported. Test Find nearby devices and confirm that choosing a label only fills the address: the code, passphrase and import selection must still be required. Stop search, navigate away and background during a pending resolve; no late peer should reappear. Stop/expire the sender and verify service removal or a safe connection failure if the OS retains a stale record. Disable multicast while leaving unicast available and test manual fallback. Spoofed labels, wrong protocol versions and TXT addresses not in resolved host addresses must not bypass validation. No Bluetooth radio pairing should appear.
+
+## Multilingual interface acceptance (3.5.0)
+
+Use test-only records, not real care data. In setup and Settings, choose English,
+Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese. Confirm preference
+survives a full relaunch, navigation stays in the same destination, and form edits
+are not reset merely by changing the preference. Test device-language automatic
+selection plus an unsupported language's English fallback.
+
+Save a note named/text `Save` and a custom phrase in another language. Neither
+may be automatically translated when UI language changes. Share selected copies
+with an Android whose UI uses a different language; original Unicode text,
+selection boundaries, passphrase handling and duplicate protection must survive.
+These are manual physical-device checks, not yet established by CI.
+
+Review every safety/privacy prompt with fluent speakers before production use.
+Confirm Simplified Chinese is clearly labeled, English fallback is disclosed,
+and installed Mandarin/Spanish/Filipino/Vietnamese voices behave truthfully. With
+no matching voice, verify visible text plus an unavailability explanation, not an
+English-voice substitution. Check VoiceOver, largest Dynamic Type, narrow iPhones,
+Switch Control and mixed-script names/notes. OS dialogs and advanced/reference
+content may follow the OS/provider or remain English; see `docs/languages.md`.

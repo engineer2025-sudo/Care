@@ -22,9 +22,12 @@ def command(*args):
 def api(path):
     return json.loads(command('gh', 'api', path))
 
+LOCALIZATION_PATHS = ['localization', 'scripts/generate_localizations.py', 'src/locales/interface.json',
+    'ios/ActivityKit/Sources/CareActivityKit/Resources/InterfaceTranslations.json', 'android/app/src/main/assets/interface.json']
+
 WEB_PATHS = ['src', 'public', 'test', 'e2e', 'e2e-offline', 'package.json', 'package-lock.json',
     'index.html', 'vite.config.js', 'postcss.config.js', 'tailwind.config.js',
-    'playwright.config.js', 'playwright.offline.config.js', '.github/workflows/web.yml']
+    'playwright.config.js', 'playwright.offline.config.js', '.github/workflows/web.yml', *LOCALIZATION_PATHS]
 
 def verified_run(run_id, *directories):
     directory = ', '.join(directories)
@@ -45,10 +48,11 @@ parser.add_argument('--ios-run', required=True)
 parser.add_argument('--android-run', required=True)
 parser.add_argument('--web-run', required=True)
 args = parser.parse_args()
-ios = verified_run(args.ios_run, 'ios', '.github/workflows/ios.yml')
-android = verified_run(args.android_run, 'android', 'scripts/android_smoke.py', '.github/workflows/android.yml')
+ios = verified_run(args.ios_run, 'ios', '.github/workflows/ios.yml', *LOCALIZATION_PATHS)
+android = verified_run(args.android_run, 'android', 'scripts/android_smoke.py', '.github/workflows/android.yml', *LOCALIZATION_PATHS)
 web = verified_run(args.web_run, *WEB_PATHS)
 release_commit = command('git', 'rev-parse', 'HEAD').strip()
+subprocess.run(['python3','scripts/generate_localizations.py','--check'],cwd=ROOT,check=True)
 # Build from the exact verified sources; no stale dist/ is packaged.
 subprocess.run(['npm', 'ci'], cwd=ROOT, check=True)
 subprocess.run(['npm', 'run', 'build'], cwd=ROOT, check=True)
@@ -74,33 +78,40 @@ apk_path.write_bytes(apk)
 with zipfile.ZipFile(apk_path) as z:
     assert z.testzip() is None
     assert 'AndroidManifest.xml' in z.namelist() and 'classes.dex' in z.namelist()
+    assert z.read('assets/interface.json') == (ROOT/'android/app/src/main/assets/interface.json').read_bytes()
 
-paths = [ROOT / p for p in command('git', 'ls-files', 'ios', 'android').splitlines()]
+paths = [ROOT / p for p in command('git', 'ls-files', 'ios', 'android', *LOCALIZATION_PATHS).splitlines()]
 paths += [ROOT / p for p in ['DOWNLOAD.md', 'docs/signing-troubleshooting.md',
     'docs/ios-device-test-plan.md', 'docs/activities-and-accessibility.md', 'docs/release-2026-10-14.md',
-    'docs/web-deployment.md', 'docs/device-sharing.md', 'docs/personal-tools.md', 'scripts/android_smoke.py']]
+    'docs/web-deployment.md', 'docs/device-sharing.md', 'docs/personal-tools.md', 'docs/languages.md', 'scripts/android_smoke.py']]
 # Refuse to silently label a later version using this release's metadata.
 project = (ROOT/'ios/CareSphere.xcodeproj/project.pbxproj').read_text()
-assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.4.0'}
-assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'11'}
+assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.5.0'}
+assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'12'}
 gradle = (ROOT/'android/app/build.gradle.kts').read_text()
-assert re.search(r'versionName\s*=\s*"1\.4\.0"', gradle)
-assert re.search(r'versionCode\s*=\s*5\b', gradle)
-assert json.loads((ROOT/'package.json').read_text())['version'] == '1.2.0'
+assert re.search(r'versionName\s*=\s*"1\.5\.0"', gradle)
+assert re.search(r'versionCode\s*=\s*6\b', gradle)
+assert json.loads((ROOT/'package.json').read_text())['version'] == '1.3.0'
+assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 458
+language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':458,
+    'offline_catalog':True, 'persistent_selector':True, 'automatic_patient_text_translation':False,
+    'english_fallback_for_untranslated_content':True, 'complete_interface_translation':False,
+    'professional_linguistic_review':False, 'physical_multilingual_speech_tested':False}
 manifest = {
     'source_commit': command('git','rev-parse','HEAD').strip(),
-    'ios': {'version':'3.4.0 (11)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
+    'ios': {'version':'3.5.0 (12)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
         'unsigned_device_build': True, 'healthkit_build': True, 'simulator_launch': True,
-        'tests':38, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
-    'android': {'version':'1.4.0 (5)', 'ci':android['url'], 'tested_commit':android['headSha'],
-        'tests':27, 'lint':'passed', 'apk_signing_verified_in_ci':True,
-        'emulator_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
+        'tests':42, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
+    'android': {'version':'1.5.0 (6)', 'ci':android['url'], 'tested_commit':android['headSha'],
+        'tests':30, 'lint':'passed', 'apk_signing_verified_in_ci':True,
+        'emulator_smoke':'passed', 'five_language_ui_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
         'apk_sha256':digest, 'apk_bytes':len(apk)},
     'device_sharing': {'app_backend_required':False, 'mode':'native direct LAN plus encrypted-file snapshots',
         'web_to_android_emulator_import':'passed', 'physical_nearby_delivery_tested':False,
         'bluetooth_phone_pairing':False, 'hosted_backend_required':False, 'temporary_phone_listener':True, 'native_manual_lan_connection':True,
         'opt_in_local_discovery':True, 'discovery_protocol':'DNS-SD _care-xfer._tcp.',
         'android_nsd_instrumentation':'passed', 'physical_cross_device_discovery_tested':False, 'android_emulator_lan_receive_import':'passed', 'automatic_sync':False, 'remote_revocation':False},
+    'interface_localization':language_manifest,
     'compiled_source_comparison_excludes': ['ios/README.md', 'android/README.md'],
     'files': {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
 }
@@ -122,6 +133,12 @@ No remote Swift packages or XcodeGen are needed.
 Repeated codesign password prompt? Cancel it and read docs/signing-troubleshooting.md.
 Never share passwords or reset/delete your keychain indiscriminately.
 
+LANGUAGES
+Settings > App language: English, Spanish, Simplified Chinese, Filipino/Tagalog
+and Vietnamese. Offline core-interface translations; advanced content can remain
+English. Your own care records are not translated. See docs/languages.md.
+Translations require fluent-speaker and safety review before production use.
+
 WHAT'S REAL
 Routines, notes, and mood choices are entered by you. No prefilled people or vital signs.
 Heart rate appears only from a real monitor (or optional Apple Health history on iOS).
@@ -133,8 +150,8 @@ not full iOS feature parity. See android/README.md and ios/README.md for exact s
 
 VALIDATION
 See BUILD_VERIFICATION.json for successful CI runs and file hashes.
-iOS 3.4.0 (11): 38 logic/preference/packet/transfer/LAN/discovery tests; standard device, HealthKit and Simulator builds; launch.
-Android 1.4.0 (5): 27 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
+iOS 3.5.0 (12): 42 logic/preference/packet/transfer/LAN/discovery/language tests; standard device, HealthKit and Simulator builds; launch.
+Android 1.5.0 (6): 30 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
 Real-device BLE, actual Apple Intelligence responses, accessibility with users, and
 Mac signing remain manual acceptance work. No clinical effectiveness is claimed.
 
@@ -152,7 +169,7 @@ Alternatively use AirDrop/Quick Share/the system share sheet or save the file. R
 file picker, unlock, preview, then choose copies to import. Tell the recipient the
 passphrase separately. No built-in Bluetooth pairing, live sync or remote revocation.
 Read docs/device-sharing.md and docs/personal-tools.md before using these features.
-The separate CareSphere-Web.zip contains web 1.2.0 source and a built website.
+The separate CareSphere-Web.zip contains web 1.3.0 source and a built website.
 START_HERE.txt and DOWNLOAD.md explain installation. No slide deck is included.
 '''
 archive = out / 'CareSphere-Mobile.zip'
@@ -174,13 +191,14 @@ with tempfile.TemporaryDirectory() as tmp, zipfile.ZipFile(archive) as z:
         assert (z.getinfo('CareSphere-Mobile/'+executable).external_attr >> 16) & 0o100
 # Separate web download: source + a ready-to-host production directory.
 web_paths = [ROOT / p for p in command('git', 'ls-files', *WEB_PATHS).splitlines()]
-web_paths += [ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md', ROOT/'docs/device-sharing.md', ROOT/'docs/personal-tools.md']
+web_paths += [ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md', ROOT/'docs/device-sharing.md', ROOT/'docs/personal-tools.md', ROOT/'docs/languages.md']
 web_files = {str(p.relative_to(ROOT)):p for p in web_paths}
 web_files.update({'production/'+str(p.relative_to(ROOT/'dist')):p for p in (ROOT/'dist').rglob('*') if p.is_file()})
 web_manifest = {
-    'version':'1.2.0', 'source_commit':command('git','rev-parse','HEAD').strip(),
+    'interface_localization':language_manifest,
+    'version':'1.3.0', 'source_commit':command('git','rev-parse','HEAD').strip(),
     'ci':web['url'], 'tested_commit':web['headSha'],
-    'unit_tests':32, 'browser_tests':23, 'offline_production_tests':1,
+    'unit_tests':37, 'browser_tests':26, 'offline_production_tests':1,
     'audit_known_vulnerabilities':0, 'audit_date':'2026-10-14',
     'production_build':'rebuilt locally from verified source with the locked dependencies',
     'node':command('node','--version').strip(),
@@ -190,7 +208,11 @@ web_manifest = {
 web_archive = out/'CareSphere-Web.zip'
 with zipfile.ZipFile(web_archive, 'w', zipfile.ZIP_DEFLATED) as z:
     for name, path in web_files.items(): z.write(path, 'CareSphere-Web/'+name)
-    z.writestr('CareSphere-Web/START_HERE.txt', """CARESPHERE WEB 1.2.0
+    z.writestr('CareSphere-Web/START_HERE.txt', """CARESPHERE WEB 1.3.0
+
+App language: English, Spanish, Simplified Chinese, Filipino/Tagalog, Vietnamese.
+Offline core-interface translations, with English fallback. Personal records
+are not translated. Read docs/languages.md for coverage and review limitations.
 
 DEVELOP: Node.js 20.19+ or 22.12+, then npm ci and npm run dev.
 HOST: Upload the CONTENTS of production/ to a static HTTPS site's root.

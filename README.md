@@ -4,21 +4,23 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 ## This release — October 14, 2026
 
+**Five-language interface preview:** English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with an offline persistent selector. Core labels are translated; advanced content has explicit English fallback. Private notes and care records are never translated automatically. [Coverage, setup and review limits](docs/languages.md).
+
 **Personal support tools:** Simple Mode, visual routines, communication cards, personal photo conversation/matching, comfort preferences, trusted contacts, appointment questions, routine undo, note recovery, encrypted backup/restore, interest prompts, optional first-use guidance and native iPhone AI drafting.
 
 **No backend:** selected notes/routines transfer as encrypted files using AirDrop, Quick Share, another chosen app or saved files. The receiving CareSphere previews and selectively imports copies. No automatic sync, built-in phone-to-phone Bluetooth pairing, remote revocation, or fabricated connection status. [Sharing instructions and protocol](docs/device-sharing.md) · [feature guide and limits](docs/personal-tools.md)
 
 
 - **All three platforms:** searchable activity libraries, private favorites, searchable/editable care notes and confirmed deletion.
-- **iPhone 3.4.0 (11):** favorite filtering, note-edit discard protection and updated timestamps. Existing encrypted care data migrates without a reset.
-- **Android 1.4.0 (5):** system/light/dark appearance, native themed dialogs, live search that retains the keyboard, and a two-row navigation layout at large font sizes.
-- **Web 1.2.0:** 11 optional activities, one focused session at a time, five added supported-choice/conversation activities, note-edit discard protection and verified offline reopening after the first completed installation.
+- **iPhone 3.5.0 (12):** favorite filtering, note-edit discard protection and updated timestamps. Existing encrypted care data migrates without a reset.
+- **Android 1.5.0 (6):** system/light/dark appearance, native themed dialogs, live search that retains the keyboard, and a two-row navigation layout at large font sizes.
+- **Web 1.3.0:** 11 optional activities, one focused session at a time, five added supported-choice/conversation activities, note-edit discard protection and verified offline reopening after the first completed installation.
 
 Downloads are documented in [DOWNLOAD.md](DOWNLOAD.md). See [release verification](docs/release-2026-10-14.md) and [web deployment](docs/web-deployment.md).
 
 ## Native apps
 
-| | iPhone 3.2 | Android 1.2 |
+| | iPhone 3.5 | Android 1.5 |
 |---|---|---|
 | Project | `ios/CareSphere.xcodeproj` | `android/` in Android Studio |
 | Minimum OS | iOS 16 | Android 8 / API 26 |

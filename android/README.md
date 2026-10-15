@@ -1,8 +1,10 @@
-# CareSphere for Android — 1.4
+# CareSphere for Android — 1.5
 
 Native Kotlin/Android Views app. Android 8+ (API 26), JDK 17, Gradle 8.9, Android SDK 35. Open this folder in Android Studio; no project-generation or Node toolchain needed. First Gradle sync requires internet for the Android build tools and Kotlin/JUnit. No third-party runtime UI, health, video, analytics, or AI SDK is bundled.
 
-## New in 1.4.0 (5)
+## New in 1.5.0 (6)
+
+Offline core-interface localization in English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with a persistent App language selector. Untranslated advanced content falls back to English; private records are unchanged. [Coverage and review limits](../docs/languages.md).
 
 Open **My support tools** on Today for Simple Mode, visual routines, communication cards and offline installed-voice speech, personal photos/conversation/matching, trusted contacts, appointment questions/follow-ups, note recovery, encrypted Android backup/restore and interest prompts. Routine changes can be undone. There is still no Apple Intelligence substitute.
 
@@ -52,3 +54,7 @@ CI builds the APK, runs 19 activity/preference/packet/backup/transfer tests and 
 ## Direct local phone connection
 
 The native iPhone/Android apps now include **Offer to a nearby device** and a receive connection form. Join the same private Wi-Fi or hotspot, enter the sender's address and eight-digit code inside CareSphere, then unlock with the separate encryption passphrase and preview/select copies to import. Supports either phone as sender without a hosted backend or internet relay. Offers stop on leaving/backgrounding, after five minutes, or explicitly with Stop. Choose **Find nearby devices**, select the generic offer label shown on the sender, then enter its code and encryption passphrase. Discovery is opt-in, limited to one minute, and is not Bluetooth pairing or identity verification. Manual address/code entry remains available. Web retains encrypted-file sharing. See [the sharing guide](../docs/device-sharing.md) for limits and physical-device checks.
+
+## Five-language interface preview
+
+Settings → App language supports English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, plus automatic device-language selection. Core interface text is localized offline; some advanced text remains English. Private user content is not translated. Speech requires a matching installed local voice. See [scope, setup and review limitations](../docs/languages.md).
