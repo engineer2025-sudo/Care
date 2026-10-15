@@ -79,6 +79,15 @@ class NearbySmokeInstrumentation : Instrumentation() {
                 MedicationReminders.due(targetContext,persisted.list("medications").getJSONObject(0).getString("id"))
                 val notifications=targetContext.getSystemService(android.app.NotificationManager::class.java).activeNotifications
                 check(notifications.any{it.id==701 && it.notification.extras.getString(android.app.Notification.EXTRA_TEXT)=="Open your confirmed medication schedule."})
+                val medID=persisted.list("medications").getJSONObject(0).getString("id")
+                if(java.time.LocalDateTime.now().plusMinutes(10).toLocalDate()==java.time.LocalDate.now()){
+                    check(MedicationReminders.snooze(targetContext,medID))
+                    val until=checkNotNull(MedicationReminders.snoozedUntil(targetContext,medID))
+                    MedicationReminders.sync(targetContext)
+                    check(MedicationReminders.snoozedUntil(targetContext,medID)==until)
+                    check(MedicationReminders.cancelSnooze(targetContext,medID))
+                    check(MedicationReminders.snoozedUntil(targetContext,medID)==null)
+                }
                 val snapshot=persisted.json.toString()
                 persisted.restoreSnapshot(snapshot)
                 check(!persisted.json.optBoolean("medicationConfirmed") && !MedicationReminders.enabled(targetContext))
@@ -90,8 +99,26 @@ class NearbySmokeInstrumentation : Instrumentation() {
                     check(file.readBytes().contentEquals(byteArrayOf(1,2,3)))
                 }finally{file.writeBytes(before)}
             }
+            // Screen-lock UI coverage uses the real app activities, not a fake view.
+            // The separate shell smoke test verifies actual system credential success/cancel.
+            runOnMainSync { check(AppLock.setEnabled(targetContext,true));AppLock.session.lock() }
+            val protectedScreens=mutableListOf<Activity>()
+            try {
+                for(type in listOf(MainActivity::class.java,SupportActivity::class.java,MedicationActivity::class.java,HealthHistoryActivity::class.java)){
+                    val screen=startActivitySync(Intent(targetContext,type).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    protectedScreens.add(screen)
+                    runOnMainSync {
+                        fun containsGate(view:android.view.View):Boolean {
+                            if(view is android.widget.TextView && view.isShown && view.text.toString()=="CareSphere is locked")return true
+                            return view is android.view.ViewGroup && (0 until view.childCount).any{containsGate(view.getChildAt(it))}
+                        }
+                        check(containsGate(screen.window.decorView))
+                        check(screen.window.attributes.flags and android.view.WindowManager.LayoutParams.FLAG_SECURE != 0)
+                    }
+                }
+            } finally {runOnMainSync{check(AppLock.setEnabled(targetContext,false));AppLock.session.lock();protectedScreens.reversed().forEach{it.finish()}}}
             outcome = Activity.RESULT_OK
-            report = "PASS: native DNS-SD publish/discover/resolve, private endpoint validation, encrypted socket transfer/decryption, and explicit stop; QR image roundtrip; Keystore save rollback/corruption protection; restored medication reminders paused."
+            report = "PASS: native DNS-SD publish/discover/resolve, private endpoint validation, encrypted socket transfer/decryption, and explicit stop; QR image roundtrip; Keystore save rollback/corruption protection; restored medication reminders paused; app-lock shield and screenshot flag on every protected entry point."
         } catch(error: Throwable) {
             report = "FAIL: ${error.javaClass.simpleName}: ${error.message}"
         } finally {

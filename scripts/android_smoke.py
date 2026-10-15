@@ -280,6 +280,44 @@ result = adb('shell','am','instrument','-w','-r',package+'.test/'+package+'.Near
 print(result)
 assert 'PASS: native DNS-SD publish/discover/resolve' in result and 'INSTRUMENTATION_CODE: -1' in result, result
 adb('uninstall',package+'.test')
+# Test-only public PIN on an emulator (the destructive physical-device guard is above).
+# Never copy these locksettings commands to a user's phone.
+def enter_system_test_pin():
+    deadline=time.monotonic()+20
+    while time.monotonic()<deadline:
+        fields=[n for n in screen().iter('node') if n.attrib.get('class')=='android.widget.EditText' and n.attrib.get('package')!=package]
+        if fields:
+            x1,y1,x2,y2=map(int,re.findall(r'\d+',fields[0].attrib['bounds']))
+            adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+            adb('shell','input','text','246810')
+            adb('shell','input','keyevent','66')
+            return
+        time.sleep(.5)
+    raise AssertionError('System device-credential field not found')
+adb('shell','locksettings','set-pin','246810')
+try:
+    adb('shell','am','force-stop',package)
+    adb('shell','am','start','-W',f'{package}/.MainActivity')
+    tap('Settings & privacy')
+    tap('Enable app lock')
+    enter_system_test_pin()
+    find('Disable app lock')
+    adb('shell','input','keyevent','3')
+    adb('shell','am','start','-W',f'{package}/.MainActivity')
+    find('CareSphere is locked')
+    assert not any(n.attrib.get('text') in ['Reminder test only','Settings & privacy','My support tools'] for n in screen().iter('node'))
+    tap('Unlock CareSphere')
+    adb('shell','input','keyevent','4')
+    find('CareSphere is locked')
+    tap('Unlock CareSphere')
+    enter_system_test_pin()
+    find('Disable app lock')
+    tap('Disable app lock')
+    enter_system_test_pin()
+    find('Enable app lock')
+finally:
+    adb('shell','locksettings','clear','--old','246810')
+
 adb('shell','am','force-stop',package)
 # Leave the emulator with an empty installation, not a saved test routine.
 adb('shell','pm','clear',package)
