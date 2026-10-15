@@ -27,10 +27,10 @@ open class ProtectedActivity:ComponentActivity(){
     private val pendingResults=mutableListOf<()->Unit>()
     private fun label(s:String)=AppLanguage.text(this,s)
     override fun onCreate(state:Bundle?){super.onCreate(state);if(AppLock.enabled(this))window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)}
-    override fun setContentView(view:View){setContentView(view,ViewGroup.LayoutParams(-1,-1))}
-    override fun setContentView(view:View,params:ViewGroup.LayoutParams){
+    override fun setContentView(view:View?){setContentView(view,ViewGroup.LayoutParams(-1,-1))}
+    override fun setContentView(view:View?,params:ViewGroup.LayoutParams?){
         content=view
-        val root=FrameLayout(this);root.addView(view,FrameLayout.LayoutParams(params.width,params.height));frame=root;shield=null
+        val root=FrameLayout(this);if(view!=null)root.addView(view,FrameLayout.LayoutParams(params?.width?:-1,params?.height?:-1));frame=root;shield=null
         super.setContentView(root);refreshPrivacy()
     }
     override fun setContentView(layoutResID:Int){setContentView(layoutInflater.inflate(layoutResID,null))}
