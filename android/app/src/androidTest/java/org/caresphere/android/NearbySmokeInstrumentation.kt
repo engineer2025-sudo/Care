@@ -57,6 +57,7 @@ class NearbySmokeInstrumentation : Instrumentation() {
             check(browser!!.peers.isEmpty() && !browser!!.scanning && publisher!!.advertisedName.isEmpty())
             server.close()
             check(runCatching { LocalTransferReceiver().use { it.receive(chosen.address,offer.second) } }.isFailure)
+            uiAutomation.grantRuntimePermission(targetContext.packageName,"android.permission.POST_NOTIFICATIONS")
             val bitmap=ConnectionQR.image(offer.first,offer.second)
             val image=java.io.ByteArrayOutputStream();bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,image);bitmap.recycle()
             check(ConnectionQR.read(image.toByteArray())==offer)
@@ -72,7 +73,12 @@ class NearbySmokeInstrumentation : Instrumentation() {
                 } finally { obstacle.delete() }
                 val persisted=CareData(targetContext,false)
                 check(persisted.json.getString("storageRegressionMarker")=="saved")
+                persisted.put("medications",org.json.JSONArray().put(JSONObject().put("id",UUID.randomUUID().toString()).put("name","Public notification test only").put("time","09:30").put("takenOn","")))
                 persisted.put("medicationConfirmed",true)
+                check(MedicationReminders.enable(targetContext))
+                MedicationReminders.due(targetContext,persisted.list("medications").getJSONObject(0).getString("id"))
+                val notifications=targetContext.getSystemService(android.app.NotificationManager::class.java).activeNotifications
+                check(notifications.any{it.id==701 && it.notification.extras.getString(android.app.Notification.EXTRA_TEXT)=="Open your confirmed medication schedule."})
                 val snapshot=persisted.json.toString()
                 persisted.restoreSnapshot(snapshot)
                 check(!persisted.json.optBoolean("medicationConfirmed") && !MedicationReminders.enabled(targetContext))

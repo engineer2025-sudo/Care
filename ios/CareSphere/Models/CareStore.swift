@@ -459,8 +459,8 @@ final class CareStore: ObservableObject {
         guard medicationScheduleConfirmed,
               let med = medications.first(where: { $0.id == id }) else { return }
         let content = UNMutableNotificationContent()
-        content.title = "💊 Snoozed: \(med.shortName)"
-        content.body = "Reminder for \(med.timeLabel) snoozed 10 minutes."
+        content.title = "CareSphere"
+        content.body = AppLanguage.text("Open your confirmed medication schedule.")
         content.sound = .default
         content.categoryIdentifier = "MED_DOSE"
         content.userInfo = ["medId": med.id.uuidString]

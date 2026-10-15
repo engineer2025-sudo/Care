@@ -325,12 +325,15 @@ class SupportActivity : Activity() {
                     require(secrets[0].length>=12);stopNearby();receivedTransfer=null
                     val pass=secrets[0].toCharArray();val generation=nearbyGeneration
                     val receiver=LocalTransferReceiver();nearbyReceiver=receiver;nearbyBusy=true;nearbyStatus="Connecting locally…";render()
-                    Thread { val result=runCatching { unlockTransfer(String(receiver.receive(fields[0],fields[1]),Charsets.UTF_8),String(pass)) }
+                    Thread {
+                        val received=runCatching{receiver.receive(fields[0],fields[1])}
+                        received.onSuccess{runOnUiThread{if(nearbyGeneration==generation&&foreground){nearbyStatus="Encrypted copy received. Unlocking locally…";render()}}}
+                        val result=received.mapCatching { unlockTransfer(String(it,Charsets.UTF_8),String(pass)) }
                         pass.fill('\u0000')
                         runOnUiThread { if(nearbyGeneration==generation&&foreground&&!isFinishing&&!isDestroyed) {
                             nearbyBusy=false;nearbyReceiver=null
                             result.onSuccess{receivedTransfer=it;nearbyStatus="Received and unlocked locally. Review and select copies below. Nothing has been imported."}
-                                .onFailure{nearbyStatus="Could not connect or unlock. Check the address, code and passphrase, same Wi-Fi/hotspot, and that the sender's offer is still open. Nothing was imported."}
+                                .onFailure{nearbyStatus=if(received.isFailure)"Could not connect. Check the address and code, same Wi-Fi/hotspot, and that the sender's offer is still open. Nothing was imported." else "Received bytes could not be unlocked. Check the passphrase with the sender. Nothing was imported."}
                             render()
                         } }
                     }.start()

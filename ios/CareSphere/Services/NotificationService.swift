@@ -1,3 +1,4 @@
+import CareActivityKit
 import Foundation
 import UserNotifications
 
@@ -11,6 +12,8 @@ extension Notification.Name {
 /// ("✓ Taken" / "Snooze 10 min") handled via UNUserNotificationCenterDelegate.
 final class NotificationService: NSObject, ObservableObject {
     static let shared = NotificationService()
+
+    private var reminderGeneration = UUID()
 
     @Published var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
@@ -44,35 +47,39 @@ final class NotificationService: NSObject, ObservableObject {
     /// Rebuilds only CareSphere medication reminders. Old pending requests are
     /// cleared even when permission is unavailable or a saved schedule is paused.
     func syncMedicationReminders(_ meds: [Medication]) {
+        // Serialize scheduling decisions on the main queue. A late settings/list
+        // callback from an older edit must not re-enable a paused schedule.
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { self.syncMedicationReminders(meds) }; return
+        }
+        let generation = UUID(); reminderGeneration = generation
         let center = UNUserNotificationCenter.current()
         center.getNotificationSettings { settings in
-            center.getDeliveredNotifications { delivered in
-                let medicationIDs = delivered
-                    .map { $0.request.identifier }
-                    .filter { $0.hasPrefix("med-") }
-                center.removeDeliveredNotifications(withIdentifiers: medicationIDs)
-            }
-            center.getPendingNotificationRequests { requests in
-                let medicationIDs = requests
-                    .map(\.identifier)
-                    .filter { $0.hasPrefix("med-") }
-                center.removePendingNotificationRequests(withIdentifiers: medicationIDs)
-
-                guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
-                // Keep one repeating calendar request per confirmed schedule.
-                // A taken check-in is day-specific and must not cancel tomorrow's alert.
-                for med in meds where !med.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    var comps = DateComponents()
-                    comps.hour = med.hour
-                    comps.minute = med.minute
-                    let content = UNMutableNotificationContent()
-                    content.title = "💊 Time for \(med.shortName)"
-                    content.body = "Scheduled for \(med.timeLabel) — \(med.purpose). Mark it taken when done."
-                    content.sound = .default
-                    content.categoryIdentifier = "MED_DOSE"
-                    content.userInfo = ["medId": med.id.uuidString]
-                    let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
-                    center.add(UNNotificationRequest(identifier: "med-\(med.id.uuidString)", content: content, trigger: trigger))
+            DispatchQueue.main.async {
+                guard self.reminderGeneration == generation else { return }
+                center.getDeliveredNotifications { delivered in
+                    DispatchQueue.main.async {
+                        guard self.reminderGeneration == generation else { return }
+                        center.removeDeliveredNotifications(withIdentifiers: delivered.map { $0.request.identifier }.filter { $0.hasPrefix("med-") })
+                    }
+                }
+                center.getPendingNotificationRequests { requests in
+                    DispatchQueue.main.async {
+                        guard self.reminderGeneration == generation else { return }
+                        center.removePendingNotificationRequests(withIdentifiers: requests.map(\.identifier).filter { $0.hasPrefix("med-") })
+                        guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
+                        for med in meds where !med.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            var comps = DateComponents(); comps.hour = med.hour; comps.minute = med.minute
+                            let content = UNMutableNotificationContent()
+                            content.title = "CareSphere"
+                            content.body = AppLanguage.text("Open your confirmed medication schedule.")
+                            content.sound = .default
+                            content.categoryIdentifier = "MED_DOSE"
+                            content.userInfo = ["medId": med.id.uuidString]
+                            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
+                            center.add(UNNotificationRequest(identifier: "med-\(med.id.uuidString)", content: content, trigger: trigger))
+                        }
+                    }
                 }
             }
         }

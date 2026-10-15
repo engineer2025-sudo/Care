@@ -215,7 +215,7 @@ struct PersonalSupportView: View {
             }
             if !offeredAddress.isEmpty {
                 if let image = connectionQR() {
-                    Image(uiImage:image).interpolation(.none).resizable().scaledToFit().frame(maxWidth:280)
+                    Image(uiImage:image).interpolation(.none).resizable().scaledToFit().frame(maxWidth:280).padding(16).background(Color.white)
                         .accessibilityLabel(AppLanguage.text("Connection QR code. The address and code are also written below."))
                 }
                 Text(AppLanguage.text("QR contains only connection details. Keep this offer open. It does not contain your records or passphrase."))
