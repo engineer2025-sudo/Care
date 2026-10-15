@@ -43,3 +43,13 @@ test('speech only uses installed local voices matching language, never English f
  globalThis.speechSynthesis={getVoices:()=>[{lang:getLanguage(),localService:false}],speak:()=>{spoke=true},cancel:()=>{}}
  try{assert.throws(()=>speak('Save'),/installed voice/);assert.equal(spoke,false)}finally{globalThis.speechSynthesis=old}
 })
+
+test('required home, setup, comfort and routine messages cannot silently lose translations',()=>{
+ const required=JSON.parse(fs.readFileSync('localization/required-core.json','utf8'))
+ const entries=JSON.parse(fs.readFileSync('src/locales/interface.json','utf8'))
+ for(const keys of Object.values(required))for(const key of keys)for(const lang of ['es','zh-Hans','fil','vi'])assert.equal(typeof entries[key]?.[lang],'string',key+': '+lang)
+})
+test('greetings allow locale word order without translating or reparsing the display name',()=>{
+ assert.equal(translate('{0}, {1}.',['早上好','Save {0}'],'zh-Hans'),'Save {0}，早上好。')
+ for(const lang of ['es','zh-Hans','fil','vi'])assert.notEqual(translate('Good morning',[],lang),'Good morning')
+})

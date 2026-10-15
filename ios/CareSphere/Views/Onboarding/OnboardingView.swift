@@ -78,7 +78,7 @@ struct OnboardingView: View {
                         .font(.caption.weight(.heavy))
                         .foregroundStyle(Color.emeraldText)
                     Spacer()
-                    Text("Step \(step.rawValue + 1) of \(Step.allCases.count)")
+                    Text(AppLanguage.format("Step {0} of {1}", [String(step.rawValue + 1), String(Step.allCases.count)]))
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
@@ -194,7 +194,7 @@ struct OnboardingView: View {
 
     private var profilePage: some View {
         VStack(alignment: .leading, spacing: 22) {
-            pageHeader("About you", "Your profile is stored locally. Your display name is shared with Jitsi only if you join a video room.", systemImage: "person.crop.circle")
+            pageHeader(AppLanguage.text("About you"), AppLanguage.text("Your profile is stored locally. Your display name is shared with Jitsi only if you join a video room."), systemImage: "person.crop.circle")
             VStack(alignment: .leading, spacing: 8) {
                 Text(AppLanguage.text("Your name")).font(.caption.weight(.bold)).foregroundStyle(.secondary)
                 TextField(AppLanguage.text("e.g. Alex"), text: $store.displayName)
@@ -215,7 +215,7 @@ struct OnboardingView: View {
 
     private var focusPage: some View {
         VStack(alignment: .leading, spacing: 22) {
-            pageHeader("What brings you here?", "Choose a profile preference. All activities remain available; this is not a diagnosis or treatment plan.", systemImage: "switch.2")
+            pageHeader(AppLanguage.text("What brings you here?"), AppLanguage.text("Choose a profile preference. All activities remain available; this is not a diagnosis or treatment plan."), systemImage: "switch.2")
             VStack(spacing: 12) {
                 ForEach(CareMode.allCases) { mode in
                     Button {
@@ -255,7 +255,7 @@ struct OnboardingView: View {
 
     private var medicationsPage: some View {
         VStack(alignment: .leading, spacing: 18) {
-            pageHeader("Your medications", "Enter only a schedule confirmed by your care team or medication label. Reminders stay paused until you confirm every name and time.", systemImage: "pills.fill")
+            pageHeader(AppLanguage.text("Your medications"), AppLanguage.text("Enter only a schedule confirmed by your care team or medication label. Reminders stay paused until you confirm every name and time."), systemImage: "pills.fill")
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach($meds) { $med in
@@ -346,7 +346,7 @@ struct OnboardingView: View {
 
     private var routinesPage: some View {
         VStack(alignment: .leading, spacing: 18) {
-            pageHeader("Daily rhythm", "Choose a few checklist reminders that fit your day. Check-ins reset each local day and are not proof of an activity.", systemImage: "calendar.badge.checkmark")
+            pageHeader(AppLanguage.text("Daily rhythm"), AppLanguage.text("Choose a few checklist reminders that fit your day. Check-ins reset each local day and are not proof of an activity."), systemImage: "calendar.badge.checkmark")
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach($routines) { $routine in
@@ -380,7 +380,7 @@ struct OnboardingView: View {
 
     private var contactPage: some View {
         VStack(alignment: .leading, spacing: 22) {
-            pageHeader("Emergency contact", "One tap in SOS calls or texts this person — choose someone close by.", systemImage: "sos.circle")
+            pageHeader(AppLanguage.text("Emergency contact"), AppLanguage.text("One tap in SOS calls or texts this person — choose someone close by."), systemImage: "sos.circle")
             VStack(alignment: .leading, spacing: 8) {
                 Text(AppLanguage.text("Name")).font(.caption.weight(.bold)).foregroundStyle(.secondary)
                 TextField(AppLanguage.text("e.g. Sarah M."), text: $emergencyName)
@@ -439,7 +439,7 @@ struct OnboardingView: View {
 
     private var permissionsPage: some View {
         VStack(alignment: .leading, spacing: 18) {
-            pageHeader("Enable superpowers", "Each one is optional and asked by iOS itself — change any time in Settings.", systemImage: "powersleep")
+            pageHeader(AppLanguage.text("Enable superpowers"), AppLanguage.text("Each one is optional and asked by iOS itself — change any time in Settings."), systemImage: "powersleep")
             permissionRow(
                 icon: "bell.badge.fill", title: "Medication reminders",
                 status: notifications.authorizationStatus == .authorized ? "Enabled ✓" : "Tap Continue to allow",

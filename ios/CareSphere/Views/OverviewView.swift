@@ -80,7 +80,7 @@ struct OverviewView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(Date(), format: .dateTime.weekday(.wide).month(.abbreviated).day())
                 .font(.subheadline.weight(.medium)).foregroundStyle(Color.emeraldText)
-            Text("\(greeting), \(store.displayName.isEmpty ? "friend" : store.displayName).")
+            Text(AppLanguage.format("{0}, {1}.", [AppLanguage.text(greeting), store.displayName.isEmpty ? AppLanguage.text("friend") : store.displayName]))
                 .font(.largeTitle.weight(.bold))
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
@@ -145,7 +145,7 @@ struct OverviewView: View {
                     }
                 }
             }
-            Text(store.moodToday.map { "Today: feeling \(moodLabel($0.score).lowercased())" } ?? "How are you feeling right now?")
+            Text(store.moodToday.map { AppLanguage.format("Today: feeling {0}", [AppLanguage.text(moodLabel($0.score))]) } ?? AppLanguage.text("How are you feeling right now?"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Button {
@@ -167,7 +167,7 @@ struct OverviewView: View {
         } label: {
             VStack(spacing: 8) {
                 Text(moodEmoji(score)).font(.title).accessibilityHidden(true)
-                Text(moodLabel(score)).font(.subheadline.weight(.medium))
+                Text(AppLanguage.text(moodLabel(score))).font(.subheadline.weight(.medium))
                     .fixedSize(horizontal: false, vertical: true)
                 if selected { Image(systemName: "checkmark.circle.fill").accessibilityHidden(true) }
             }
@@ -180,8 +180,8 @@ struct OverviewView: View {
                         .strokeBorder(selected ? Color.yellow.opacity(0.7) : .clear, lineWidth: 2))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Feeling \(moodLabel(score))")
-        .accessibilityValue(selected ? "Selected" : "")
+        .accessibilityLabel(AppLanguage.format("Feeling {0}", [AppLanguage.text(moodLabel(score))]))
+        .accessibilityValue(selected ? AppLanguage.text("Selected") : "")
     }
 
     private func moodEmoji(_ score: Int) -> String {

@@ -212,7 +212,7 @@ class MainActivity : Activity() {
             }
             button(tx("Add a routine"), c) {
                 if (routines.length() >= 24) { message(tx("You can keep up to 24 routines. Remove one in Settings first.")); return@button }
-                input("Add your routine", "A short reminder", 80) { title ->
+                input(tx("Add your routine"), tx("A short reminder"), 80) { title ->
                     val updatedRoutines = JSONArray(routines.toString())
                     updatedRoutines.put(JSONObject().put("id", java.util.UUID.randomUUID().toString()).put("title", title))
                     data.put("routines", updatedRoutines); render()
@@ -222,9 +222,9 @@ class MainActivity : Activity() {
         if(data.json.optJSONObject("routineUndo")?.optString("day") == LocalDate.now().toString()) button(tx("Undo last routine change")) { data.undoRoutine(); render() }
         card(tx("How are you feeling?")) { c ->
             val current = data.json.optString("mood")
-            text(if(current.isBlank()) "No check-in today. Choose a word if you want to." else "Today's self-report: $current", parent = c)
+            text(if(current.isBlank()) tx("No check-in today. Choose a word if you want to.") else AppLanguage.format(this,"Today's self-report: {0}",AppLanguage.moodLabel(current,::tx)), parent = c)
             listOf("Low", "Okay", "Good", "Prefer not to say").forEach { mood ->
-                button(mood, c) { data.put("mood", mood); render() }.isEnabled = data.canWrite
+                button(tx(mood), c) { data.put("mood", mood); render() }.isEnabled = data.canWrite
             }
             text(tx("A personal check-in, not a health assessment."), 14f, c)
         }
@@ -393,7 +393,7 @@ class MainActivity : Activity() {
         text(tx("Private notes on this device. Search, edit, or choose exactly what to share. No family sync or clinician portal is connected."))
         button(tx("Write a care note"), primary = true) {
             if (data.list("notes").length() >= 100) { message(tx("You have 100 notes. Remove a note before adding another.")); return@button }
-            input("New care note", "What would you like to remember?", 4000) { note ->
+            input(tx("New care note"), tx("What would you like to remember?"), 4000) { note ->
                 val notes = data.list("notes")
                 notes.put(JSONObject().put("id", java.util.UUID.randomUUID().toString()).put("body", note).put("at", Instant.now().toString()))
                 data.put("notes", notes); noteQuery = ""; render()
@@ -426,7 +426,7 @@ class MainActivity : Activity() {
             text(note.getString("body"), 18f, c)
             val date = runCatching { Instant.parse(note.getString("at")).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(java.time.format.FormatStyle.MEDIUM,java.time.format.FormatStyle.SHORT).withLocale(Locale.forLanguageTag(AppLanguage.current(this)))) }.getOrDefault("Date not recorded")
             text("Created $date${if(note.has("editedAt")) " · edited" else ""}", 14f, c)
-            button(tx("Edit note"), c) { input("Edit care note", "Your note", 4000, initial = note.getString("body")) { body ->
+            button(tx("Edit note"), c) { input(tx("Edit care note"), tx("Your note"), 4000, initial = note.getString("body")) { body ->
                 note.put("body", body).put("editedAt", Instant.now().toString()); data.put("notes", notes); render()
             } }.isEnabled = data.canWrite
             button(tx("Review & share this note"), c) { confirm(tx("Share this note?"), "Review the recipient before sending.\n\n${note.getString("body")}") { share(note.getString("body")) } }
@@ -503,7 +503,7 @@ class MainActivity : Activity() {
         text(tx("Your app. Your choices."), 29f, bold = true)
         card(tx("Profile")) { c ->
             text("Display name: ${data.json.optString("name").ifBlank { "Not entered" }}", parent = c)
-            button(tx("Set display name"), c) { input("Your name", "Optional display name", 60) { data.put("name", it); render() } }.isEnabled = data.canWrite
+            button(tx("Set display name"), c) { input(tx("Your name"), tx("Optional display name"), 60) { data.put("name", it); render() } }.isEnabled = data.canWrite
             button(tx("Clear display name"), c) { data.put("name", ""); render() }.isEnabled = data.canWrite
         }
         card(tx("Routine management")) { c ->

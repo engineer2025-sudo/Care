@@ -132,7 +132,7 @@ struct PersonalSupportView: View {
                 ForEach(phrases.map { AppLanguage.text($0) } + store.personalSupport.phrases, id: \.self) { phrase in Button(phrase) { SpeechService.shared.stop(); shown = phrase }.frame(minHeight: 44) }
                 TextField(AppLanguage.text("My own phrase"), text: $draft)
                 Button(AppLanguage.text("Add phrase")) { let value = String(draft.trimmingCharacters(in: .whitespacesAndNewlines).prefix(240)); if !value.isEmpty && !phrases.contains(value) && !store.personalSupport.phrases.contains(value) { store.personalSupport.phrases.append(value); draft = "" } }.disabled(store.personalSupport.phrases.count >= 24)
-                ForEach(store.personalSupport.phrases, id: \.self) { phrase in Button("Remove: \(phrase)", role: .destructive) { store.personalSupport.phrases.removeAll { $0 == phrase } } }
+                ForEach(store.personalSupport.phrases, id: \.self) { phrase in Button(AppLanguage.format("Remove: {0}", [phrase]), role: .destructive) { store.personalSupport.phrases.removeAll { $0 == phrase } } }
             }
         case "My photos": photos
         case "My people": contacts
@@ -308,7 +308,7 @@ struct PersonalSupportView: View {
     @ViewBuilder private var plans: some View {
         if let plan = store.personalSupport.plans.first(where: { $0.id == planID }), !plan.steps.isEmpty {
             Section(plan.title) {
-                Text("Step \(step + 1) of \(plan.steps.count)")
+                Text(AppLanguage.format("Step {0} of {1}", [String(step + 1), String(plan.steps.count)]))
                 if paused { Text(AppLanguage.text("Take your time.")); Button(AppLanguage.text("Continue")) { paused = false } }
                 else {
                     Text(plan.steps[step]).font(.title2)
@@ -332,7 +332,7 @@ struct PersonalSupportView: View {
                     store.personalSupport.plans.append(VisualPlan(title: String(draft.prefix(120)), steps: Array(steps.prefix(40)), photoID: photoID)); draft = ""; detail = ""
                 }.disabled(store.personalSupport.plans.count >= 30)
             }
-            Section(AppLanguage.text("Saved routines")) { ForEach(store.personalSupport.plans) { plan in Button("Start \(plan.title)") { planID = plan.id; step = 0; paused = false; if store.personalSupport.speakSteps, let first = plan.steps.first { say(first) } } }.onDelete { store.personalSupport.plans.remove(atOffsets: $0) } }
+            Section(AppLanguage.text("Saved routines")) { ForEach(store.personalSupport.plans) { plan in Button(AppLanguage.format("Start {0}", [plan.title])) { planID = plan.id; step = 0; paused = false; if store.personalSupport.speakSteps, let first = plan.steps.first { say(first) } } }.onDelete { store.personalSupport.plans.remove(atOffsets: $0) } }
         }
     }
     private func advance(_ plan: VisualPlan) { SpeechService.shared.stop(); if step + 1 < plan.steps.count { step += 1; if store.personalSupport.speakSteps { say(plan.steps[step]) } } else { planID = nil; status = "Routine ended. No score or completion record was saved." } }

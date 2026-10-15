@@ -1193,12 +1193,12 @@ function MoodCheckIn({ moods, setMoods }) {
         </h3>
         <span className="mood-privacy text-xs text-slate-500"><Lock className="w-3.5 h-3.5" />{tr(" Only on this device")}</span>
       </div>
-      <div className="flex justify-between gap-2">
+      <div className="mood-choices">
         {MOODS.map((m) =>
         <button
           key={m.score}
           onClick={() => setToday(m.score)}
-          aria-label={`Feeling ${m.label}`}
+          aria-label={tr('Feeling {0}',[tr(m.label)])}
           aria-pressed={todayMood?.score === m.score}
           className={`mood-option flex-1 py-3 rounded-2xl border text-2xl transition ${
           todayMood?.score === m.score ?
@@ -1207,12 +1207,12 @@ function MoodCheckIn({ moods, setMoods }) {
           }>
 
             <m.icon className="w-7 h-7 text-slate-300" strokeWidth={1.5} aria-hidden="true" />
-            <span className="mood-label">{m.label}</span>
+            <span className="mood-label">{tr(m.label)}</span>
           </button>
         )}
       </div>
       <div className="flex flex-wrap gap-3 items-center justify-between text-xs text-slate-500">
-        <span role="status">{todayMood ? `Saved for today: ${MOODS[todayMood.score - 1].label.toLowerCase()}. You can change this anytime.` : tr('How are you feeling right now?')}</span>
+        <span role="status">{todayMood ? tr('Saved for today: {0}. You can change this anytime.',[getLanguage()==='en'?MOODS[todayMood.score-1].label.toLowerCase():tr(MOODS[todayMood.score-1].label)]) : tr('How are you feeling right now?')}</span>
         {last14.length > 0 &&
         <span className="flex items-center gap-1" title={tr("Last check-ins")}>
             {last14.map((m) =>
@@ -1869,7 +1869,7 @@ export default function App() {
             <section className="overview-welcome" aria-labelledby="welcome-title">
               <div className="welcome-copy">
                 <div className="eyebrow"><span className="welcome-dot" />{tr(" YOUR DAILY SPACE ")}<span className="welcome-date">{new Date().toLocaleDateString(languageTag(), { weekday: 'long', month: 'short', day: 'numeric' })}</span></div>
-                <h1 id="welcome-title">{greeting}, {settings.name || tr('friend')}<span className="text-emerald-400">.</span></h1>
+                <h1 id="welcome-title">{tr('{0}, {1}.',[tr(greeting),settings.name || tr('friend')])}</h1>
                 <p>{tr("A little structure. A moment of calm. A familiar face.")}<br className="hidden sm:block" />{tr(" Take today at your own pace.")}</p>
                 <div className="welcome-actions">
                   <button onClick={() => goToSection('daily-routine')} className="primary-action">{tr("View my routine ")}<ArrowRight className="w-4 h-4" /></button>

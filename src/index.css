@@ -377,3 +377,7 @@ html[data-contrast='high'] .library-tile, html[data-contrast='high'] .library-in
 .support-display{font-size:1.75rem;padding:1.5rem;border:2px solid #80b493;border-radius:1rem;display:grid;gap:1rem}
 html[data-theme='light'] .support-card{background:#fff;color:#223b2b}
 .support-hub input[type=checkbox]{width:1.3rem;height:1.3rem;margin-right:.5rem;vertical-align:middle}
+
+/* Translated feeling words need room at narrow widths and larger text sizes. */
+.mood-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 6.5rem), 1fr)); gap: .5rem; }
+.mood-label { overflow-wrap: anywhere; }

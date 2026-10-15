@@ -16,6 +16,8 @@ object AppLanguage {
         }
         return "en"
     }
+    /** Only the app's fixed mood categories are labels; legacy/custom values stay verbatim. */
+    fun moodLabel(value:String, localize:(String)->String):String = if(value in listOf("Low","Okay","Good","Prefer not to say"))localize(value) else value
     fun preference(context:Context)=context.getSharedPreferences("interface",Context.MODE_PRIVATE).getString(KEY,"auto")?:"auto"
     fun current(context:Context):String {
         val value=preference(context)

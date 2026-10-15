@@ -23,4 +23,12 @@ final class AppLanguageTests: XCTestCase {
         XCTAssertFalse(AppLanguage.voiceMatches("zh-HK",language:"zh-Hans"))
         XCTAssertFalse(AppLanguage.voiceMatches("en-US",language:"vi"))
     }
+    func testCoreHeadingsAndReorderedPersonalGreeting() {
+        for language in ["es","zh-Hans","fil","vi"] {
+            for source in ["Good morning","How are you feeling today?","Simple Mode — three destinations","Medication name"] {
+                XCTAssertNotEqual(AppLanguage.text(source,language:language),source)
+            }
+        }
+        XCTAssertEqual(AppLanguage.format("{0}, {1}.",["早上好","Save {0}"],language:"zh-Hans"),"Save {0}，早上好。")
+    }
 }

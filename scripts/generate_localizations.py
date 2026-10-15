@@ -17,7 +17,11 @@ for line in (ROOT/'localization/interface.psv').read_text().splitlines():
     entries[key]=dict(zip(LANGS,values))
 for alias,original in json.loads((ROOT/'localization/aliases.json').read_text()).items():
     assert alias not in entries and original in entries, alias
+    assert sorted(re.findall(r'\{\d+\}',alias)) == sorted(re.findall(r'\{\d+\}',original)), 'Alias placeholders: '+alias
     entries[alias]=entries[original]
+for group, keys in json.loads((ROOT/'localization/required-core.json').read_text()).items():
+    assert isinstance(keys,list) and keys and len(keys)==len(set(keys)), group
+    assert set(keys) <= entries.keys(), f'Missing required {group} messages: {set(keys)-entries.keys()}'
 body=json.dumps(entries,ensure_ascii=False,sort_keys=True,indent=2)+'\n'
 paths=['src/locales/interface.json','ios/ActivityKit/Sources/CareActivityKit/Resources/InterfaceTranslations.json','android/app/src/main/assets/interface.json']
 for relative in paths:

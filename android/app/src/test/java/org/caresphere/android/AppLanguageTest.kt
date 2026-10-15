@@ -17,4 +17,11 @@ class AppLanguageTest {
         assertFalse(AppLanguage.voiceMatches("zh-HK","zh-Hans"))
         assertFalse(AppLanguage.voiceMatches("en-US","vi"))
     }
+    @Test fun onlyBuiltInMoodCategoriesAreLocalized() {
+        val localize:(String)->String = { "localized:$it" }
+        assertEquals("localized:Good",AppLanguage.moodLabel("Good",localize))
+        assertEquals("Save",AppLanguage.moodLabel("Save",localize))
+        assertEquals("My own words {0}",AppLanguage.moodLabel("My own words {0}",localize))
+        assertEquals("Save，早上好。",AppLanguage.formatTemplate("{1}，{0}。",listOf("早上好","Save")))
+    }
 }
