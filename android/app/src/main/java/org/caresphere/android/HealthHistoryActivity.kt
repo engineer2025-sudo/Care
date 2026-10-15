@@ -47,7 +47,7 @@ class HealthHistoryActivity:ToolActivity(){
         text(tx(status));connectedRows.forEach{text(it)}
         text(tx("Your manually entered records"),23f)
         text(tx("These are self-entered values, not verified sensor readings. They do not change your care plan."))
-        data.error?.let{text(it)}
+        data.error?.let{text(tx(it))}
         button(tx("Add blood pressure")){addManual(true)}.isEnabled=data.canWrite&&data.list("manualVitals").length()<100
         button(tx("Add blood oxygen")){addManual(false)}.isEnabled=data.canWrite&&data.list("manualVitals").length()<100
         val records=data.list("manualVitals")

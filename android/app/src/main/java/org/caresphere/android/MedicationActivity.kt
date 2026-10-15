@@ -12,12 +12,12 @@ class MedicationActivity:ToolActivity(){
     private lateinit var data:CareData
     override fun onCreate(state:Bundle?){super.onCreate(state);data=CareData(this);render()}
     override fun onResume(){super.onResume();if(::data.isInitialized){data=CareData(this);runCatching{MedicationReminders.sync(this)}.onFailure{MedicationReminders.pause(this)};render()}}
-    override fun onRequestPermissionsResult(requestCode:Int,permissions:Array<out String>,results:IntArray){super.onRequestPermissionsResult(requestCode,permissions,results);render()}
+    override fun onRequestPermissionsResult(requestCode:Int,permissions:Array<String>,results:IntArray){super.onRequestPermissionsResult(requestCode,permissions,results);render()}
     private fun render(){
         begin(tx("Medication reminders"))
         text(tx("Enter only a schedule confirmed by your care team or medication label. Reminders stay paused until you confirm every name and time."))
         text(tx("Notifications may be delayed by Android or Samsung battery settings. They are not a medication safety system."))
-        data.error?.let{text(it)}
+        data.error?.let{text(tx(it))}
         val meds=data.list("medications")
         for(i in 0 until meds.length()){
             val med=meds.getJSONObject(i)

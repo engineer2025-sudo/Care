@@ -136,11 +136,11 @@ class CareData(private val context: Context, private val refreshOnOpen:Boolean =
             }
         }
     }
-    fun restoreSnapshot(raw: String) {
+    fun restoreSnapshot(raw: String, forRecovery:Boolean = true) {
         check(writable); validateSnapshot(raw)
         val previous = json
-        check(MedicationReminders.pause(context))
-        json = JSONObject(raw); json.remove("routineUndo"); json.put("medicationConfirmed",false); save()
+        if(forRecovery)check(MedicationReminders.pause(context))
+        json = JSONObject(raw); json.remove("routineUndo"); if(forRecovery)json.put("medicationConfirmed",false); save()
         if(error != null) { json = previous; throw IllegalStateException("Secure save failed") }
         refreshDay()
     }

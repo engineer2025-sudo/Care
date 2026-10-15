@@ -27,6 +27,7 @@ class SupportActivity : Activity() {
     private var promptIndex = 0
     private var pack = "Nature"
     private var phrase = ""
+    private val summarySelection=mutableSetOf<String>()
     private var tts: TextToSpeech? = null
     private var speechReady = false
     private var pendingSpeech: String? = null
@@ -51,7 +52,7 @@ class SupportActivity : Activity() {
     private val ink get() = if(dark) Color.rgb(237,244,237) else Color.rgb(28,46,36)
     private val bg get() = if(dark) Color.rgb(20,29,23) else Color.rgb(246,248,244)
     private val soft get() = if(dark) Color.rgb(45,62,49) else Color.rgb(233,240,232)
-    private val sections = listOf("Start here", "Visual routines", "Communication", "My photos", "My people", "Comfort", "Appointments", "Recovery & backup", "Interest activities", "Device sharing")
+    private val sections = listOf("Start here", "Visual routines", "Communication", "My photos", "My people", "Comfort", "Appointments", "Visit summary", "Recovery & backup", "Interest activities", "Device sharing")
     private val phrases = listOf("I need a break", "It is too loud", "Please explain again", "Yes", "No", "I would like help")
     private val packs = mapOf("Nature" to listOf("What do you notice outside?", "Would you choose a garden, beach or forest?", "Point to something that grows."), "Music" to listOf("What sounds do you enjoy?", "Would you like music or quiet?", "Tell a story about a song, or skip."), "Familiar objects" to listOf("What makes a place comfortable?", "Which object do you like nearby?", "Describe a familiar everyday task."))
     private fun dp(v:Int) = (resources.displayMetrics.density*v).toInt()
@@ -124,6 +125,7 @@ class SupportActivity : Activity() {
             "My people"->people()
             "Comfort"->comfort()
             "Appointments"->questions()
+            "Visit summary"->visitSummary()
             "Recovery & backup"->recovery()
             "Interest activities"->{button(AppLanguage.format(this,"Interest · {0}",tx(pack))){dialog().setItems(packs.keys.map{tx(it)}.toTypedArray()){_,i->pack=packs.keys.elementAt(i);promptIndex=0;render()}.show()};text(tx(packs.getValue(pack)[promptIndex%3]),24f);button(tx("Next / skip")){promptIndex++;render()};text(tx("Speak, point, listen or skip. Answers are not recorded. These are leisure prompts, not treatment."))}
             else->deviceSharing()
@@ -165,6 +167,26 @@ class SupportActivity : Activity() {
         button(tx("Add appointment question")){form(tx("Question"),listOf("What would you like to ask?" to "")){v->require(v[0].isNotBlank()&&rows("questions").size<100);update("questions",rows("questions")+JSONObject().put("id",UUID.randomUUID()).put("text",v[0].take(1000)))}}
         rows("questions").forEach{q->text(q.optString("text"),22f);listOf("important" to "Important","discussed" to "Discussed").forEach{(key,label)->page.addView(CheckBox(this).apply{text=tx(label);textSize=18f;setTextColor(ink);isChecked=q.optBoolean(key);setOnCheckedChangeListener{_,value->q.put(key,value);save("questions",JSONArray(rows("questions").map{if(it.optString("id")==q.optString("id"))q else it}))}})};text("Follow-up: ${q.optString("followup","None entered")}");button(tx("Edit follow-up")){form(tx("Follow-up"),listOf("Follow-up" to q.optString("followup"))){v->q.put("followup",v[0].take(2000));update("questions",rows("questions").map{if(it.optString("id")==q.optString("id"))q else it})}};button(tx("Delete question")){confirm(tx("Delete this question and follow-up?")){update("questions",rows("questions").filter{it.optString("id")!=q.optString("id")})}}}
         button(tx("Review & share questions")){val value=rows("questions").sortedByDescending{it.optBoolean("important")}.joinToString("\n\n"){"${if(it.optBoolean("important"))"IMPORTANT: " else ""}${it.optString("text")}\nFollow-up: ${it.optString("followup")}"};confirm("Share these questions? Exported text is not encrypted by CareSphere.\n\n$value"){runCatching{startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,value),"Choose recipient"))}.onFailure{message(tx("No sharing app available."))}}}
+    }
+    private fun visitSummary(){
+        text(tx("Structured draft · no AI"),24f)
+        text(tx("Choose your notes and questions. This offline template copies only your selected words; it does not diagnose, simplify wording, or invent advice. Review and edit before saving a new note."))
+        val notes=data.list("notes")
+        val records=(0 until notes.length()).map{val n=notes.getJSONObject(it);("note:"+n.optString("id")) to n.optString("body")}+
+            rows("questions").map{q->("question:"+q.optString("id")) to (q.optString("text")+if(q.optString("followup").isBlank())"" else "\n"+tx("Follow-up")+": "+q.optString("followup"))}
+        records.forEach{(id,body)->page.addView(CheckBox(this).apply{text=body;textSize=18f;setTextColor(ink);isChecked=summarySelection.contains(id);setOnCheckedChangeListener{_,checked->if(checked)summarySelection.add(id)else summarySelection.remove(id)}})}
+        button(tx("Review selected draft")){
+            val chosen=records.filter{summarySelection.contains(it.first)}
+            if(chosen.isEmpty()){message(tx("Choose at least one note or question."));return@button}
+            val draft=tx("User-selected visit notes · not medical advice")+"\n\n"+chosen.joinToString("\n\n"){it.second}
+            if(draft.length>4000){message(tx("The selected text is too long. Choose fewer records; nothing was shortened or saved."));return@button}
+            form(tx("Review selected draft"),listOf("Your note" to draft)){v->
+                require(v[0].isNotBlank()&&data.list("notes").length()<100)
+                data.put("notes",data.list("notes").put(JSONObject().put("id",UUID.randomUUID().toString()).put("body",v[0]).put("at",java.time.Instant.now().toString())))
+                if(data.error==null){summarySelection.clear();message(tx("Saved as a new note. Original records were not changed."))}else message(data.error!!)
+                render()
+            }
+        }.isEnabled=data.canWrite
     }
     private fun image(photo:JSONObject){runCatching{val bytes=Base64.getDecoder().decode(photo.optString("jpeg"));if(bytes.size>180000)return;val bounds=BitmapFactory.Options().apply{inJustDecodeBounds=true};BitmapFactory.decodeByteArray(bytes,0,bytes.size,bounds);if(bounds.outWidth !in 1..2048 || bounds.outHeight !in 1..2048)return;val options=BitmapFactory.Options().apply{inSampleSize=maxOf(1,maxOf(bounds.outWidth,bounds.outHeight)/512)};val bitmap=BitmapFactory.decodeByteArray(bytes,0,bytes.size,options)?:return;page.addView(ImageView(this).apply{setImageBitmap(bitmap);adjustViewBounds=true;maxHeight=dp(300);contentDescription=photo.optString("caption")},LinearLayout.LayoutParams(-1,-2))}}
     private fun photos(){
@@ -247,7 +269,7 @@ class SupportActivity : Activity() {
                     require(notes.length()+chosen.count{it.getString("type")=="note"}<=100 && routines.length()+chosen.count{it.getString("type")=="routine"}<=24)
                     val received=imported.toMutableList()
                     chosen.forEach {r->if(r.getString("type")=="note")notes.put(JSONObject().put("id",UUID.randomUUID()).put("body",r.getString("text")).put("at",java.time.Instant.now().toString()).put("imported",true))else routines.put(JSONObject().put("id",UUID.randomUUID()).put("title",r.getString("text")));received.add(payload.getString("id")+":"+r.getString("id"))}
-                    snapshot.put("notes",notes).put("routines",routines).put("receivedItems",JSONArray(received.takeLast(2000)));data.restoreSnapshot(snapshot.toString());receivedTransfer=null;render();message(tx("Imported selected copies. Existing records were not replaced."))
+                    snapshot.put("notes",notes).put("routines",routines).put("receivedItems",JSONArray(received.takeLast(2000)));data.restoreSnapshot(snapshot.toString(),forRecovery=false);receivedTransfer=null;render();message(tx("Imported selected copies. Existing records were not replaced."))
                 }.onFailure{message(tx("Import could not finish. Check available storage and record capacity (100 notes, 24 routines). Nothing was replaced."))}
             }
             button(tx("Cancel import")){receivedTransfer=null;render()}

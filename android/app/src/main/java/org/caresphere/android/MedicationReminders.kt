@@ -41,12 +41,14 @@ object MedicationReminders {
             c.getSystemService(AlarmManager::class.java).setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,whenAt,pending(c,med.getString("id")))
         }
     }
+    @android.annotation.SuppressLint("MissingPermission") // permitted() checks POST_NOTIFICATIONS and notification settings.
     @Synchronized fun due(c:Context,id:String) {
         if(!enabled(c)||!permitted(c))return
         val data=CareData(c,false)
         if(data.error!=null||!data.json.optBoolean("medicationConfirmed"))return
         val meds=data.list("medications")
-        if((0 until meds.length()).none{meds.optJSONObject(it)?.optString("id")==id})return
+        val medication=(0 until meds.length()).mapNotNull{meds.optJSONObject(it)}.firstOrNull{it.optString("id")==id}?:return
+        if(medication.optString("takenOn")==java.time.LocalDate.now().toString()){sync(c,false);return}
         val manager=c.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(NotificationChannel(CHANNEL,AppLanguage.text(c,"Medication reminders"),NotificationManager.IMPORTANCE_DEFAULT))
         val open=PendingIntent.getActivity(c,701,Intent(c,MedicationActivity::class.java),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
