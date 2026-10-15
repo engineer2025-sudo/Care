@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import ImageIO
+import CoreImage
 import UniformTypeIdentifiers
 import CryptoKit
 import CommonCrypto
@@ -18,6 +19,7 @@ struct PersonalSupportView: View {
     @State private var status = ""
     @State private var shown = ""
     @State private var selectedPhoto: PhotosPickerItem?
+    @State private var connectionPhoto: PhotosPickerItem?
     @State private var planID: UUID?
     @State private var photoID: UUID?
     @State private var step = 0
@@ -72,6 +74,7 @@ struct PersonalSupportView: View {
             .onChange(of: section) { _ in stopNearby(); draft = ""; detail = ""; third = ""; shown = ""; status = ""; password = ""; transferPassword = ""; transferGeneration = UUID(); transferBusy = false; incomingTransfer = nil; planID = nil; assistant.clearResponse(); SpeechService.shared.stop() }
             .onDisappear { stopNearby(); transferPassword = ""; transferGeneration = UUID(); assistant.clearResponse(); SpeechService.shared.stop() }
             .onChange(of: phase) { value in if value == .background { stopNearby() }; if value != .active { SpeechService.shared.stop(); assistant.clearResponse(); paused = true } }
+            .onChange(of: connectionPhoto) { item in Task { await readConnectionPhoto(item) } }
             .onChange(of: selectedPhoto) { item in Task { await loadPhoto(item) } }
             .onChange(of: assistant.response) { reviewed = $0 }
             .confirmationDialog(AppLanguage.text("Open another app?"), isPresented: Binding(get: { pendingURL != nil }, set: { if !$0 { pendingURL = nil } })) {
@@ -211,6 +214,11 @@ struct PersonalSupportView: View {
                 Button(AppLanguage.text("Offer to a nearby device")) { offerNearby() }.disabled(nearbyBusy || transferBusy || !offeredAddress.isEmpty)
             }
             if !offeredAddress.isEmpty {
+                if let image = connectionQR() {
+                    Image(uiImage:image).interpolation(.none).resizable().scaledToFit().frame(maxWidth:280)
+                        .accessibilityLabel(AppLanguage.text("Connection QR code. The address and code are also written below."))
+                }
+                Text(AppLanguage.text("QR contains only connection details. Keep this offer open. It does not contain your records or passphrase."))
                 Text("Device address: \(offeredAddress)").textSelection(.enabled)
                 Text(AppLanguage.format("Connection code: {0}", [offeredCode])).font(.title2.monospacedDigit()).textSelection(.enabled)
                     .accessibilityLabel(AppLanguage.text("Connection code. ") + offeredCode.map { String($0) }.joined(separator: ", "))
@@ -227,6 +235,8 @@ struct PersonalSupportView: View {
                     nearbyStatus = "Address selected. Enter the code shown on that phone and the separately agreed passphrase. Nothing has connected or imported yet."
                 }
             }
+            PhotosPicker(selection:$connectionPhoto,matching:.images) { Text(AppLanguage.text("Read connection QR from a photo")) }
+                .disabled(nearbyBusy || transferBusy || !offeredAddress.isEmpty)
             TextField(AppLanguage.text("Sender address · e.g. 192.168.1.5:12345"), text: $receiveAddress)
                 .textInputAutocapitalization(.never).autocorrectionDisabled().disabled(nearbyBusy)
             TextField(AppLanguage.text("Sender's 8-digit connection code"), text: $receiveCode)
@@ -237,6 +247,28 @@ struct PersonalSupportView: View {
             if nearbyBusy || !offeredAddress.isEmpty { Button(AppLanguage.text("Stop nearby connection")) { stopNearby(); nearbyStatus = "Local connection stopped. Received copies cannot be recalled." } }
             Text(AppLanguage.text("If a guest network blocks other devices, try a private hotspot or use the encrypted-file option. A connection failure never imports records.")).font(.caption)
         }
+    }
+    private func connectionQR() -> UIImage? {
+        guard let value=try? ConnectionSetup.encode(address:offeredAddress,code:offeredCode),
+              let filter=CIFilter(name:"CIQRCodeGenerator") else { return nil }
+        filter.setValue(Data(value.utf8),forKey:"inputMessage")
+        guard let output=filter.outputImage?.transformed(by:CGAffineTransform(scaleX:8,y:8)),
+              let image=CIContext().createCGImage(output,from:output.extent) else { return nil }
+        return UIImage(cgImage:image)
+    }
+    @MainActor private func readConnectionPhoto(_ item:PhotosPickerItem?) async {
+        guard let item else { return }; defer { connectionPhoto=nil }
+        do {
+            guard let bytes=try await item.loadTransferable(type:Data.self), bytes.count<=10_000_000,
+                  let source=CGImageSourceCreateWithData(bytes as CFData,nil),
+                  let image=CGImageSourceCreateThumbnailAtIndex(source,0,[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceThumbnailMaxPixelSize:1600,kCGImageSourceCreateThumbnailWithTransform:true] as CFDictionary),
+                  let detector=CIDetector(ofType:CIDetectorTypeQRCode,context:nil,options:[CIDetectorAccuracy:CIDetectorAccuracyHigh]),
+                  let value=(detector.features(in:CIImage(cgImage:image)).first as? CIQRCodeFeature)?.messageString else { throw LocalTransferWire.Failure.invalid }
+            let info=try ConnectionSetup.parse(value)
+            guard section == "Device sharing", phase != .background else { return }
+            receiveAddress=info.0;receiveCode=info.1
+            nearbyStatus="QR details loaded. Check the sender, enter the separate passphrase, then connect. Nothing has been imported."
+        } catch { nearbyStatus="Could not read a valid CareSphere connection QR. Use the written address and code instead." }
     }
     private func stopNearby() {
         nearbyCodeFocused = false; nearbyGeneration = UUID(); nearbyHost.stop(); nearbyReceiver.cancel(); nearbyDiscovery.stop(); nearbyAdvertisement.stop()

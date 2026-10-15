@@ -239,7 +239,7 @@ struct SettingsView: View {
                     Text(result).font(.caption).foregroundStyle(.secondary)
                 }
             }
-            Text(AppLanguage.text("The app locks whenever it leaves the foreground. Your device passcode always works as a fallback — you can never be locked out."))
+            Text(AppLanguage.text("The app locks in the background. Device passcode fallback depends on system availability. Authentication errors keep your data locked."))
                 .font(.caption2).foregroundStyle(.secondary)
         }
     }

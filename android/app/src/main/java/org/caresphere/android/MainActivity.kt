@@ -187,6 +187,7 @@ class MainActivity : Activity() {
         text(if (name.isBlank()) tx("Your day, at your pace.") else AppLanguage.format(this,"Hello, {0}.",name), 30f, bold = true).apply { if (Build.VERSION.SDK_INT >= 28) isAccessibilityHeading = true }
         text(LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL).withLocale(Locale.forLanguageTag(AppLanguage.current(this)))), 16f)
         button(tx("My support tools")) { startActivity(Intent(this, SupportActivity::class.java)) }
+        button(tx("Medication reminders")) { startActivity(Intent(this,MedicationActivity::class.java)) }
         button(tx("Settings & privacy")) { settings = true; render() }
         card(tx("A small moment for you")) { c ->
             text(tx("Choose an activity, check in with yourself, or simply take a break. Everything here is optional."), parent = c)
@@ -457,7 +458,8 @@ class MainActivity : Activity() {
             text(tx("Readings expire after 15 seconds without an update. Monitoring stops when the app leaves the foreground. This is not a medical device or an emergency monitor."), 15f, c)
         }
         card(tx("Other health data")) { c ->
-            text(tx("Blood pressure, blood oxygen, Health Connect, and smartwatch-account syncing are not connected in this Android release. No values are generated or substituted."), parent = c)
+            button(tx("Health history"),c){startActivity(Intent(this,HealthHistoryActivity::class.java))}
+            text(tx("Read permitted Health Connect history or enter your own blood pressure and blood oxygen records. No smartwatch-account sync or generated readings."),parent=c)
             text(tx("For symptoms or health concerns, contact a qualified clinician. In an emergency, use your phone to contact local emergency services."), parent = c)
         }
         updateHealth()

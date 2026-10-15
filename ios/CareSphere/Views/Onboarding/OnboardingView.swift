@@ -430,7 +430,7 @@ struct OnboardingView: View {
                         .strokeBorder(wantsBiometrics ? Color.emerald.opacity(0.6) : .clear, lineWidth: 2))
             }
             .buttonStyle(.plain)
-            Text(AppLanguage.text("If biometrics ever fail, your device passcode always works — you can never be locked out."))
+            Text(AppLanguage.text("Device passcode fallback depends on system availability. Authentication errors keep your data locked."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

@@ -1,9 +1,10 @@
+import CareActivityKit
 import Foundation
 import LocalAuthentication
 
 /// Touch ID / Face ID app lock via the official LocalAuthentication frame‐
-/// work. Uses `.deviceOwnerAuthentication` so users can always fall back to
-/// the device passcode (never locks people out), and reports which biometry
+/// work. Uses `.deviceOwnerAuthentication` for supported passcode fallback,
+/// fails closed when authentication is unavailable, and reports which biometry
 /// the hardware offers so the UI can say "Touch ID" or "Face ID" correctly.
 enum BiometricService {
 
@@ -28,20 +29,22 @@ enum BiometricService {
         return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
 
-    /// Prompts the user. Falls back to the device passcode automatically.
-    static func authenticate(reason: String, completion: @escaping (Bool, String?) -> Void) {
+    /// Caller can invalidate the returned context when leaving/backgrounding.
+    @discardableResult
+    static func authenticate(reason: String, completion: @escaping (Bool, String?) -> Void) -> LAContext {
         let context = LAContext()
-        context.localizedFallbackTitle = "Use Passcode"
+        context.localizedFallbackTitle = AppLanguage.text("Use Passcode")
         var evalError: NSError?
-        // .deviceOwnerAuthentication = biometrics OR passcode — always solvable.
+        // Unsupported, cancelled or unavailable authentication must never become success.
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &evalError) else {
-            completion(true, nil)   // nothing to authenticate against — don't lock out
-            return
+            DispatchQueue.main.async { completion(false, AppLanguage.text("Device authentication is unavailable. Your data remains locked. Check device security settings and try again.")) }
+            return context
         }
         context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, error in
             DispatchQueue.main.async {
-                completion(success, error?.localizedDescription)
+                completion(AuthenticationGate.accepts(canEvaluate: true, verified: success), error?.localizedDescription)
             }
         }
+        return context
     }
 }

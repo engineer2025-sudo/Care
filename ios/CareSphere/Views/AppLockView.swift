@@ -1,13 +1,18 @@
 import CareActivityKit
 import SwiftUI
+import LocalAuthentication
 
 /// Opaque, full-window biometric gate. CareSphereApp switches its root view to
 /// this view while locked, so protected content is removed rather than rendered
 /// underneath a translucent sheet or full-screen cover.
 struct AppLockView: View {
     let onUnlock: () -> Void
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var context: LAContext?
+    @State private var attempt = UUID()
     @State private var isAuthenticating = false
     @State private var failureText: String?
+    @State private var returnedFromBackground = false
 
     private var biometryName: String { BiometricService.biometryName }
 
@@ -65,15 +70,25 @@ struct AppLockView: View {
         .background(Color.ink.ignoresSafeArea())
         .contentShape(Rectangle())
         .onAppear { authenticate() }
+        .onDisappear { cancelAuthentication() }
+        .onChange(of: scenePhase) { phase in
+            if phase == .background { returnedFromBackground = true; cancelAuthentication() }
+            else if phase == .active && returnedFromBackground { returnedFromBackground = false; authenticate() }
+        }
     }
 
+    private func cancelAuthentication() {
+        attempt = UUID(); context?.invalidate(); context = nil; isAuthenticating = false
+    }
     private func authenticate() {
         guard !isAuthenticating else { return }
         isAuthenticating = true
         failureText = nil
-        BiometricService.authenticate(reason: "Unlock CareSphere to view health data") { success, error in
+        let operation = UUID(); attempt = operation
+        context = BiometricService.authenticate(reason: "Unlock CareSphere to view health data") { success, error in
+            guard operation == attempt else { return }
             isAuthenticating = false
-            if success {
+            if AuthenticationGate.accepts(canEvaluate: true, verified: success, currentAttempt: operation == attempt, foreground: scenePhase != .background) {
                 onUnlock()
             } else {
                 failureText = error ?? "Authentication failed — try again."

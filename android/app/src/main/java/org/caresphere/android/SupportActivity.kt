@@ -278,6 +278,8 @@ class SupportActivity : Activity() {
             }.isEnabled=!nearbyBusy&&nearbyOffer==null
         }
         nearbyOffer?.let { info ->
+            page.addView(ImageView(this).apply{setImageBitmap(ConnectionQR.image(info.first,info.second));adjustViewBounds=true;maxHeight=dp(280);contentDescription=tx("Connection QR code. The address and code are also written below.")},LinearLayout.LayoutParams(-1,-2))
+            text(tx("QR contains only connection details. Keep this offer open. It does not contain your records or passphrase."))
             text("Device address: ${info.first}");text("Connection code: ${info.second}",24f)
             (page.getChildAt(page.childCount-1) as? TextView)?.contentDescription="Connection code. ${info.second.toCharArray().joinToString(", ")}"
             text(tx("This offers only the prepared encrypted copy, not confirmation of delivery. It stops after five minutes or when you leave/background this screen. Tell the recipient the code and encryption passphrase privately; they are different."))
@@ -287,14 +289,15 @@ class SupportActivity : Activity() {
         if(nearbyDiscovery.scanning)button(tx("Stop searching")){nearbyDiscovery.stopSearch();render()}
         if(nearbyDiscovery.status.isNotEmpty())text(tx(nearbyDiscovery.status))
         nearbyDiscovery.peers.forEach { peer -> button("Choose ${peer.name} · ${peer.address}"){connectNearby(peer.address)} }
+        button(tx("Read connection QR from a photo")){runCatching{startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).setType("image/*").addCategory(Intent.CATEGORY_OPENABLE),614)}.onFailure{message(tx("No photo picker available."))}}.isEnabled=!nearbyBusy&&!busy&&nearbyOffer==null
         button(tx("Connect to a nearby device")){connectNearby()}.isEnabled=!nearbyBusy&&!busy
         if(nearbyBusy||nearbyOffer!=null)button(tx("Stop nearby connection")){stopNearby();nearbyStatus="Local connection stopped. Received copies cannot be recalled.";render()}
         text(tx("If a guest network blocks other devices, try a private hotspot or use the encrypted-file option. A connection failure never imports records."))
     }
-    private fun connectNearby(address:String="") {
+    private fun connectNearby(address:String="",code:String="") {
         if(nearbyBusy||busy)return
         nearbyDiscovery.stopSearch();render()
-            form(tx("Sender connection details"),listOf("Device address" to address,"8-digit connection code" to "")){fields->
+            form(tx("Sender connection details"),listOf("Device address" to address,"8-digit connection code" to code)){fields->
                 LocalTransferWire.endpoint(fields[0],fields[1])
                 form(tx("Unlock nearby copy"),listOf("Passphrase" to ""),true){secrets->
                     require(secrets[0].length>=12);stopNearby();receivedTransfer=null
@@ -339,6 +342,7 @@ class SupportActivity : Activity() {
         val uri=intent?.data
         if(resultCode!=RESULT_OK||uri==null){password?.fill('\u0000');password=null;backupBytes?.fill(0);backupBytes=null;return}
         try{when(requestCode){
+            614->{val bytes=contentResolver.openInputStream(uri)!!.use{it.readBytesBounded(10_000_000)};val details=ConnectionQR.read(bytes);connectNearby(details.first,details.second)}
             610->{val bytes=contentResolver.openInputStream(uri)!!.use{it.readBytesBounded(10_000_000)};val bounds=BitmapFactory.Options().apply{inJustDecodeBounds=true};BitmapFactory.decodeByteArray(bytes,0,bytes.size,bounds);require(bounds.outWidth>0&&bounds.outHeight>0);val options=BitmapFactory.Options().apply{inSampleSize=maxOf(1,maxOf(bounds.outWidth,bounds.outHeight)/512)};val bitmap=BitmapFactory.decodeByteArray(bytes,0,bytes.size,options)?:throw IllegalArgumentException();val out=java.io.ByteArrayOutputStream();bitmap.compress(Bitmap.CompressFormat.JPEG,65,out);bitmap.recycle();require(out.size()<180000);form(tx("Photo description"),listOf("Description" to "My photo")){v->require(rows("photos").size<10&&v[0].isNotBlank());update("photos",rows("photos")+JSONObject().put("id",UUID.randomUUID()).put("caption",v[0].take(120)).put("jpeg",Base64.getEncoder().encodeToString(out.toByteArray())))}}
             613->{val pass=password?:return;password=null;val raw=contentResolver.openInputStream(uri)!!.use{String(it.readBytesBounded(1_000_000),Charsets.UTF_8)};busy=true
                 Thread{val result=runCatching{val envelope=JSONObject(raw);require(envelope.getString("format")=="CareSphere Transfer"&&envelope.getInt("version")==1&&envelope.getInt("iterations")==310000)

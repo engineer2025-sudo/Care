@@ -15,7 +15,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 /** No starter people, medication, notes, moods, or measurements. */
-class CareData(private val context: Context) {
+class CareData(private val context: Context, private val refreshOnOpen:Boolean = true) {
     var json = JSONObject()
         private set
     var error: String? = null
@@ -37,7 +37,7 @@ class CareData(private val context: Context) {
                 error = "Saved data could not be unlocked. It has not been overwritten. You can retry after restarting or explicitly erase it in Settings."
             }
         }
-        refreshDay()
+        if(refreshOnOpen)refreshDay()
     }
     private fun key(create: Boolean): SecretKey {
         val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
@@ -104,6 +104,22 @@ class CareData(private val context: Context) {
                     else { require(item.getString("body").length <= 4000); require(item.getString("at").length <= 100) }
                 }
             }
+            val vitals=value.optJSONArray("manualVitals")?:JSONArray()
+            require(vitals.length()<=100)
+            for(i in 0 until vitals.length()) {
+                val v=vitals.getJSONObject(i)
+                require(VitalRules.valid(v.getString("kind"),v.getInt("first"),if(v.has("second"))v.getInt("second")else null))
+                java.time.Instant.parse(v.getString("at"))
+            }
+            val medications=value.optJSONArray("medications")?:JSONArray()
+            require(medications.length()<=24)
+            val medicationIDs=mutableSetOf<String>()
+            for(i in 0 until medications.length()) {
+                val m=medications.getJSONObject(i)
+                require(m.getString("id").length in 1..120 && medicationIDs.add(m.getString("id")))
+                require(m.getString("name").isNotBlank() && m.getString("name").length<=80)
+                require(MedicationRules.validTime(m.getString("time")) && m.optString("instructions").length<=240)
+            }
             val tools = value.optJSONObject("tools") ?: JSONObject()
             for ((name, limit) in listOf("photos" to 10, "plans" to 30, "contacts" to 20, "questions" to 100, "phrases" to 24)) {
                 val array = tools.optJSONArray(name) ?: JSONArray(); require(array.length() <= limit)
@@ -117,12 +133,14 @@ class CareData(private val context: Context) {
     fun restoreSnapshot(raw: String) {
         check(writable); validateSnapshot(raw)
         val previous = json
-        json = JSONObject(raw); json.remove("routineUndo"); save()
+        check(MedicationReminders.pause(context))
+        json = JSONObject(raw); json.remove("routineUndo"); json.put("medicationConfirmed",false); save()
         if(error != null) { json = previous; throw IllegalStateException("Secure save failed") }
         refreshDay()
     }
     fun erase() {
         try {
+            check(MedicationReminders.pause(context))
             file.delete()
             check(!file.baseFile.exists())
             KeyStore.getInstance("AndroidKeyStore").apply { load(null); deleteEntry(alias) }
