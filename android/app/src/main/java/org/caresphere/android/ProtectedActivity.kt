@@ -38,7 +38,10 @@ open class ProtectedActivity:ComponentActivity(){
     override fun onResume(){super.onResume();resumed=true;refreshPrivacy()}
     override fun onPause(){
         resumed=false
-        if(AppLock.enabled(this)){dialogs.toList().forEach{it.dismiss()};dialogs.clear()}
+        if(AppLock.enabled(this)){
+            window.decorView.findFocus()?.let{focus->getSystemService(android.view.inputmethod.InputMethodManager::class.java).hideSoftInputFromWindow(focus.windowToken,0);focus.clearFocus()}
+            dialogs.toList().forEach{it.dismiss()};dialogs.clear()
+        }
         refreshPrivacy();super.onPause()
     }
     override fun onStop(){cancelAuthentication();AppLock.stop(isChangingConfigurations);refreshPrivacy();super.onStop()}

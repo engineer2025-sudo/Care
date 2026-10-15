@@ -9,7 +9,9 @@ class LockSession {
     fun invalidate(){generation++}
     fun lock(){invalidate();unlocked=false}
     fun complete(attempt:Long,verified:Boolean,foreground:Boolean):Boolean {
-        if(attempt!=generation || !verified || !foreground)return false
-        generation++;unlocked=true;return true
+        if(attempt!=generation)return false
+        generation++
+        if(!verified || !foreground)return false
+        unlocked=true;return true
     }
 }

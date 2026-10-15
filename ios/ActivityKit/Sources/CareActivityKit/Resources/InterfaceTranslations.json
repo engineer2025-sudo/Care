@@ -311,6 +311,18 @@
     "vi": "Ngôn ngữ ứng dụng",
     "zh-Hans": "应用语言"
   },
+  "App lock": {
+    "es": "Bloqueo de la aplicación",
+    "fil": "Lock ng app",
+    "vi": "Khóa ứng dụng",
+    "zh-Hans": "应用锁"
+  },
+  "App lock requires Android 11 or newer. Use your device screen lock on older Android versions.": {
+    "es": "El bloqueo de la aplicación requiere Android 11 o posterior. En versiones anteriores, usa el bloqueo de pantalla del dispositivo.",
+    "fil": "Kailangan ng app lock ang Android 11 o mas bago. Gamitin ang screen lock ng device sa mas lumang Android.",
+    "vi": "Khóa ứng dụng cần Android 11 trở lên. Trên Android cũ hơn, hãy dùng khóa màn hình thiết bị.",
+    "zh-Hans": "应用锁需要Android 11或更新版本。较旧版本请使用设备屏幕锁。"
+  },
   "App locks whenever it leaves the foreground": {
     "es": "La aplicación se bloquea al pasar a segundo plano",
     "fil": "Nila-lock ang app kapag umalis ito sa foreground",
@@ -346,6 +358,18 @@
     "fil": "Mga appointment",
     "vi": "Cuộc hẹn",
     "zh-Hans": "预约"
+  },
+  "Authentication did not finish in the foreground. Try again.": {
+    "es": "La autenticación no terminó con la aplicación en primer plano. Inténtalo de nuevo.",
+    "fil": "Hindi natapos ang pagpapatunay habang nasa foreground ang app. Subukang muli.",
+    "vi": "Xác thực chưa hoàn tất khi ứng dụng ở tiền cảnh. Hãy thử lại.",
+    "zh-Hans": "应用在前台时未完成身份验证。请重试。"
+  },
+  "Authentication was cancelled or unavailable. Tap Unlock to try again.": {
+    "es": "La autenticación se canceló o no está disponible. Toca Desbloquear para volver a intentarlo.",
+    "fil": "Kinansela o hindi magagamit ang pagpapatunay. Pindutin ang I-unlock upang subukang muli.",
+    "vi": "Xác thực đã hủy hoặc không khả dụng. Nhấn Mở khóa để thử lại.",
+    "zh-Hans": "身份验证已取消或不可用。请点按解锁以重试。"
   },
   "Automatic · best installed Apple voice": {
     "es": "Automática · mejor voz de Apple instalada",
@@ -472,6 +496,12 @@
     "fil": "Kanselahin ang pagbabalik",
     "vi": "Hủy khôi phục",
     "zh-Hans": "取消恢复"
+  },
+  "Cancel snooze": {
+    "es": "Cancelar aplazamiento",
+    "fil": "Kanselahin ang snooze",
+    "vi": "Hủy nhắc lại",
+    "zh-Hans": "取消稍后提醒"
   },
   "Care": {
     "es": "Cuidado",
@@ -1007,6 +1037,12 @@
     "vi": "Tâm trương · mmHg",
     "zh-Hans": "舒张压 · mmHg"
   },
+  "Disable app lock": {
+    "es": "Desactivar bloqueo de la aplicación",
+    "fil": "I-disable ang lock ng app",
+    "vi": "Tắt khóa ứng dụng",
+    "zh-Hans": "停用应用锁"
+  },
   "Discard changes": {
     "es": "Descartar cambios",
     "fil": "Huwag i-save ang mga pagbabago",
@@ -1102,6 +1138,12 @@
     "fil": "Pang-emergency na contact",
     "vi": "Liên hệ khẩn cấp",
     "zh-Hans": "紧急联系人"
+  },
+  "Enable app lock": {
+    "es": "Activar bloqueo de la aplicación",
+    "fil": "I-enable ang lock ng app",
+    "vi": "Bật khóa ứng dụng",
+    "zh-Hans": "启用应用锁"
   },
   "Enable superpowers": {
     "es": "Activar funciones opcionales",
@@ -1643,6 +1685,12 @@
     "vi": "Rời hoạt động",
     "zh-Hans": "退出活动"
   },
+  "Leave app": {
+    "es": "Salir de la aplicación",
+    "fil": "Umalis sa app",
+    "vi": "Rời ứng dụng",
+    "zh-Hans": "离开应用"
+  },
   "Let's look together. You can try another choice or use a hint.": {
     "es": "Miremos juntos. Puedes probar otra opción o usar una pista.",
     "fil": "Tingnan natin nang magkasama. Maaari kang pumili ng iba o gumamit ng pahiwatig.",
@@ -1696,6 +1744,12 @@
     "fil": "Protektahan ang pag-access",
     "vi": "Bảo vệ quyền truy cập",
     "zh-Hans": "保护访问"
+  },
+  "Lock private screens when CareSphere leaves the foreground. Android 11+ and a secure device screen lock are required. Screenshots are blocked while enabled.": {
+    "es": "Bloquea las pantallas privadas al salir de CareSphere. Requiere Android 11 o posterior y un bloqueo de pantalla seguro. Se bloquean las capturas de pantalla mientras está activado.",
+    "fil": "I-lock ang mga pribadong screen kapag umalis sa foreground ang CareSphere. Kailangan ang Android 11 o mas bago at ligtas na screen lock. Bawal ang screenshot habang naka-enable.",
+    "vi": "Khóa màn hình riêng tư khi CareSphere rời tiền cảnh. Cần Android 11 trở lên và khóa màn hình an toàn. Chặn ảnh chụp màn hình khi bật.",
+    "zh-Hans": "CareSphere离开前台时锁定私人页面。需要Android 11或更新版本及安全屏幕锁。启用后会阻止截屏。"
   },
   "Look for Circle.": {
     "es": "Busca Círculo.",
@@ -1924,6 +1978,12 @@
     "fil": "Ituro ang isang bagay na lumalaki.",
     "vi": "Chỉ vào một thứ có thể phát triển.",
     "zh-Hans": "指一指会生长的东西。"
+  },
+  "Native Android": {
+    "es": "Android nativo",
+    "fil": "Native Android",
+    "vi": "Android gốc",
+    "zh-Hans": "原生Android"
   },
   "Nature": {
     "es": "Naturaleza",
@@ -2669,6 +2729,12 @@
     "vi": "Cần kiểm tra",
     "zh-Hans": "需要检查"
   },
+  "Review reminder pending": {
+    "es": "Recordatorio de revisión pendiente",
+    "fil": "Nakahintay ang paalala sa pagsusuri",
+    "vi": "Lời nhắc xem lại đang chờ",
+    "zh-Hans": "查看提醒待发送"
+  },
   "Review selection": {
     "es": "Revisar selección",
     "fil": "Suriin ang napili",
@@ -2957,6 +3023,18 @@
     "vi": "Những bước nhỏ là đủ",
     "zh-Hans": "一小步也足够"
   },
+  "Snooze adds one same-day review reminder. It does not change your prescribed schedule or tell you to take a dose. Delivery may be delayed.": {
+    "es": "El aplazamiento añade un recordatorio de revisión para el mismo día. No cambia el horario recetado ni indica que tomes una dosis. Puede llegar con retraso.",
+    "fil": "Nagdaragdag ang snooze ng isang paalala sa pagsusuri sa araw ding iyon. Hindi nito binabago ang iniresetang iskedyul o sinasabing uminom ng gamot. Maaaring maantala ang pagdating.",
+    "vi": "Nhắc lại thêm một lời nhắc xem lại trong cùng ngày. Không thay đổi lịch kê đơn hay chỉ dẫn dùng một liều thuốc. Thông báo có thể bị chậm.",
+    "zh-Hans": "稍后提醒会在当天添加一次查看提醒。它不会更改处方时间表，也不是服药指示。提醒可能延迟送达。"
+  },
+  "Snooze is unavailable. Check confirmation, notification permission and storage. Snooze cannot cross midnight.": {
+    "es": "El aplazamiento no está disponible. Revisa la confirmación, el permiso de notificaciones y el almacenamiento. No puede pasar de medianoche.",
+    "fil": "Hindi magagamit ang snooze. Suriin ang kumpirmasyon, pahintulot sa notification at storage. Hindi maaaring lumampas sa hatinggabi ang snooze.",
+    "vi": "Không thể nhắc lại. Kiểm tra xác nhận, quyền thông báo và bộ nhớ. Nhắc lại không thể sang ngày mới.",
+    "zh-Hans": "无法设置稍后提醒。请检查确认状态、通知权限及存储空间。稍后提醒不能跨过午夜。"
+  },
   "Soap helps clean your hands.": {
     "es": "El jabón ayuda a limpiar las manos.",
     "fil": "Nakatutulong ang sabon sa paglilinis ng kamay.",
@@ -3215,6 +3293,18 @@
     "vi": "Phù hợp rồi. Tiếp tục khi bạn sẵn sàng.",
     "zh-Hans": "这样合适。准备好后再继续。"
   },
+  "The app-lock preference could not be saved. Try again.": {
+    "es": "No se pudo guardar la preferencia de bloqueo. Inténtalo de nuevo.",
+    "fil": "Hindi na-save ang setting ng app lock. Subukang muli.",
+    "vi": "Không lưu được tùy chọn khóa ứng dụng. Hãy thử lại.",
+    "zh-Hans": "无法保存应用锁偏好。请重试。"
+  },
+  "The paused state could not be saved. Disable CareSphere notifications in Android Settings before restarting.": {
+    "es": "No se pudo guardar el estado de pausa. Desactiva las notificaciones de CareSphere en los ajustes de Android antes de reiniciar.",
+    "fil": "Hindi na-save ang naka-pause na estado. I-disable ang mga notification ng CareSphere sa Android Settings bago mag-restart.",
+    "vi": "Không lưu được trạng thái tạm dừng. Tắt thông báo CareSphere trong Cài đặt Android trước khi khởi động lại.",
+    "zh-Hans": "无法保存暂停状态。重新启动前，请在Android设置中停用CareSphere通知。"
+  },
   "These are self-entered values, not verified sensor readings. They do not change your care plan.": {
     "es": "Son valores introducidos por ti, no lecturas verificadas de sensores. No cambian tu plan de atención.",
     "fil": "Ikaw ang naglagay ng mga halagang ito; hindi ito beripikadong sukat ng sensor. Hindi nito binabago ang plano ng pangangalaga mo.",
@@ -3383,6 +3473,12 @@
     "vi": "Bỏ đánh dấu đã dùng",
     "zh-Hans": "撤销已服用标记"
   },
+  "Unlock CareSphere": {
+    "es": "Desbloquear CareSphere",
+    "fil": "I-unlock ang CareSphere",
+    "vi": "Mở khóa CareSphere",
+    "zh-Hans": "解锁CareSphere"
+  },
   "Unlock a CareSphere transfer": {
     "es": "Desbloquear transferencia de CareSphere",
     "fil": "I-unlock ang CareSphere transfer",
@@ -3424,6 +3520,12 @@
     "fil": "Gamitin ang wika ng device",
     "vi": "Dùng ngôn ngữ của thiết bị",
     "zh-Hans": "使用设备语言"
+  },
+  "Use your device screen lock or a strong biometric. CareSphere never receives your PIN or biometric data.": {
+    "es": "Usa el bloqueo de pantalla del dispositivo o una biometría segura. CareSphere nunca recibe tu PIN ni tus datos biométricos.",
+    "fil": "Gamitin ang screen lock ng device o ligtas na biometric. Hindi natatanggap ng CareSphere ang PIN o biometric data mo.",
+    "vi": "Dùng khóa màn hình thiết bị hoặc sinh trắc học bảo mật cao. CareSphere không nhận mã PIN hay dữ liệu sinh trắc học của bạn.",
+    "zh-Hans": "请使用设备屏幕锁或高安全级别的生物识别。CareSphere不会获取您的PIN码或生物识别数据。"
   },
   "Very low": {
     "es": "Muy bajo",
