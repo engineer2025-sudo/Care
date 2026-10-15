@@ -355,3 +355,19 @@ test('undo restores a deleted routine without changing other care records',async
   await page.getByRole('button',{name:'Undo last routine change'}).click()
   await expect(page.getByRole('button',{name:'Choose a quiet activity',exact:true})).toBeVisible()
 })
+
+
+test('editing a medication preserves its identity and pauses reminders for another review', async ({ page }) => {
+  await page.getByRole('button', { name: 'Add a medication', exact: true }).click()
+  await page.getByLabel('Medication name', { exact: true }).fill('Reminder test only')
+  await page.getByLabel('Reminder time', { exact: true }).fill('09:30')
+  await page.getByRole('button', { name: 'Add medication', exact: true }).click()
+  await page.getByRole('checkbox', { name: 'Confirm medication schedule' }).check()
+  await page.getByRole('button', { name: 'Edit medication: Reminder test only', exact: true }).click()
+  await page.getByLabel('Reminder time', { exact: true }).fill('21:30')
+  await page.getByRole('button', { name: 'Save changes', exact: true }).click()
+  await expect(page.getByText('Reminder test only · 9:30 PM', { exact: true })).toBeVisible()
+  await expect(page.getByText('Reminder test only · 9:30 AM', { exact: true })).toHaveCount(0)
+  await expect(page.getByRole('checkbox', { name: 'Confirm medication schedule' })).not.toBeChecked()
+  await expect(page.getByRole('button', { name: 'Edit medication: Reminder test only', exact: true })).toHaveCount(1)
+})

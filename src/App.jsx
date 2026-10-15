@@ -406,17 +406,19 @@ function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirm
   const [name, setName] = useState('');
   const [time, setTime] = useState('09:00');
   const [message, setMessage] = useState('');
+  const [editingId, setEditingId] = useState(null);
   const scheduleReady = meds.length > 0 && meds.every((med) =>
   med && typeof med.name === 'string' && med.name.trim().length > 0 &&
-  typeof med.time === 'string' && /^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(med.time));
+  reminderDate(med.time) !== null);
 
   const add = () => {
     const trimmed = name.trim();
-    if (!trimmed || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return;
+    if (!trimmed || trimmed.length > 160 || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time) || (editingId === null && meds.length >= 200)) return;
     const [hours, minutes] = time.split(':').map(Number);
     const period = hours >= 12 ? 'PM' : 'AM';
     const timeLabel = `${hours % 12 || 12}:${String(minutes).padStart(2, '0')} ${period}`;
-    setMeds((current) => [...current, { id: `${Date.now()}-${Math.random()}`, name: trimmed, time: timeLabel, takenOn: null }]);
+    setMeds((current) => editingId === null ? [...current, { id: crypto.randomUUID(), name: trimmed, time: timeLabel, takenOn: null }] : current.map(med => med.id === editingId ? { ...med, name: trimmed, time: timeLabel, takenOn: null } : med));
+    setEditingId(null);
     setMedsConfirmed(false);
     setName('');
     setMessage('Schedule saved on this device. Review and confirm it below before reminders are enabled.');
@@ -431,9 +433,10 @@ function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirm
       {meds.length === 0 ?
       <p className="text-xs text-slate-500">{tr("No medication reminders are configured.")}</p> :
       meds.map((med) =>
-      <div key={med.id} className="flex items-center justify-between gap-3 bg-slate-800/60 rounded-xl px-3 py-2">
+      <div key={med.id} className="flex flex-wrap items-center justify-between gap-3 bg-slate-800/60 rounded-xl px-3 py-2">
           <span className="text-xs text-slate-200">{med.name} · {med.time}</span>
-          <button onClick={() => {setMeds((current) => current.filter((item) => item.id !== med.id));setMedsConfirmed(false);}} className="text-[11px] font-bold text-rose-300 hover:text-rose-200">{tr("Remove")}</button>
+          <button type="button" aria-label={tr('Edit medication: {0}', [med.name])} onClick={() => {setEditingId(med.id);setName(med.name);const date = reminderDate(med.time);setTime(date ? `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}` : '');setMessage('');}} className="text-sm font-bold text-emerald-300">{tr("Edit")}</button>
+          <button onClick={() => {if (editingId === med.id) {setEditingId(null);setName('');} setMeds((current) => current.filter((item) => item.id !== med.id));setMedsConfirmed(false);}} className="text-[11px] font-bold text-rose-300 hover:text-rose-200">{tr("Remove")}</button>
         </div>
       )}
       {meds.length > 0 &&
@@ -453,12 +456,13 @@ function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirm
       }
       <form onSubmit={(event) => {event.preventDefault();add();}} className="medication-form">
         <label className="field-label">{tr("Medication name")}
-          <input required value={name} onChange={(event) => setName(event.target.value)} placeholder={tr("As written on your label")} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500" />
+          <input required maxLength={160} value={name} onChange={(event) => setName(event.target.value)} placeholder={tr("As written on your label")} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500" />
         </label>
         <label className="field-label">{tr("Reminder time")}
           <input required type="time" value={time} onChange={(event) => setTime(event.target.value)} className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
         </label>
-        <button type="submit" disabled={!name.trim() || !time} className="bg-emerald-700 disabled:opacity-40 text-sm font-bold text-white px-4 py-2 rounded-xl">{tr("Add medication")}</button>
+        <button type="submit" disabled={!name.trim() || !time || (editingId === null && meds.length >= 200)} className="bg-emerald-700 disabled:opacity-40 text-sm font-bold text-white px-4 py-2 rounded-xl">{tr(editingId === null ? "Add medication" : "Save changes")}</button>
+        {editingId !== null && <button type="button" onClick={() => {setEditingId(null);setName('');setTime('09:00');}} className="text-sm font-bold text-slate-200">{tr("Cancel")}</button>}
       </form>
       {message && <p role="status" className="text-sm text-emerald-300">{message}</p>}
     </div>);
