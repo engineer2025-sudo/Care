@@ -172,7 +172,7 @@ class MainActivity : ProtectedActivity() {
                 setTextColor(if (i == tab && !settings && activityIndex < 0) Color.WHITE else green)
                 background = shape(if (i == tab && !settings && activityIndex < 0) fill else bg, 14)
                 isSelected = i == tab && !settings && activityIndex < 0
-                setOnClickListener { if(i == 2 && data.json.optJSONObject("tools")?.optBoolean("simple") == true) { startActivity(Intent(this@MainActivity, SupportActivity::class.java)); return@setOnClickListener }; stopComfort(); tab = i; settings = false; activityIndex = -1; render() }
+                setOnClickListener { if(i == 2 && data.json.optJSONObject("tools")?.optBoolean("simple") == true) { openInternal(Intent(this@MainActivity, SupportActivity::class.java)); return@setOnClickListener }; stopComfort(); tab = i; settings = false; activityIndex = -1; render() }
             }
             if(largeText && i % 2 == 0) {
                 navRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
