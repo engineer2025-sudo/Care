@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit
 /** Test APK only: exercises real Android NSD with independent publisher/browser instances. */
 class NearbySmokeInstrumentation : Instrumentation() {
     override fun onCreate(arguments: Bundle?) { super.onCreate(arguments); start() }
+    private fun checkpoint(value:String){sendStatus(0,Bundle().apply{putString("stream","CareSphere check: $value\n")})}
     override fun onStart() {
         var publisher: NearbyDiscovery? = null
         var browser: NearbyDiscovery? = null
@@ -20,7 +21,8 @@ class NearbySmokeInstrumentation : Instrumentation() {
         var outcome = Activity.RESULT_CANCELED
         var report = "FAIL: native DNS-SD test did not complete"
         try {
-            startActivitySync(Intent(targetContext,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            checkpoint("launch and native discovery")
+            startActivitySync(Intent(targetContext,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
             val wifi = java.net.NetworkInterface.getByName("wlan0")?.inetAddresses?.let { java.util.Collections.list(it) }?.mapNotNull { it.hostAddress }?.firstOrNull { LocalTransferWire.privateIPv4(it) }
             val ip = wifi ?: LocalTransferWire.addresses().firstOrNull() ?: error("No private IPv4 interface in emulator")
             val pass = "public nearby instrumentation phrase"
@@ -57,6 +59,7 @@ class NearbySmokeInstrumentation : Instrumentation() {
             check(browser!!.peers.isEmpty() && !browser!!.scanning && publisher!!.advertisedName.isEmpty())
             server.close()
             check(runCatching { LocalTransferReceiver().use { it.receive(chosen.address,offer.second) } }.isFailure)
+            checkpoint("QR, storage and reminder regressions")
             uiAutomation.grantRuntimePermission(targetContext.packageName,"android.permission.POST_NOTIFICATIONS")
             val bitmap=ConnectionQR.image(offer.first,offer.second)
             val image=java.io.ByteArrayOutputStream();bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,image);bitmap.recycle()
@@ -99,13 +102,15 @@ class NearbySmokeInstrumentation : Instrumentation() {
                     check(file.readBytes().contentEquals(byteArrayOf(1,2,3)))
                 }finally{file.writeBytes(before)}
             }
+            checkpoint("protected activity entry points")
             // Screen-lock UI coverage uses the real app activities, not a fake view.
             // The separate shell smoke test verifies actual system credential success/cancel.
             runOnMainSync { check(AppLock.setEnabled(targetContext,true));AppLock.session.lock() }
             val protectedScreens=mutableListOf<Activity>()
             try {
                 for(type in listOf(MainActivity::class.java,SupportActivity::class.java,MedicationActivity::class.java,HealthHistoryActivity::class.java)){
-                    val screen=startActivitySync(Intent(targetContext,type).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    checkpoint(type.simpleName)
+                    val screen=startActivitySync(Intent(targetContext,type).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
                     protectedScreens.add(screen)
                     runOnMainSync {
                         fun containsGate(view:android.view.View):Boolean {

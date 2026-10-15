@@ -16,6 +16,9 @@ def adb(*args):
     timeout = 120 if 'instrument' in args else 45
     try:
         return subprocess.check_output(['adb', *args], text=True, stderr=subprocess.STDOUT, timeout=timeout)
+    except subprocess.TimeoutExpired as error:
+        partial=error.output.decode(errors='replace') if isinstance(error.output,bytes) else str(error.output or '')
+        raise RuntimeError(f'ADB {args!r} timed out. Partial instrumentation output: {partial[-6000:]}') from error
     except subprocess.CalledProcessError as error:
         raise RuntimeError(f'ADB {args!r} failed: {error.output[-4000:]}') from error
 
