@@ -17,9 +17,9 @@ export function SupportedActivity({ id, choices = 3 }) {
       <div className="grid gap-3">{options.map(({ label: option, index: i }) => <button key={tr(option)} className="library-choice" onClick={() => setFeedback(i === item.answer ? 'That fits. Continue when you’re ready.' : 'Let’s look together. Try another choice, or ask for a hint.')}>{tr(option)}</button>)}</div>
       <button className="library-secondary" onClick={() => setFeedback(item.hint)}>{tr("Show a hint")}</button>
       <p role="status" className="text-base text-emerald-300 min-h-6">{tr(feedback)}</p>
-    </> : <p className="text-slate-300">{tr("Speak, point, listen, write elsewhere, or skip. There is no right answer. Your response is not recorded.")}</p>}
+    </> : <Info className="text-slate-300">{tr("Speak, point, listen, write elsewhere, or skip. There is no right answer. Your response is not recorded.")}</Info>}
     <button className="library-primary" onClick={() => {setRound((n) => n + 1);setFeedback('');}}>{tr("Next / skip")}</button>
-    <p className="text-sm text-slate-400">{tr("No scores or countdowns. Stop whenever you like.")}</p>
+    <Info className="text-sm text-slate-400">{tr("No scores or countdowns. Stop whenever you like.")}</Info>
   </div>;
 }
 
@@ -47,7 +47,7 @@ export default function ActivityLibrary({ favorites, onToggleFavorite, renderAct
       <label className="flex gap-2 items-center py-3"><input type="checkbox" checked={favoritesOnly} onChange={(e) => setFavoritesOnly(e.target.checked)} className="w-5 h-5 accent-emerald-600" /><span>{tr("Favorites only")}</span></label>
     </div>
     <p className="text-sm text-slate-400" role="status">{visible.length} {visible.length === 1 ? tr('activity') : tr('activities')}{favoritesOnly ? tr(' in your favorites') : ''}</p>
-    {!visible.length && <div className="library-empty"><h3 className="text-xl font-bold">{tr("Nothing here yet")}</h3><p>{tr("Try another word, or browse all activities and save a favorite.")}</p><button className="library-secondary" onClick={() => {setQuery('');setCategory('all');setFavoritesOnly(false);}}>{tr("Show all activities")}</button></div>}
+    {!visible.length && <div className="library-empty"><h3 className="text-xl font-bold">{tr("Nothing here yet")}</h3><Info>{tr("Try another word, or browse all activities and save a favorite.")}</Info><button className="library-secondary" onClick={() => {setQuery('');setCategory('all');setFavoritesOnly(false);}}>{tr("Show all activities")}</button></div>}
     <div className="library-grid">{visible.map((activity) => <article key={activity.id} className="library-tile">
       <div className="flex items-center justify-between"><span className="library-symbol" aria-hidden="true">{activity.symbol}</span><span className="text-xs text-slate-400">{tr(CATEGORIES[activity.category])}</span></div>
       <h3 className="text-lg font-bold text-white">{tr(activity.title)}</h3><p className="text-sm text-slate-300 flex-1">{tr(activity.summary)}</p>
@@ -56,8 +56,8 @@ export default function ActivityLibrary({ favorites, onToggleFavorite, renderAct
     </article>)}</div>
     <Info className="text-sm text-slate-400">{tr("Favorites stay in this browser’s encrypted storage. Participation isn’t tracked. Activities are optional practice and enjoyment, not clinically validated dementia or autism treatments.")}</Info>
     {selected && <div className="library-modal-backdrop"><section ref={dialog} role="dialog" aria-modal="true" aria-labelledby="activity-session-title" className="library-session">
-      <header className="flex justify-between items-start gap-3"><div><p className="text-sm text-emerald-300">{tr("Your own pace · no score")}</p><h2 id="activity-session-title" className="text-xl font-bold text-white">{tr(selected.title)}</h2></div><button onClick={() => setSelected(null)} className="library-secondary" aria-label={tr("Leave activity")}><X aria-hidden="true" className="w-5 h-5" /><span>{tr("Done")}</span></button></header>
-      {paused ? <div className="library-empty"><p>{tr("Take your time. This activity restarts when you continue.")}</p><button className="library-primary" onClick={() => setPaused(false)}>{tr("Continue activity")}</button></div> : CHOICE_ROUNDS[selected.id] || selected.id === 'conversation' ? <SupportedActivity key={selected.id} id={selected.id} choices={choices} /> : renderActivity(selected.id)}
+      <header className="flex justify-between items-start gap-3"><div><Info className="text-sm text-emerald-300">{tr("Your own pace · no score")}</Info><h2 id="activity-session-title" className="text-xl font-bold text-white">{tr(selected.title)}</h2></div><button onClick={() => setSelected(null)} className="library-secondary" aria-label={tr("Leave activity")}><X aria-hidden="true" className="w-5 h-5" /><span>{tr("Done")}</span></button></header>
+      {paused ? <div className="library-empty"><Info>{tr("Take your time. This activity restarts when you continue.")}</Info><button className="library-primary" onClick={() => setPaused(false)}>{tr("Continue activity")}</button></div> : CHOICE_ROUNDS[selected.id] || selected.id === 'conversation' ? <SupportedActivity key={selected.id} id={selected.id} choices={choices} /> : renderActivity(selected.id)}
       <button className="library-secondary" onClick={() => setPaused(true)}>{tr("Pause activity")}</button>
       <Info className="text-sm text-slate-400">{tr("Closing this activity or moving the app to the background ends this session and stops its sound.")}</Info>
     </section></div>}

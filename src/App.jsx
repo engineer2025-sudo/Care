@@ -22,6 +22,7 @@ import { soundEngine } from './lib/audio';
 import { connectHeartRateMonitor } from './lib/bluetooth';
 import { buildVisitBrief } from './lib/visitBrief';
 import { encodeCsv } from './lib/csv';
+import { validManualVital, manualVitalRow, formatManualVital } from './lib/vitalRules';
 import { STORAGE_KEY, RESET_LOCAL_DATA_EVENT, normalizePersistedValue, localDayKey, isRoutineDoneToday, isMedicationTakenToday } from './lib/careStorage';
 import { CARE_STORAGE_SECURITY_EVENT, eraseCareStorage, getCareStorageCache, getCareStorageSecurityStatus, persistCareStorage } from './lib/secureCareStorage';
 import Info from './components/Info';
@@ -1368,6 +1369,9 @@ export default function App() {
   // but reminders stay paused until the user explicitly confirms every entry.
   const [meds, setMeds] = usePersisted('meds', []);
   const [medsConfirmed, setMedsConfirmed] = usePersisted('medsConfirmed', false);
+  const [manualVitals, setManualVitals] = usePersisted('manualVitals', []);
+  const [vitalForm, setVitalForm] = useState(null);
+  const [vitalFormError, setVitalFormError] = useState(false);
   const [notes, setNotes] = usePersisted('notes', []);
   const [support, setSupport] = usePersisted('support', normalizeSupport());
   useEffect(() => {setSupport((current) => normalizeSupport(current));}, [localDay]);
@@ -1798,7 +1802,7 @@ export default function App() {
 
         {/* ══════════ OVERVIEW ══════════ */}
         {activeTab === 'support' && <SupportHub support={support} setSupport={setSupport} notes={notes} setNotes={setNotes} routines={routines} setRoutines={setRoutines} settings={settings} updateSettings={updateSettings} navigate={setActiveTab} />}
-        {activeTab === 'home' && support.simple && <section className="support-card"><h1 className="text-3xl font-bold">{tr("My day, at my pace")}</h1><p>{tr("One thing at a time. Choose what feels useful.")}</p><div className="support-actions"><button className="library-primary" onClick={() => setActiveTab('games')}>{tr("Activities")}</button><button className="library-primary" onClick={() => setActiveTab('support')}>{tr("My people & support tools")}</button></div><h2>{tr("My daily routine")}</h2>{routines.length ? routines.map((r) => <button key={r.id} className="library-choice" aria-pressed={routineIsDone(r)} onClick={() => toggleRoutine(r.id)}>{routineIsDone(r) ? '✓ ' : ''}{r.text}</button>) : <p>{tr("No daily routines yet. Visual routines are in My support tools. Restore the full view to customize your daily checklist.")}</p>}<button className="library-secondary" onClick={() => setSupport((s) => ({ ...s, simple: false }))}>{tr("Restore full view")}</button></section>}
+        {activeTab === 'home' && support.simple && <section className="support-card"><h1 className="text-3xl font-bold">{tr("My day, at my pace")}</h1><Info>{tr("One thing at a time. Choose what feels useful.")}</Info><div className="support-actions"><button className="library-primary" onClick={() => setActiveTab('games')}>{tr("Activities")}</button><button className="library-primary" onClick={() => setActiveTab('support')}>{tr("My people & support tools")}</button></div><h2>{tr("My daily routine")}</h2>{routines.length ? routines.map((r) => <button key={r.id} className="library-choice" aria-pressed={routineIsDone(r)} onClick={() => toggleRoutine(r.id)}>{routineIsDone(r) ? '✓ ' : ''}{r.text}</button>) : <p>{tr("No daily routines yet. Visual routines are in My support tools. Restore the full view to customize your daily checklist.")}</p>}<button className="library-secondary" onClick={() => setSupport((s) => ({ ...s, simple: false }))}>{tr("Restore full view")}</button></section>}
         {activeTab === 'home' && routineUndo?.day === localDayKey() && <button className="library-secondary" onClick={undoRoutine}>{tr("Undo last routine change")}</button>}
         {activeTab === 'home' && !support.simple &&
         <div className="space-y-8">
@@ -1922,7 +1926,7 @@ export default function App() {
                   {meds.length === 0 && <div className="medication-empty">
                     <span className="summary-icon rose"><Pill /></span>
                     <h4>{tr("No medication reminders yet")}</h4>
-                    <p>{tr("If you need them, add medicines and times from your label or care team's instructions.")}</p>
+                    <Info>{tr("If you need them, add medicines and times from your label or care team's instructions.")}</Info>
                     <button onClick={() => openSettings('medications')} className="secondary-action"><Plus className="w-4 h-4" />{tr(" Add a medication")}</button>
                   </div>}
                   {meds.length > 0 && !medsConfirmed && <p className="text-xs text-amber-200 bg-amber-950/30 border border-amber-800/50 rounded-xl p-3">{tr("A saved schedule needs review in Settings. Reminders and dose check-ins are paused until you confirm every name and time.")}</p>}
@@ -2188,9 +2192,57 @@ export default function App() {
                 <Info className="text-[11px] text-slate-500">{tr("Bluetooth SIG Heart Rate profile (0x180D) · sensor notifications · stale after 15 seconds")}</Info>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3 md:col-span-2">
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 md:col-span-2">
                 <h2 className="font-bold text-white">{tr("Other health readings")}</h2>
                 <p className="text-sm text-slate-400">{tr("Blood oxygen and blood pressure are not connected in this browser. No values are generated. The optional HealthKit build of the native iOS app can read records you choose to share from Apple Health.")}</p>
+                <div className="support-actions">
+                  {!vitalForm && <button className="library-secondary" onClick={() => { setVitalForm({ kind: 'bp' }); setVitalFormError(false); }}>{tr("Add blood pressure")}</button>}
+                  {!vitalForm && <button className="library-secondary" onClick={() => { setVitalForm({ kind: 'oxygen' }); setVitalFormError(false); }}>{tr("Add blood oxygen")}</button>}
+                </div>
+                {vitalForm && (
+                  <form className="support-actions items-end" onSubmit={(event) => {
+                    event.preventDefault();
+                    const data = new FormData(event.currentTarget);
+                    const first = Number(data.get('first'));
+                    const second = vitalForm.kind === 'bp' ? Number(data.get('second')) : null;
+                    if (!validManualVital(vitalForm.kind, first, second)) {
+                      setVitalFormError(true);
+                      return;
+                    }
+                    setManualVitals([...manualVitals, manualVitalRow(vitalForm.kind, first, vitalForm.kind === 'bp' ? second : undefined)]);
+                    setVitalForm(null);
+                    setVitalFormError(false);
+                  }}>
+                    <label className="support-field">
+                      <span>{vitalForm.kind === 'bp' ? tr("Systolic · mmHg") : tr("Blood oxygen · percent")}</span>
+                      <input name="first" type="number" inputMode="numeric" min="1" required className="library-input" />
+                    </label>
+                    {vitalForm.kind === 'bp' && (
+                      <label className="support-field">
+                        <span>{tr("Diastolic · mmHg")}</span>
+                        <input name="second" type="number" inputMode="numeric" min="1" required className="library-input" />
+                      </label>
+                    )}
+                    <button type="submit" className="library-action">{tr("Save")}</button>
+                    <button type="button" className="library-secondary" onClick={() => { setVitalForm(null); setVitalFormError(false); }}>{tr("Cancel")}</button>
+                  </form>
+                )}
+                {vitalFormError && <p role="alert" className="text-amber-300 text-sm">{tr("Check the units and values. This is not a medical interpretation.")}</p>}
+                {manualVitals.length > 0 && (
+                  <ul className="space-y-2">
+                    {manualVitals.map(vital => (
+                      <li key={vital.id} className="support-list-item">
+                        <div>
+                          <p className="text-white text-sm">{formatManualVital(vital)} · {tr("Manually entered")}</p>
+                          <p className="text-slate-400 text-xs">{new Date(vital.at).toLocaleString()}</p>
+                        </div>
+                        <button className="text-rose-300 text-sm" onClick={() => {
+                          if (window.confirm(tr("Delete this manually entered record?"))) setManualVitals(manualVitals.filter(item => item.id !== vital.id));
+                        }}>{tr("Remove")}</button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
 

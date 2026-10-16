@@ -228,7 +228,7 @@ class MainActivity : ProtectedActivity() {
             listOf("Low", "Okay", "Good", "Prefer not to say").forEach { mood ->
                 button(tx(mood), c) { data.put("mood", mood); render() }.isEnabled = data.canWrite
             }
-            text(tx("A personal check-in, not a health assessment."), 14f, c)
+            copy(tx("A personal check-in, not a health assessment."), 14f, c)
         }
     }
     private fun searchField(label: String, value: String, changed: (String) -> Unit) {
@@ -362,7 +362,7 @@ class MainActivity : ProtectedActivity() {
         button(tx("Take a break")) { activityIndex = -1; stopComfort(); render() }
     }
     private fun pairs() = card(tx("Find two matching cards")) { c ->
-        text(tx("Cards stay visible until you choose to turn them over. No timer."), parent = c)
+        copy(tx("Cards stay visible until you choose to turn them over. No timer."), parent = c)
         pairWords.forEachIndexed { i, word ->
             val revealed = i == firstPair || i == secondPair || i in matched
             button(if (revealed) "Card ${i+1}: $word${if(i in matched) " · matched" else ""}" else "Reveal card ${i+1}", c) {
@@ -418,7 +418,7 @@ class MainActivity : ProtectedActivity() {
         parent.removeAllViews()
         val notes = data.list("notes")
         val visible = (notes.length()-1 downTo 0).filter { LibraryPreferences.matches(notes.getJSONObject(it).optString("body"), noteQuery) }
-        if(notes.length() == 0) { text(tx("No notes yet"), 22f, parent, true); text(tx("Only notes you write will appear here."), parent = parent) }
+        if(notes.length() == 0) { text(tx("No notes yet"), 22f, parent, true); copy(tx("Only notes you write will appear here."), parent = parent) }
         else if(visible.isEmpty()) { text(tx("No notes match your search."), parent = parent); button(tx("Clear search"), parent) { noteQuery = ""; render() } }
         else text("${visible.size} ${if(visible.size == 1) "note" else "notes"}", 15f, parent)
         for(i in visible) {
@@ -516,7 +516,7 @@ class MainActivity : ProtectedActivity() {
         }
         card(tx("Routine management")) { c ->
             val routines = data.list("routines")
-            if(routines.length() == 0) text(tx("Add routines from Today."), parent = c)
+            if(routines.length() == 0) copy(tx("Add routines from Today."), parent = c)
             for(i in 0 until routines.length()) {
                 button("Remove ${routines.getJSONObject(i).getString("title")}", c) { confirm(tx("Remove routine?"), "Your other routines will remain.") { val updated = JSONArray(routines.toString()); updated.remove(i); data.put("routines", updated); render() } }.isEnabled = data.canWrite
             }

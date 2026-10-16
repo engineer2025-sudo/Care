@@ -1,9 +1,10 @@
 import { normalizeSupport } from './support.js'
 import { normalizeFavorites } from './activityLibrary.js'
+import { validManualVital } from './vitalRules.js'
 export const STORAGE_KEY = 'caresphere.v1'
 export const RESET_LOCAL_DATA_EVENT = 'caresphere:reset-local-data'
 
-const PERSISTED_KEYS = new Set(['settings', 'routines', 'meds', 'medsConfirmed', 'notes', 'moods', 'emotionScore', 'bestPattern', 'favoriteActivities', 'support'])
+const PERSISTED_KEYS = new Set(['settings', 'routines', 'meds', 'medsConfirmed', 'notes', 'moods', 'manualVitals', 'emotionScore', 'bestPattern', 'favoriteActivities', 'support'])
 const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value)
 const isDayKey = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 
@@ -78,6 +79,15 @@ export function normalizePersistedValue(key, value, fallback) {
       score: item.score,
       ts: Number.isFinite(item.ts) ? item.ts : undefined,
     }))
+  }
+  if (key === 'manualVitals' && Array.isArray(value)) {
+    return value.slice(0, 100).filter(isRecord).map(item => ({
+      id: typeof item.id === 'string' ? item.id.slice(0, 120) : crypto.randomUUID(),
+      kind: item.kind === 'bp' ? 'bp' : item.kind === 'oxygen' ? 'oxygen' : '',
+      first: Number.isInteger(item.first) ? item.first : 0,
+      second: Number.isInteger(item.second) ? item.second : undefined,
+      at: typeof item.at === 'string' ? item.at.slice(0, 40) : '',
+    })).filter(item => item.id && item.at && validManualVital(item.kind, item.first, item.second ?? null))
   }
   if (key === 'medsConfirmed') return typeof value === 'boolean' ? value : fallback
   if (key === 'emotionScore' || key === 'bestPattern') {

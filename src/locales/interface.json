@@ -605,6 +605,12 @@
     "vi": "Lắng nghe bản thân, làm việc hằng ngày hoặc nghỉ ngơi. Bạn chọn điều phù hợp.",
     "zh-Hans": "关注自己的感受、遵循日常安排，或只是休息一下。选择适合自己的方式。"
   },
+  "Check the units and values. This is not a medical interpretation.": {
+    "es": "Comprueba las unidades y los valores. Esta no es una interpretación médica.",
+    "fil": "Suriin ang mga yunit at halaga. Hindi ito medikal na interpretasyon.",
+    "vi": "Kiểm tra đơn vị và giá trị. Đây không phải diễn giải y khoa.",
+    "zh-Hans": "请核对单位和数值。这不是医学解读。"
+  },
   "Choices in personal photo matching": {
     "es": "Opciones al emparejar fotos personales",
     "fil": "Mga pagpipilian sa pagtutugma ng sariling larawan",

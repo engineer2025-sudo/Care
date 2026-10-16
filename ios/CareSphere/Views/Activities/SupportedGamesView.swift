@@ -120,7 +120,7 @@ struct EverydayOrderView: View {
 
     var body: some View {
         SectionCard(title: session.sequence.title, systemImage: "list.number") {
-            Text(AppLanguage.text("Tap the steps in order for this example. No dragging or timer. Your own routine may be different."))
+            InfoText(AppLanguage.text("Tap the steps in order for this example. No dragging or timer. Your own routine may be different."))
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 10) {
                 ForEach(Array(session.placedIDs.enumerated()), id: \.offset) { index, id in

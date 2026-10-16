@@ -161,7 +161,7 @@ struct PersonalSupportView: View {
         case "Visual routines": plans
         case "Communication":
             Section(AppLanguage.text("Point, display or speak")) {
-                Text(AppLanguage.text("A supplement to your existing communication system, not a replacement."))
+                InfoText(AppLanguage.text("A supplement to your existing communication system, not a replacement."))
                 if !shown.isEmpty { Text(shown).font(.largeTitle); Button(AppLanguage.text("Speak this phrase")) { say(shown) }; Button(AppLanguage.text("Clear / stop")) { SpeechService.shared.stop(); shown = "" } }
                 ForEach(phrases.map { AppLanguage.text($0) } + store.personalSupport.phrases, id: \.self) { phrase in Button(phrase) { SpeechService.shared.stop(); shown = phrase }.frame(minHeight: 44) }
                 TextField(AppLanguage.text("My own phrase"), text: $draft)
