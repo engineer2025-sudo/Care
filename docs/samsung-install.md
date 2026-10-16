@@ -2,7 +2,7 @@
 
 ## Which download?
 
-Download **CareSphere-Android.apk**, version **1.6.0 (8)**, from this conversation's newly verified download. You do **not** need the iPhone ZIP, Xcode, Android Studio, a computer or a CareSphere account to install the APK.
+Download **CareSphere-Android.apk**, version **1.7.0 (9)**, from this conversation's newly verified download. You do **not** need the iPhone ZIP, Xcode, Android Studio, a computer or a CareSphere account to install the APK.
 
 The app supports **Android 8 or newer**. Check **Settings → About phone → Software information → Android version**. Health Connect has additional requirements: generally Android 9+ with an available/up-to-date provider; Android 14+ includes it in system settings. Availability and permissions vary; the app checks instead of fabricating readings.
 
@@ -34,6 +34,16 @@ The app supports **Android 8 or newer**. Check **Settings → About phone → So
 - **Support:** Today → My support tools → choose visual routines, communication, photos, contacts, appointments or interest prompts.
 - **Non-AI draft:** My support tools → Visit summary. Select notes/questions, review/edit the copied text, then save as a new note. It does not generate clinical advice.
 
+## Optional app lock — Android 11 or newer
+
+1. Set a secure PIN/pattern/password in Samsung's device settings first.
+2. CareSphere → Today → Settings & privacy → **App lock → Enable app lock**.
+3. Complete Android's own authentication prompt. The app never receives your PIN or biometric templates. A strong biometric (where supported) or device credential can unlock; weak face recognition may not qualify.
+4. Leaving the app locks private screens. Return and tap **Unlock CareSphere**. Cancellation keeps them hidden; there is no endless automatic retry loop. Disabling the lock also requires authentication.
+5. While enabled, screenshots/recents capture are blocked. Save unfinished dialogs before leaving; they close for privacy. After using the file picker, unlock before continuing the import. If the activity was recreated, choose the file again.
+
+On Android 8–10 the base app still works, but this app-specific lock is unavailable; use the device screen lock. This gate is separate from the encryption key and does not turn a debug build into production-grade storage. The lock preference is device-local and is not included in care backups. After a fresh installation, enable it separately; restoring a care backup does not enable or disable an existing app lock.
+
 ## Optional medication reminders
 
 1. Today → **Medication reminders** → **Add medication**. Enter only a name/time already confirmed by the label or care team. Times use the 24-hour clock, such as `09:30` or `21:30`.
@@ -41,6 +51,10 @@ The app supports **Android 8 or newer**. Check **Settings → About phone → So
 3. If notifications are blocked, open **Settings → Apps → CareSphere → Notifications**. A disabled medication notification category can also block them.
 4. Samsung's **Battery → Background usage limits / Sleeping apps** settings may delay notifications. If you intentionally want background reminders, review whether CareSphere is sleeping; menu paths differ by One UI. The app does not silently bypass battery restrictions.
 5. Scheduling is **inexact** and can be delayed by Android, power-saving, force-stop or device shutdown. Reopen CareSphere after a force-stop. Do not use it as your only system for time-critical medicines. Editing or restoring the schedule pauses reminders for another review.
+
+### Snooze / cancel
+
+After confirming the schedule and enabling notifications, each untaken entry has **Snooze 10 min**. It adds one same-day review reminder and shows a pending time with **Cancel snooze**. It is not an instruction to take a dose and does not change tomorrow's normal schedule. Android/Samsung can delay delivery. Snooze is unavailable if ten minutes would cross midnight. Editing/removing the schedule, pausing reminders or restoring a backup clears snoozes; marking an entry taken clears its snooze.
 
 ## Optional real health data
 

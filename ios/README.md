@@ -2,11 +2,14 @@
 
 Open **CareSphere.xcodeproj** directly. No XcodeGen, remote Swift packages, binary SDKs, or model downloads are needed to build the app. The only package is `ActivityKit/`, included locally.
 
-## New in 3.6.0 (14)
+## New in 3.6.1 (15)
+
+Shared catalog expanded to 641 messages for the new platform controls; native iPhone functionality from 3.6.0 is retained. See the current validation report.
+
 
 Authentication now fails closed when system verification is unavailable; contexts are invalidated on background/disappearance and stale results cannot unlock. Returning from the authentication sheet itself does not automatically re-prompt after cancellation. Medication notification text no longer reveals names/doses, and late scheduling callbacks are ignored. Native sharing displays a connection QR and can read it from a chosen photo; it never includes the passphrase. Live-camera scanning and authenticated import receipts are still missing.
 
-[Full platform checklist](../docs/feature-checklist.md) · [Current validation](../docs/release-parity-2026-10-14.md)
+[Full platform checklist](../docs/feature-checklist.md) · [Current validation](../docs/release-lock-2026-10-14.md)
 
 Offline core-interface localization in English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with a persistent App language selector. Untranslated advanced content falls back to English; private records are unchanged. [Coverage and review limits](../docs/languages.md).
 

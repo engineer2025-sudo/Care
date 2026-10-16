@@ -1,6 +1,6 @@
 # CareSphere — complete user-facing feature/status checklist
 
-Scope: iPhone **3.6.0 (14)**, Android **1.6.0 (8)**, web **1.4.0**. This is an inventory, **not a claim of complete parity or production readiness**. Each separate activity and major action is listed below. “Yes” means implemented; it does not mean physically validated on your Samsung/iPhone. See the release validation report for automated evidence.
+Scope: iPhone **3.6.1 (15)**, Android **1.7.0 (9)**, web **1.4.1**. This is an inventory, **not a claim of complete parity or production readiness**. Each separate activity and major action is listed below. “Yes” means implemented; it does not mean physically validated on your Samsung/iPhone. See the release validation report for automated evidence.
 
 **Legend:** Yes = implemented; Limited = only the stated subset/equivalent; No = not implemented on that platform; Optional = needs hardware, permissions, configuration or an external service. Nothing marked No is replaced with fake data or a pretend button.
 
@@ -25,7 +25,7 @@ Scope: iPhone **3.6.0 (14)**, Android **1.6.0 (8)**, web **1.4.0**. This is an i
 | Pause reminders after schedule edits / backup recovery | Yes | Yes | Yes |
 | Mark taken / undo self-report | Yes | Yes | Yes |
 | OS medication notifications while app is closed | Optional: iOS scheduling/permissions | Optional: inexact Android alarms/permissions; Samsung can delay them | **No:** page must remain open; browser timers can be suspended |
-| Snooze ten minutes | Yes | No | Yes, while page remains active |
+| Snooze ten minutes | Yes | Yes: same-day in-app review reminder; cancel/pending time | Yes, while page remains active |
 | Notification “taken” action | Authenticated iOS action | No: open app to review/check in | In-app reminder action |
 | Private generic notification text | Yes: no drug name/dose in notification | Yes: no drug name/dose in notification | Yes: no drug name/dose in OS notification |
 | Step counting | Optional: iPhone motion permission | No | No |
@@ -173,14 +173,14 @@ The connection code, QR and discovery label are not verified identities. Opening
 |---|---|---|---|
 | Encrypted local care data | AES-GCM / Keychain | AES-GCM / Keystore / AtomicFile | AES-GCM / IndexedDB non-extractable key |
 | Visible save/read errors; no silent replacement of corrupt store | Yes | Yes; failed-save rollback now tested in emulator | Yes; browser storage limits apply |
-| Optional app authentication lock | **Yes: fails closed; stale/background result invalidation** | **No app-specific lock yet:** use phone lock; not equivalent | **No app-specific lock:** protect device/browser profile |
-| Authentication unavailable does not unlock | Yes | Not an app feature | Not an app feature |
+| Optional app authentication lock | **Yes: fails closed; stale/background result invalidation** | **Optional Android 11+:** strong biometric/device credential; background relock, screenshot block; older Android uses device lock only | **No app-specific lock:** protect device/browser profile |
+| Authentication unavailable does not unlock | Yes | Yes: enabled lock stays closed | Not an app feature |
 | Android automatic OS backup disabled | Not applicable | Yes | Not applicable |
 | Explicit local erase | Yes | Yes | Yes |
 | Offline after installation | Core local features | Core local features | After completed first HTTPS/PWA load |
 | Five-language core UI; saved selector; device-language choice | Yes | Yes | Yes |
 | English / Spanish / Simplified Chinese / Filipino-Tagalog / Vietnamese | Yes | Yes | Yes |
-| 624 shared messages with English fallback | Yes | Yes | Yes |
+| 641 shared messages with English fallback | Yes | Yes | Yes |
 | Translate personal records automatically | No, deliberately | No, deliberately | No, deliberately |
 | All advanced UI/errors/exports fully translated and professionally reviewed | **No** | **No** | **No** |
 | Matching installed-local speech, no forced English/network fallback | Optional matching OS voice | Optional matching OS voice | Optional matching browser voice |
@@ -197,10 +197,14 @@ The connection code, QR and discovery label are not verified identities. Opening
 ## Still open — do not mistake this batch for completion
 
 - Authenticated import receipts and full-fidelity broader portable record sharing.
-- Android app lock, snooze, extended mood/step/workout/reference/SOS equivalents; iPhone/web manual-vital parity.
+- Android extended mood/step/workout/reference/SOS equivalents; iPhone/web manual-vital parity.
 - Complete advanced translations and fluent-speaker safety review; no blanket accessibility conformance claim.
 - Real Samsung notification timing/battery behavior, Health Connect grants/revocation, real BLE hardware, and all three native sharing pairings in both directions.
 - Physical iPhone authentication failure/cancellation/background tests, Apple Intelligence hardware responses, VoiceOver/TalkBack/switch-access and intended-user sessions.
 - Owner-controlled signing, backup/update migration acceptance, store/privacy/support release procedures and clinical safety review.
+
+### App-lock behavior on Samsung
+
+The Android lock is a screen-access gate, **not a biometric-bound Keystore key** and not protection against a compromised/debuggable device. Set a secure device screen lock first. Turning it on/off uses Android authentication; it does not ask you to type a PIN into a CareSphere form. A session is not saved across process death. External pause (including Home or another app) invalidates the session immediately, even if Android delays onStop. Deliberate navigation between CareSphere screens preserves the session. Multiwindow/partially visible sessions need physical-device review. Private dialogs close on leaving; unfinished dialog drafts may be discarded. Returning from a system file picker may require unlocking before its result is processed; activity/process recreation can require choosing the file again. Screenshots are intentionally blocked while enabled, including QR screenshots; another phone can photograph the displayed QR or use manual connection details.
 
 Those are genuine remaining tasks, not completed features. Build/emulator/browser checks cannot replace these checks. Use non-sensitive test records in the supplied development build.

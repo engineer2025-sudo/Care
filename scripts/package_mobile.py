@@ -82,30 +82,30 @@ with zipfile.ZipFile(apk_path) as z:
 
 paths = [ROOT / p for p in command('git', 'ls-files', 'ios', 'android', *LOCALIZATION_PATHS).splitlines()]
 paths += [ROOT / p for p in ['DOWNLOAD.md', 'docs/signing-troubleshooting.md',
-    'docs/local-data-encryption.md', 'docs/feature-checklist.md', 'docs/samsung-install.md', 'docs/android-release-signing.md', 'docs/release-parity-2026-10-14.md', 'docs/ios-device-test-plan.md', 'docs/activities-and-accessibility.md', 'docs/release-2026-10-14.md',
+    'docs/local-data-encryption.md', 'docs/feature-checklist.md', 'docs/samsung-install.md', 'docs/android-release-signing.md', 'docs/release-parity-2026-10-14.md', 'docs/release-lock-2026-10-14.md', 'docs/ios-device-test-plan.md', 'docs/activities-and-accessibility.md', 'docs/release-2026-10-14.md',
     'docs/web-deployment.md', 'docs/device-sharing.md', 'docs/personal-tools.md', 'docs/languages.md', 'scripts/android_smoke.py']]
 # Refuse to silently label a later version using this release's metadata.
 project = (ROOT/'ios/CareSphere.xcodeproj/project.pbxproj').read_text()
-assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.6.0'}
-assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'14'}
+assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.6.1'}
+assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'15'}
 gradle = (ROOT/'android/app/build.gradle.kts').read_text()
-assert re.search(r'versionName\s*=\s*"1\.6\.0"', gradle)
-assert re.search(r'versionCode\s*=\s*8\b', gradle)
-assert json.loads((ROOT/'package.json').read_text())['version'] == '1.4.0'
-assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 624
-language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':624,
+assert re.search(r'versionName\s*=\s*"1\.7\.0"', gradle)
+assert re.search(r'versionCode\s*=\s*9\b', gradle)
+assert json.loads((ROOT/'package.json').read_text())['version'] == '1.4.1'
+assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 641
+language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':641,
     'offline_catalog':True, 'persistent_selector':True, 'automatic_patient_text_translation':False,
     'english_fallback_for_untranslated_content':True, 'complete_interface_translation':False,
     'professional_linguistic_review':False, 'physical_multilingual_speech_tested':False}
 manifest = {
     'source_commit': command('git','rev-parse','HEAD').strip(),
-    'ios': {'version':'3.6.0 (14)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
+    'ios': {'version':'3.6.1 (15)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
         'unsigned_device_build': True, 'healthkit_build': True, 'simulator_launch': True,
         'tests':47, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
-    'android': {'version':'1.6.0 (8)', 'ci':android['url'], 'tested_commit':android['headSha'],
-        'tests':38, 'lint':'passed', 'apk_signing_verified_in_ci':True,
+    'android': {'version':'1.7.0 (9)', 'ci':android['url'], 'tested_commit':android['headSha'],
+        'tests':44, 'lint':'passed', 'apk_signing_verified_in_ci':True,
         'emulator_smoke':'passed', 'five_language_ui_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
-        'medication_reminders':'inexact local alarms; physical Samsung timing unverified', 'health_connect':'read-only foreground; real-device data grants unverified', 'owner_release_signed':False, 'apk_sha256':digest, 'apk_bytes':len(apk)},
+        'medication_reminders':'inexact local alarms; physical Samsung timing unverified', 'health_connect':'read-only foreground; real-device data grants unverified', 'owner_release_signed':False, 'app_lock':'Android 11+ system strong biometric/device credential; screen gate, not biometric-bound key', 'snooze':'same-day ten-minute review reminder; inexact delivery', 'apk_sha256':digest, 'apk_bytes':len(apk)},
     'device_sharing': {'app_backend_required':False, 'mode':'native direct LAN plus encrypted-file snapshots',
         'web_to_android_emulator_import':'passed', 'physical_nearby_delivery_tested':False,
         'bluetooth_phone_pairing':False, 'hosted_backend_required':False, 'temporary_phone_listener':True, 'native_manual_lan_connection':True,
@@ -147,15 +147,17 @@ Heart rate appears only from a real monitor (or optional Apple Health history on
 Apple Intelligence uses Apple's on-device framework only on supported iPhones with
 it enabled and ready. Android has no Apple Intelligence: Visit summary uses a clearly labeled non-AI template.
 Android adds confirmed inexact medication reminders and read-only Health Connect
-history, plus manually entered BP/oxygen with source labels. See docs/samsung-install.md.
+history, plus manually entered BP/oxygen with source labels. Android 11+ supports
+optional app lock with system authentication and screenshot protection. Medication
+reminders have same-day ten-minute snooze/cancel. See docs/samsung-install.md.
 Eleven optional activities with search/favorites on each platform. Search and edit
 care notes with confirmed deletion. Android is a native development release,
 not full iOS feature parity. See android/README.md and ios/README.md for exact scope.
 
 VALIDATION
 See BUILD_VERIFICATION.json for successful CI runs and file hashes.
-iOS 3.6.0 (14): 47 logic/preference/packet/transfer/LAN/discovery/language tests; standard device, HealthKit and Simulator builds; launch.
-Android 1.6.0 (8): 38 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
+iOS 3.6.1 (15): 47 logic/preference/packet/transfer/LAN/discovery/language tests; standard device, HealthKit and Simulator builds; launch.
+Android 1.7.0 (9): 44 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
 Real-device BLE, actual Apple Intelligence responses, accessibility with users, and
 Mac signing remain manual acceptance work. No clinical effectiveness is claimed.
 
@@ -175,7 +177,7 @@ passphrase separately. No built-in Bluetooth pairing, live sync or remote revoca
 Read docs/device-sharing.md and docs/personal-tools.md before using these features.
 The full implemented/limited/missing list is docs/feature-checklist.md. Native QR
 setup reads chosen photos, not a live camera. There are no authenticated import receipts.
-The separate CareSphere-Web.zip contains web 1.4.0 source and a built website.
+The separate CareSphere-Web.zip contains web 1.4.1 source and a built website.
 START_HERE.txt and DOWNLOAD.md explain installation. No slide deck is included.
 '''
 archive = out / 'CareSphere-Mobile.zip'
@@ -197,12 +199,12 @@ with tempfile.TemporaryDirectory() as tmp, zipfile.ZipFile(archive) as z:
         assert (z.getinfo('CareSphere-Mobile/'+executable).external_attr >> 16) & 0o100
 # Separate web download: source + a ready-to-host production directory.
 web_paths = [ROOT / p for p in command('git', 'ls-files', *WEB_PATHS).splitlines()]
-web_paths += [ROOT/'docs/feature-checklist.md', ROOT/'docs/release-parity-2026-10-14.md', ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md', ROOT/'docs/device-sharing.md', ROOT/'docs/personal-tools.md', ROOT/'docs/languages.md']
+web_paths += [ROOT/'docs/feature-checklist.md', ROOT/'docs/release-parity-2026-10-14.md', ROOT/'docs/release-lock-2026-10-14.md', ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md', ROOT/'docs/device-sharing.md', ROOT/'docs/personal-tools.md', ROOT/'docs/languages.md']
 web_files = {str(p.relative_to(ROOT)):p for p in web_paths}
 web_files.update({'production/'+str(p.relative_to(ROOT/'dist')):p for p in (ROOT/'dist').rglob('*') if p.is_file()})
 web_manifest = {
     'interface_localization':language_manifest,
-    'version':'1.4.0', 'source_commit':command('git','rev-parse','HEAD').strip(),
+    'version':'1.4.1', 'source_commit':command('git','rev-parse','HEAD').strip(),
     'ci':web['url'], 'tested_commit':web['headSha'],
     'unit_tests':41, 'browser_tests':31, 'offline_production_tests':1,
     'audit_known_vulnerabilities':0, 'audit_date':'2026-10-14',
@@ -214,7 +216,7 @@ web_manifest = {
 web_archive = out/'CareSphere-Web.zip'
 with zipfile.ZipFile(web_archive, 'w', zipfile.ZIP_DEFLATED) as z:
     for name, path in web_files.items(): z.write(path, 'CareSphere-Web/'+name)
-    z.writestr('CareSphere-Web/START_HERE.txt', """CARESPHERE WEB 1.4.0
+    z.writestr('CareSphere-Web/START_HERE.txt', """CARESPHERE WEB 1.4.1
 
 App language: English, Spanish, Simplified Chinese, Filipino/Tagalog, Vietnamese.
 Offline core-interface translations, with English fallback. Personal records

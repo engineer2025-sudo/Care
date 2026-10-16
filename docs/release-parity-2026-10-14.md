@@ -1,3 +1,5 @@
+> Historical 1.6.0 / 3.6.0 / web 1.4.0 evidence. See [the lock/snooze follow-up](release-lock-2026-10-14.md) for the current version.
+
 # Security and Android feature follow-up — October 14, 2026
 
 Versions: **iPhone 3.6.0 (14), Android 1.6.0 (8), web 1.4.0**.

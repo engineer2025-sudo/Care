@@ -4,13 +4,16 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 ## This release — October 14, 2026
 
+**Android lock + snooze follow-up:** optional Android 11+ system-authenticated app lock, screenshot protection, hidden locked-screen accessibility content, background relocking, same-day ten-minute reminder snooze/cancel, and actual installed-version reporting. Strong biometrics or device credentials are verified by Android; the app never collects a PIN. [Behavior and validation](docs/release-lock-2026-10-14.md).
+
+
 **Security and Android follow-up:** fail-closed iPhone authentication, generic private medication notifications on all platforms, Android confirmed medication reminders and manual BP/oxygen records, explicit read-only Health Connect history, native connection-QR display/photo reading, failed-save rollback and a non-AI Android visit draft.
 
-[**Complete feature/parity checklist**](docs/feature-checklist.md) · [**Samsung installation steps**](docs/samsung-install.md) · [Release validation](docs/release-parity-2026-10-14.md)
+[**Complete feature/parity checklist**](docs/feature-checklist.md) · [**Samsung installation steps**](docs/samsung-install.md) · [Release validation](docs/release-lock-2026-10-14.md)
 
-This does **not** finish every requested feature. Richer portable sharing, authenticated import receipts, Android app lock, full advanced localization, physical-phone checks and owner-signed distribution remain open. See the checklist rather than assuming identical platforms.
+This does **not** finish every requested feature. Richer portable sharing, authenticated import receipts, full advanced localization, physical-phone checks and owner-signed distribution remain open. See the checklist rather than assuming identical platforms.
 
-**Five-language interface preview:** English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with an offline persistent selector. 624 interface messages cover core labels, greetings, mood choices, setup guidance and comfort controls; advanced content has explicit English fallback. Private notes and care records are never translated automatically. [Coverage, setup and review limits](docs/languages.md).
+**Five-language interface preview:** English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with an offline persistent selector. 641 interface messages cover core labels, greetings, mood choices, setup guidance and comfort controls; advanced content has explicit English fallback. Private notes and care records are never translated automatically. [Coverage, setup and review limits](docs/languages.md).
 
 **Personal support tools:** Simple Mode, visual routines, communication cards, personal photo conversation/matching, comfort preferences, trusted contacts, appointment questions, routine undo, note recovery, encrypted backup/restore, interest prompts, optional first-use guidance and native iPhone AI drafting.
 
@@ -18,15 +21,15 @@ This does **not** finish every requested feature. Richer portable sharing, authe
 
 
 - **All three platforms:** searchable activity libraries, private favorites, searchable/editable care notes and confirmed deletion.
-- **iPhone 3.6.0 (14):** favorite filtering, note-edit discard protection and updated timestamps. Existing encrypted care data migrates without a reset.
-- **Android 1.6.0 (8):** system/light/dark appearance, native themed dialogs, live search that retains the keyboard, and a two-row navigation layout at large font sizes.
-- **Web 1.4.0:** 11 optional activities, one focused session at a time, five added supported-choice/conversation activities, note-edit discard protection and verified offline reopening after the first completed installation.
+- **iPhone 3.6.1 (15):** favorite filtering, note-edit discard protection and updated timestamps. Existing encrypted care data migrates without a reset.
+- **Android 1.7.0 (9):** system/light/dark appearance, native themed dialogs, live search that retains the keyboard, and a two-row navigation layout at large font sizes.
+- **Web 1.4.1:** 11 optional activities, one focused session at a time, five added supported-choice/conversation activities, note-edit discard protection and verified offline reopening after the first completed installation.
 
 Downloads are documented in [DOWNLOAD.md](DOWNLOAD.md). See [release verification](docs/release-2026-10-14.md) and [web deployment](docs/web-deployment.md).
 
 ## Native apps
 
-| | iPhone 3.6 | Android 1.6 |
+| | iPhone 3.6 | Android 1.7 |
 |---|---|---|
 | Project | `ios/CareSphere.xcodeproj` | `android/` in Android Studio |
 | Minimum OS | iOS 16 | Android 8 / API 26 |

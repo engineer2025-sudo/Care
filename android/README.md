@@ -1,8 +1,16 @@
-# CareSphere for Android — 1.6
+# CareSphere for Android — 1.7
 
 Native Kotlin/Android Views app. Android 8+ (API 26), JDK 17, Gradle 8.11.1, Android SDK 36. Open this folder in Android Studio; no project-generation or Node toolchain needed. First Gradle sync requires internet for the Android build tools and Kotlin/JUnit. AndroidX Activity/Health Connect, Kotlin coroutines and ZXing QR support are included. No video, analytics or generative-AI SDK is bundled.
 
-## New in 1.6.0 (8)
+## New in 1.7.0 (9)
+
+- Optional **App lock** in Settings & privacy, on Android 11+. Enable/disable requires successful system authentication. Unlock uses a strong biometric or the device screen-lock credential; not all Samsung face-unlock modes qualify as strong biometrics. Older Android versions retain the core app but do not expose an enabled app-lock control.
+- Protected screens include Today, support tools, medications and health history. Private content is hidden from the accessibility tree while locked. Screenshots/recents capture are blocked while enabled; backgrounding relocks. Cancel/error/stale callbacks cannot unlock. In-progress private dialogs close on leaving; save first. File-picker results are held in the living activity until verified unlock, not silently imported through the gate.
+- **Snooze 10 min**, pending reminder time and **Cancel snooze** in Medication reminders. One same-day review reminder per entry, subject to OS delivery delays, not a dose recommendation. Taking/editing/removing/pausing/restoring clears applicable snoozes; no carryover across midnight. Tomorrow's daily schedule is unchanged.
+- About now shows the actual installed version rather than an obsolete hard-coded release number.
+- 17 more shared translated messages (641 total). Core advanced-language coverage remains partial; professional review is pending.
+
+## Retained from 1.6.0 (8)
 
 - Confirmed medication schedules, taken/undo self-reports and optional private local notifications. Editing/recovery pauses reminders; note transfer does not. Android scheduling is inexact and Samsung battery controls can delay delivery.
 - Explicit foreground read-only Health Connect heart-rate/BP/oxygen history; no fake substitute when unavailable. Last 7 days, up to 100 records per type, latest sample per heart-rate record. No health writes, background reads, persistence or automatic exports.
@@ -12,7 +20,7 @@ Native Kotlin/Android Views app. Android 8+ (API 26), JDK 17, Gradle 8.11.1, And
 - Failed saves roll back the displayed store to the last successful save. Restore pauses medication scheduling. Emulator regression checks exercise real Keystore storage, failed writes and corrupt-store protection.
 - Owner-keystore environment configuration for non-debuggable release builds. The supplied APK is **still debug-signed**; [release-signing guide](../docs/android-release-signing.md).
 
-[Samsung installation](../docs/samsung-install.md) · [Every feature and remaining gap](../docs/feature-checklist.md) · [Current validation](../docs/release-parity-2026-10-14.md)
+[Samsung installation](../docs/samsung-install.md) · [Every feature and remaining gap](../docs/feature-checklist.md) · [Current validation](../docs/release-lock-2026-10-14.md)
 
 Offline core-interface localization in English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with a persistent App language selector. Untranslated advanced content falls back to English; private records are unchanged. [Coverage and review limits](../docs/languages.md).
 
@@ -40,7 +48,7 @@ The emulator smoke also checks saved favorites after restart, note editing, dele
 
 ## Not included / not claimed
 
-No cloud Garmin/Samsung-account sync, Apple Intelligence, generative-AI chatbot, app-specific biometric lock, medication snooze, workout history or remote family/clinician account. These are not mocked. This release is not full iOS parity. Apple Intelligence is an Apple-only framework. Activities are not clinically validated treatments. No real-device BLE/TalkBack or medical accuracy certification is claimed.
+No cloud Garmin/Samsung-account sync, Apple Intelligence, generative-AI chatbot, workout history or remote family/clinician account. These are not mocked. This release is not full iOS parity. Apple Intelligence is an Apple-only framework. Activities are not clinically validated treatments. No real-device BLE/TalkBack or medical accuracy certification is claimed.
 
 ## Build
 
@@ -49,7 +57,7 @@ No cloud Garmin/Samsung-account sync, Apple Intelligence, generative-AI chatbot,
 # APK: app/build/outputs/apk/debug/app-debug.apk
 ```
 
-CI builds the APK, runs 38 JVM activity/preference/packet/backup/transfer/clock/input tests and Android lint. Debug APKs are installable, but debuggable and not production releases. Android Studio maintains its own local debug signing key; hosted CI debug certificates can change between runs. Never commit a private production signing key. See [installation guide](../DOWNLOAD.md).
+CI builds the APK, runs 44 JVM activity/preference/packet/backup/transfer/clock/input tests and Android lint. Debug APKs are installable, but debuggable and not production releases. Android Studio maintains its own local debug signing key; hosted CI debug certificates can change between runs. Never commit a private production signing key. See [installation guide](../DOWNLOAD.md).
 
 ## Manual acceptance checklist (not completed by compilation)
 

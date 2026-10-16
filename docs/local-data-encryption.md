@@ -10,10 +10,10 @@
 
 ## Native Android
 
-- `CareData` encrypts the local JSON store with AES-256-GCM using an Android Keystore key. `AtomicFile` protects replacement writes; automatic OS backup is disabled. The key is not protected by an in-app biometric challenge; an app-specific Android lock is still missing.
+- `CareData` encrypts the local JSON store with AES-256-GCM using an Android Keystore key. `AtomicFile` protects replacement writes; automatic OS backup is disabled. The key is not biometric-bound. Android 11+ now has an optional system-authenticated **screen gate** across activities, with background relocking and FLAG_SECURE screenshot protection. This is not key-level access control or protection against debugging/root compromise.
 - A read/decryption failure disables writes instead of replacing an unreadable file. A failed save restores the in-memory JSON to the last successfully saved snapshot and shows an error. The emulator test forces an AtomicFile write failure and a corrupt ciphertext read; physical storage exhaustion and process interruption still need testing.
 - Explicit recovery uses a separate passphrase-encrypted Android backup. Replacement requires preview/confirmation and pauses medication reminders for fresh review. A selected-note/routine merge does not replace the full dataset or pause an unrelated schedule.
-- Medication names/instructions and manually entered vitals remain in encrypted care data. Alarm scheduling preferences contain only a Boolean and random cancellation IDs, not drug names. Notifications display generic text. Health Connect readings are shown only on explicit foreground request and are not persisted into this file or sent to AI.
+- Medication names/instructions and manually entered vitals remain in encrypted care data. Alarm scheduling preferences contain only enablement, random cancellation IDs and snooze timing/day metadata, not drug names. Notifications display generic text. Health Connect readings are shown only on explicit foreground request and are not persisted into this file or sent to AI.
 - A **debuggable APK is not production-grade confidentiality** even with encrypted storage. Owner-controlled non-debuggable signing and device security are required for a release. See `android-release-signing.md`.
 
 ## Web app
