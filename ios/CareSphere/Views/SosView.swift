@@ -30,17 +30,17 @@ struct SosView: View {
                             .foregroundStyle(.secondary)
 
                         if includeLocation, let fix = location.location {
-                            Label(String(format: "Location ready to share: %.5f, %.5f", fix.coordinate.latitude, fix.coordinate.longitude), systemImage: "location")
+                            Label(String(format: AppLanguage.text("Location ready to share") + ": %.5f, %.5f", fix.coordinate.latitude, fix.coordinate.longitude), systemImage: "location")
                                 .font(.subheadline)
                             Text("Location recorded \(fix.timestamp.formatted(date: .omitted, time: .shortened)). \(fix.horizontalAccuracy >= 0 ? "Accuracy about \(Int(fix.horizontalAccuracy)) meters." : "Accuracy unavailable.")")
                                 .font(.footnote).foregroundStyle(.secondary)
                         }
                         if includeLocation, let error = location.errorText {
-                            Text("Location unavailable: \(error). You can still choose to share a message without coordinates. Nothing has been sent.")
+                            Text("\(AppLanguage.text("Location unavailable or permission denied. You can still share an SOS message without coordinates.")) (\(error))")
                                 .font(.footnote).foregroundStyle(.secondary)
                         }
                         Button { includeLocation = true; location.request() } label: {
-                            Label(location.isLocating ? "Getting location…" : location.location == nil ? "Add my location (optional)" : "Refresh my location", systemImage: "location")
+                            Label(location.isLocating ? AppLanguage.text("Getting location…") : location.location == nil ? AppLanguage.text("Add my location (optional)") : AppLanguage.text("Refresh my location"), systemImage: "location")
                                 .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         }
                         .buttonStyle(.bordered)

@@ -90,8 +90,8 @@ gradle = (ROOT/'android/app/build.gradle.kts').read_text()
 assert re.search(r'versionName\s*=\s*\"1\.8\.0\"', gradle)
 assert re.search(r'versionCode\s*=\s*10\b', gradle)
 assert json.loads((ROOT/'package.json').read_text())['version'] == '1.5.0'
-assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 671
-language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':671,
+assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 701
+language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':701,
     'offline_catalog':True, 'persistent_selector':True, 'automatic_patient_text_translation':False,
     'english_fallback_for_untranslated_content':True, 'complete_interface_translation':False,
     'professional_linguistic_review':False, 'physical_multilingual_speech_tested':False}
@@ -101,7 +101,7 @@ manifest = {
         'unsigned_device_build': True, 'healthkit_build': True, 'simulator_launch': True,
         'tests':54, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
     'android': {'version':'1.8.0 (10)', 'ci':android['url'], 'tested_commit':android['headSha'],
-        'tests':48, 'lint':'passed', 'apk_signing_verified_in_ci':True,
+        'tests':56, 'lint':'passed', 'apk_signing_verified_in_ci':True,
         'emulator_smoke':'passed', 'five_language_ui_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
         'medication_reminders':'inexact local alarms; physical Samsung timing unverified', 'health_connect':'read-only foreground; real-device data grants unverified', 'owner_release_signed':False, 'app_lock':'Android 11+ system strong biometric/device credential; screen gate, not biometric-bound key', 'snooze':'same-day ten-minute review reminder; inexact delivery', 'apk_sha256':digest, 'apk_bytes':len(apk)},
     'device_sharing': {'app_backend_required':False, 'mode':'native direct LAN plus encrypted-file snapshots',
@@ -155,7 +155,7 @@ not full iOS feature parity. See android/README.md and ios/README.md for exact s
 VALIDATION
 See BUILD_VERIFICATION.json for successful CI runs and file hashes.
 iOS 3.7.0 (16): 54 logic/preference/packet/transfer/LAN/discovery/language/vitals tests; standard device, HealthKit and Simulator builds; launch.
-Android 1.8.0 (10): 48 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
+Android 1.8.0 (10): 56 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
 Real-device BLE, actual Apple Intelligence responses, accessibility with users, and
 Mac signing remain manual acceptance work. No clinical effectiveness is claimed.
 

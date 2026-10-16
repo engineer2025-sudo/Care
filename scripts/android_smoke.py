@@ -89,6 +89,14 @@ def find(label, timeout=35):
                 x1,y1,x2,y2 = map(int,re.findall(r'\d+',ok.attrib['bounds']))
                 adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
                 continue
+        anr = next((n for n in tree.iter('node') if "isn't responding" in n.attrib.get('text','')), None)
+        if anr is not None:
+            wait_btn = next((n for n in tree.iter('node') if n.attrib.get('text','') == 'Wait'), None)
+            if wait_btn is not None:
+                x1,y1,x2,y2 = map(int,re.findall(r'\d+',wait_btn.attrib['bounds']))
+                adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+                time.sleep(2)
+                continue
         attempts += 1
         if any(n.attrib.get('resource-id') == 'android:id/parentPanel' for n in tree.iter('node')) and not any(n.attrib.get('class') == 'android.widget.ListView' for n in tree.iter('node')):
             time.sleep(.5)

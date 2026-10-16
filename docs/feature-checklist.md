@@ -18,7 +18,7 @@ Scope: iPhone **3.7.0 (16)**, Android **1.8.0 (10)**, web **1.5.0**. This is an 
 | Routine done/not-done check-in with local-day reset | Yes | Yes | Yes |
 | Undo last routine change | Yes | Yes | Yes |
 | Optional mood self-report | Yes | Yes | Yes |
-| Mood history / visit-brief inclusion | Yes | Limited: today's mood | Yes |
+| Mood history / visit-brief inclusion | Yes | Yes: day-keyed history; visit draft rows | Yes |
 | Medication names and daily reminder times | Yes | Yes: 24-hour time; up to 24 entries | Yes |
 | Edit/remove medication reminder entries | Yes | Yes | Yes |
 | Explicit schedule confirmation before reminders | Yes | Yes | Yes |
@@ -28,7 +28,7 @@ Scope: iPhone **3.7.0 (16)**, Android **1.8.0 (10)**, web **1.5.0**. This is an 
 | Snooze ten minutes | Yes | Yes: same-day in-app review reminder; cancel/pending time | Yes, while page remains active |
 | Notification “taken” action | Authenticated iOS action | No: open app to review/check in | In-app reminder action |
 | Private generic notification text | Yes: no drug name/dose in notification | Yes: no drug name/dose in notification | Yes: no drug name/dose in OS notification |
-| Step counting | Optional: iPhone motion permission | No | No |
+| Step counting | Optional: iPhone motion permission | Optional: Health Connect today total on explicit read | No; browsers have no pedometer |
 | Local scheduled appointment calendar / clinician booking | No | No | No |
 
 Reminder confirmations are user review, not prescription verification. A taken check-in is not proof of ingestion. Do not depend on this app for time-critical medication delivery.
@@ -124,18 +124,18 @@ Exports and messages outside the app lose its local-storage protections. Externa
 | Health history saved automatically into care records or sent to AI | No | No | No |
 | Missing/denied permissions remain empty, not “normal” | Yes | Yes | Yes |
 | Manual BP / oxygen entry with source and date | Yes: records taken now; up to 100; remove | Yes: records taken now; up to 100; remove | Yes: records taken now; up to 100; remove |
-| Read workout summaries | Optional Apple Health | No | No |
+| Read workout summaries | Optional Apple Health | Optional Health Connect; last 7 days, up to 20 sessions | No |
 | Direct Garmin / Samsung Health account sync | No | No; another app must first write to Health Connect | No |
 | Garmin/watch BLE broadcast compatibility | Optional if that model broadcasts standard BLE HR | Same | Same, browser permitting |
-| Built-in health reference search | Yes | No dedicated reference library | No dedicated reference library |
+| Built-in health reference search | Yes | Yes: five built-in safety notes, offline search | Yes: same five notes, offline search |
 | Optional MedlinePlus download / private-network Kiwix lookup | Yes; explicit configuration/action | No | No |
 | On-device educational answer from actual Apple Intelligence | Optional eligible enabled iOS 26+ hardware | No | No |
 | AI model unavailable state, cancellation and no fabricated fallback | Yes | No model used | No model used |
 | “I'm stressed” guided support flow | Yes | Limited: breathing + contacts separately | Limited: breathing + contacts separately |
 | Opt-in sustained live-HR check-in flow | Yes; off by default, not diagnosis | No | No |
 | Phrase-based safety interruption before Health Guide AI | Yes; incomplete, not validated crisis detection | No Health Guide AI | No Health Guide AI |
-| SOS emergency action | Yes | Limited: use phone emergency calling / trusted contacts | Yes, browser/phone handoff |
-| Optional location in reviewed help message | Yes, permission-based | No dedicated equivalent | No dedicated equivalent |
+| SOS emergency action | Yes | Yes: dialer action + reviewed share | Yes, browser/phone handoff |
+| Optional location in reviewed help message | Yes, permission-based | Yes, permission-based | No dedicated equivalent |
 | Diagnosis, triage, medical-device accuracy certification | No | No | No |
 
 Manual entries are never passed off as sensor measurements. Apple Health/Health Connect history is not a live reading. Hardware/platform differences remain visible rather than being concealed with mock information.
@@ -201,7 +201,6 @@ The connection code, QR and discovery label are not verified identities. Opening
 ## Still open — do not mistake this batch for completion
 
 - Identity-bound import receipts (current receipts are passphrase-authenticated, not identity-verified) and full-fidelity broader portable record sharing.
-- Android extended mood/step/workout/reference/SOS equivalents.
 - Complete advanced translations and fluent-speaker safety review; no blanket accessibility conformance claim.
 - Real Samsung notification timing/battery behavior, Health Connect grants/revocation, real BLE hardware, and all three native sharing pairings in both directions.
 - Physical iPhone authentication failure/cancellation/background tests, Apple Intelligence hardware responses, VoiceOver/TalkBack/switch-access and intended-user sessions.

@@ -22,7 +22,7 @@ English counts as one of the five. The selection uses the **2019 American Commun
 
 ## What is translated—and what is not
 
-The checked-in catalog contains **671 source messages with four translations each**, including aliases shared between platforms. There is no translation API, cloud translator, account, hosted backend, or download required to use the catalog.
+The checked-in catalog contains **701 source messages with four translations each**, including aliases shared between platforms. There is no translation API, cloud translator, account, hosted backend, or download required to use the catalog.
 
 Coverage now also includes localized greetings and mood labels, setup guidance, comfort settings and routine-action templates. Mood choices retain their original stable codes/scores, and personal names are substituted without translation, even when they match a catalog key.
 

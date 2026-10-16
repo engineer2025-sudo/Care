@@ -89,7 +89,7 @@ class HealthHistoryActivity:ToolActivity(){
                 if(HealthPermission.getReadPermission(ExerciseSessionRecord::class) in granted){
                     workoutRows=client.readRecords(ReadRecordsRequest(ExerciseSessionRecord::class,range,ascendingOrder=false,pageSize=20)).records.map{r->
                         val minutes=java.time.Duration.between(r.startTime,r.endTime).toMinutes()
-                        "${tx(ExerciseNames.key(r.exerciseType))} · ${stamp(r.startTime)} · ${android.text.format.DateUtils.formatDuration(minutes*60000L)}\nHealth Connect · ${r.metadata.dataOrigin.packageName}"
+                        "${tx(ExerciseNames.key(r.exerciseType))} · ${stamp(r.startTime)} · $minutes min\nHealth Connect · ${r.metadata.dataOrigin.packageName}"
                     }
                 }
                 connectedRows=rows.sortedByDescending{it.first}.map{it.second}
