@@ -9,9 +9,9 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 **Android lock + snooze follow-up:** optional Android 11+ system-authenticated app lock, screenshot protection, hidden locked-screen accessibility content, background relocking, same-day ten-minute reminder snooze/cancel, and actual installed-version reporting. Strong biometrics or device credentials are verified by Android; the app never collects a PIN. [Behavior and validation](docs/release-lock-2026-10-14.md).
 
 
-**Security and Android follow-up:** fail-closed iPhone authentication, generic private medication notifications on all platforms, Android confirmed medication reminders and manual BP/oxygen records, explicit read-only Health Connect history, native connection-QR display/photo reading, failed-save rollback and a non-AI Android visit draft.
+**Security and Android follow-up:** fail-closed iPhone authentication, generic private medication notifications on all platforms, Android confirmed medication reminders, manual BP/oxygen records on iPhone, Android and web, explicit read-only Health Connect history, native connection-QR display/photo reading, failed-save rollback and a non-AI Android visit draft.
 
-[**Complete feature/parity checklist**](docs/feature-checklist.md) · [**Samsung installation steps**](docs/samsung-install.md) · [Release validation](docs/release-receipts-2026-10-15.md)
+[**Complete feature/parity checklist**](docs/feature-checklist.md) · [**Samsung installation steps**](docs/samsung-install.md) · [Release validation](docs/release-manual-vitals-2026-10-16.md)
 
 This does **not** finish every requested feature. Richer portable sharing, authenticated import receipts, full advanced localization, physical-phone checks and owner-signed distribution remain open. See the checklist rather than assuming identical platforms.
 
