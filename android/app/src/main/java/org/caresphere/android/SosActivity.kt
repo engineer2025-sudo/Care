@@ -112,12 +112,13 @@ class SosActivity : ToolActivity() {
             message(tx("Location unavailable or permission denied. You can still share an SOS message without coordinates."))
             return
         }
-        runCatching { @Suppress("DEPRECATION") manager.requestSingleUpdate(provider, listener, mainLooper) }
-            .onFailure {
-                locating = false
-                render()
-                message(tx("Location unavailable or permission denied. You can still share an SOS message without coordinates."))
-            }
+        try {
+            @Suppress("DEPRECATION") manager.requestSingleUpdate(provider, listener, mainLooper)
+        } catch (e: SecurityException) {
+            locating = false
+            render()
+            message(tx("Location unavailable or permission denied. You can still share an SOS message without coordinates."))
+        }
     }
 
     private fun shareMessage(): String {
