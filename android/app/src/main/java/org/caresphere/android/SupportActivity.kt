@@ -180,7 +180,8 @@ class SupportActivity : ProtectedActivity() {
         copy(tx("Choose your notes and questions. This offline template copies only your selected words; it does not diagnose, simplify wording, or invent advice. Review and edit before saving a new note."))
         val notes=data.list("notes")
         val records=(0 until notes.length()).map{val n=notes.getJSONObject(it);("note:"+n.optString("id")) to n.optString("body")}+
-            rows("questions").map{q->("question:"+q.optString("id")) to (q.optString("text")+if(q.optString("followup").isBlank())"" else "\n"+tx("Follow-up")+": "+q.optString("followup"))}
+            rows("questions").map{q->("question:"+q.optString("id")) to (q.optString("text")+if(q.optString("followup").isBlank())"" else "\n"+tx("Follow-up")+": "+q.optString("followup"))}+
+            MoodHistory.recent(data.list("moods"),30).map{(day,label)->("mood:"+day) to (tx("Mood")+" · $day: "+AppLanguage.moodLabel(label,::tx))}
         records.forEach{(id,body)->page.addView(CheckBox(this).apply{text=body;textSize=18f;setTextColor(ink);isChecked=summarySelection.contains(id);setOnCheckedChangeListener{_,checked->if(checked)summarySelection.add(id)else summarySelection.remove(id)}})}
         button(tx("Review selected draft")){
             val chosen=records.filter{summarySelection.contains(it.first)}

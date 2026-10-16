@@ -226,8 +226,16 @@ class MainActivity : ProtectedActivity() {
             val current = data.json.optString("mood")
             text(if(current.isBlank()) tx("No check-in today. Choose a word if you want to.") else AppLanguage.format(this,"Today's self-report: {0}",AppLanguage.moodLabel(current,::tx)), parent = c)
             listOf("Low", "Okay", "Good", "Prefer not to say").forEach { mood ->
-                button(tx(mood), c) { data.put("mood", mood); render() }.isEnabled = data.canWrite
+                button(tx(mood), c) {
+                    data.put("mood", mood)
+                    data.put("moods", MoodHistory.record(data.list("moods"), java.time.LocalDate.now().toString(), mood, java.time.Instant.now().toString()))
+                    render()
+                }.isEnabled = data.canWrite
             }
+            text(tx("Mood history"), 20f, c)
+            val history = MoodHistory.recent(data.list("moods"), 5)
+            if (history.isEmpty()) text(tx("No check-ins yet"), parent = c)
+            else history.forEach { (day, label) -> text("$day · ${AppLanguage.moodLabel(label, ::tx)}", 15f, c) }
             copy(tx("A personal check-in, not a health assessment."), 14f, c)
         }
     }
@@ -460,6 +468,8 @@ class MainActivity : ProtectedActivity() {
         }
         card(tx("Other health data")) { c ->
             button(tx("Health history"),c){openInternal(Intent(this,HealthHistoryActivity::class.java))}
+            button(tx("Health references"),c){openInternal(Intent(this,ReferencesActivity::class.java))}
+            button(tx("Emergency SOS"),c){openInternal(Intent(this,SosActivity::class.java))}
             copy(tx("Read permitted Health Connect history or enter your own blood pressure and blood oxygen records. No smartwatch-account sync or generated readings."),parent=c)
             text(tx("For symptoms or health concerns, contact a qualified clinician. In an emergency, use your phone to contact local emergency services."), parent = c)
         }

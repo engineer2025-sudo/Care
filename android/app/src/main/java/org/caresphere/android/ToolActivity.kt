@@ -7,9 +7,9 @@ import android.widget.*
 
 open class ToolActivity:ProtectedActivity(){
     protected lateinit var page:LinearLayout
-    private var dark=false
-    private val ink get()=if(dark)Color.rgb(237,244,237)else Color.rgb(28,46,36)
-    private fun dp(n:Int)=(n*resources.displayMetrics.density).toInt()
+    protected var dark=false
+    protected val ink get()=if(dark)Color.rgb(237,244,237)else Color.rgb(28,46,36)
+    protected fun dp(n:Int)=(n*resources.displayMetrics.density).toInt()
     protected fun tx(s:String)=AppLanguage.text(this,s)
     protected fun begin(title:String){
         val preference=CareData(this,false).json.optString("appearance","system")

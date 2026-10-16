@@ -9,11 +9,13 @@ import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.*
 import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import kotlinx.coroutines.*
 import org.json.JSONObject
 import org.json.JSONArray
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -24,11 +26,13 @@ class HealthHistoryActivity:ToolActivity(){
     private var activeRead:Job?=null
     private var connectedRows=listOf<String>()
     private var status="No Health Connect data loaded."
+    private var stepsLine: String? = null
+    private var workoutRows=listOf<String>()
     private lateinit var data:CareData
-    private val readPermissions=setOf(HealthPermission.getReadPermission(HeartRateRecord::class),HealthPermission.getReadPermission(OxygenSaturationRecord::class),HealthPermission.getReadPermission(BloodPressureRecord::class))
+    private val readPermissions=setOf(HealthPermission.getReadPermission(HeartRateRecord::class),HealthPermission.getReadPermission(OxygenSaturationRecord::class),HealthPermission.getReadPermission(BloodPressureRecord::class),HealthPermission.getReadPermission(StepsRecord::class),HealthPermission.getReadPermission(ExerciseSessionRecord::class))
     private val permissions=registerForActivityResult(PermissionController.createRequestPermissionResultContract()){status=if(it.isEmpty())"No read permissions granted. No readings were loaded." else "Permissions updated. Tap Read recent history.";render()}
     override fun onCreate(state:Bundle?){super.onCreate(state);data=CareData(this);render()}
-    override fun onStop(){activeRead?.cancel();connectedRows=emptyList();status="No Health Connect data loaded.";super.onStop()}
+    override fun onStop(){activeRead?.cancel();connectedRows=emptyList();stepsLine=null;workoutRows=emptyList();status="No Health Connect data loaded.";super.onStop()}
     override fun onResume(){super.onResume();if(::data.isInitialized)render()}
     override fun onDestroy(){work.cancel();super.onDestroy()}
     private fun stamp(time:Instant)=DateTimeFormatter.ofLocalizedDateTime(java.time.format.FormatStyle.SHORT).withZone(ZoneId.systemDefault()).format(time)
@@ -45,6 +49,8 @@ class HealthHistoryActivity:ToolActivity(){
             if(sdk==HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED)button(tx("Open Health Connect in Play Store")){runCatching{startActivity(Intent(Intent.ACTION_VIEW,Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata")))}.onFailure{message(tx("Open the Play Store and search for Health Connect."))}}
         }
         text(tx(status));connectedRows.forEach{text(it)}
+        stepsLine?.let{ text(tx("Today's steps"),23f); text(it) }
+        if(workoutRows.isNotEmpty()){ text(tx("Recent workouts"),23f); workoutRows.forEach{text(it)} }
         text(tx("Your manually entered records"),23f)
         text(tx("These are self-entered values, not verified sensor readings. They do not change your care plan."))
         data.error?.let{text(tx(it))}
@@ -59,7 +65,7 @@ class HealthHistoryActivity:ToolActivity(){
     }
     private fun readRecent(){
         activeRead=work.launch{
-            connectedRows=emptyList();status="Reading Health Connect…";render()
+            connectedRows=emptyList();stepsLine=null;workoutRows=emptyList();status="Reading Health Connect…";render()
             try{
                 val client=HealthConnectClient.getOrCreate(this@HealthHistoryActivity)
                 val granted=client.permissionController.getGrantedPermissions()
@@ -74,6 +80,17 @@ class HealthHistoryActivity:ToolActivity(){
                 }
                 if(HealthPermission.getReadPermission(BloodPressureRecord::class) in granted){
                     client.readRecords(ReadRecordsRequest(BloodPressureRecord::class,range,ascendingOrder=false,pageSize=100)).records.forEach{r->rows.add(r.time to "${r.systolic.inMillimetersOfMercury}/${r.diastolic.inMillimetersOfMercury} mmHg · ${stamp(r.time)}\nHealth Connect · ${r.metadata.dataOrigin.packageName}")}
+                }
+                if(HealthPermission.getReadPermission(StepsRecord::class) in granted){
+                    val today=TimeRangeFilter.between(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant(),Instant.now())
+                    val total=client.aggregate(AggregateRequest(setOf(StepsRecord.COUNT_TOTAL),today))[StepsRecord.COUNT_TOTAL]?:0L
+                    stepsLine="${java.text.NumberFormat.getIntegerInstance().format(total)} · ${tx("From Health Connect")}"
+                }
+                if(HealthPermission.getReadPermission(ExerciseSessionRecord::class) in granted){
+                    workoutRows=client.readRecords(ReadRecordsRequest(ExerciseSessionRecord::class,range,ascendingOrder=false,pageSize=20)).records.map{r->
+                        val minutes=java.time.Duration.between(r.startTime,r.endTime).toMinutes()
+                        "${tx(ExerciseNames.key(r.exerciseType))} · ${stamp(r.startTime)} · ${android.text.format.DateUtils.formatDuration(minutes*60000L)}\nHealth Connect · ${r.metadata.dataOrigin.packageName}"
+                    }
                 }
                 connectedRows=rows.sortedByDescending{it.first}.map{it.second}
                 status=if(rows.isEmpty())"No records returned for the permissions and dates requested." else "History loaded. These are not current measurements."

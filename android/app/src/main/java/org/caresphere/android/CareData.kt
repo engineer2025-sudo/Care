@@ -117,6 +117,12 @@ class CareData(private val context: Context, private val refreshOnOpen:Boolean =
                 require(VitalRules.valid(v.getString("kind"),v.getInt("first"),if(v.has("second"))v.getInt("second")else null))
                 java.time.Instant.parse(v.getString("at"))
             }
+            val moods=value.optJSONArray("moods")?:JSONArray()
+            require(moods.length()<=MoodHistory.LIMIT)
+            for(i in 0 until moods.length()) {
+                val m=moods.getJSONObject(i)
+                require(m.getString("day").length in 1..10 && m.getString("label").length in 1..40)
+            }
             val medications=value.optJSONArray("medications")?:JSONArray()
             require(medications.length()<=24)
             val medicationIDs=mutableSetOf<String>()
