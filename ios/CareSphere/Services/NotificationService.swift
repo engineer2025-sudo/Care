@@ -44,9 +44,7 @@ final class NotificationService: NSObject, ObservableObject {
         }
     }
 
-    /// Rebuilds only CareSphere medication reminders. Old pending requests are
-    /// cleared even when permission is unavailable or a saved schedule is paused.
-    func syncMedicationReminders(_ meds: [Medication]) {
+            func syncMedicationReminders(_ meds: [Medication]) {
         // Serialize scheduling decisions on the main queue. A late settings/list
         // callback from an older edit must not re-enable a paused schedule.
         guard Thread.isMainThread else {

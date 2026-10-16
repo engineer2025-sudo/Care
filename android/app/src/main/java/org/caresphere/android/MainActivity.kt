@@ -112,8 +112,7 @@ class MainActivity : ProtectedActivity() {
         setPadding(0, dp(5), 0, dp(7)); setTextIsSelectable(true)
         parent.addView(this, LinearLayout.LayoutParams(-1, -2))
     }
-    /** Explanatory/guidance copy: hidden entirely in Bare minimum mode. */
-    private fun copy(value: String, size: Float = 17f, parent: LinearLayout = page) { if (!DisplayMode.enabled(this)) text(value, size, parent) }
+        private fun copy(value: String, size: Float = 17f, parent: LinearLayout = page) { if (!DisplayMode.enabled(this)) text(value, size, parent) }
     private fun button(label: String, parent: LinearLayout = page, primary: Boolean = false, action: () -> Unit): Button = Button(this).apply {
         text = label; textSize = 17f; isAllCaps = false; minHeight = dp(52)
         setPadding(dp(12), dp(10), dp(12), dp(10)); setTextColor(if(primary) Color.WHITE else green)

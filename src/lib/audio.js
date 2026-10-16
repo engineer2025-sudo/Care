@@ -1,8 +1,4 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// CareSphere Sensory Audio Engine
-// Generates ambient soundscapes procedurally with the Web Audio API — no audio
-// files, no downloads, works offline, and never blocks the UI thread.
-// ─────────────────────────────────────────────────────────────────────────────
 
 let ctx = null
 
@@ -32,7 +28,6 @@ function makeBrownBuffer(ac, seconds = 3) {
 }
 
 const builders = {
-  // Gentle rainfall: filtered noise with a slow intensity swell.
   rain(ac, out) {
     const src = ac.createBufferSource()
     src.buffer = makeNoiseBuffer(ac)
@@ -48,7 +43,6 @@ const builders = {
     return () => { try { src.stop(); lfo.stop() } catch (e) {} }
   },
 
-  // Ocean waves: low noise whose amplitude breathes with a slow LFO.
   ocean(ac, out) {
     const src = ac.createBufferSource()
     src.buffer = makeNoiseBuffer(ac, 3)
@@ -63,7 +57,6 @@ const builders = {
     return () => { try { src.stop(); swell.stop() } catch (e) {} }
   },
 
-  // Forest: soft breeze bed with procedurally scheduled birdsong chirps.
   forest(ac, out) {
     const src = ac.createBufferSource()
     src.buffer = makeNoiseBuffer(ac, 3)
@@ -99,7 +92,6 @@ const builders = {
     return () => { stopped = true; clearTimeout(timer); try { src.stop() } catch (e) {} }
   },
 
-  // Hearth fire: brown-noise bed with randomly scheduled crackle transients.
   fire(ac, out) {
     const src = ac.createBufferSource()
     src.buffer = makeBrownBuffer(ac, 3)

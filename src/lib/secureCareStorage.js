@@ -56,7 +56,6 @@ function base64ToBytes(value) {
   return Uint8Array.from(binary, character => character.charCodeAt(0))
 }
 
-/** Encrypt a string with a non-extractable AES-256-GCM CryptoKey. */
 export async function encryptCareStoragePayload(plaintext, key, cryptoProvider = globalThis.crypto) {
   if (!cryptoProvider?.subtle || !key) throw new Error('Web Crypto is unavailable')
   assertAes256Key(key)
@@ -79,7 +78,6 @@ export async function encryptCareStoragePayload(plaintext, key, cryptoProvider =
   }
 }
 
-/** Authenticate and decrypt a CareSphere AES-256-GCM envelope. */
 export async function decryptCareStoragePayload(envelope, key, cryptoProvider = globalThis.crypto) {
   if (!cryptoProvider?.subtle || !key) throw new Error('Web Crypto is unavailable')
   assertAes256Key(key)
@@ -153,8 +151,6 @@ async function getOrCreateKey() {
     ['encrypt', 'decrypt'],
   )
 
-  // Recheck inside the serialized write transaction so two tabs cannot replace
-  // each other's freshly generated key and make the other tab's ciphertext unreadable.
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(CARE_STORAGE_KEY_STORE, 'readwrite')
     const store = transaction.objectStore(CARE_STORAGE_KEY_STORE)
@@ -204,10 +200,6 @@ function replaceCache(values) {
   Object.assign(cache, values)
 }
 
-/**
- * Load CareSphere's browser data before React mounts. Existing plaintext v1
- * localStorage data is encrypted and replaced only after a successful write.
- */
 export async function initializeCareStorage() {
   try {
     if (!globalThis.crypto?.subtle || !globalThis.indexedDB) {
@@ -217,7 +209,6 @@ export async function initializeCareStorage() {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw === null) {
       replaceCache({})
-      // Open the database once so unsupported/blocked storage is detected early.
       await openKeyDatabase()
       setSecurityStatus('ready', 'AES-256-GCM encrypted local storage is ready on this device.')
       return cache
@@ -260,7 +251,6 @@ export async function initializeCareStorage() {
   }
 }
 
-/** Queue encrypted snapshots so rapid React state updates cannot finish out of order. */
 export function persistCareStorage(values) {
   const serialized = JSON.stringify(values)
   writeQueue = writeQueue.then(async () => {
@@ -279,7 +269,6 @@ export function persistCareStorage(values) {
   return writeQueue
 }
 
-/** Remove the encrypted browser record and its per-origin encryption key. */
 export function eraseCareStorage() {
   writeQueue = writeQueue.then(async () => {
     try {

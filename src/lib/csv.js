@@ -1,4 +1,3 @@
-/** Encode records as RFC 4180-style CSV with CRLF rows and escaped cells. */
 export function encodeCsv(rows) {
   if (!Array.isArray(rows)) return ''
   const escapeCell = value => {

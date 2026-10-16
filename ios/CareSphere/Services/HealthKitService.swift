@@ -53,8 +53,7 @@ final class HealthKitService: NSObject, ObservableObject {
     private var observedSampleTypeIdentifiers = Set<String>()
     private var didInstallObservers = false
 
-    /// HealthKit is available when running on a supported iPhone or iPad.
-    var canRequestAuthorization: Bool {
+        var canRequestAuthorization: Bool {
         #if os(iOS) && CARE_HEALTHKIT
         return HKHealthStore.isHealthDataAvailable()
         #else
@@ -124,9 +123,7 @@ final class HealthKitService: NSObject, ObservableObject {
         #endif
     }
 
-    /// Refreshes the latest vitals and recent workouts. Called after the user
-    /// requests access and again when the app returns to the foreground.
-    func refreshAll() {
+            func refreshAll() {
         guard canRequestAuthorization, hasRequestedAuthorization else { return }
         installObserversIfNeeded()
 
@@ -146,8 +143,7 @@ final class HealthKitService: NSObject, ObservableObject {
         refreshWorkouts()
     }
 
-    /// Fetches the 25 most recent workouts that HealthKit makes visible to the
-    /// app. Garmin Connect must first write an activity into Apple Health.
+    /// Garmin Connect must first write an activity into Apple Health.
     func refreshWorkouts() {
         guard canRequestAuthorization, hasRequestedAuthorization else { return }
         fetchRecentWorkouts()

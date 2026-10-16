@@ -2,11 +2,7 @@ import Foundation
 import CryptoKit
 import CommonCrypto
 
-/// Passphrase-authenticated import receipts, interoperable with the Android and
-/// web implementations. A receipt records what was actually imported after
-/// decryption — never a transfer acknowledgment — and proves it only to parties
-/// who know that transfer's passphrase. Not identity verification, not a
-/// delivery guarantee.
+/// Never a transfer acknowledgment; not identity verification or a delivery guarantee.
 public enum ImportReceipt {
     public enum Failure: Error { case invalid, notVerified }
 
@@ -65,8 +61,7 @@ public enum ImportReceipt {
             }
         }
         guard result == kCCSuccess else { throw Failure.invalid }
-        // 64 PBKDF2 bytes: the transfer AES key uses the first half; the receipt
-        // MAC key is the independent second half (no key reuse across purposes).
+        // MAC key is PBKDF2 bytes 32–64 so the transfer AES key is never reused.
         return SymmetricKey(data: bytes[32..<64])
     }
 
@@ -94,8 +89,7 @@ public enum ImportReceipt {
                        source: source, macSalt: macSalt.base64EncodedString(), mac: mac)
     }
 
-    /// Returns verified details, or throws when the receipt is unsupported, wrong or tampered.
-    public static func verify(_ receipt: Receipt, passphrase: String) throws -> [String: String] {
+        public static func verify(_ receipt: Receipt, passphrase: String) throws -> [String: String] {
         guard receipt.format == "CareSphere Import Receipt", receipt.version == 1 else { throw Failure.invalid }
         guard receipt.mac.wholeMatch(of: hex64) != nil, let salt = Data(base64Encoded: receipt.macSalt) else { throw Failure.invalid }
         try validate(transfer: receipt.transfer, fileSha256: receipt.fileSha256, imported: receipt.imported, importedAt: receipt.importedAt, source: receipt.source, salt: salt)
@@ -111,8 +105,7 @@ public enum ImportReceipt {
         return receipt
     }
 
-    /// Optional deeper check: bind a verified receipt to the exact transfer file it names.
-    public static func verifyAgainstTransfer(_ receipt: Receipt, passphrase: String, transferFile: Data) throws -> (details: [String: String], fileMatches: Bool, importedPresent: Bool) {
+        public static func verifyAgainstTransfer(_ receipt: Receipt, passphrase: String, transferFile: Data) throws -> (details: [String: String], fileMatches: Bool, importedPresent: Bool) {
         let details = try verify(receipt, passphrase: passphrase)
         let fileMatches = fileSha256(transferFile) == receipt.fileSha256
         let payload = try DeviceTransfer.open(transferFile, password: passphrase)

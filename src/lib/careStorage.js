@@ -7,7 +7,6 @@ const PERSISTED_KEYS = new Set(['settings', 'routines', 'meds', 'medsConfirmed',
 const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value)
 const isDayKey = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 
-/** A stable local-calendar day key for daily routines and medication check-ins. */
 export function localDayKey(date = new Date()) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -23,7 +22,6 @@ export function isMedicationTakenToday(medication, date = new Date()) {
   return medication?.takenOn === localDayKey(date)
 }
 
-/** Parse only the known CareSphere storage keys; ignore malformed or foreign data. */
 export function parseCareStorage(raw) {
   try {
     const parsed = JSON.parse(raw || '{}')
@@ -34,7 +32,6 @@ export function parseCareStorage(raw) {
   }
 }
 
-/** Bound and type-check values restored from editable browser storage. */
 export function normalizePersistedValue(key, value, fallback) {
   if (key === 'support') return normalizeSupport(value)
   if (key === 'favoriteActivities') return normalizeFavorites(value)
@@ -54,8 +51,6 @@ export function normalizePersistedValue(key, value, fallback) {
     return value.slice(0, 200).filter(isRecord).map((item, index) => ({
       id: typeof item.id === 'string' ? item.id.slice(0, 120) : Number.isSafeInteger(item.id) ? item.id : `routine-${index}`,
       text: typeof item.text === 'string' ? item.text.slice(0, 240) : '',
-      // Migrate the legacy Boolean as today's check-in once; new data expires
-      // naturally at the next local calendar day.
       completedOn: isDayKey(item.completedOn) ? item.completedOn : item.done === true ? localDayKey() : null,
     }))
   }

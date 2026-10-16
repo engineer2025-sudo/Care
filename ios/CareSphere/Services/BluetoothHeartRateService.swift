@@ -8,8 +8,7 @@ struct HeartRateMonitorCandidate: Identifiable {
     var shortID: String { String(id.uuidString.suffix(4)) }
 }
 
-/// Main-queue CoreBluetooth callbacks. Scanning does not connect to the first
-/// stranger's monitor: the person explicitly selects a discovered device.
+/// The person selects a discovered monitor; scanning never auto-connects.
 final class BluetoothHeartRateService: NSObject, ObservableObject {
     @Published private(set) var measuredAt: Date?
     @Published var bpm: Int?

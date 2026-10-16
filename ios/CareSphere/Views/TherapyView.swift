@@ -445,8 +445,7 @@ struct PacedBreathingActivity: View {
             ? [("Breathe in", 4, 1.0), ("Hold", 4, 1.0), ("Breathe out", 6, 0.55)]
             : [("Breathe in", 4, 1.0), ("Breathe out", 6, 0.55)]
     }
-    // A paused hold preference can change before onChange resets phaseIndex.
-    // Clamp rendering during that update so toggling the hold cannot index past the array.
+    // Clamp rendering so toggling the hold cannot index past the array.
     private var currentPhase: (name: String, seconds: Int, scale: CGFloat) {
         phases[min(phaseIndex, phases.count - 1)]
     }

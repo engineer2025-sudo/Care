@@ -406,6 +406,5 @@ private struct WorkoutSummaryRow: View {
 }
 
 extension HealthKitService {
-    /// Small convenience for tinting the SpO₂ progress bar.
-    var spo2FlagView: Bool { (spo2 ?? 99) < 94 }
+        var spo2FlagView: Bool { (spo2 ?? 99) < 94 }
 }

@@ -1,7 +1,6 @@
 import SwiftUI
 import CareActivityKit
 
-/// A library, not a wall of simultaneously active games. Each session is isolated.
 struct TherapyView: View {
     @EnvironmentObject private var store: CareStore
     @State private var favoritesOnly = false
@@ -139,8 +138,7 @@ struct ActivitySessionView: View {
                     Label(AppLanguage.text("No score · stop whenever you like"), systemImage: "leaf")
                         .font(.subheadline).foregroundStyle(Color.emeraldText)
                     // Keep the session mounted while paused so choices are not lost.
-                    // Activity lifecycle handlers stop sound/playback on backgrounding.
-                    ZStack(alignment: .top) {
+                                        ZStack(alignment: .top) {
                         activityContent
                             .opacity(paused ? 0 : 1)
                             .allowsHitTesting(!paused)
@@ -180,8 +178,7 @@ struct ActivitySessionView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(AppLanguage.text("Done")) { dismiss() }.accessibilityLabel(AppLanguage.text("Leave activity"))
                 }
-                // Sound and breathing have their own explicit pause controls.
-                if activity != .soundscapes && activity != .breathing {
+                                if activity != .soundscapes && activity != .breathing {
                     ToolbarItem(placement: .primaryAction) {
                         Button(paused ? "Continue" : "Take a break") { paused.toggle() }
                     }

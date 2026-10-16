@@ -1,10 +1,7 @@
 import Foundation
 import AVFoundation
 
-/// Procedural sensory soundscapes (rain, ocean, forest, hearth) rendered in
-/// real time by an AVAudioEngine + AVAudioSourceNode render callback — the
-/// official iOS equivalent of the web app's Web Audio engine. No audio files;
-/// all DSP is generated sample-by-sample.
+
 final class SoundScapeEngine {
     static let shared = SoundScapeEngine()
 
@@ -36,7 +33,7 @@ final class SoundScapeEngine {
     private var isRunning = false
     private var sourceInstalled = false
 
-    // ── DSP state (touched only on the render thread under stateLock) ──
+    // Touched only on the render thread under stateLock.
     private var rngState: UInt32 = 0x9E3779B9
     private var lpFast: Float = 0        // ~1.3 kHz one-pole (rain)
     private var lpSlow: Float = 0        // ~430 Hz one-pole (band split)
@@ -118,8 +115,7 @@ final class SoundScapeEngine {
     }
 
     private func rand() -> Float {
-        // xorshift32 — fast, deterministic enough for noise synthesis.
-        var x = rngState
+                var x = rngState
         x ^= x << 13
         x ^= x >> 17
         x ^= x << 5

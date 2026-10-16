@@ -10,7 +10,6 @@ import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-/** Test APK only: exercises real Android NSD with independent publisher/browser instances. */
 class NearbySmokeInstrumentation : Instrumentation() {
     override fun onCreate(arguments: Bundle?) { super.onCreate(arguments); start() }
     private fun checkpoint(value:String){sendStatus(0,Bundle().apply{putString("stream","CareSphere check: $value\n")})}
@@ -64,10 +63,7 @@ class NearbySmokeInstrumentation : Instrumentation() {
             val bitmap=ConnectionQR.image(offer.first,offer.second)
             val image=java.io.ByteArrayOutputStream();bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,image);bitmap.recycle()
             check(ConnectionQR.read(image.toByteArray())==offer)
-            // Storage and reminder checks run on the instrumentation thread so a failed
-            // check reports as a clean FAIL result instead of crashing the app process
-            // from the main looper (which hides the reason and returns code 0).
-            val data=CareData(targetContext,false)
+                                                val data=CareData(targetContext,false)
             data.put("storageRegressionMarker","saved")
             check(data.error==null)
             val obstacle=java.io.File(targetContext.filesDir,"care.enc.new")
@@ -87,9 +83,7 @@ class NearbySmokeInstrumentation : Instrumentation() {
             val reread=CareData(targetContext,false)
             check(reread.error==null&&reread.json.optBoolean("medicationConfirmed")&&reread.list("medications").length()==1){"Setup medication data did not persist"}
             MedicationReminders.due(targetContext,medID)
-            // Poll instead of a single immediate read: the first notification after
-            // channel creation can be observed slightly late on a loaded emulator.
-            val expectedText=AppLanguage.text(targetContext,"Open your confirmed medication schedule.")
+                                    val expectedText=AppLanguage.text(targetContext,"Open your confirmed medication schedule.")
             val manager=targetContext.getSystemService(android.app.NotificationManager::class.java)
             var notifications=manager.activeNotifications.toList()
             val noticeDeadline=System.currentTimeMillis()+10_000
@@ -117,9 +111,7 @@ class NearbySmokeInstrumentation : Instrumentation() {
                 check(file.readBytes().contentEquals(byteArrayOf(1,2,3)))
             }finally{file.writeBytes(before)}
             checkpoint("protected activity entry points")
-            // Screen-lock UI coverage uses the real app activities, not a fake view.
-            // The separate shell smoke test verifies actual system credential success/cancel.
-            var lockEnabled=false
+                                    var lockEnabled=false
             runOnMainSync { lockEnabled=AppLock.setEnabled(targetContext,true);AppLock.session.lock() }
             check(lockEnabled){"App lock preference could not be enabled"}
             val protectedScreens=mutableListOf<Activity>()
@@ -128,9 +120,7 @@ class NearbySmokeInstrumentation : Instrumentation() {
                     checkpoint(type.simpleName)
                     val screen=startActivitySync(Intent(targetContext,type).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
                     protectedScreens.add(screen)
-                    // Collect view facts on the main thread, then assert here so a failed
-                    // expectation is reported with its message instead of crashing the app.
-                    var gateVisible=false
+                                                            var gateVisible=false
                     var unlockPresent=false
                     var failClosed=false
                     var secureWindow=false

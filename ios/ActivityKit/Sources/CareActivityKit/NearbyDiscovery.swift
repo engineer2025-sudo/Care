@@ -98,8 +98,7 @@ public final class NearbyDiscovery: NSObject, ObservableObject, NetServiceBrowse
         let txt = NetService.dictionary(fromTXTRecord: raw)
         guard let ipBytes = txt["ipv4"], ipBytes.count <= 15, let ip = String(data: ipBytes, encoding: .ascii),
               txt["v"] == Data("1".utf8) else { return }
-        // Darwin sockaddr_in: length, family, port, then four network-order address bytes.
-        let addresses = (sender.addresses ?? []).compactMap { data -> String? in
+                let addresses = (sender.addresses ?? []).compactMap { data -> String? in
             let bytes = [UInt8](data)
             guard bytes.count >= 16, bytes[1] == UInt8(AF_INET) else { return nil }
             return bytes[4..<8].map(String.init).joined(separator: ".")

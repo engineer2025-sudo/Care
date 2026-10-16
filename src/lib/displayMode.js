@@ -1,6 +1,3 @@
-// Bare minimum mode: a display preference that hides explanatory/guidance copy
-// so the app shows only controls and personal content. Status messages, empty
-// states and safety warnings are rendered by their own elements and stay visible.
 import { useSyncExternalStore } from 'react'
 
 let enabled = false

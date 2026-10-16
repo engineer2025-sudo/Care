@@ -7,8 +7,7 @@ struct Routine: Identifiable, Codable, Equatable {
     var id: UUID
     var emoji: String
     var title: String
-    /// Local calendar day on which the routine was last checked off.
-    var completedDay: String?
+        var completedDay: String?
 
     /// Old routine stores only had a Boolean. Persist both fields during the
     /// transition, but treat completion as current-day state everywhere.
@@ -54,8 +53,7 @@ struct Medication: Identifiable, Codable, Equatable {
     var purpose: String
     var hour: Int      // 24-hour clock
     var minute: Int
-    /// Local calendar day on which the user last marked this reminder taken.
-    var takenDay: String?
+        var takenDay: String?
 
     /// A check-in expires at local midnight; it is never a verified dose record.
     var isTaken: Bool {
@@ -108,12 +106,10 @@ struct CareNote: Identifiable, Codable, Equatable {
     var author: String
     var body: String
     var createdAt: Date = Date()
-    /// On-device NaturalLanguage sentiment score (-1...1) for journal insights.
-    var sentiment: Double?
+        var sentiment: Double?
     var updatedAt: Date? = nil
 }
 
-/// Care focus chosen during onboarding — personalizes the whole app.
 enum CareMode: String, Codable, CaseIterable, Identifiable {
     case senior, autism, both
     var id: String { rawValue }
@@ -145,8 +141,7 @@ struct CareProfile: Codable, Equatable {
     var emergencyContact = EmergencyContact()
     var dailyStepGoal: Int = 6000
 
-    /// Age in whole years (nil when birth date not provided).
-    var age: Int? {
+        var age: Int? {
         guard let birthDate else { return nil }
         return Calendar.current.dateComponents([.year], from: birthDate, to: Date()).year
     }

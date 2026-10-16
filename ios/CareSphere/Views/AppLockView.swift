@@ -2,9 +2,7 @@ import CareActivityKit
 import SwiftUI
 import LocalAuthentication
 
-/// Opaque, full-window biometric gate. CareSphereApp switches its root view to
-/// this view while locked, so protected content is removed rather than rendered
-/// underneath a translucent sheet or full-screen cover.
+/// Root swap removes protected content rather than rendering it under a sheet.
 struct AppLockView: View {
     let onUnlock: () -> Void
     @Environment(\.scenePhase) private var scenePhase

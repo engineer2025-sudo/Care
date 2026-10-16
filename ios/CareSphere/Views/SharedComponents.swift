@@ -5,9 +5,6 @@ import UIKit
 import AppKit
 #endif
 
-// MARK: - Cross-platform semantic colors & helpers
-// iOS uses UISystemBackground colors; macOS maps them to AppKit equivalents
-// so the same SwiftUI sources compile on both platforms.
 
 private struct CareSphereHighContrastKey: EnvironmentKey {
     static let defaultValue = false
@@ -21,16 +18,14 @@ extension EnvironmentValues {
 }
 
 extension Color {
-    /// Outer card background.
-    static let card = {
+        static let card = {
         #if os(iOS)
         return Color(UIColor.secondarySystemBackground)
         #else
         return Color(NSColor.controlBackgroundColor)
         #endif
     }()
-    /// Inner row / element background inside cards.
-    static let cardInner = {
+        static let cardInner = {
         #if os(iOS)
         return Color(UIColor.tertiarySystemBackground)
         #else
@@ -40,9 +35,7 @@ extension Color {
 }
 
 extension View {
-    /// Inline navigation titles on iOS; no-op on macOS where titles are
-    /// already rendered inline in the window chrome.
-    @ViewBuilder
+            @ViewBuilder
     func inlineTitle() -> some View {
         #if os(iOS)
         navigationBarTitleDisplayMode(.inline)
@@ -52,7 +45,6 @@ extension View {
     }
 }
 
-/// Card container used across all tabs.
 struct SectionCard<Content: View>: View {
     let title: String
     let systemImage: String
@@ -78,7 +70,6 @@ struct SectionCard<Content: View>: View {
     }
 }
 
-/// LIVE / SIMULATED / OFFLINE-style chip used on vitals cards.
 struct StatusChip: View {
     let text: String
     var color: Color = .emeraldText
@@ -135,14 +126,11 @@ struct BigMetricButton<Label: View>: View {
 }
 
 extension View {
-    /// Gentle success haptic — CoreHaptics custom patterns on iPhone,
-    /// no-op on macOS. See HapticsService.
-    func celebrate() {
+            func celebrate() {
         HapticsService.success()
     }
 }
 
-// Global haptic helpers usable from any view or model.
 func hapticWarning() {
     HapticsService.warning()
 }
@@ -153,8 +141,7 @@ func hapticError() {
 
 
 extension View {
-    /// A readable column on iPad and comfortable margins on compact iPhones.
-    func carePagePadding() -> some View {
+        func carePagePadding() -> some View {
         self.padding(16)
             .frame(maxWidth: 900)
             .frame(maxWidth: .infinity, alignment: .center)

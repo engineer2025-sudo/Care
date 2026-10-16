@@ -1,7 +1,6 @@
 import CareActivityKit
 import SwiftUI
 
-/// Five explicit destinations avoid the system's hidden sixth-tab “More” menu.
 @MainActor
 final class CareNavigation: ObservableObject {
     enum Tab: Hashable { case today, activities, connect, care, health }

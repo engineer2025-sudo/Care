@@ -53,7 +53,6 @@ android = verified_run(args.android_run, 'android', 'scripts/android_smoke.py', 
 web = verified_run(args.web_run, *WEB_PATHS)
 release_commit = command('git', 'rev-parse', 'HEAD').strip()
 subprocess.run(['python3','scripts/generate_localizations.py','--check'],cwd=ROOT,check=True)
-# Build from the exact verified sources; no stale dist/ is packaged.
 subprocess.run(['npm', 'ci'], cwd=ROOT, check=True)
 subprocess.run(['npm', 'run', 'build'], cwd=ROOT, check=True)
 
@@ -84,7 +83,6 @@ paths = [ROOT / p for p in command('git', 'ls-files', 'ios', 'android', *LOCALIZ
 paths += [ROOT / p for p in ['DOWNLOAD.md', 'docs/signing-troubleshooting.md',
     'docs/local-data-encryption.md', 'docs/feature-checklist.md', 'docs/samsung-install.md', 'docs/android-release-signing.md', 'docs/release-parity-2026-10-14.md', 'docs/release-lock-2026-10-14.md', 'docs/release-receipts-2026-10-15.md', 'docs/ios-device-test-plan.md', 'docs/activities-and-accessibility.md', 'docs/release-2026-10-14.md',
     'docs/web-deployment.md', 'docs/device-sharing.md', 'docs/personal-tools.md', 'docs/languages.md', 'scripts/android_smoke.py']]
-# Refuse to silently label a later version using this release's metadata.
 project = (ROOT/'ios/CareSphere.xcodeproj/project.pbxproj').read_text()
 assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.7.0'}
 assert set(re.findall(r'CURRENT_PROJECT_VERSION = "([^"]+)"', project)) == {'16'}
@@ -197,7 +195,6 @@ with tempfile.TemporaryDirectory() as tmp, zipfile.ZipFile(archive) as z:
     subprocess.run(['python3',str(unpacked/'ios/scripts/check_project.py')],check=True)
     for executable in ['ios/scripts/preflight.sh','android/gradlew']:
         assert (z.getinfo('CareSphere-Mobile/'+executable).external_attr >> 16) & 0o100
-# Separate web download: source + a ready-to-host production directory.
 web_paths = [ROOT / p for p in command('git', 'ls-files', *WEB_PATHS).splitlines()]
 web_paths += [ROOT/'docs/feature-checklist.md', ROOT/'docs/release-parity-2026-10-14.md', ROOT/'docs/release-lock-2026-10-14.md', ROOT/'docs/release-receipts-2026-10-15.md', ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md', ROOT/'docs/device-sharing.md', ROOT/'docs/personal-tools.md', ROOT/'docs/languages.md']
 web_files = {str(p.relative_to(ROOT)):p for p in web_paths}
@@ -246,7 +243,6 @@ with zipfile.ZipFile(web_archive) as z:
     assert z.testzip() is None
     for path,sha in web_manifest['files'].items():
         assert hashlib.sha256(z.read('CareSphere-Web/'+path)).hexdigest() == sha
-# Refuse a release if another edit/commit raced the build or archive creation.
 assert command('git','rev-parse','HEAD').strip() == release_commit, 'Source commit changed during packaging; run again.'
 checked = ['ios', 'android', 'scripts/android_smoke.py', '.github/workflows/ios.yml', '.github/workflows/android.yml', *WEB_PATHS,
     ':(exclude)ios/README.md', ':(exclude)android/README.md']

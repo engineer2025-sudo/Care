@@ -1,5 +1,3 @@
-// Explanatory copy wrapper. Renders nothing in Bare minimum mode; the same
-// component marks guidance text so the mode can remove it in one place.
 import React from 'react'
 import { useBareMinimum } from '../lib/displayMode.js'
 

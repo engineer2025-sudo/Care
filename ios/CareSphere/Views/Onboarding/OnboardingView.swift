@@ -37,11 +37,6 @@ struct ContactPicker: UIViewControllerRepresentable {
 }
 #endif
 
-/// ─────────────────────────────────────────────────────────────────────────
-/// CareSphere v2 Setup Wizard — a calm, Apple-style first-run experience:
-/// welcome → profile (age) → care focus → medications → routines →
-/// emergency contact → security (Touch ID) → permissions → done.
-/// ─────────────────────────────────────────────────────────────────────────
 struct OnboardingView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var store: CareStore
@@ -71,8 +66,7 @@ struct OnboardingView: View {
     var body: some View {
         VStack(spacing: 0) {
             InterfaceLanguagePicker(compact: true).padding(.horizontal)
-            // Progress
-            VStack(spacing: 8) {
+                        VStack(spacing: 8) {
                 HStack {
                     Text(AppLanguage.text("CareSphere Setup"))
                         .font(.caption.weight(.heavy))
@@ -110,8 +104,7 @@ struct OnboardingView: View {
 
             Spacer(minLength: 0)
 
-            // Navigation
-            HStack(spacing: 12) {
+                        HStack(spacing: 12) {
                 if step != .welcome {
                     Button {
                         step = Step(rawValue: step.rawValue - 1) ?? .welcome

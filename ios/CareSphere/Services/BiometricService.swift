@@ -2,14 +2,10 @@ import CareActivityKit
 import Foundation
 import LocalAuthentication
 
-/// Touch ID / Face ID app lock via the official LocalAuthentication frame‐
-/// work. Uses `.deviceOwnerAuthentication` for supported passcode fallback,
-/// fails closed when authentication is unavailable, and reports which biometry
-/// the hardware offers so the UI can say "Touch ID" or "Face ID" correctly.
+/// Fails closed when authentication is unavailable.
 enum BiometricService {
 
-    /// Human-readable name of the available biometry, e.g. "Touch ID".
-    static var biometryName: String {
+        static var biometryName: String {
         let context = LAContext()
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
@@ -29,8 +25,7 @@ enum BiometricService {
         return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
 
-    /// Caller can invalidate the returned context when leaving/backgrounding.
-    @discardableResult
+        @discardableResult
     static func authenticate(reason: String, completion: @escaping (Bool, String?) -> Void) -> LAContext {
         let context = LAContext()
         context.localizedFallbackTitle = AppLanguage.text("Use Passcode")

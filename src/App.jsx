@@ -27,26 +27,13 @@ import { CARE_STORAGE_SECURITY_EVENT, eraseCareStorage, getCareStorageCache, get
 import Info from './components/Info';
 import { setBareMinimum, useBareMinimum } from './lib/displayMode';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Platform detection — iPhone/iPad (incl. iPadOS desktop-mode UA) and whether
-// CareSphere is running as an installed home-screen app.
-// ─────────────────────────────────────────────────────────────────────────────
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
 navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
 const isStandalone = window.navigator.standalone === true ||
 window.matchMedia('(display-mode: standalone)').matches;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Persistence — routines, medications, notes, scores, mood and display settings
-// are stored in this browser. Joining Jitsi, BLE pairing, SOS sharing, and
-// notification permissions are explicit external/device actions.
-// ─────────────────────────────────────────────────────────────────────────────
-// main.jsx hydrates this shared cache with authenticated encrypted storage before
-// React mounts. Hooks keep a reference to the same object for export/reset flows.
 const saved = getCareStorageCache();
 
-// A browser storage event is delivered only to other tabs. Propagate erasures
-// across tabs without echoing ordinary writes back and forth.
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event) => {
     if (event.key !== STORAGE_KEY || event.newValue !== null) return;
@@ -138,16 +125,10 @@ function useLocalDayKey() {
   return day;
 }
 
-
 function speak(text) {
   try { speakLocally(text) } catch(error) { window.dispatchEvent(new CustomEvent('caresphere-speech-status',{detail:error.message})) }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Jitsi Meet room — embedded with the official Jitsi Meet External API
-// (https://meet.jit.si/external_api.js). Falls back to a plain iframe embed of
-// the same real room if the script can't load.
-// ─────────────────────────────────────────────────────────────────────────────
 function JitsiRoom({ room, displayName = 'CareSphere Member' }) {
   const containerRef = useRef(null);
   const apiRef = useRef(null);
@@ -245,11 +226,7 @@ function VideoModal({ session, displayName, onClose }) {
 
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Emergency SOS — call 911 via tel:, optionally attach real GPS coordinates,
-// and share details only after the user selects a recipient in the system sheet.
 // There is no automatic Care Circle push backend in this build.
-// ─────────────────────────────────────────────────────────────────────────────
 function SosModal({ open, onClose }) {
   const [shareStatus, setShareStatus] = useState(null);
   const [loc, setLoc] = useState(null);
@@ -341,7 +318,6 @@ function SosModal({ open, onClose }) {
             }}
             className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-2xl text-xs border border-slate-700 transition">{tr("↗ Share SOS details")}
 
-
           </button>
           <button onClick={onClose} className="w-full text-xs text-slate-400 hover:text-white font-bold py-2 transition">{tr("Close")}
 
@@ -352,9 +328,6 @@ function SosModal({ open, onClose }) {
 
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Toasts — in-app notifications for medication reminders and system events.
-// ─────────────────────────────────────────────────────────────────────────────
 function ToastItem({ toast, onDismiss }) {
   useEffect(() => {
     const t = setTimeout(() => onDismiss(toast.id), toast.ttl || 6000);
@@ -401,9 +374,6 @@ function ToastItem({ toast, onDismiss }) {
 
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Settings — display name, accessibility, user-entered medication schedule & notifications.
-// ─────────────────────────────────────────────────────────────────────────────
 function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirmed }) {
   const [name, setName] = useState('');
   const [time, setTime] = useState('09:00');
@@ -490,8 +460,6 @@ const SettingsToggle = ({ on, onClick, label }) =>
 
       <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${on ? 'left-6' : 'left-1'}`} />
     </button>;
-
-
 
 function SettingsModal({ open, initialSection, onClose, settings, update, notifyState, enableNotifications, meds, setMeds, medsConfirmed, setMedsConfirmed, onExportData, onClearLocalData, localDataBytes, storageSecurity }) {
   const [confirmClear, setConfirmClear] = useState(false);
@@ -617,7 +585,6 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
             }}
             className="bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white px-4 py-2 rounded-xl border border-slate-700 transition">{tr("▶ Test")}
 
-
           </button>
         </SettingsRow>
 
@@ -686,9 +653,6 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
 
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Vitals helpers
-// ─────────────────────────────────────────────────────────────────────────────
 function Sparkline({ data, stroke = '#34d399' }) {
   if (!data || data.length < 2) {
     return <div className="h-12 flex items-center text-[11px] text-slate-500">{tr("Awaiting stream data…")}</div>;
@@ -723,10 +687,7 @@ function SensorChip({ mode, label }) {
 
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Optional, untimed activities. They are for shared practice and enjoyment,
 // never for diagnosing, treating, or measuring anyone's health.
-// ─────────────────────────────────────────────────────────────────────────────
 const FEELINGS = [
 { name: 'Happy', emoji: '😊' },
 { name: 'Calm', emoji: '😌' },
@@ -886,13 +847,11 @@ const SOUNDSCAPES = [
 { id: 'forest', name: 'Forest', icon: TreePine },
 { id: 'fire', name: 'Hearth', icon: Flame }];
 
-
 const PICTURE_PAIRS = [
 { pairId: 'cup', label: 'Cup', emoji: '☕' },
 { pairId: 'book', label: 'Book', emoji: '📘' },
 { pairId: 'plant', label: 'Plant', emoji: '🌿' },
 { pairId: 'bird', label: 'Bird', emoji: '🐦' }];
-
 
 function makePictureDeck(pairCount) {
   const cards = PICTURE_PAIRS.slice(0, pairCount).flatMap((picture) => [
@@ -1009,7 +968,6 @@ const PICTURE_STORIES = [
 
 }];
 
-
 function PictureStory() {
   const [storyIndex, setStoryIndex] = useState(0);
   const [stepIndex, setStepIndex] = useState(0);
@@ -1108,7 +1066,6 @@ const PHASES = [
 { name: 'Breathe in', seconds: 4, scale: 'scale-100' },
 { name: 'Breathe out', seconds: 6, scale: 'scale-[0.55]' }];
 
-
 function BreathingCoach() {
   const [running, setRunning] = useState(false);
   const [phaseIdx, setPhaseIdx] = useState(0);
@@ -1171,16 +1128,12 @@ function BreathingCoach() {
 
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Mood check-in — daily emotional pulse, visualised over two weeks.
-// ─────────────────────────────────────────────────────────────────────────────
 const MOODS = [
 { score: 1, icon: Frown, label: 'Very low', color: 'bg-rose-500' },
 { score: 2, icon: Frown, label: 'Low', color: 'bg-orange-400' },
 { score: 3, icon: Meh, label: 'Okay', color: 'bg-amber-300' },
 { score: 4, icon: Smile, label: 'Good', color: 'bg-lime-400' },
 { score: 5, icon: Laugh, label: 'Great', color: 'bg-emerald-400' }];
-
 
 function MoodCheckIn({ moods, setMoods }) {
   const today = todayKey();
@@ -1236,16 +1189,12 @@ function MoodCheckIn({ moods, setMoods }) {
 
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// v2.3 groundwork — user-selected, on-device visit-prep brief. This is an
 // editable handoff aid, not a medical record, diagnosis, or clinical summary.
-// ─────────────────────────────────────────────────────────────────────────────
 const VisitBriefChoice = ({ checked, onChange, title, detail }) =>
 <label className="flex items-start gap-3 rounded-xl border border-slate-700 bg-slate-800/70 p-3 cursor-pointer hover:border-emerald-700/70">
       <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="mt-0.5 accent-emerald-500" />
       <span className="min-w-0"><span className="block text-xs font-bold text-slate-100">{title}</span><span className="mt-0.5 block text-[10px] leading-relaxed text-slate-400">{detail}</span></span>
     </label>;
-
 
 function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, notes, moods, hrRecords }) {
   const [includeName, setIncludeName] = useState(false);
@@ -1302,8 +1251,6 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
     }
   };
 
-
-
   return (
     <div className="fixed inset-0 z-[55] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6" onClick={onClose}>
       <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="visit-brief-title" className="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl max-h-[92vh] overflow-y-auto space-y-5" onClick={(event) => event.stopPropagation()}>
@@ -1346,9 +1293,6 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
 
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Main App
-// ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
   const languageRevision = useLanguage();
   const [speechIssue,setSpeechIssue]=useState('');
@@ -1372,13 +1316,11 @@ export default function App() {
   const showInstallTip = isIOS && !isStandalone && !installTipDismissed;
   const localDay = useLocalDayKey();
 
-  // Settings (persisted)
   const [settings, setSettings] = usePersisted('settings', {
     name: '', textScale: 'md', theme: 'system', highContrast: false, lowSensory: true, voice: false, bareMinimum: false
   });
   const updateSettings = (patch) => setSettings((s) => ({ ...s, ...patch }));
 
-  // Apply accessibility preferences to <html>
   useEffect(() => {
     document.documentElement.dataset.textscale = settings.textScale;
     if (settings.highContrast) document.documentElement.dataset.contrast = 'high';else
@@ -1411,7 +1353,6 @@ export default function App() {
     Notification.requestPermission().then((p) => setNotifyState(p));
   };
 
-  // ── Toasts ──
   const [toasts, setToasts] = useState([]);
   const dismissToast = useCallback((id) => setToasts((items) => items.filter((toast) => toast.id !== id)), []);
   const pushToast = useCallback((toast) => {
@@ -1420,7 +1361,6 @@ export default function App() {
     return id;
   }, []);
 
-  // ── Daily living state (persisted) ──
   const [routines, setRoutines] = usePersisted('routines', []);
   const [routineUndo, setRoutineUndo] = useState(null);
   const undoRoutine = () => {if (routineUndo?.day === localDayKey()) setRoutines(routineUndo.items);setRoutineUndo(null);};
@@ -1471,8 +1411,6 @@ export default function App() {
     medication));
     if (!wasTaken) celebrateConfetti({ particleCount: 18 });
   };
-  // ── Medication reminder engine ──
-  // Checks every 15 s whether a scheduled dose is due, then raises a toast,
   // an optional browser notification, and an optional spoken prompt.
   const notifiedRef = useRef(new Set());
   const snoozeTimersRef = useRef({});
@@ -1528,7 +1466,6 @@ export default function App() {
     return () => clearInterval(iv);
   }, [meds, medsConfirmed, settings.voice, notifyState]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // User-requested preview for the configured reminder in Settings.
   useEffect(() => {
     window.__careSphereTestReminder = () => {
       if (meds.length === 0) {
@@ -1550,7 +1487,6 @@ export default function App() {
     return () => {delete window.__careSphereTestReminder;};
   }, [meds, medsConfirmed]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Vitals ──
   const [hr, setHr] = useState(null);
   const [hrHistory, setHrHistory] = useState([]);
   const [hrRecords, setHrRecords] = useState([]);
@@ -1693,7 +1629,6 @@ export default function App() {
     try {return new Blob([JSON.stringify(saved)]).size;} catch {return 0;}
   }, [settings, routines, meds, medsConfirmed, notes, moods, emotionScore, saved.bestPattern]);
 
-  // ── Coffee circles — real, open Jitsi rooms ──
   const coffeeCircles = [
   {
     id: 1, title: 'Morning Sunshine Tea & Chat', icon: '☕',
@@ -1710,7 +1645,6 @@ export default function App() {
     time: 'Open Jitsi room · no schedule',
     room: 'CareSphere-GentleStretchBreathing-Room2026'
   }];
-
 
   const launchRoom = (title, room) => setVideoSession({ title, room });
   const launchOpenRoom = () =>
@@ -1741,7 +1675,6 @@ export default function App() {
   { id: 'buddies', label: 'Coffee Circles', shortLabel: 'Connect', icon: Coffee },
   { id: 'care', label: 'Care Circle', shortLabel: 'Care', icon: Shield },
   { id: 'telehealth', label: 'Vitals & Telehealth', shortLabel: 'Vitals', icon: Activity }];
-
 
   useEffect(() => {if (activeTab !== 'games') soundEngine.stop();}, [activeTab]);
 
@@ -2102,8 +2035,6 @@ export default function App() {
               <div className="font-bold text-white">{tr("💡 How the video works")}</div>
               <p>{tr("Rooms use Jitsi Meet's encrypted WebRTC transport. \"Join in app\" loads the official Jitsi External API inside CareSphere; camera and microphone permissions are requested only when you enable them. CareSphere does not host, schedule, or moderate rooms; anyone with a room link may join, so verify participants before sharing private health details.")}
 
-
-
             </p>
             </div>
           </div>
@@ -2268,7 +2199,6 @@ export default function App() {
               <p>
                 <span className="text-slate-200 font-semibold">{tr("Live mode:")}</span>{tr(" \"Pair real monitor\" opens your browser's Bluetooth chooser (Chrome/Edge desktop & Android) and subscribes to the standard BLE Heart Rate service — the same profile exposed by many chest straps. Readings arrive as GATT notifications, plotted above in real time.")}
 
-
             </p>
               <Info>{tr("Canceling pairing, losing the connection, or using an unsupported browser leaves the current reading blank. Only real Bluetooth measurements are exported.")}</Info>
             </div>
@@ -2306,7 +2236,6 @@ export default function App() {
         onClearLocalData={clearLocalData}
         localDataBytes={localDataBytes}
         storageSecurity={storageSecurity} />
-
 
       {/* Toast stack */}
       <div className="toast-stack fixed bottom-4 right-4 z-[60] flex flex-col gap-3 pointer-events-none" aria-live="polite">

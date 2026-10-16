@@ -50,8 +50,7 @@ open class ProtectedActivity:ComponentActivity(){
     override fun finish(){internalDeparture=!isTaskRoot;super.finish()}
     override fun onPause(){
         resumed=false
-        // Home/another app can return before onStop runs. Invalidate immediately;
-        // only deliberate navigation to another CareSphere screen keeps the session.
+        // onPause can precede onStop on rapid Home/return; relock here.
         if(!internalDeparture){cancelAuthentication();AppLock.session.lock()}
         if(AppLock.enabled(this)){
             window.decorView.findFocus()?.let{focus->getSystemService(android.view.inputmethod.InputMethodManager::class.java).hideSoftInputFromWindow(focus.windowToken,0);focus.clearFocus()}

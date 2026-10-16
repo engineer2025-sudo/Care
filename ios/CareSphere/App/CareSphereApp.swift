@@ -41,8 +41,7 @@ struct CareSphereApp: App {
                 if !store.hasCompletedOnboarding {
                     OnboardingView()
                 } else if store.biometricEnabled && (isLocked || !hasCheckedInitialLock) {
-                    // Replace the app's root view with an opaque lock screen.
-                    AppLockView(onUnlock: { isLocked = false })
+                                        AppLockView(onUnlock: { isLocked = false })
                 } else {
                     RootTabView()
                 }
@@ -124,11 +123,9 @@ struct CareSphereApp: App {
 }
 
 extension Color {
-    /// Muted sage for filled controls; white labels remain readable on this shade.
-    static let emerald = Color(red: 55 / 255, green: 111 / 255, blue: 76 / 255)
+        static let emerald = Color(red: 55 / 255, green: 111 / 255, blue: 76 / 255)
 
-    /// Contrast-aware sage text: dark ink in light appearance, light sage in dark.
-    static let emeraldText: Color = {
+        static let emeraldText: Color = {
         #if os(iOS)
         return Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -145,8 +142,7 @@ extension Color {
         #endif
     }()
 
-    /// Follow the user's system appearance rather than forcing a dark canvas.
-    static let ink: Color = {
+        static let ink: Color = {
         #if os(iOS)
         return Color(uiColor: .systemBackground)
         #else

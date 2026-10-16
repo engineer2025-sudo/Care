@@ -13,12 +13,7 @@ import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
-/**
- * Passphrase-authenticated import receipts, interoperable with the iPhone and web
- * implementations. A receipt records what was actually imported after decryption —
- * never a transfer acknowledgment — and proves it only to parties who know that
- * transfer's passphrase. Not identity verification, not a delivery guarantee.
- */
+/** Never a transfer acknowledgment; not identity verification or a delivery guarantee. */
 object ImportReceipt {
     private val timeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneOffset.UTC)
     private val idPattern = Regex("^[A-Za-z0-9:._\\-]{1,120}$")
@@ -39,8 +34,7 @@ object ImportReceipt {
         require(bytes.size in 12..1024)
         val spec = PBEKeySpec(normalized.toCharArray(), salt, 310000, 512)
         return try {
-            // 64 PBKDF2 bytes: the transfer AES key uses the first half; the receipt
-            // MAC key is the independent second half (no key reuse across purposes).
+            // MAC key is PBKDF2 bytes 32–64 so the transfer AES key is never reused.
             val all = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded
             SecretKeySpec(all.copyOfRange(32, 64), "HmacSHA256")
         } finally { spec.clearPassword() }
@@ -73,8 +67,7 @@ object ImportReceipt {
         require(macSalt.size == 16) { "invalid salt" }
     }
 
-    /** Returns verified details, or throws when the receipt is unsupported, wrong or tampered. */
-    fun verify(receipt: JSONObject, passphrase: String): JSONObject {
+        fun verify(receipt: JSONObject, passphrase: String): JSONObject {
         require(receipt.optString("format") == "CareSphere Import Receipt" && receipt.optInt("version") == 1) { "unsupported receipt" }
         val imported = (0 until receipt.getJSONArray("imported").length()).map { receipt.getJSONArray("imported").getString(it) }
         val salt = Base64.getDecoder().decode(receipt.getString("mac_salt"))
@@ -87,8 +80,7 @@ object ImportReceipt {
             .put("imported", JSONArray(imported)).put("imported_at", receipt.getString("imported_at")).put("source", receipt.getString("source"))
     }
 
-    /** Optional deeper check: bind a verified receipt to the exact transfer file it names. */
-    fun verifyAgainstTransfer(receipt: JSONObject, passphrase: String, transferFile: ByteArray): JSONObject {
+        fun verifyAgainstTransfer(receipt: JSONObject, passphrase: String, transferFile: ByteArray): JSONObject {
         val details = verify(receipt, passphrase)
         val fileMatches = fileSha256(transferFile) == details.getString("file_sha256")
         val envelope = JSONObject(String(transferFile, Charsets.UTF_8))

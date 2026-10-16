@@ -1,8 +1,3 @@
-// Passphrase-authenticated import receipts. Backend-free and interoperable with
-// the native iPhone/Android implementations. A receipt records what was actually
-// imported after decryption — never a transfer acknowledgment — and proves it only
-// to parties who know that transfer's passphrase. Not identity verification and
-// not a delivery guarantee.
 import { decryptTransfer } from './deviceTransfer.js'
 
 const enc = new TextEncoder()
@@ -36,8 +31,6 @@ async function macKey(passphrase, salt) {
   if (input.length < 12 || input.length > 1024) throw Error('Use the transfer passphrase (12–1,024 UTF-8 bytes).')
   if (salt.length !== 16) throw Error('Invalid receipt salt.')
   const base = await crypto.subtle.importKey('raw', input, 'PBKDF2', false, ['deriveBits'])
-  // 64 PBKDF2 bytes: the transfer AES key uses the first half; the receipt MAC
-  // key is the independent second half (separate purposes, no key reuse).
   const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256' }, base, 512))
   return crypto.subtle.importKey('raw', bits.slice(32), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify'])
 }
@@ -91,8 +84,6 @@ export async function verifyImportReceipt(value, passphrase) {
   return { transfer: parsed.transfer, fileSha256: parsed.fileSha256, imported: parsed.imported, importedAt: parsed.importedAt, source: parsed.source }
 }
 
-// Optional deeper check: bind a verified receipt to the exact transfer file it
-// refers to (file hash and record IDs). Requires the same passphrase.
 export async function verifyReceiptAgainstTransfer(value, passphrase, transferFile) {
   const parsed = parseReceipt(value)
   const details = await verifyImportReceipt(value, passphrase)

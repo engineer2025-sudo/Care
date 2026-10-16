@@ -1,7 +1,5 @@
 import { useEffect, useRef } from 'react'
 
-// Keep keyboard users in the active dialog and return them to their trigger.
-// The ref also gives each dialog its own boundary when more than one is open.
 export function useDialog(open, onClose) {
   const dialogRef = useRef(null)
   const closeRef = useRef(onClose)

@@ -2,9 +2,6 @@ import Foundation
 #if os(iOS)
 import CoreMotion
 
-/// Daily step tracking via CoreMotion's CMPedometer — the official motion
-/// processor API. Prompts for Motion & Fitness permission on first start and
-/// streams step-count updates live. Not available on macOS (no-op stub below).
 @MainActor
 final class StepCountService: ObservableObject {
     @Published private(set) var hasStarted = false
@@ -42,9 +39,7 @@ final class StepCountService: ObservableObject {
                 }
             }
         }
-        // startUpdates delivers today's accumulated totals immediately,
-        // then streams deltas as the user moves.
-    }
+                    }
 }
 #else
 import Foundation

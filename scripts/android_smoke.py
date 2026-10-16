@@ -80,8 +80,6 @@ def find(label, timeout=35):
         candidates = [n for n in tree.iter('node') if n.attrib.get('text', '').casefold() == label.casefold() or n.attrib.get('content-desc', '').casefold() == label.casefold()]
         if candidates:
             return next((n for n in candidates if n.attrib.get('clickable') == 'true'), candidates[0])
-        # File picker return can show an informational success dialog or leave
-        # the preview visible directly. Verify persistent UI, not a transient notice.
         messages = {"Unlocked locally. Nothing is saved until you select records and import.",
                     "Imported selected copies. Existing records were not replaced.",
                     "Imported selected copies. An import receipt is ready below."}
@@ -95,15 +93,12 @@ def find(label, timeout=35):
         if any(n.attrib.get('resource-id') == 'android:id/parentPanel' for n in tree.iter('node')) and not any(n.attrib.get('class') == 'android.widget.ListView' for n in tree.iter('node')):
             time.sleep(.5)
             continue
-        # Find off-screen content using the actual display dimensions, not a
-        # hard-coded emulator resolution. Never swipe the persistent nav bar.
         size = re.search(r'(\d+)x(\d+)', adb('shell','wm','size'))
         width,height = map(int, size.groups())
         start,end_y = (int(height*.72), int(height*.3)) if attempts % 6 < 4 else (int(height*.3), int(height*.72))
         adb('shell','input','swipe',str(width//2),str(start),str(width//2),str(end_y),'250')
         time.sleep(.3)
     raise AssertionError(f'UI text not found: {label}')
-
 
 def failure(kind, value, tb):
     detail = ''.join(traceback.format_exception(kind, value, tb))
@@ -135,13 +130,10 @@ if adb('shell','getprop','ro.kernel.qemu').strip() != '1':
 
 adb('install', '-r', 'android/app/build/outputs/apk/debug/app-debug.apk')
 adb('shell', 'pm', 'clear', package)
-# Keep the emulator display on for the entire run so later UI dumps are never
-# empty because the screen slept (or a keyguard appeared) during long steps.
 adb('shell','settings','put','global','stay_on_while_plugged_in','3')
 adb('shell','settings','put','system','screen_off_timeout','1800000')
 adb('shell','svc','power','stayon','true')
 wake()
-# Run new security checks first so failures surface before the longer UI suite.
 adb('push','android/app/src/test/resources/browser-transfer.caretransfer','/sdcard/Download/CareSphere-test.caretransfer')
 # Separate test APK; no test publisher, fixture or debug switch is shipped in the app.
 adb('install','-r','android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk')
@@ -163,8 +155,6 @@ def enter_system_test_pin():
                 time.sleep(.3)
                 adb('shell','input','keyevent','66')
                 time.sleep(.8)
-                # The system prompt/bouncer dismisses only after accepting the PIN.
-                # If it is still up, the input missed: retry instead of failing later.
                 if not any(n.attrib.get('class')=='android.widget.EditText' and n.attrib.get('package')!=package for n in screen().iter('node')):
                     return
                 continue
@@ -200,7 +190,6 @@ try:
     tap('Unlock CareSphere')
     enter_system_test_pin()
     find('Disable app lock')
-    # Internal navigation remains usable; an external picker relocks before its result is processed.
     tap('Back to Today')
     tap('My support tools')
     tap('Choose a tool · Start here')
@@ -288,7 +277,6 @@ find('Remember appointment and questions')
 tap('Delete note')
 tap('Cancel')
 find('Remember appointment and questions')
-# Real UI localization, persistence and unchanged personal records.
 tap('Today')
 tap('Settings & privacy')
 tap('🌐 App language')
@@ -394,7 +382,6 @@ try:
 finally:
     peer.shutdown()
     peer.server_close()
-# New screens: empty by default, explicit manual entry, no permission required to review.
 tap('Today')
 tap('Medication reminders')
 find('Reminders paused')
@@ -423,6 +410,5 @@ tap('Back')
 adb('shell','am','force-stop',package)
 
 adb('shell','am','force-stop',package)
-# Leave the emulator with an empty installation, not a saved test routine.
 adb('shell','pm','clear',package)
 print('PASS: installed APK, empty state, user routine persistence, activity choice, real-only empty vitals, empty notes, favorites persistence, note editing/delete cancellation, dark appearance, large-text navigation, communication cards, and real web-to-Android encrypted file preview/import, and direct local socket receive/unlock/selective import.')
