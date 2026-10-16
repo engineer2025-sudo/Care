@@ -83,7 +83,8 @@ def find(label, timeout=35):
         # File picker return can show an informational success dialog or leave
         # the preview visible directly. Verify persistent UI, not a transient notice.
         messages = {"Unlocked locally. Nothing is saved until you select records and import.",
-                    "Imported selected copies. Existing records were not replaced."}
+                    "Imported selected copies. Existing records were not replaced.",
+                    "Imported selected copies. An import receipt is ready below."}
         if any(n.attrib.get('text') in messages for n in tree.iter('node')):
             ok = next((n for n in tree.iter('node') if n.attrib.get('text','').casefold() == 'ok'), None)
             if ok is not None:

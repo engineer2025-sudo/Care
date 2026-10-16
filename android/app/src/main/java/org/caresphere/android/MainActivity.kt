@@ -112,6 +112,8 @@ class MainActivity : ProtectedActivity() {
         setPadding(0, dp(5), 0, dp(7)); setTextIsSelectable(true)
         parent.addView(this, LinearLayout.LayoutParams(-1, -2))
     }
+    /** Explanatory/guidance copy: hidden entirely in Bare minimum mode. */
+    private fun copy(value: String, size: Float = 17f, parent: LinearLayout = page) { if (!DisplayMode.enabled(this)) text(value, size, parent) }
     private fun button(label: String, parent: LinearLayout = page, primary: Boolean = false, action: () -> Unit): Button = Button(this).apply {
         text = label; textSize = 17f; isAllCaps = false; minHeight = dp(52)
         setPadding(dp(12), dp(10), dp(12), dp(10)); setTextColor(if(primary) Color.WHITE else green)
@@ -190,7 +192,7 @@ class MainActivity : ProtectedActivity() {
         button(tx("Medication reminders")) { openInternal(Intent(this,MedicationActivity::class.java)) }
         button(tx("Settings & privacy")) { settings = true; render() }
         card(tx("A small moment for you")) { c ->
-            text(tx("Choose an activity, check in with yourself, or simply take a break. Everything here is optional."), parent = c)
+            copy(tx("Choose an activity, check in with yourself, or simply take a break. Everything here is optional."), parent = c)
             button(tx("Explore activities"), c, true) { tab = 1; render() }
         }
         card(tx("My routine today")) { c ->
@@ -252,7 +254,7 @@ class MainActivity : ProtectedActivity() {
     }
     private fun activities() {
         text(tx("Make room for a pause."), 30f, bold = true)
-        text(tx("Find something you enjoy. Save a favorite for next time. No scores, streaks, or pressure to finish."))
+        copy(tx("Find something you enjoy. Save a favorite for next time. No scores, streaks, or pressure to finish."))
         lateinit var results: LinearLayout
         searchField("Find an activity", activityQuery) { activityQuery = it; activityResults(results) }
         val only = CheckBox(this).apply {
@@ -261,7 +263,7 @@ class MainActivity : ProtectedActivity() {
         }; page.addView(only)
         results = column(); activityResults(results)
         card(tx("Why these activities?")) { c ->
-            text(tx("Predictable steps, personal choice, and reduced sensory pressure draw on accessibility and wellbeing guidance. These individual games are not clinically validated dementia or autism treatments, cognitive stimulation therapy, or diagnostic tests."), parent = c)
+            copy(tx("Predictable steps, personal choice, and reduced sensory pressure draw on accessibility and wellbeing guidance. These individual games are not clinically validated dementia or autism treatments, cognitive stimulation therapy, or diagnostic tests."), parent = c)
             button(tx("Read NICE dementia guidance"), c) { openURL("https://www.nice.org.uk/guidance/ng97/chapter/recommendations") }
             button(tx("Read NICE autistic-adult guidance"), c) { openURL("https://www.nice.org.uk/guidance/cg142/chapter/recommendations") }
         }
@@ -307,11 +309,11 @@ class MainActivity : ProtectedActivity() {
             4 -> card(tx("A conversation, not a test")) { c ->
                 val prompts = listOf("What music do you enjoy?", "Would you like to describe a place where you feel comfortable?", "Is there a food, texture, or scent you enjoy?", "What would make today more comfortable?")
                 text(tx(prompts[round % prompts.size]), 24f, c, true)
-                text(tx("Speak, point, write elsewhere, listen, or skip. There is no right answer and nothing is recorded."), parent = c)
+                copy(tx("Speak, point, write elsewhere, listen, or skip. There is no right answer and nothing is recorded."), parent = c)
             }
             5 -> pairs()
             6 -> card(tx("Name a feeling, if you want")) { c ->
-                text(tx("People express feelings differently. These words are choices, not a judgment about someone's face or behavior."), parent = c)
+                copy(tx("People express feelings differently. These words are choices, not a judgment about someone's face or behavior."), parent = c)
                 listOf("Comfortable", "Excited", "Tired", "Overwhelmed", "Not sure", "Something else").forEach { feeling ->
                     button(tx(feeling), c) { feedback = "$feeling. Would a quiet moment, a change of activity, or company feel helpful? This choice is not saved."; render() }
                 }
@@ -319,7 +321,7 @@ class MainActivity : ProtectedActivity() {
             7 -> card(tx("Tell the story your way")) { c ->
                 val scenes = listOf("☀  A sunny window", "🌱  A small plant", "☕  A cup on the table")
                 text(tx(scenes[round % scenes.size]), 25f, c, true)
-                text(tx("Imagine this scene. What might happen next? You can describe, point, or simply look. This is a fictional prompt, not a memory test."), parent = c)
+                copy(tx("Imagine this scene. What might happen next? You can describe, point, or simply look. This is a fictional prompt, not a memory test."), parent = c)
             }
             8 -> card(tx("Remember a short pattern")) { c ->
                 if (!memoryHidden) {
@@ -337,14 +339,14 @@ class MainActivity : ProtectedActivity() {
                 } else text(tx("You reached the end of this pattern."), parent = c)
             }
             9 -> card(tx("A gentle tone")) { c ->
-                text(tx("Optional synthesized sound. Start with a comfortable device volume. It stops when you leave the app. Silence is always a good choice."), parent = c)
+                copy(tx("Optional synthesized sound. Start with a comfortable device volume. It stops when you leave the app. Silence is always a good choice."), parent = c)
                 button(if(playing) "Stop sound" else "Play gentle tone", c, true) {
                     if (playing) { sound.stop(); playing = false } else { playing = sound.play(); if(!playing) feedback = "Audio couldn't start. Check your sound output and try again." }
                     render()
                 }
             }
             10 -> card(tx("Breathe comfortably")) { c ->
-                text(tx("Optional pace: in for 4 seconds, out for 6. No breath hold. Follow your own comfortable rhythm instead if you prefer. Stop if uncomfortable or dizzy."), parent = c)
+                copy(tx("Optional pace: in for 4 seconds, out for 6. No breath hold. Follow your own comfortable rhythm instead if you prefer. Stop if uncomfortable or dizzy."), parent = c)
                 breathLabel = text(if(breathing) phase() else "Ready when you are", 30f, c, true)
                 button(if(breathing) "Pause breathing guide" else "Start breathing guide", c, true) {
                     breathing = !breathing
@@ -391,7 +393,7 @@ class MainActivity : ProtectedActivity() {
     }
     private fun care() {
         text(tx("Keep what matters."), 30f, bold = true)
-        text(tx("Private notes on this device. Search, edit, or choose exactly what to share. No family sync or clinician portal is connected."))
+        copy(tx("Private notes on this device. Search, edit, or choose exactly what to share. No family sync or clinician portal is connected."))
         button(tx("Write a care note"), primary = true) {
             if (data.list("notes").length() >= 100) { message(tx("You have 100 notes. Remove a note before adding another.")); return@button }
             input(tx("New care note"), tx("What would you like to remember?"), 4000) { note ->
@@ -404,7 +406,7 @@ class MainActivity : ProtectedActivity() {
         searchField("Search care notes", noteQuery) { noteQuery = it; noteResults(results) }
         results = column(); noteResults(results)
         card(tx("Connect with someone you trust")) { c ->
-            text(tx("Create a room link, share it yourself, and open the real video provider. Nobody is invited automatically. The provider may require sign-in and handles its own privacy and permissions."), parent = c)
+            copy(tx("Create a room link, share it yourself, and open the real video provider. Nobody is invited automatically. The provider may require sign-in and handles its own privacy and permissions."), parent = c)
             button(tx("Create a video invitation"), c) {
                 val url = "https://meet.jit.si/CareSphere-${java.util.UUID.randomUUID()}"
                 dialogBuilder().setTitle(tx("Your room invitation")).setMessage(url)
@@ -436,7 +438,7 @@ class MainActivity : ProtectedActivity() {
     }
     private fun health() {
         text(tx("Real readings only."), 30f, bold = true)
-        text(tx("Connect a monitor that broadcasts the standard Bluetooth Heart Rate service. A phone camera is not used to estimate your pulse."))
+        copy(tx("Connect a monitor that broadcasts the standard Bluetooth Heart Rate service. A phone camera is not used to estimate your pulse."))
         card(tx("Heart rate")) { c ->
             hrLabel = text(monitor.bpm?.let { "$it bpm" } ?: "— bpm", 40f, c, true)
             hrStatus = text(monitor.status, parent = c)
@@ -459,7 +461,7 @@ class MainActivity : ProtectedActivity() {
         }
         card(tx("Other health data")) { c ->
             button(tx("Health history"),c){openInternal(Intent(this,HealthHistoryActivity::class.java))}
-            text(tx("Read permitted Health Connect history or enter your own blood pressure and blood oxygen records. No smartwatch-account sync or generated readings."),parent=c)
+            copy(tx("Read permitted Health Connect history or enter your own blood pressure and blood oxygen records. No smartwatch-account sync or generated readings."),parent=c)
             text(tx("For symptoms or health concerns, contact a qualified clinician. In an emergency, use your phone to contact local emergency services."), parent = c)
         }
         updateHealth()
@@ -505,7 +507,7 @@ class MainActivity : ProtectedActivity() {
         button(tx("Back to Today")) { settings = false; tab = 0; render() }
         text(tx("Your app. Your choices."), 29f, bold = true)
         card(tx("App lock")) { c ->
-            text(tx("Lock private screens when CareSphere leaves the foreground. Android 11+ and a secure device screen lock are required. Screenshots are blocked while enabled."),parent=c)
+            copy(tx("Lock private screens when CareSphere leaves the foreground. Android 11+ and a secure device screen lock are required. Screenshots are blocked while enabled."),parent=c)
             button(tx(if(AppLock.enabled(this))"Disable app lock" else "Enable app lock"),c){configureAppLock(!AppLock.enabled(this)){render()}}.isEnabled=Build.VERSION.SDK_INT>=30
         }
         card(tx("Profile")) { c ->
@@ -521,19 +523,20 @@ class MainActivity : ProtectedActivity() {
             }
         }
         card(tx("Appearance")) { c ->
-            text(tx("Choose what feels comfortable. System follows your device's light or dark setting."), parent = c)
+            copy(tx("Choose what feels comfortable. System follows your device's light or dark setting."), parent = c)
             val current = data.json.optString("appearance", "system")
             listOf("system", "light", "dark").forEach { mode ->
                 button("${mode.replaceFirstChar { it.uppercase() }}${if(current == mode) " · selected" else ""}", c) { data.put("appearance", mode); render() }
                     .apply { isSelected = current == mode; isEnabled = data.canWrite }
             }
+            button(tx(if(DisplayMode.enabled(this))"Bare minimum mode · On" else "Bare minimum mode · Off"), c) { DisplayMode.set(this, !DisplayMode.enabled(this)); render() }
         }
         card(tx("Accessibility")) { c ->
-            text(tx("Text follows Android's font-size setting. Buttons have text labels and generous touch targets. Activities don't auto-advance; no flashing, points, or timed tests. TalkBack uses the native controls."), parent = c)
+            copy(tx("Text follows Android's font-size setting. Buttons have text labels and generous touch targets. Activities don't auto-advance; no flashing, points, or timed tests. TalkBack uses the native controls."), parent = c)
             button(tx("Open Android accessibility settings"), c) { runCatching { startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) }.onFailure { message(tx("Open Accessibility in Android Settings.")) } }
         }
         card(tx("Privacy & local data")) { c ->
-            text(tx("Care notes, routines, name, and today's mood are encrypted with AES-GCM using a key in Android Keystore. System backup is disabled. No analytics, ad SDKs, account, or background health monitoring. Shared exports are no longer protected by CareSphere."), parent = c)
+            copy(tx("Care notes, routines, name, and today's mood are encrypted with AES-GCM using a key in Android Keystore. System backup is disabled. No analytics, ad SDKs, account, or background health monitoring. Shared exports are no longer protected by CareSphere."), parent = c)
             button(tx("Review & export basic care data"), c) {
                 val basic = JSONObject()
                 listOf("name", "routines", "done", "day", "mood", "notes").forEach { key -> if(data.json.has(key)) basic.put(key, data.json.get(key)) }
@@ -546,7 +549,7 @@ class MainActivity : ProtectedActivity() {
         }
         card(tx("About this Android release")) { c ->
             text("CareSphere "+packageManager.getPackageInfo(packageName,0).versionName+" · "+tx("Native Android"),parent=c)
-            text(tx("Apple Intelligence is an Apple-only capability and is not available in this Android app. No AI answers are fabricated or substituted. This is a first Android release, not full iOS feature parity."), parent = c)
+            copy(tx("Apple Intelligence is an Apple-only capability and is not available in this Android app. No AI answers are fabricated or substituted. This is a first Android release, not full iOS feature parity."), parent = c)
         }
     }
     private fun input(title: String, hint: String, limit: Int, initial: String = "", save: (String) -> Unit) {
