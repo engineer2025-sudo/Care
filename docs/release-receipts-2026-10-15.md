@@ -20,4 +20,10 @@ Versions: **Android 1.8.0 (10), iPhone 3.7.0 (16), web 1.5.0**. Source additions
 
 Receipts were exercised in unit/instrumented tests, not between two physical phones. Physical iPhone↔Android↔iPhone receipt exchange, ShareLink/share-sheet behavior, and the Apple Intelligence hardware paths remain device checks. The download remains **debug-signed**; owner production signing and store procedures are outstanding. See the [complete checklist](feature-checklist.md), [sharing guide](device-sharing.md) and [Samsung guide](samsung-install.md).
 
-Runs for this release are recorded after CI completes; exact APK and archive hashes are in `BUILD_VERIFICATION.json` inside the archives.
+## Validation runs
+
+- iPhone [38865998594](https://github.com/engineer2025-sudo/Care/actions/runs/38865998594): **passed** on the release source — Swift test suite (including the shared receipt vector and tamper cases), unsigned physical build, optional HealthKit build, Simulator build/install/launch.
+- Web [38865998733](https://github.com/engineer2025-sudo/Care/actions/runs/38865998733): **passed** on the release source — 45 unit tests (including the shared receipt vector and tamper cases), 31 browser tests, offline production reopening.
+- Android [38868185011](https://github.com/engineer2025-sudo/Care/actions/runs/38868185011): **passed** on the release source — 48 JVM tests (including the shared receipt vector and tamper cases), lint, APK signature verification, and the full emulator smoke: real system-PIN app-lock flows, locked file-picker return, snooze checks, receipt-ready import flow and the five-language UI suite.
+
+Earlier attempts in this batch were not distributed: a missing parenthesis in the new receipt test failed the build step (the failure-surfacing step now extracts real compiler/test errors instead of a truncated warning tail), and one emulator run needed the system credential field to take focus before the harness typed its test PIN. Exact APK and archive hashes are in `BUILD_VERIFICATION.json` inside the archives.
