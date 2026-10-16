@@ -48,7 +48,7 @@ class CheckInActivity : ToolActivity() {
         when (step) {
             CheckInFlow.Step.Pause -> {
                 text(tx("Let's pause together"), 24f)
-                copy(tx("A paced pause, not treatment. Stop any time."))
+                text(tx("A paced pause, not treatment. Stop any time."), 14f)
                 breathLabel = text(label(), 30f)
                 text(AppLanguage.format(this, "{0} of {1} cycles",
                     minOf(breath.cycles, CheckInFlow.TARGET_CYCLES), CheckInFlow.TARGET_CYCLES), 15f)
@@ -83,7 +83,7 @@ class CheckInActivity : ToolActivity() {
                         .onFailure { message(tx("No browser is available on this device.")) }
                 }
                 text("https://meet.jit.si/$room", 15f)
-                copy(tx("Choose where to share the message. Anyone with the room link can join."))
+                text(tx("Choose where to share the message. Anyone with the room link can join."), 14f)
                 button(tx("Close")) { finish() }
             }
         }

@@ -1266,7 +1266,7 @@ function StressCheckInModal({ open, onClose, onVideoSupport }) {
 
         {step === 'pause' &&
         <div className="space-y-4">
-            <Info className="text-xs text-slate-400 leading-relaxed">{tr("A paced pause, not treatment. Stop any time.")}</Info>
+            <p className="text-xs text-slate-400 leading-relaxed">{tr("A paced pause, not treatment. Stop any time.")}</p>
             <div className="flex items-center justify-center py-2">
               <div className="relative w-32 h-32 flex items-center justify-center">
                 <div
@@ -1310,7 +1310,7 @@ function StressCheckInModal({ open, onClose, onVideoSupport }) {
             className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 font-bold py-3.5 rounded-2xl text-sm transition">
               {tr('Open video support')}
             </button>
-            <Info className="text-[11px] text-slate-500 leading-relaxed">{tr('Choose where to share the message. Anyone with the room link can join.')}</Info>
+            <p className="text-[11px] text-slate-500 leading-relaxed">{tr('Choose where to share the message. Anyone with the room link can join.')}</p>
             {flowButton(tr('Close'), onClose)}
           </div>
         }
