@@ -1,6 +1,6 @@
 # Interface languages — October 14, 2026
 
-CareSphere iPhone **3.6.1 (15)**, Android **1.7.0 (9)** and web **1.4.1** add an offline, persistent **App language** selector:
+CareSphere iPhone **3.7.0 (16)**, Android **1.8.0 (10)** and web **1.5.0** add an offline, persistent **App language** selector:
 
 | Choice | Interface scope | Speech matching |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ English counts as one of the five. The selection uses the **2019 American Commun
 
 ## What is translated—and what is not
 
-The checked-in catalog contains **641 source messages with four translations each**, including aliases shared between platforms. There is no translation API, cloud translator, account, hosted backend, or download required to use the catalog.
+The checked-in catalog contains **670 source messages with four translations each**, including aliases shared between platforms. There is no translation API, cloud translator, account, hosted backend, or download required to use the catalog.
 
 Coverage now also includes localized greetings and mood labels, setup guidance, comfort settings and routine-action templates. Mood choices retain their original stable codes/scores, and personal names are substituted without translation, even when they match a catalog key.
 
@@ -52,4 +52,4 @@ Native language names remain visible in the picker, without flags. Layouts allow
 6. Activity IDs, category IDs, selected sections and choice-answer comparisons remain stable English/machine IDs; only their display labels change. Activity search also checks translated built-in titles.
 7. English is the fallback for an unknown key or unsupported locale. Translation failures must not make care records unreadable.
 
-Automated evidence is recorded in `docs/release-lock-2026-10-14.md` and the downloadable archives' `BUILD_VERIFICATION.json`. Unit tests cover language aliases, catalogs, placeholder integrity, unchanged values and wrong-language voice rejection. Browser tests cover all choices, device defaults, draft preservation, persisted preference, original saved notes and translated search. Each non-English interface is also exercised at 320px/largest text with saved mood check-ins and a display name containing template-like characters. The Android emulator exercises all five choices, Spanish preference persistence and unchanged care-note text. These checks do not replace linguistic review or physical-phone testing.
+Automated evidence is recorded in `docs/release-receipts-2026-10-15.md` and the downloadable archives' `BUILD_VERIFICATION.json`. Unit tests cover language aliases, catalogs, placeholder integrity, unchanged values and wrong-language voice rejection. Browser tests cover all choices, device defaults, draft preservation, persisted preference, original saved notes and translated search. Each non-English interface is also exercised at 320px/largest text with saved mood check-ins and a display name containing template-like characters. The Android emulator exercises all five choices, Spanish preference persistence and unchanged care-note text. These checks do not replace linguistic review or physical-phone testing.

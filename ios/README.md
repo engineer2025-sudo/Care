@@ -2,14 +2,16 @@
 
 Open **CareSphere.xcodeproj** directly. No XcodeGen, remote Swift packages, binary SDKs, or model downloads are needed to build the app. The only package is `ActivityKit/`, included locally.
 
-## New in 3.6.1 (15)
+## New in 3.7.0 (16)
 
-Shared catalog expanded to 641 messages for the new platform controls; native iPhone functionality from 3.6.0 is retained. See the current validation report.
+- **Import receipts:** after importing shared records, create a passphrase-authenticated receipt of exactly what was imported and from which transfer file. Share it back; verify a returned receipt with the passphrase, optionally bound to the original transfer file. Not identity verification and not a delivery guarantee — see docs/device-sharing.md.
+- **Bare minimum mode** (Settings → Accessibility and Support tools → Comfort): hides explanatory and how-to copy app-wide. Status messages, empty states and safety warnings stay visible.
+- Shared catalog expanded to 670 messages.
 
 
 Authentication now fails closed when system verification is unavailable; contexts are invalidated on background/disappearance and stale results cannot unlock. Returning from the authentication sheet itself does not automatically re-prompt after cancellation. Medication notification text no longer reveals names/doses, and late scheduling callbacks are ignored. Native sharing displays a connection QR and can read it from a chosen photo; it never includes the passphrase. Live-camera scanning and authenticated import receipts are still missing.
 
-[Full platform checklist](../docs/feature-checklist.md) · [Current validation](../docs/release-lock-2026-10-14.md)
+[Full platform checklist](../docs/feature-checklist.md) · [Current validation](../docs/release-receipts-2026-10-15.md)
 
 Offline core-interface localization in English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with a persistent App language selector. Untranslated advanced content falls back to English; private records are unchanged. [Coverage and review limits](../docs/languages.md).
 

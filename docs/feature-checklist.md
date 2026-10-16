@@ -1,6 +1,6 @@
 # CareSphere — complete user-facing feature/status checklist
 
-Scope: iPhone **3.6.1 (15)**, Android **1.7.0 (9)**, web **1.4.1**. This is an inventory, **not a claim of complete parity or production readiness**. Each separate activity and major action is listed below. “Yes” means implemented; it does not mean physically validated on your Samsung/iPhone. See the release validation report for automated evidence.
+Scope: iPhone **3.7.0 (16)**, Android **1.8.0 (10)**, web **1.5.0**. This is an inventory, **not a claim of complete parity or production readiness**. Each separate activity and major action is listed below. “Yes” means implemented; it does not mean physically validated on your Samsung/iPhone. See the release validation report for automated evidence.
 
 **Legend:** Yes = implemented; Limited = only the stated subset/equivalent; No = not implemented on that platform; Optional = needs hardware, permissions, configuration or an external service. Nothing marked No is replaced with fake data or a pretend button.
 
@@ -65,6 +65,7 @@ All eleven below exist on **iPhone, Android and web**. They are optional leisure
 | Feature and actions | iPhone | Android | Web |
 |---|---|---|---|
 | Simple Mode: three destinations, reversible | Yes | Yes | Yes |
+| Bare minimum mode: hides explanatory/how-to copy; status, empty states and safety warnings stay | Yes: Comfort + Settings | Yes: Settings · Appearance | Yes: Settings + comfort tools |
 | Visual routines: user title, steps, optional chosen photo | Yes | Yes | Yes |
 | Visual routines: read step, done, skip, pause, continue, end | Yes | Yes | Yes |
 | Communication board: built-in and custom phrases | Yes | Yes | Yes |
@@ -160,6 +161,9 @@ Manual entries are never passed off as sensor measurements. Apple Health/Health 
 | Separate encryption passphrase remains required | Yes | Yes | Yes |
 | Offer expires in five minutes; stops when leaving/backgrounding | Yes | Yes | No server offer |
 | Visible prepared/offered/received-unlocked/imported stages | Yes | Yes | File preparation/unlock/import stages |
+| Import receipt created only after real import (passphrase-authenticated HMAC) | Yes: save/share/copy | Yes: save/share | Yes: save/copy |
+| Verify returned receipt with passphrase; optional transfer-file binding (hash + record IDs) | Yes | Yes | Yes |
+| Receipt as identity verification or delivery/read proof | **No: deliberately not — passphrase-authenticated record only** | Same | Same |
 | Sender gets authenticated proof that recipient imported | **No** | **No** | **No** |
 | Complete visual plans, photos, contacts, meds or health records in portable transfer | **No** | **No** | **No** |
 | Automatic sync, conflict resolution, remote revocation | No | No | No |
@@ -196,7 +200,7 @@ The connection code, QR and discovery label are not verified identities. Opening
 
 ## Still open — do not mistake this batch for completion
 
-- Authenticated import receipts and full-fidelity broader portable record sharing.
+- Identity-bound import receipts (current receipts are passphrase-authenticated, not identity-verified) and full-fidelity broader portable record sharing.
 - Android extended mood/step/workout/reference/SOS equivalents; iPhone/web manual-vital parity.
 - Complete advanced translations and fluent-speaker safety review; no blanket accessibility conformance claim.
 - Real Samsung notification timing/battery behavior, Health Connect grants/revocation, real BLE hardware, and all three native sharing pairings in both directions.

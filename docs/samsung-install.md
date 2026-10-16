@@ -2,7 +2,7 @@
 
 ## Which download?
 
-Download **CareSphere-Android.apk**, version **1.7.0 (9)**, from this conversation's newly verified download. You do **not** need the iPhone ZIP, Xcode, Android Studio, a computer or a CareSphere account to install the APK.
+Download **CareSphere-Android.apk**, version **1.8.0 (10)**, from this conversation's newly verified download. You do **not** need the iPhone ZIP, Xcode, Android Studio, a computer or a CareSphere account to install the APK.
 
 The app supports **Android 8 or newer**. Check **Settings → About phone → Software information → Android version**. Health Connect has additional requirements: generally Android 9+ with an available/up-to-date provider; Android 14+ includes it in system settings. Availability and permissions vary; the app checks instead of fabricating readings.
 
@@ -55,6 +55,14 @@ On Android 8–10 the base app still works, but this app-specific lock is unavai
 ### Snooze / cancel
 
 After confirming the schedule and enabling notifications, each untaken entry has **Snooze 10 min**. It adds one same-day review reminder and shows a pending time with **Cancel snooze**. It is not an instruction to take a dose and does not change tomorrow's normal schedule. Android/Samsung can delay delivery. Snooze is unavailable if ten minutes would cross midnight. Editing/removing the schedule, pausing reminders or restoring a backup clears snoozes; marking an entry taken clears its snooze.
+
+### Import receipts
+
+When you import records someone shared, you can create an **import receipt** — a small JSON file that records what was imported, protected by that transfer's passphrase. Send it back if they should know. Anyone with the passphrase can verify it; optionally they can also check it against the original transfer file. It proves an import was recorded by someone who knew the passphrase — not who you are, and not that anything was delivered. Nothing is ever labeled a receipt before the records are actually imported.
+
+### Bare minimum mode
+
+**Settings & privacy → Appearance → Bare minimum mode** hides explanatory and how-to text across the app. Status messages, empty states and safety warnings stay visible. Turn it off to see the guidance again.
 
 ## Optional real health data
 
