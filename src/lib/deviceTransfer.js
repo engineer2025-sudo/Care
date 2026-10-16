@@ -42,5 +42,5 @@ export function prepareTransferImport(payload,selected,notes,routines,receivedIt
   if(!chosen.length)throw Error('Choose records that have not already been imported.')
   if(notes.length+chosen.filter(r=>r.type==='note').length>500||routines.length+chosen.filter(r=>r.type==='routine').length>200)throw Error('Not enough local capacity. Import fewer records or remove items first.')
   const now=new Date().toISOString()
-  return {notes:[...notes,...chosen.filter(r=>r.type==='note').map(r=>({id:makeID(),note:r.text,author:'Imported copy',date:now}))],routines:[...routines,...chosen.filter(r=>r.type==='routine').map(r=>({id:makeID(),text:r.text,completedOn:null}))],receivedItems:[...receivedItems,...chosen.map(r=>`${checked.id}:${r.id}`)].slice(-2000)}
+  return {notes:[...notes,...chosen.filter(r=>r.type==='note').map(r=>({id:makeID(),note:r.text,author:'Imported copy',date:now}))],routines:[...routines,...chosen.filter(r=>r.type==='routine').map(r=>({id:makeID(),text:r.text,completedOn:null}))],receivedItems:[...receivedItems,...chosen.map(r=>`${checked.id}:${r.id}`)].slice(-2000),chosen}
 }

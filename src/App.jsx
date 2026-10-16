@@ -24,6 +24,8 @@ import { buildVisitBrief } from './lib/visitBrief';
 import { encodeCsv } from './lib/csv';
 import { STORAGE_KEY, RESET_LOCAL_DATA_EVENT, normalizePersistedValue, localDayKey, isRoutineDoneToday, isMedicationTakenToday } from './lib/careStorage';
 import { CARE_STORAGE_SECURITY_EVENT, eraseCareStorage, getCareStorageCache, getCareStorageSecurityStatus, persistCareStorage } from './lib/secureCareStorage';
+import Info from './components/Info';
+import { setBareMinimum, useBareMinimum } from './lib/displayMode';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Platform detection — iPhone/iPad (incl. iPadOS desktop-mode UA) and whether
@@ -428,7 +430,7 @@ function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirm
     <div className="border-t border-slate-800 pt-4 mt-3 space-y-3">
       <div>
         <h4 id="medication-settings" tabIndex={-1} className="text-sm font-bold text-white">{tr("Medication schedule · local only")}</h4>
-        <p className="text-[11px] text-slate-400 mt-1">{tr("Add only medicines and times confirmed by your care team or label. CareSphere does not prescribe, verify a dose, or check interactions.")}</p>
+        <Info className="text-[11px] text-slate-400 mt-1">{tr("Add only medicines and times confirmed by your care team or label. CareSphere does not prescribe, verify a dose, or check interactions.")}</Info>
       </div>
       {meds.length === 0 ?
       <p className="text-xs text-slate-500">{tr("No medication reminders are configured.")}</p> :
@@ -473,7 +475,7 @@ const SettingsRow = ({ label, hint, children }) =>
 <div className="settings-row flex items-center justify-between gap-4 py-3.5 border-b border-slate-800 last:border-0">
       <div className="min-w-0">
         <div className="text-sm font-bold text-white">{label}</div>
-        {hint && <div className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{hint}</div>}
+        {hint && !useBareMinimum() && <div className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{hint}</div>}
       </div>
       <div className="shrink-0">{children}</div>
     </div>;
@@ -599,6 +601,10 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
           <SettingsToggle on={settings.lowSensory} onClick={() => update({ lowSensory: !settings.lowSensory })} label={tr("Reduce visual movement")} />
         </SettingsRow>
 
+        <SettingsRow label={tr("Bare minimum mode")} hint="Hides explanatory and how-to text everywhere in the app. Status messages, empty states and safety warnings stay visible.">
+          <SettingsToggle on={settings.bareMinimum === true} onClick={() => update({ bareMinimum: settings.bareMinimum !== true })} label={tr("Bare minimum mode")} />
+        </SettingsRow>
+
         <SettingsRow label={tr("Voice reminders")} hint="Speaks medication and routine prompts aloud (browser speech synthesis).">
           <SettingsToggle on={settings.voice} onClick={() => update({ voice: !settings.voice })} label={tr("Voice reminders")} />
         </SettingsRow>
@@ -643,9 +649,9 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
             <div className="rounded-xl bg-emerald-500/15 p-2 text-emerald-300"><Shield className="w-5 h-5" /></div>
             <div className="min-w-0 flex-1">
               <h4 id="privacy-data-title" className="text-sm font-bold text-white">{tr("Privacy & your data")}</h4>
-              <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">{tr("CareSphere saves your entries in this browser profile (")}
+              <Info className="text-[11px] text-slate-300 mt-1 leading-relaxed">{tr("CareSphere saves your entries in this browser profile (")}
                 {formatBytes(localDataBytes)}{tr("). When secure browser storage is available, saved data is encrypted with AES-256-GCM and its non-extractable key is kept in this origin’s IndexedDB.")}
-              </p>
+              </Info>
               <p className={`text-[11px] mt-2 leading-relaxed ${storageSecurity?.state === 'ready' ? 'text-emerald-200' : 'text-amber-200'}`} role={storageSecurity?.state === 'ready' ? 'status' : 'alert'}>
                 {storageSecurity?.message || tr('Secure local storage status is not available.')}{tr(" Encryption at rest does not protect data from scripts running in this page, malware, or someone using your unlocked browser profile. No CareSphere account or sync server is configured.")}
               </p>
@@ -673,7 +679,7 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
             }
           </div>
           {privacyMessage && <p className="text-[11px] text-emerald-200" role="status" aria-live="polite">{privacyMessage}</p>}
-          <p className="text-[10px] text-slate-500 leading-relaxed">{tr("A downloaded export is no longer protected by CareSphere. Store it carefully and share it only with a person you trust. Optional third-party features such as Jitsi and SOS sharing operate only when you choose them.")}</p>
+          <Info className="text-[10px] text-slate-500 leading-relaxed">{tr("A downloaded export is no longer protected by CareSphere. Store it carefully and share it only with a person you trust. Optional third-party features such as Jitsi and SOS sharing operate only when you choose them.")}</Info>
         </section>
       </div>
     </div>);
@@ -744,10 +750,10 @@ function EmotionMatch() {
       <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
         <Brain className="w-4 h-4 text-emerald-300" />{tr(" Feelings explorer")}
       </div>
-      <p className="text-sm text-slate-300 leading-relaxed">{tr("What might this person be feeling? Choose any word—or “Not sure.” These emoji are simplified illustrations, not rules for reading real people; there is no right answer or score.")}</p>
+      <Info className="text-sm text-slate-300 leading-relaxed">{tr("What might this person be feeling? Choose any word—or “Not sure.” These emoji are simplified illustrations, not rules for reading real people; there is no right answer or score.")}</Info>
       <div className="text-center py-5 bg-slate-950 rounded-2xl border border-slate-800" aria-live="polite">
         <div className="text-5xl sm:text-6xl" aria-hidden="true">{FEELING_PICTURES[pictureIndex]}</div>
-        {choice && <p className="text-sm text-slate-300 mt-3 px-3">“{choice}{tr("” is one possibility. It is also okay not to know.")}</p>}
+        {choice && <Info className="text-sm text-slate-300 mt-3 px-3">“{choice}{tr("” is one possibility. It is also okay not to know.")}</Info>}
       </div>
       <div className="grid grid-cols-2 gap-3">
         {FEELINGS.map((feeling) =>
@@ -850,7 +856,7 @@ function PatternRecall({ reduceVisualMotion }) {
       <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
         <Gamepad2 className="w-4 h-4 text-emerald-300" />{tr(" Pattern Recall")}
       </div>
-      <p className="text-sm text-slate-300 leading-relaxed">{tr("An optional pattern activity. It is untimed, has no personal score, and is not a measure of memory or cognitive health. Reduce visual movement in Settings to slow each highlight.")}</p>
+      <Info className="text-sm text-slate-300 leading-relaxed">{tr("An optional pattern activity. It is untimed, has no personal score, and is not a measure of memory or cognitive health. Reduce visual movement in Settings to slow each highlight.")}</Info>
       <p className="text-sm text-slate-200 min-h-11" role="status" aria-live="polite">{banner}</p>
       <div className="grid grid-cols-2 gap-3">
         {[0, 1, 2, 3].map((index) =>
@@ -946,7 +952,7 @@ function PicturePairs() {
       <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
         <Gamepad2 className="w-4 h-4 text-emerald-300" />{tr(" Picture pairs")}
       </div>
-      <p className="text-sm text-slate-300 leading-relaxed">{tr("Match familiar picture symbols at your own pace. There is no timer or score; unmatched cards stay visible until you choose to hide them. This is an optional game, not a memory test.")}</p>
+      <Info className="text-sm text-slate-300 leading-relaxed">{tr("Match familiar picture symbols at your own pace. There is no timer or score; unmatched cards stay visible until you choose to hide them. This is an optional game, not a memory test.")}</Info>
       <label className="flex items-center gap-3 text-sm font-semibold text-slate-200">
         <span>{tr("Number of pairs")}</span>
         <select value={pairCount} onChange={choosePairCount} className="bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 text-sm text-white">
@@ -1020,7 +1026,7 @@ function PictureStory() {
       <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
         <FileText className="w-4 h-4 text-emerald-300" />{tr(" Picture story")}
       </div>
-      <p className="text-sm text-slate-300 leading-relaxed">{tr("Explore a short, predictable picture sequence. These are examples, not instructions—people’s routines and preferences differ. Move forward or back whenever you like.")}</p>
+      <Info className="text-sm text-slate-300 leading-relaxed">{tr("Explore a short, predictable picture sequence. These are examples, not instructions—people’s routines and preferences differ. Move forward or back whenever you like.")}</Info>
       <label className="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-200">
         <span>{tr("Choose a story")}</span>
         <select value={storyIndex} onChange={chooseStory} className="bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 text-sm text-white">
@@ -1067,9 +1073,9 @@ function Soundscapes() {
         </button>
         }
       </div>
-      <p className="text-xs text-slate-400 -mt-3">{tr("Generated live with the Web Audio API and works offline. Audio preferences vary; start at a comfortable device volume and stop anytime.")}
+      <Info className="text-xs text-slate-400 -mt-3">{tr("Generated live with the Web Audio API and works offline. Audio preferences vary; start at a comfortable device volume and stop anytime.")}
 
-      </p>
+      </Info>
       <div className="grid grid-cols-2 gap-3 flex-1">
         {SOUNDSCAPES.map((s) => {
           const Icon = s.icon;
@@ -1142,7 +1148,7 @@ function BreathingCoach() {
           {cycles}{tr(" cycles")}
         </span>
       </div>
-      <p className="text-sm text-slate-300 leading-relaxed">{tr("A paced-breathing exercise, not treatment. Breathe in for 4 seconds and out for 6, without a hold. Follow your own comfortable rhythm and pause or stop at any time.")}</p>
+      <Info className="text-sm text-slate-300 leading-relaxed">{tr("A paced-breathing exercise, not treatment. Breathe in for 4 seconds and out for 6, without a hold. Follow your own comfortable rhythm and pause or stop at any time.")}</Info>
       <div className="flex-1 flex items-center justify-center py-4">
         <div className="relative w-36 h-36 flex items-center justify-center">
           <div
@@ -1305,7 +1311,7 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-sky-700/50 bg-sky-950/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-sky-200"><FileText className="h-3.5 w-3.5" />{tr(" Local preview · no sync")}</div>
             <h2 id="visit-brief-title" className="mt-3 text-xl font-black text-white">{tr("Prepare for a care visit")}</h2>
-            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">{tr("Choose exactly what to include. The summary is assembled on this device from your entries; it is not a medical record, diagnosis, or clinical advice, and nothing is sent automatically.")}</p>
+            <Info className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">{tr("Choose exactly what to include. The summary is assembled on this device from your entries; it is not a medical record, diagnosis, or clinical advice, and nothing is sent automatically.")}</Info>
           </div>
           <button onClick={onClose} aria-label={tr("Close visit preparation")} className="rounded-xl bg-slate-800 p-2 text-slate-400 hover:text-white"><X className="h-5 w-5" /></button>
         </header>
@@ -1328,7 +1334,7 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
           <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words text-[11px] leading-relaxed text-slate-300">{brief}</pre>
         </div>
         <footer className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
-          <p className="text-[10px] leading-relaxed text-slate-500">{tr("Downloaded files are outside CareSphere's local privacy controls. Verify all names, dates, and sources before sharing.")}</p>
+          <Info className="text-[10px] leading-relaxed text-slate-500">{tr("Downloaded files are outside CareSphere's local privacy controls. Verify all names, dates, and sources before sharing.")}</Info>
           <div className="flex gap-2 shrink-0">
             <button onClick={onClose} className="rounded-xl border border-slate-700 px-4 py-2.5 text-xs font-bold text-slate-300 hover:bg-slate-800">{tr("Close")}</button>
             <button onClick={downloadBrief} className="flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-sky-500"><Download className="h-4 w-4" />{tr(" Download .txt")}</button>
@@ -1368,7 +1374,7 @@ export default function App() {
 
   // Settings (persisted)
   const [settings, setSettings] = usePersisted('settings', {
-    name: '', textScale: 'md', theme: 'system', highContrast: false, lowSensory: true, voice: false
+    name: '', textScale: 'md', theme: 'system', highContrast: false, lowSensory: true, voice: false, bareMinimum: false
   });
   const updateSettings = (patch) => setSettings((s) => ({ ...s, ...patch }));
 
@@ -1378,7 +1384,8 @@ export default function App() {
     if (settings.highContrast) document.documentElement.dataset.contrast = 'high';else
     delete document.documentElement.dataset.contrast;
     document.documentElement.dataset.lowSensory = settings.lowSensory !== false ? 'true' : 'false';
-  }, [settings.textScale, settings.highContrast, settings.lowSensory]);
+    setBareMinimum(settings.bareMinimum === true);
+  }, [settings.textScale, settings.highContrast, settings.lowSensory, settings.bareMinimum]);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -1770,7 +1777,7 @@ export default function App() {
               <div className="flex items-center space-x-2">
                 <span className="font-extrabold text-lg tracking-tight text-emerald-300">{tr("CareSphere")}</span>
               </div>
-              <p className="text-[11px] text-slate-400">{tr("A little support, every day")}</p>
+              <Info className="text-[11px] text-slate-400">{tr("A little support, every day")}</Info>
             </div>
           </button>
 
@@ -1866,7 +1873,7 @@ export default function App() {
               <div className="welcome-copy">
                 <div className="eyebrow"><span className="welcome-dot" />{tr(" YOUR DAILY SPACE ")}<span className="welcome-date">{new Date().toLocaleDateString(languageTag(), { weekday: 'long', month: 'short', day: 'numeric' })}</span></div>
                 <h1 id="welcome-title">{tr('{0}, {1}.',[tr(greeting),settings.name || tr('friend')])}</h1>
-                <p>{tr("A little structure. A moment of calm. A familiar face.")}<br className="hidden sm:block" />{tr(" Take today at your own pace.")}</p>
+                <Info>{tr("A little structure. A moment of calm. A familiar face.")}<br className="hidden sm:block" />{tr(" Take today at your own pace.")}</Info>
                 <div className="welcome-actions">
                   <button onClick={() => goToSection('daily-routine')} className="primary-action">{tr("View my routine ")}<ArrowRight className="w-4 h-4" /></button>
                   <button onClick={() => setActiveTab('games')} className="secondary-action"><Wind className="w-4 h-4" />{tr(" Find a calm moment")}</button>
@@ -1876,7 +1883,7 @@ export default function App() {
                 <div className="daily-note-icon"><TreePine className="w-7 h-7" strokeWidth={1.5} /></div>
                 <span className="eyebrow">{tr("ONE THING AT A TIME")}</span>
                 <h2>{tr("Your day, your pace.")}</h2>
-                <p>{tr("Check in with yourself, follow a routine, or simply take a break. You choose what feels right.")}</p>
+                <Info>{tr("Check in with yourself, follow a routine, or simply take a break. You choose what feels right.")}</Info>
                 <span className="daily-note-footer"><Check className="w-4 h-4" />{tr(" Small steps are enough")}</span>
               </div>
             </section>
@@ -1920,7 +1927,7 @@ export default function App() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h3 id="routine-title" className="font-bold text-base text-white">{tr("My daily routine")}</h3>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{tr("Check-ins reset at local midnight.")}</p>
+                    <Info className="text-[11px] text-slate-500 mt-0.5">{tr("Check-ins reset at local midnight.")}</Info>
                   </div>
                   <button
                   onClick={() => setRoutineEditorOpen((open) => !open)}
@@ -1944,7 +1951,7 @@ export default function App() {
 
                       <button type="submit" disabled={!routineDraft.trim() || routines.length >= 24} className="bg-emerald-600 disabled:opacity-40 text-white font-bold px-4 py-2 rounded-xl text-xs">{tr("Add")}</button>
                     </div>
-                    <p className="text-[10px] text-slate-500">{tr("Saved only in this browser. Up to 24 routines.")}</p>
+                    <Info className="text-[10px] text-slate-500">{tr("Saved only in this browser. Up to 24 routines.")}</Info>
                   </form>
               }
                 <div className="space-y-2.5">
@@ -2022,9 +2029,9 @@ export default function App() {
         <div className="space-y-8">
             <div>
               <h1 className="text-2xl font-black text-white">{tr("Activities & Sensory Tools")}</h1>
-              <p className="text-sm text-slate-400 mt-1 leading-relaxed">{tr("Optional, self-paced activities for shared practice and enjoyment—not therapy, treatment, or assessment. No activity is timed or scored; skip or stop at any time.")}
+              <Info className="text-sm text-slate-400 mt-1 leading-relaxed">{tr("Optional, self-paced activities for shared practice and enjoyment—not therapy, treatment, or assessment. No activity is timed or scored; skip or stop at any time.")}
 
-            </p>
+            </Info>
             </div>
             <ActivityLibrary choices={support.choices} favorites={favorites} onToggleFavorite={(id) => setFavorites((current) => toggleFavorite(id, current))} renderActivity={(id) => {
             switch (id) {
@@ -2046,9 +2053,9 @@ export default function App() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-black text-white">{tr("Coffee Circles — Isolation Prevention")}</h1>
-                <p className="text-xs sm:text-sm text-slate-400 mt-1">{tr("These buttons open real ")}
+                <Info className="text-xs sm:text-sm text-slate-400 mt-1">{tr("These buttons open real ")}
                 <span className="text-emerald-300 font-semibold">{tr("meet.jit.si")}</span>{tr(" rooms — join embedded or in a full tab. Rooms are public links with no scheduled host, attendance count, or CareSphere moderation. Share only with people you trust; the provider may require sign-in to start a room. You'll appear as ")}<span className="text-white font-semibold">{settings.name}</span>.
-                </p>
+                </Info>
               </div>
               <button
               onClick={launchOpenRoom}
@@ -2108,7 +2115,7 @@ export default function App() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-black text-white">{tr("Care Circle · Local")}</h1>
-                <p className="text-xs sm:text-sm text-slate-400 mt-1">{tr("Private notes and check-ins saved in this browser. No family-sync, clinician portal, or push-alert server is connected.")}</p>
+                <Info className="text-xs sm:text-sm text-slate-400 mt-1">{tr("Private notes and check-ins saved in this browser. No family-sync, clinician portal, or push-alert server is connected.")}</Info>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button onClick={() => setVisitBriefOpen(true)} className="text-xs bg-sky-700 hover:bg-sky-600 text-white px-4 py-2.5 rounded-2xl font-bold flex items-center gap-2 transition" aria-haspopup="dialog">
@@ -2247,7 +2254,7 @@ export default function App() {
                   {hr ?? '—'} <span className="text-xs text-slate-400 font-normal">{tr("bpm")}</span>
                 </div>
                 <Sparkline data={hrHistory} />
-                <p className="text-[11px] text-slate-500">{tr("Bluetooth SIG Heart Rate profile (0x180D) · sensor notifications · stale after 15 seconds")}</p>
+                <Info className="text-[11px] text-slate-500">{tr("Bluetooth SIG Heart Rate profile (0x180D) · sensor notifications · stale after 15 seconds")}</Info>
               </div>
 
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3 md:col-span-2">
@@ -2263,7 +2270,7 @@ export default function App() {
 
 
             </p>
-              <p>{tr("Canceling pairing, losing the connection, or using an unsupported browser leaves the current reading blank. Only real Bluetooth measurements are exported.")}</p>
+              <Info>{tr("Canceling pairing, losing the connection, or using an unsupported browser leaves the current reading blank. Only real Bluetooth measurements are exported.")}</Info>
             </div>
           </div>
         }
@@ -2311,7 +2318,7 @@ export default function App() {
       {/* Footer */}
       <footer className="app-footer border-t border-slate-800 bg-slate-900/60 py-8 text-center text-xs text-slate-500 space-y-2 px-4">
         <div className="font-bold text-slate-300">{tr("CareSphere — a little support, every day")}</div>
-        <p>{tr("Real Jitsi Meet rooms · Web Bluetooth vitals · Web Audio sensory studio · Local by default · You choose what to share.")}</p>
+        <Info>{tr("Real Jitsi Meet rooms · Web Bluetooth vitals · Web Audio sensory studio · Local by default · You choose what to share.")}</Info>
       </footer>
     </div>);
 

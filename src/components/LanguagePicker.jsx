@@ -1,5 +1,6 @@
 import React,{useState} from 'react'
 import {LANGUAGES,tr,useLanguage,getLanguagePreference,setLanguagePreference} from '../lib/i18n'
+import Info from './Info'
 export default function LanguagePicker(){
   useLanguage()
   const [error,setError]=useState(false)
@@ -9,8 +10,8 @@ export default function LanguagePicker(){
         {LANGUAGES.map(l=><option key={l.id} value={l.id}>{l.id==='auto'?tr(l.name):l.name}</option>)}
       </select>
     </label>
-    <p className="text-sm mt-2">{tr('Your notes and care records stay in their original language.')}</p>
-    <p className="text-sm mt-2">{tr('Some advanced instructions and external content remain in English.')}</p>
+    <Info className="text-sm mt-2">{tr('Your notes and care records stay in their original language.')}</Info>
+    <Info className="text-sm mt-2">{tr('Some advanced instructions and external content remain in English.')}</Info>
     {error&&<p role="alert">{tr('Language preference could not be saved.')}</p>}
   </section>
 }

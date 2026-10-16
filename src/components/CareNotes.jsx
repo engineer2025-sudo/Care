@@ -1,6 +1,7 @@
 // Interface text localized; user-authored expressions are intentionally unchanged.
 import { tr, languageTag } from "../lib/i18n";import React, { useEffect, useState } from 'react';
 import { useDialog } from '../hooks/useDialog';
+import Info from './Info';
 import { matchesSearch } from '../lib/activityLibrary';
 import { RESET_LOCAL_DATA_EVENT } from '../lib/careStorage';
 const dateLabel = (date) => Number.isNaN(new Date(date).valueOf()) ? 'Date not recorded' : new Date(date).toLocaleString(languageTag(), { dateStyle: 'medium', timeStyle: 'short' });

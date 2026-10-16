@@ -1,6 +1,7 @@
 // Interface text localized; user-authored expressions are intentionally unchanged.
 import { tr } from "../lib/i18n";import React, { useEffect, useState } from 'react';
 import { Heart, Search, ArrowUpRight, X } from 'lucide-react';
+import Info from './Info';
 import { useDialog } from '../hooks/useDialog';
 import { ACTIVITIES, CATEGORIES, CHOICE_ROUNDS, filterActivities } from '../lib/activityLibrary';
 
@@ -53,12 +54,12 @@ export default function ActivityLibrary({ favorites, onToggleFavorite, renderAct
       <button className="library-primary" onClick={() => {setSelected(activity);setPaused(false);}} aria-label={`${tr("Open activity")}: ${tr(activity.title)}`}>{tr("Open activity ")}<ArrowUpRight aria-hidden="true" className="w-4 h-4" /></button>
       <button className="library-favorite" aria-pressed={favorites.includes(activity.id)} aria-label={`${tr(favorites.includes(activity.id) ? 'Remove from favorites' : 'Save to favorites')}: ${tr(activity.title)}`} onClick={() => onToggleFavorite(activity.id)}><Heart aria-hidden="true" className={`w-4 h-4 ${favorites.includes(activity.id) ? 'fill-current' : ''}`} />{favorites.includes(activity.id) ? tr('Saved to favorites') : tr('Save to favorites')}</button>
     </article>)}</div>
-    <p className="text-sm text-slate-400">{tr("Favorites stay in this browser’s encrypted storage. Participation isn’t tracked. Activities are optional practice and enjoyment, not clinically validated dementia or autism treatments.")}</p>
+    <Info className="text-sm text-slate-400">{tr("Favorites stay in this browser’s encrypted storage. Participation isn’t tracked. Activities are optional practice and enjoyment, not clinically validated dementia or autism treatments.")}</Info>
     {selected && <div className="library-modal-backdrop"><section ref={dialog} role="dialog" aria-modal="true" aria-labelledby="activity-session-title" className="library-session">
       <header className="flex justify-between items-start gap-3"><div><p className="text-sm text-emerald-300">{tr("Your own pace · no score")}</p><h2 id="activity-session-title" className="text-xl font-bold text-white">{tr(selected.title)}</h2></div><button onClick={() => setSelected(null)} className="library-secondary" aria-label={tr("Leave activity")}><X aria-hidden="true" className="w-5 h-5" /><span>{tr("Done")}</span></button></header>
       {paused ? <div className="library-empty"><p>{tr("Take your time. This activity restarts when you continue.")}</p><button className="library-primary" onClick={() => setPaused(false)}>{tr("Continue activity")}</button></div> : CHOICE_ROUNDS[selected.id] || selected.id === 'conversation' ? <SupportedActivity key={selected.id} id={selected.id} choices={choices} /> : renderActivity(selected.id)}
       <button className="library-secondary" onClick={() => setPaused(true)}>{tr("Pause activity")}</button>
-      <p className="text-sm text-slate-400">{tr("Closing this activity or moving the app to the background ends this session and stops its sound.")}</p>
+      <Info className="text-sm text-slate-400">{tr("Closing this activity or moving the app to the background ends this session and stops its sound.")}</Info>
     </section></div>}
   </>;
 }

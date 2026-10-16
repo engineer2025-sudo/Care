@@ -46,6 +46,7 @@ export function normalizePersistedValue(key, value, fallback) {
       theme: ['system', 'dark', 'light'].includes(value.theme) ? value.theme : fallback.theme,
       highContrast: typeof value.highContrast === 'boolean' ? value.highContrast : fallback.highContrast,
       lowSensory: typeof value.lowSensory === 'boolean' ? value.lowSensory : fallback.lowSensory,
+      bareMinimum: typeof value.bareMinimum === 'boolean' ? value.bareMinimum : fallback.bareMinimum === true,
       voice: typeof value.voice === 'boolean' ? value.voice : fallback.voice,
     }
   }
