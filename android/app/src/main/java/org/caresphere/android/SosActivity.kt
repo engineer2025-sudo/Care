@@ -80,8 +80,12 @@ class SosActivity : ToolActivity() {
     private fun requestFix() {
         if (!hasLocationPermission()) return
         val manager = getSystemService(LOCATION_SERVICE) as LocationManager
-        fix = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            ?: manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        fix = try {
+            manager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                ?: manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        } catch (e: SecurityException) {
+            null
+        }
         if (fix != null) { locating = false; render(); return }
         locating = true
         render()

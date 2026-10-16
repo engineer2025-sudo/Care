@@ -67,9 +67,15 @@ When you import records someone shared, you can create an **import receipt** —
 ## Optional real health data
 
 - **Health → Pair a heart-rate monitor:** requires hardware broadcasting the standard Bluetooth Heart Rate service. A Galaxy phone/watch is not assumed to broadcast this service. Grant Nearby devices permission only when you choose this feature.
-- **Health → Health history → Choose Health Connect read permissions:** choose which of heart rate, blood pressure and oxygen CareSphere may read, then tap **Read recent history**. Another health app must already have written real records to Health Connect. CareSphere does not directly sign into Samsung Health or guarantee that every Samsung Health record is shared.
-- History is limited to the last seven days/up to 100 records per type and is **not live monitoring**. It is not copied into CareSphere's persistent store or sent to AI. Missing permissions/records stay empty.
+- **Health → Health history → Choose Health Connect read permissions:** choose which of heart rate, blood pressure, oxygen, steps and exercise sessions CareSphere may read, then tap **Read recent history**. Another health app must already have written real records to Health Connect. CareSphere does not directly sign into Samsung Health or guarantee that every Samsung Health record is shared.
+- History is limited to the last seven days/up to 100 records per type and is **not live monitoring**. It is not copied into CareSphere's persistent store or sent to AI. Missing permissions/records stay empty. **Today's steps** (a Health Connect total) and **Recent workouts** (up to 20 session summaries) appear only after you grant those permissions and tap **Read recent history**.
 - **Add blood pressure / Add blood oxygen** records a measurement you took now. These are explicitly labeled **Manually entered**, not verified sensor readings.
+- **How are you feeling?** keeps a day-keyed self-report history (365 days) on this device; the visit draft can include selected entries.
+
+## Health references and Emergency SOS
+
+- **Other health data → Health references** searches five built-in safety notes offline (medication lists, home fall hazards, sensory-aware support, recording readings, urgent symptoms). Nothing is fetched or uploaded.
+- **Other health data → Emergency SOS** offers a **Call 911** dialer action and a reviewed help message you can share through any messaging app. Adding your location is optional and shown for review first; CareSphere never contacts anyone automatically and never confirms delivery.
 
 ## Share with another phone without a backend
 
