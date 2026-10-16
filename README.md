@@ -11,7 +11,7 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 **Security and Android follow-up:** fail-closed iPhone authentication, generic private medication notifications on all platforms, Android confirmed medication reminders, manual BP/oxygen records on iPhone, Android and web, explicit read-only Health Connect history, native connection-QR display/photo reading, failed-save rollback and a non-AI Android visit draft.
 
-[**Complete feature/parity checklist**](docs/feature-checklist.md) · [**Samsung installation steps**](docs/samsung-install.md) · [Release validation](docs/release-manual-vitals-2026-10-16.md)
+[**Complete feature/parity checklist**](docs/feature-checklist.md) · [**Samsung installation steps**](docs/samsung-install.md) · [Release validation](docs/release-android-parity-2026-10-16.md)
 
 This does **not** finish every requested feature. Richer portable sharing, authenticated import receipts, full advanced localization, physical-phone checks and owner-signed distribution remain open. See the checklist rather than assuming identical platforms.
 
