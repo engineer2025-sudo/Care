@@ -196,7 +196,7 @@ with tempfile.TemporaryDirectory() as tmp, zipfile.ZipFile(archive) as z:
     for executable in ['ios/scripts/preflight.sh','android/gradlew']:
         assert (z.getinfo('CareSphere-Mobile/'+executable).external_attr >> 16) & 0o100
 web_paths = [ROOT / p for p in command('git', 'ls-files', *WEB_PATHS).splitlines()]
-web_paths += [ROOT/'docs/feature-checklist.md', ROOT/'docs/release-parity-2026-10-14.md', ROOT/'docs/release-lock-2026-10-14.md', ROOT/'docs/release-receipts-2026-10-15.md', ROOT/'docs/release-manual-vitals-2026-10-16.md', ROOT/'docs/release-android-parity-2026-10-16.md', ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md', ROOT/'docs/device-sharing.md', ROOT/'docs/personal-tools.md', ROOT/'docs/languages.md']
+web_paths += [ROOT/'docs/feature-checklist.md', ROOT/'docs/release-parity-2026-10-14.md', ROOT/'docs/release-lock-2026-10-14.md', ROOT/'docs/release-receipts-2026-10-15.md', ROOT/'docs/release-manual-vitals-2026-10-16.md', ROOT/'docs/release-android-parity-2026-10-16.md', ROOT/'docs/release-checkin-2026-10-16.md', ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md', ROOT/'docs/device-sharing.md', ROOT/'docs/personal-tools.md', ROOT/'docs/languages.md']
 web_files = {str(p.relative_to(ROOT)):p for p in web_paths}
 web_files.update({'production/'+str(p.relative_to(ROOT/'dist')):p for p in (ROOT/'dist').rglob('*') if p.is_file()})
 web_manifest = {
