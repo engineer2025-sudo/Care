@@ -250,3 +250,15 @@ struct DeletedCareNote: Identifiable, Codable {
     var note: CareNote
     var deletedAt = Date()
 }
+
+struct ManualVital: Identifiable, Codable, Equatable {
+    var id: UUID
+    var kind: String
+    var first: Int
+    var second: Int?
+    var at: Date
+
+    var formatted: String {
+        kind == "bp" ? "\(first)/\(second ?? 0) mmHg" : "\(first)% SpO₂"
+    }
+}

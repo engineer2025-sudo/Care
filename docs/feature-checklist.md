@@ -123,7 +123,7 @@ Exports and messages outside the app lose its local-storage protections. Externa
 | Historical heart rate, oxygen and blood pressure | Optional Apple Health records | Optional Health Connect; last 7 days, up to 100 records/type; latest sample per heart-rate record | No |
 | Health history saved automatically into care records or sent to AI | No | No | No |
 | Missing/denied permissions remain empty, not “normal” | Yes | Yes | Yes |
-| Manual BP / oxygen entry with source and date | No | Yes: records taken now; up to 100; remove | No |
+| Manual BP / oxygen entry with source and date | Yes: records taken now; up to 100; remove | Yes: records taken now; up to 100; remove | Yes: records taken now; up to 100; remove |
 | Read workout summaries | Optional Apple Health | No | No |
 | Direct Garmin / Samsung Health account sync | No | No; another app must first write to Health Connect | No |
 | Garmin/watch BLE broadcast compatibility | Optional if that model broadcasts standard BLE HR | Same | Same, browser permitting |
@@ -201,7 +201,7 @@ The connection code, QR and discovery label are not verified identities. Opening
 ## Still open — do not mistake this batch for completion
 
 - Identity-bound import receipts (current receipts are passphrase-authenticated, not identity-verified) and full-fidelity broader portable record sharing.
-- Android extended mood/step/workout/reference/SOS equivalents; iPhone/web manual-vital parity.
+- Android extended mood/step/workout/reference/SOS equivalents.
 - Complete advanced translations and fluent-speaker safety review; no blanket accessibility conformance claim.
 - Real Samsung notification timing/battery behavior, Health Connect grants/revocation, real BLE hardware, and all three native sharing pairings in both directions.
 - Physical iPhone authentication failure/cancellation/background tests, Apple Intelligence hardware responses, VoiceOver/TalkBack/switch-access and intended-user sessions.

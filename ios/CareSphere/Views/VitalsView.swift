@@ -14,6 +14,11 @@ struct VitalsView: View {
     @EnvironmentObject private var bluetooth: BluetoothHeartRateService
 
     @State private var series: [VitalsPoint] = []
+    @State private var manualEntry: String? = nil
+    @State private var manualFirst = ""
+    @State private var manualSecond = ""
+    @State private var manualError = false
+    @State private var confirmRemoval: ManualVital? = nil
 
     private var effectiveHR: Double? { bluetooth.bpm.map(Double.init) ?? healthKit.heartRate }
     private var hrFlag: Bool { effectiveHR.map { $0 < 50 || $0 > 110 } ?? false }
@@ -39,6 +44,7 @@ struct VitalsView: View {
                     heartRateCard
                     spo2Card
                     bloodPressureCard
+                    manualReadingsCard
                     howItWorks
                 }
                 .carePagePadding()
@@ -324,6 +330,81 @@ struct VitalsView: View {
                     .padding(.vertical, 9)
             }
             .buttonStyle(.bordered)
+        }
+    }
+
+    private var manualReadingsCard: some View {
+        SectionCard(title: AppLanguage.text("Your manually entered records"), systemImage: "square.and.pencil") {
+            InfoText(AppLanguage.text("These are self-entered values, not verified sensor readings. They do not change your care plan."))
+            HStack {
+                Button(AppLanguage.text("Add blood pressure")) {
+                    manualEntry = "bp"; manualFirst = ""; manualSecond = ""; manualError = false
+                }
+                Button(AppLanguage.text("Add blood oxygen")) {
+                    manualEntry = "oxygen"; manualFirst = ""; manualSecond = ""; manualError = false
+                }
+            }
+            .buttonStyle(.bordered)
+            .disabled(store.manualVitals.count >= 100)
+            if let entry = manualEntry {
+                VStack(alignment: .leading, spacing: 8) {
+                    TextField(AppLanguage.text(entry == "bp" ? "Systolic · mmHg" : "Blood oxygen · percent"), text: $manualFirst)
+                        .keyboardType(.numberPad)
+                    if entry == "bp" {
+                        TextField(AppLanguage.text("Diastolic · mmHg"), text: $manualSecond)
+                            .keyboardType(.numberPad)
+                    }
+                    if manualError {
+                        Text(AppLanguage.text("Check the units and values. This is not a medical interpretation."))
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                    }
+                    HStack {
+                        Button(AppLanguage.text("Save")) {
+                            let first = Int(manualFirst.trimmingCharacters(in: .whitespaces)) ?? 0
+                            let second = entry == "bp" ? Int(manualSecond.trimmingCharacters(in: .whitespaces)) : nil
+                            if store.addManualVital(kind: entry, first: first, second: second) {
+                                manualEntry = nil
+                                manualError = false
+                            } else {
+                                manualError = true
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        Button(AppLanguage.text("Cancel")) {
+                            manualEntry = nil
+                            manualError = false
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                }
+                .textFieldStyle(.roundedBorder)
+            }
+            ForEach(Array(store.manualVitals.reversed())) { vital in
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(vital.formatted) · \(AppLanguage.text("Manually entered"))")
+                            .font(.subheadline.weight(.medium))
+                        Text(vital.at.formatted(date: .abbreviated, time: .shortened))
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button(AppLanguage.text("Remove")) {
+                        confirmRemoval = vital
+                    }
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(.red)
+                }
+            }
+        }
+        .alert(AppLanguage.text("Delete this manually entered record?"),
+               isPresented: Binding(get: { confirmRemoval != nil }, set: { if !$0 { confirmRemoval = nil } })) {
+            Button(AppLanguage.text("Remove"), role: .destructive) {
+                if let vital = confirmRemoval { store.removeManualVital(id: vital.id) }
+                confirmRemoval = nil
+            }
+            Button(AppLanguage.text("Cancel"), role: .cancel) { confirmRemoval = nil }
         }
     }
 

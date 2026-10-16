@@ -6,7 +6,7 @@ export function validManualVital(kind, first, second = null) {
 }
 
 export function formatManualVital(record) {
-  return record.kind === 'bp' ? `${record.first}/${record.second} mmHg` : `${record.first}%`
+  return record.kind === 'bp' ? `${record.first}/${record.second} mmHg` : `${record.first}% SpO₂`
 }
 
 export function manualVitalRow(kind, first, second, at = new Date().toISOString()) {

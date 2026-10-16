@@ -43,6 +43,7 @@ final class CareStore: ObservableObject {
     @Published var favoriteActivities: [String] { didSet { save() } }
     @Published var notes: [CareNote] { didSet { save() } }
     @Published var moods: [MoodEntry] { didSet { save() } }
+    @Published var manualVitals: [ManualVital] { didSet { save() } }
     @Published var emotionScore: Int { didSet { save() } }
     @Published var bestPattern: Int { didSet { save() } }
 
@@ -89,6 +90,9 @@ final class CareStore: ObservableObject {
         favoriteActivities = ActivityPreferences.normalized(box?.favoriteActivities ?? [])
         notes = box?.notes ?? []
         moods = box?.moods ?? []
+        manualVitals = Array((box?.manualVitals ?? []).filter {
+            VitalRules.valid(kind: $0.kind, first: $0.first, second: $0.second)
+        }.prefix(100))
         emotionScore = box?.emotionScore ?? 0
         bestPattern = box?.bestPattern ?? 0
         hasCompletedOnboarding = box?.hasCompletedOnboarding ?? false
@@ -186,7 +190,8 @@ final class CareStore: ObservableObject {
             highContrast: highContrast,
             reduceVisualMotion: reduceVisualMotion,
             heartRateCheckInEnabled: heartRateCheckInEnabled,
-            profile: profile)
+            profile: profile,
+            manualVitals: manualVitals)
     }
 
     private func save() {
@@ -307,6 +312,7 @@ final class CareStore: ObservableObject {
         personalSupport = PersonalSupport()
         notes = []
         moods = []
+        manualVitals = []
         emotionScore = 0
         bestPattern = 0
         hasCompletedOnboarding = false
@@ -372,6 +378,8 @@ final class CareStore: ObservableObject {
         var reduceVisualMotion: Bool?
         var heartRateCheckInEnabled: Bool?
         var profile: CareProfile?
+        // Optional so stores saved before manual vitals continue to decode.
+        var manualVitals: [ManualVital]?
     }
 
     // MARK: Derived values
@@ -416,6 +424,16 @@ final class CareStore: ObservableObject {
     }
 
     // MARK: Mutations
+
+    func addManualVital(kind: String, first: Int, second: Int?) -> Bool {
+        guard manualVitals.count < 100, VitalRules.valid(kind: kind, first: first, second: second) else { return false }
+        manualVitals.append(ManualVital(id: UUID(), kind: kind, first: first, second: second, at: Date()))
+        return true
+    }
+
+    func removeManualVital(id: UUID) {
+        manualVitals.removeAll { $0.id == id }
+    }
 
     func toggleRoutine(_ routine: Routine) {
         if let index = routines.firstIndex(where: { $0.id == routine.id }) {

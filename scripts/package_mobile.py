@@ -90,8 +90,8 @@ gradle = (ROOT/'android/app/build.gradle.kts').read_text()
 assert re.search(r'versionName\s*=\s*\"1\.8\.0\"', gradle)
 assert re.search(r'versionCode\s*=\s*10\b', gradle)
 assert json.loads((ROOT/'package.json').read_text())['version'] == '1.5.0'
-assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 670
-language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':670,
+assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 671
+language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':671,
     'offline_catalog':True, 'persistent_selector':True, 'automatic_patient_text_translation':False,
     'english_fallback_for_untranslated_content':True, 'complete_interface_translation':False,
     'professional_linguistic_review':False, 'physical_multilingual_speech_tested':False}
@@ -99,7 +99,7 @@ manifest = {
     'source_commit': command('git','rev-parse','HEAD').strip(),
     'ios': {'version':'3.7.0 (16)', 'ci':ios['url'], 'tested_commit':ios['headSha'],
         'unsigned_device_build': True, 'healthkit_build': True, 'simulator_launch': True,
-        'tests':51, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
+        'tests':54, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
     'android': {'version':'1.8.0 (10)', 'ci':android['url'], 'tested_commit':android['headSha'],
         'tests':48, 'lint':'passed', 'apk_signing_verified_in_ci':True,
         'emulator_smoke':'passed', 'five_language_ui_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
@@ -154,7 +154,7 @@ not full iOS feature parity. See android/README.md and ios/README.md for exact s
 
 VALIDATION
 See BUILD_VERIFICATION.json for successful CI runs and file hashes.
-iOS 3.7.0 (16): 51 logic/preference/packet/transfer/LAN/discovery/language tests; standard device, HealthKit and Simulator builds; launch.
+iOS 3.7.0 (16): 54 logic/preference/packet/transfer/LAN/discovery/language/vitals tests; standard device, HealthKit and Simulator builds; launch.
 Android 1.8.0 (10): 48 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
 Real-device BLE, actual Apple Intelligence responses, accessibility with users, and
 Mac signing remain manual acceptance work. No clinical effectiveness is claimed.

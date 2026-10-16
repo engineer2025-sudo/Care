@@ -2195,6 +2195,8 @@ export default function App() {
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 md:col-span-2">
                 <h2 className="font-bold text-white">{tr("Other health readings")}</h2>
                 <p className="text-sm text-slate-400">{tr("Blood oxygen and blood pressure are not connected in this browser. No values are generated. The optional HealthKit build of the native iOS app can read records you choose to share from Apple Health.")}</p>
+                <h3 className="text-white font-semibold">{tr("Your manually entered records")}</h3>
+                <Info><p className="text-sm text-slate-400">{tr("These are self-entered values, not verified sensor readings. They do not change your care plan.")}</p></Info>
                 <div className="support-actions">
                   {!vitalForm && <button className="library-secondary" onClick={() => { setVitalForm({ kind: 'bp' }); setVitalFormError(false); }}>{tr("Add blood pressure")}</button>}
                   {!vitalForm && <button className="library-secondary" onClick={() => { setVitalForm({ kind: 'oxygen' }); setVitalFormError(false); }}>{tr("Add blood oxygen")}</button>}

@@ -45,5 +45,5 @@ test('manualVitalRow builds a removable record', () => {
 
 test('formatManualVital shows the entered value with units only', () => {
   assert.equal(formatManualVital({ kind: 'bp', first: 120, second: 80 }), '120/80 mmHg');
-  assert.equal(formatManualVital({ kind: 'oxygen', first: 97 }), '97%');
+  assert.equal(formatManualVital({ kind: 'oxygen', first: 97 }), '97% SpO₂');
 });
