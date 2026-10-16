@@ -110,7 +110,7 @@ def failure(kind, value, tb):
     if isinstance(value, subprocess.CalledProcessError): detail += str(value.output)
     try: detail += '\nCURRENT TEXT: ' + repr([(n.attrib.get('text'),n.attrib.get('class')) for n in screen().iter('node') if n.attrib.get('text') and n.attrib.get('package') == package])[-5000:]
     except Exception: pass
-    try: detail += '\nALL WINDOWS: ' + repr([(n.attrib.get('text'),n.attrib.get('package')) for n in screen().iter('node') if n.attrib.get('text')])[-5000:]
+    try: detail += '\nALL WINDOWS: ' + repr([(n.attrib.get('text') or n.attrib.get('content-desc') or n.attrib.get('class'), n.attrib.get('package')) for n in screen().iter('node') if n.attrib.get('text') or n.attrib.get('class') == 'android.widget.EditText'])[-5000:]
     except Exception: pass
     try: detail += '\nCRASH LOG: ' + adb('logcat','-d','-s','AndroidRuntime:E')[-8000:]
     except Exception: pass
@@ -152,17 +152,24 @@ adb('uninstall',package+'.test')
 # Test-only public PIN on an emulator (the destructive physical-device guard is above).
 # Never copy these locksettings commands to a user's phone.
 def enter_system_test_pin():
-    deadline=time.monotonic()+20
-    while time.monotonic()<deadline:
-        fields=[n for n in screen().iter('node') if n.attrib.get('class')=='android.widget.EditText' and n.attrib.get('package')!=package]
-        if fields:
-            x1,y1,x2,y2=map(int,re.findall(r'\d+',fields[0].attrib['bounds']))
-            adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
-            adb('shell','input','text','246810')
-            adb('shell','input','keyevent','66')
-            return
-        time.sleep(.5)
-    raise AssertionError('System device-credential field not found')
+        deadline=time.monotonic()+30
+        while time.monotonic()<deadline:
+            fields=[n for n in screen().iter('node') if n.attrib.get('class')=='android.widget.EditText' and n.attrib.get('package')!=package]
+            if fields:
+                x1,y1,x2,y2=map(int,re.findall(r'\d+',fields[0].attrib['bounds']))
+                adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+                time.sleep(.8)  # let the credential field take focus before typing
+                adb('shell','input','text','246810')
+                time.sleep(.3)
+                adb('shell','input','keyevent','66')
+                time.sleep(.8)
+                # The system prompt/bouncer dismisses only after accepting the PIN.
+                # If it is still up, the input missed: retry instead of failing later.
+                if not any(n.attrib.get('class')=='android.widget.EditText' and n.attrib.get('package')!=package for n in screen().iter('node')):
+                    return
+                continue
+            time.sleep(.5)
+        raise AssertionError('System device-credential field not found or did not accept the test PIN')
 def clear_bouncer_if_any():
     """If a system credential bouncer covers the app (screen slept after the test
     PIN exists), unlock it with the emulator-only test PIN before reading the UI."""
