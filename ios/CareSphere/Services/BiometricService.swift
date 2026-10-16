@@ -5,7 +5,7 @@ import LocalAuthentication
 /// Fails closed when authentication is unavailable.
 enum BiometricService {
 
-        static var biometryName: String {
+    static var biometryName: String {
         let context = LAContext()
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
@@ -25,7 +25,7 @@ enum BiometricService {
         return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
 
-        @discardableResult
+    @discardableResult
     static func authenticate(reason: String, completion: @escaping (Bool, String?) -> Void) -> LAContext {
         let context = LAContext()
         context.localizedFallbackTitle = AppLanguage.text("Use Passcode")

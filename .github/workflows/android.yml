@@ -83,8 +83,11 @@ jobs:
           p = Path('/tmp/android-build.log')
           if p.exists():
               lines = p.read_text().splitlines()
-              key = [l for l in lines if re.search(r'\be: |\berror:|FAILED|FAILURE|What went wrong|Caused by|Execution failed|lint found|AssertionError|Could not (find|resolve)', l)]
-              chosen = key[-60:] if key else [l for l in lines if not l.startswith('w:')][-40:]
+              errors = [l for l in lines if re.search(r':\d+: (Error|Warning)|\be: |\berror:|Could not (find|resolve)', l)]
+              key = [l for l in lines if re.search(r'\be: |\berror:|Error:|FAILED|FAILURE|What went wrong|Caused by|Execution failed|lint found|AssertionError|Could not (find|resolve)', l)]
+              chosen = (errors[-30:] if errors else []) + [l for l in key if l not in errors][-30:]
+              if not chosen:
+                  chosen = [l for l in lines if not l.startswith('w:')][-40:]
               chunks.append('\n'.join(chosen))
           detail = '\n'.join(chunks)[-3600:] or 'Build failed without captured output.'
           print('::error title=Android build::' + detail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))

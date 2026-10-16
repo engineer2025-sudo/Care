@@ -18,7 +18,7 @@ public struct ChoiceRound: Identifiable {
     public let hint: String
     public var answer: ActivityPicture { choices.first { $0.id == answerID }! }
 
-        public func options(fewerChoices: Bool) -> [ActivityPicture] {
+    public func options(fewerChoices: Bool) -> [ActivityPicture] {
         guard fewerChoices, choices.count > 2 else { return choices }
         let alternativeID = choices.first { $0.id != answerID }!.id
         return choices.filter { $0.id == answerID || $0.id == alternativeID }
@@ -66,7 +66,7 @@ public struct EverydaySequence: Identifiable {
     public let id: String
     public let title: String
     public let steps: [ActivityPicture]
-        public var options: [ActivityPicture] { [steps[2], steps[0], steps[1]] }
+    public var options: [ActivityPicture] { [steps[2], steps[0], steps[1]] }
 }
 
 public struct SequenceSession {
@@ -150,7 +150,7 @@ public enum ActivityExercises {
     public static let matching: [ChoiceRound] = [circle, book, leaf, cup, star, house, triangle, square].enumerated().map { index, picture in
         let all = [circle, book, leaf, cup, star, house, triangle, square]
         var choices = (0..<4).map { all[(index + $0) % all.count] }
-                let shift = index % choices.count
+        let shift = index % choices.count
         choices = Array(choices.dropFirst(shift)) + Array(choices.prefix(shift))
         return ChoiceRound(id: "match-\(picture.id)", prompt: "Find the same picture as the one above.", pictures: [picture], choices: choices, answerID: picture.id, hint: "Look for the \(picture.label.lowercased()). The picture and word are the same.")
     }

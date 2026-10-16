@@ -41,7 +41,7 @@ struct CareSphereApp: App {
                 if !store.hasCompletedOnboarding {
                     OnboardingView()
                 } else if store.biometricEnabled && (isLocked || !hasCheckedInitialLock) {
-                                        AppLockView(onUnlock: { isLocked = false })
+                    AppLockView(onUnlock: { isLocked = false })
                 } else {
                     RootTabView()
                 }
@@ -123,9 +123,9 @@ struct CareSphereApp: App {
 }
 
 extension Color {
-        static let emerald = Color(red: 55 / 255, green: 111 / 255, blue: 76 / 255)
+    static let emerald = Color(red: 55 / 255, green: 111 / 255, blue: 76 / 255)
 
-        static let emeraldText: Color = {
+    static let emeraldText: Color = {
         #if os(iOS)
         return Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -142,7 +142,7 @@ extension Color {
         #endif
     }()
 
-        static let ink: Color = {
+    static let ink: Color = {
         #if os(iOS)
         return Color(uiColor: .systemBackground)
         #else

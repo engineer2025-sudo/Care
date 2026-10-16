@@ -36,7 +36,7 @@ enum SecureCareStorage {
         return SymmetricKey(data: data)
     }
 
-        static func loadOrCreateKey() throws -> SymmetricKey {
+    static func loadOrCreateKey() throws -> SymmetricKey {
         if let key = try loadExistingKey() { return key }
 
         let key = SymmetricKey(size: .bits256)

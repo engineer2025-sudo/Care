@@ -67,7 +67,7 @@ class SupportActivity : ProtectedActivity() {
     private fun update(key:String, values:List<JSONObject>) { save(key,JSONArray(values)); render() }
     private fun dialog()=AlertDialog.Builder(ContextThemeWrapper(this, if(dark) android.R.style.Theme_Material_Dialog_Alert else android.R.style.Theme_Material_Light_Dialog_Alert))
     private fun text(value:String,size:Float=18f) { page.addView(TextView(this).apply { text=value;textSize=size;setTextColor(ink);setPadding(0,dp(10),0,dp(10));setTextIsSelectable(true) }) }
-        private fun copy(value:String,size:Float=18f) { if(!DisplayMode.enabled(this)) text(value,size) }
+    private fun copy(value:String,size:Float=18f) { if(!DisplayMode.enabled(this)) text(value,size) }
     private fun button(label:String, action:()->Unit):Button = Button(this).apply { text=label;isAllCaps=false;textSize=18f;minHeight=dp(52);setTextColor(ink);background=GradientDrawable().apply{setColor(soft);cornerRadius=dp(14).toFloat()};page.addView(this,LinearLayout.LayoutParams(-1,-2).apply{topMargin=dp(6);bottomMargin=dp(6)});setOnClickListener{action()} }
     private fun message(value:String) { if(!isFinishing && !isDestroyed)dialog().setMessage(value).setPositiveButton(tx("OK"),null).showProtected() }
     private fun confirm(body:String,action:()->Unit) { dialog().setMessage(body).setNegativeButton(tx("Cancel"),null).setPositiveButton(tx("Continue")){_,_->action()}.showProtected() }
@@ -110,7 +110,7 @@ class SupportActivity : ProtectedActivity() {
             return
         }
         if(!speechReady)return // Initialization keeps only the most recently requested text.
-                if(!configureSpeechVoice()){
+        if(!configureSpeechVoice()){
             pendingSpeech=null
             message(tx("No installed voice for this language. The words remain visible."))
             return

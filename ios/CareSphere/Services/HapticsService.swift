@@ -12,7 +12,7 @@ enum HapticsService {
 
     private static func ensureEngine() -> CHHapticEngine? {
         if let engine { return engine }
-                guard let newEngine = try? CHHapticEngine() else { return nil }
+        guard let newEngine = try? CHHapticEngine() else { return nil }
         newEngine.resetHandler = { try? newEngine.start() }
         try? newEngine.start()
         engine = newEngine
@@ -32,7 +32,7 @@ enum HapticsService {
         generator.notificationOccurred(fallback)
     }
 
-        static func success() {
+    static func success() {
         play([
             CHHapticEvent(eventType: .hapticTransient, parameters: [
                 CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.7),
@@ -43,7 +43,7 @@ enum HapticsService {
         ], fallback: .success)
     }
 
-        static func warning() {
+    static func warning() {
         play([
             CHHapticEvent(eventType: .hapticContinuous, parameters: [
                 CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.8),
@@ -52,7 +52,7 @@ enum HapticsService {
         ], fallback: .warning)
     }
 
-        static func error() {
+    static func error() {
         play([
             CHHapticEvent(eventType: .hapticContinuous, parameters: [
                 CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),

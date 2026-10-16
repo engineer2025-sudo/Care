@@ -138,7 +138,7 @@ struct ActivitySessionView: View {
                     Label(AppLanguage.text("No score · stop whenever you like"), systemImage: "leaf")
                         .font(.subheadline).foregroundStyle(Color.emeraldText)
                     // Keep the session mounted while paused so choices are not lost.
-                                        ZStack(alignment: .top) {
+                    ZStack(alignment: .top) {
                         activityContent
                             .opacity(paused ? 0 : 1)
                             .allowsHitTesting(!paused)
@@ -178,7 +178,7 @@ struct ActivitySessionView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(AppLanguage.text("Done")) { dismiss() }.accessibilityLabel(AppLanguage.text("Leave activity"))
                 }
-                                if activity != .soundscapes && activity != .breathing {
+                if activity != .soundscapes && activity != .breathing {
                     ToolbarItem(placement: .primaryAction) {
                         Button(paused ? "Continue" : "Take a break") { paused.toggle() }
                     }

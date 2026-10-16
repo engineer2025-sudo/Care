@@ -287,7 +287,7 @@ final class CareStore: ObservableObject {
 
     var canExportCareData: Bool { persistenceCanWrite }
 
-        func makeCareDataExport() throws -> Data {
+    func makeCareDataExport() throws -> Data {
         guard persistenceCanWrite else { throw CareStoreError.storageUnavailable }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -398,7 +398,7 @@ final class CareStore: ObservableObject {
             .min { ($0.hour, $0.minute) < ($1.hour, $1.minute) }
     }
 
-            func refreshMedicationReminders() {
+    func refreshMedicationReminders() {
         syncMedicationReminders()
     }
 
@@ -416,7 +416,7 @@ final class CareStore: ObservableObject {
     }
     var moodToday: MoodEntry? { moods.first { $0.day == CareTime.dayKey() } }
 
-        var personalizedTagline: String {
+    var personalizedTagline: String {
         var parts: [String] = []
         if let age = profile.age { parts.append("\(age) years young") }
         parts.append("focused on \(profile.careMode.label.lowercased())")
@@ -441,7 +441,7 @@ final class CareStore: ObservableObject {
         }
     }
 
-        func addRoutine(title: String, emoji: String = "✨") {
+    func addRoutine(title: String, emoji: String = "✨") {
         let cleanedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleanedTitle.isEmpty, routines.count < 24 else { return }
         let cleanedEmoji = emoji.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -519,7 +519,7 @@ final class CareStore: ObservableObject {
         if !notes.contains(where: { $0.id == entry.id }) { notes.insert(entry.note, at: 0) }
         personalSupport.deletedNotes.removeAll { $0.id == entry.id }
     }
-            func importTransfer(_ transfer: TransferPayload, selected: Set<String>) throws -> [String] {
+    func importTransfer(_ transfer: TransferPayload, selected: Set<String>) throws -> [String] {
         guard persistenceCanWrite else { throw CareStoreError.storageUnavailable }
         try DeviceTransfer.validate(transfer)
         var box = persistedBox()

@@ -18,14 +18,14 @@ extension EnvironmentValues {
 }
 
 extension Color {
-        static let card = {
+    static let card = {
         #if os(iOS)
         return Color(UIColor.secondarySystemBackground)
         #else
         return Color(NSColor.controlBackgroundColor)
         #endif
     }()
-        static let cardInner = {
+    static let cardInner = {
         #if os(iOS)
         return Color(UIColor.tertiarySystemBackground)
         #else
@@ -35,7 +35,7 @@ extension Color {
 }
 
 extension View {
-            @ViewBuilder
+    @ViewBuilder
     func inlineTitle() -> some View {
         #if os(iOS)
         navigationBarTitleDisplayMode(.inline)
@@ -126,7 +126,7 @@ struct BigMetricButton<Label: View>: View {
 }
 
 extension View {
-            func celebrate() {
+    func celebrate() {
         HapticsService.success()
     }
 }
@@ -141,7 +141,7 @@ func hapticError() {
 
 
 extension View {
-        func carePagePadding() -> some View {
+    func carePagePadding() -> some View {
         self.padding(16)
             .frame(maxWidth: 900)
             .frame(maxWidth: .infinity, alignment: .center)

@@ -487,5 +487,5 @@ private struct WorkoutSummaryRow: View {
 }
 
 extension HealthKitService {
-        var spo2FlagView: Bool { (spo2 ?? 99) < 94 }
+    var spo2FlagView: Bool { (spo2 ?? 99) < 94 }
 }

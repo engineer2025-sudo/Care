@@ -39,7 +39,7 @@ final class StepCountService: ObservableObject {
                 }
             }
         }
-                    }
+    }
 }
 #else
 import Foundation

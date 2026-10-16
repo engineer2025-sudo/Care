@@ -66,7 +66,7 @@ struct OnboardingView: View {
     var body: some View {
         VStack(spacing: 0) {
             InterfaceLanguagePicker(compact: true).padding(.horizontal)
-                        VStack(spacing: 8) {
+            VStack(spacing: 8) {
                 HStack {
                     Text(AppLanguage.text("CareSphere Setup"))
                         .font(.caption.weight(.heavy))
@@ -104,7 +104,7 @@ struct OnboardingView: View {
 
             Spacer(minLength: 0)
 
-                        HStack(spacing: 12) {
+            HStack(spacing: 12) {
                 if step != .welcome {
                     Button {
                         step = Step(rawValue: step.rawValue - 1) ?? .welcome

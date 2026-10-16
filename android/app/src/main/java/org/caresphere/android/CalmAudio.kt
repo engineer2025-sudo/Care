@@ -12,7 +12,7 @@ class CalmAudio {
             val rate = 22050
             val samples = ShortArray(rate * 4) { n ->
                 val phase = 2.0 * PI * n / rate
-                                ((sin(phase * 174) + sin(phase * 261) * .35 + sin(phase * 348) * .15) * 2000).toInt().toShort()
+                ((sin(phase * 174) + sin(phase * 261) * .35 + sin(phase * 348) * .15) * 2000).toInt().toShort()
             }
             val audio = AudioTrack.Builder()
                 .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())

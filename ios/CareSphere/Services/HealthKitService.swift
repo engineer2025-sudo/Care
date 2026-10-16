@@ -53,7 +53,7 @@ final class HealthKitService: NSObject, ObservableObject {
     private var observedSampleTypeIdentifiers = Set<String>()
     private var didInstallObservers = false
 
-        var canRequestAuthorization: Bool {
+    var canRequestAuthorization: Bool {
         #if os(iOS) && CARE_HEALTHKIT
         return HKHealthStore.isHealthDataAvailable()
         #else
@@ -123,7 +123,7 @@ final class HealthKitService: NSObject, ObservableObject {
         #endif
     }
 
-            func refreshAll() {
+    func refreshAll() {
         guard canRequestAuthorization, hasRequestedAuthorization else { return }
         installObserversIfNeeded()
 

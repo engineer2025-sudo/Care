@@ -44,7 +44,7 @@ final class NotificationService: NSObject, ObservableObject {
         }
     }
 
-            func syncMedicationReminders(_ meds: [Medication]) {
+    func syncMedicationReminders(_ meds: [Medication]) {
         // Serialize scheduling decisions on the main queue. A late settings/list
         // callback from an older edit must not re-enable a paused schedule.
         guard Thread.isMainThread else {

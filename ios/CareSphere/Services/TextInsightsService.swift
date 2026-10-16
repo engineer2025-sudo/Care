@@ -3,7 +3,7 @@ import NaturalLanguage
 
 enum TextInsightsService {
 
-        static func sentimentScore(for text: String) -> Double {
+    static func sentimentScore(for text: String) -> Double {
         let tagger = NLTagger(tagSchemes: [.sentimentScore])
         tagger.string = text
         let (tag, _) = tagger.tag(at: text.startIndex, unit: .paragraph, scheme: .sentimentScore)

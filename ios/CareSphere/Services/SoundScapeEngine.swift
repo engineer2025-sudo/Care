@@ -115,7 +115,7 @@ final class SoundScapeEngine {
     }
 
     private func rand() -> Float {
-                var x = rngState
+        var x = rngState
         x ^= x << 13
         x ^= x >> 17
         x ^= x << 5

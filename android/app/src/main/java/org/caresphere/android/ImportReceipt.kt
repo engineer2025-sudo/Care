@@ -67,7 +67,7 @@ object ImportReceipt {
         require(macSalt.size == 16) { "invalid salt" }
     }
 
-        fun verify(receipt: JSONObject, passphrase: String): JSONObject {
+    fun verify(receipt: JSONObject, passphrase: String): JSONObject {
         require(receipt.optString("format") == "CareSphere Import Receipt" && receipt.optInt("version") == 1) { "unsupported receipt" }
         val imported = (0 until receipt.getJSONArray("imported").length()).map { receipt.getJSONArray("imported").getString(it) }
         val salt = Base64.getDecoder().decode(receipt.getString("mac_salt"))
@@ -80,7 +80,7 @@ object ImportReceipt {
             .put("imported", JSONArray(imported)).put("imported_at", receipt.getString("imported_at")).put("source", receipt.getString("source"))
     }
 
-        fun verifyAgainstTransfer(receipt: JSONObject, passphrase: String, transferFile: ByteArray): JSONObject {
+    fun verifyAgainstTransfer(receipt: JSONObject, passphrase: String, transferFile: ByteArray): JSONObject {
         val details = verify(receipt, passphrase)
         val fileMatches = fileSha256(transferFile) == details.getString("file_sha256")
         val envelope = JSONObject(String(transferFile, Charsets.UTF_8))
