@@ -34,6 +34,44 @@ def wake():
     adb('shell', 'wm', 'dismiss-keyguard')
     time.sleep(.3)
 
+def wait_text(label, timeout=8):
+    """Like find() but never swipes: safe inside system picker drawers/dialogs."""
+    end = time.monotonic() + timeout
+    while time.monotonic() < end:
+        tree = screen()
+        candidates = [n for n in tree.iter('node') if n.attrib.get('text', '').casefold() == label.casefold() or n.attrib.get('content-desc', '').casefold() == label.casefold()]
+        if candidates:
+            return next((n for n in candidates if n.attrib.get('clickable') == 'true'), candidates[0])
+        time.sleep(.4)
+    return None
+
+def tap_node(node):
+    x1, y1, x2, y2 = map(int, re.findall(r'\d+', node.attrib['bounds']))
+    adb('shell', 'input', 'tap', str((x1+x2)//2), str((y1+y2)//2))
+    time.sleep(.5)
+
+def pick_download_file(label, rounds=4):
+    """ACTION_OPEN_DOCUMENT can land in Recents or Downloads, and the roots drawer
+    overlays the list. Navigate deliberately and never swipe while the drawer may
+    be open (a swallowed half-navigation failed run 38856641143)."""
+    for _ in range(rounds):
+        if wait_text(label, 5) is not None:
+            tap(label)
+            return
+        drawer = wait_text('Show roots', 4)
+        if drawer is not None:
+            tap_node(drawer)
+            downloads = wait_text('Downloads', 5)
+            if downloads is not None:
+                tap_node(downloads)
+                time.sleep(1)
+                try:
+                    tap(label)
+                    return
+                except AssertionError:
+                    continue
+    raise AssertionError(f'File picker never showed {label}')
+
 def find(label, timeout=35):
     end = time.monotonic() + timeout
     attempts = 0
@@ -70,6 +108,8 @@ def failure(kind, value, tb):
     detail = ''.join(traceback.format_exception(kind, value, tb))
     if isinstance(value, subprocess.CalledProcessError): detail += str(value.output)
     try: detail += '\nCURRENT TEXT: ' + repr([(n.attrib.get('text'),n.attrib.get('class')) for n in screen().iter('node') if n.attrib.get('text') and n.attrib.get('package') == package])[-5000:]
+    except Exception: pass
+    try: detail += '\nALL WINDOWS: ' + repr([(n.attrib.get('text'),n.attrib.get('package')) for n in screen().iter('node') if n.attrib.get('text')])[-5000:]
     except Exception: pass
     try: detail += '\nCRASH LOG: ' + adb('logcat','-d','-s','AndroidRuntime:E')[-8000:]
     except Exception: pass
@@ -161,12 +201,7 @@ try:
     tap('Passphrase')
     adb('shell','input','text','cross%sdevice%stest%sphrase')
     tap('Continue')
-    try:
-        tap('Show roots')
-        tap('Downloads')
-    except AssertionError:
-        pass
-    tap('CareSphere-test.caretransfer')
+    pick_download_file('CareSphere-test.caretransfer')
     find('CareSphere is locked')
     assert not any(n.attrib.get('text')=='Preview received copies' for n in screen().iter('node'))
     tap('Unlock CareSphere')
@@ -302,14 +337,7 @@ tap('Passphrase')
 time.sleep(1)
 adb('shell','input','text','cross%sdevice%stest%sphrase')
 tap('Continue')
-# ACTION_OPEN_DOCUMENT starts in Recents. Use its navigation drawer for Downloads.
-try:
-    tap('Show roots')
-    tap('Downloads')
-except AssertionError:
-    # Some platform images open Downloads directly.
-    pass
-tap('CareSphere-test.caretransfer')
+pick_download_file('CareSphere-test.caretransfer')
 find('Preview received copies')
 tap('note: Browser transfer test note')
 tap('Import selected copies')
