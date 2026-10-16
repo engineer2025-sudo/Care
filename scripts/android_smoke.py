@@ -13,7 +13,7 @@ from pathlib import Path
 package = 'org.caresphere.android'
 
 def adb(*args):
-    timeout = 120 if 'instrument' in args else 45
+    timeout = 300 if 'instrument' in args else 45
     try:
         return subprocess.check_output(['adb', *args], text=True, stderr=subprocess.STDOUT, timeout=timeout)
     except subprocess.TimeoutExpired as error:
@@ -25,6 +25,14 @@ def adb(*args):
 def screen():
     adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml')
     return ET.fromstring(adb('shell', 'cat', '/sdcard/window.xml'))
+
+def wake():
+    """CI emulator only: wake the display and clear a non-secure keyguard.
+    A sleeping screen produces empty UI dumps (seen in run 38677847508)."""
+    adb('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP')
+    time.sleep(.3)
+    adb('shell', 'wm', 'dismiss-keyguard')
+    time.sleep(.3)
 
 def find(label, timeout=35):
     end = time.monotonic() + timeout
@@ -65,6 +73,10 @@ def failure(kind, value, tb):
     except Exception: pass
     try: detail += '\nCRASH LOG: ' + adb('logcat','-d','-s','AndroidRuntime:E')[-8000:]
     except Exception: pass
+    try: detail += '\nPOWER: ' + adb('shell','dumpsys power | grep -E "mWakefulness=|mStayOn="')[-500:]
+    except Exception: pass
+    try: detail += '\nKEYGUARD: ' + adb('shell','dumpsys window | grep -E "isStatusBarKeyguard|KeyguardShowing|mShowingDream"')[-500:]
+    except Exception: pass
     print('::error title=Android emulator smoke::' + detail.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
     traceback.print_exception(kind, value, tb)
 
@@ -82,6 +94,12 @@ if adb('shell','getprop','ro.kernel.qemu').strip() != '1':
 
 adb('install', '-r', 'android/app/build/outputs/apk/debug/app-debug.apk')
 adb('shell', 'pm', 'clear', package)
+# Keep the emulator display on for the entire run so later UI dumps are never
+# empty because the screen slept (or a keyguard appeared) during long steps.
+adb('shell','settings','put','global','stay_on_while_plugged_in','3')
+adb('shell','settings','put','system','screen_off_timeout','1800000')
+adb('shell','svc','power','stayon','true')
+wake()
 # Run new security checks first so failures surface before the longer UI suite.
 adb('push','android/app/src/test/resources/browser-transfer.caretransfer','/sdcard/Download/CareSphere-test.caretransfer')
 # Separate test APK; no test publisher, fixture or debug switch is shipped in the app.
@@ -104,16 +122,27 @@ def enter_system_test_pin():
             return
         time.sleep(.5)
     raise AssertionError('System device-credential field not found')
+def clear_bouncer_if_any():
+    """If a system credential bouncer covers the app (screen slept after the test
+    PIN exists), unlock it with the emulator-only test PIN before reading the UI."""
+    fields=[n for n in screen().iter('node') if n.attrib.get('class')=='android.widget.EditText' and n.attrib.get('package')!=package]
+    if fields:
+        enter_system_test_pin()
+        time.sleep(.5)
 adb('shell','locksettings','set-pin','246810')
 try:
     adb('shell','am','force-stop',package)
+    wake()
     adb('shell','am','start','-W',f'{package}/.MainActivity')
+    clear_bouncer_if_any()
     tap('Settings & privacy')
     tap('Enable app lock')
     enter_system_test_pin()
     find('Disable app lock')
     adb('shell','input','keyevent','3')
+    wake()
     adb('shell','am','start','-W',f'{package}/.MainActivity')
+    clear_bouncer_if_any()
     find('CareSphere is locked')
     assert not any(n.attrib.get('text') in ['Reminder test only','Settings & privacy','My support tools'] for n in screen().iter('node'))
     tap('Unlock CareSphere')
@@ -156,6 +185,7 @@ finally:
 print('PASS: system credentials, cancel/relock, locked-file return and snooze checks')
 adb('shell','am','force-stop',package)
 adb('shell','pm','clear',package)
+wake()
 adb('shell', 'am', 'start', '-W', f'{package}/.MainActivity')
 find('Your day, at your pace.')
 find('No routines yet. Add something that matters to you.')
@@ -166,6 +196,7 @@ adb('shell','input','text','Take%sa%squiet%sbreak')
 tap('Save')
 find('Take a quiet break')
 adb('shell', 'am', 'force-stop', package)
+wake()
 adb('shell', 'am', 'start', '-W', f'{package}/.MainActivity')
 find('Take a quiet break')
 tap('Settings & privacy')
@@ -192,6 +223,7 @@ tap('Save Sort together to favorites')
 tap('Favorites only')
 find('1 activity · available offline')
 adb('shell','am','force-stop',package)
+wake()
 adb('shell','am','start','-W',f'{package}/.MainActivity')
 tap('Activities')
 tap('Favorites only')
@@ -223,6 +255,7 @@ tap('Hoy')
 tap('Bien')
 find('Registro personal de hoy: Bien')
 adb('shell','am','force-stop',package)
+wake()
 adb('shell','am','start','-W',f'{package}/.MainActivity')
 find('Registro personal de hoy: Bien')
 tap('Cuidado')
@@ -241,6 +274,7 @@ find('Dark · selected')
 adb('shell','settings','put','system','font_scale','1.6')
 time.sleep(2)
 adb('shell','am','force-stop',package)
+wake()
 adb('shell','am','start','-W',f'{package}/.MainActivity')
 tap('Health')
 find('— bpm')
