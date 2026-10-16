@@ -72,11 +72,22 @@ jobs:
         if: failure()
         run: |
           python3 - <<'PY'
+          import glob
+          import re
           from pathlib import Path
+          chunks = []
+          for report in glob.glob('android/app/build/test-results/testDebugUnitTest/*.xml'):
+              text = Path(report).read_text()
+              for m in re.finditer(r'<testcase name="([^"]+)"[^>]*>\s*<(failure|error)[^>]*message="([^"]*)"', text):
+                  chunks.append(f'TEST FAIL {m.group(1)}: {m.group(3)[:400]}')
           p = Path('/tmp/android-build.log')
           if p.exists():
-              tail = '\n'.join(p.read_text().splitlines()[-120:])[-50000:]
-              print('::error::' + tail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+              lines = p.read_text().splitlines()
+              key = [l for l in lines if re.search(r'\be: |\berror:|FAILED|FAILURE|What went wrong|Caused by|Execution failed|lint found|AssertionError|Could not (find|resolve)', l)]
+              chosen = key[-60:] if key else [l for l in lines if not l.startswith('w:')][-40:]
+              chunks.append('\n'.join(chosen))
+          detail = '\n'.join(chunks)[-3600:] or 'Build failed without captured output.'
+          print('::error title=Android build::' + detail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
           PY
       - uses: actions/upload-artifact@v7
         if: always()

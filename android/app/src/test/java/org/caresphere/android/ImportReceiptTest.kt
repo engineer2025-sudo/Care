@@ -48,7 +48,7 @@ class ImportReceiptTest {
             { it.put("imported_at", "2026-10-15 12:34:56") },
             { it.put("imported", JSONArray(listOf("has space"))) },
             { it.put("imported", JSONArray(listOf("dup", "dup"))) },
-        ) {
+        )) {
             try {
                 ImportReceipt.verify(change(JSONObject(receipt.toString())), vectorPassphrase)
                 throw AssertionError("expected rejection")
