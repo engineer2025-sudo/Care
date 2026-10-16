@@ -236,6 +236,7 @@ class MainActivity : ProtectedActivity() {
             val history = MoodHistory.recent(data.list("moods"), 5)
             if (history.isEmpty()) text(tx("No check-ins yet"), parent = c)
             else history.forEach { (day, label) -> text("$day · ${AppLanguage.moodLabel(label, ::tx)}", 15f, c) }
+            button(tx("I'm stressed"), c) { openInternal(Intent(this, CheckInActivity::class.java)) }
             copy(tx("A personal check-in, not a health assessment."), 14f, c)
         }
     }

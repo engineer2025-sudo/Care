@@ -71,6 +71,7 @@ When you import records someone shared, you can create an **import receipt** —
 - History is limited to the last seven days/up to 100 records per type and is **not live monitoring**. It is not copied into CareSphere's persistent store or sent to AI. Missing permissions/records stay empty. **Today's steps** (a Health Connect total) and **Recent workouts** (up to 20 session summaries) appear only after you grant those permissions and tap **Read recent history**.
 - **Add blood pressure / Add blood oxygen** records a measurement you took now. These are explicitly labeled **Manually entered**, not verified sensor readings.
 - **How are you feeling?** keeps a day-keyed self-report history (365 days) on this device; the visit draft can include selected entries.
+- **I'm stressed** opens a guided check-in: an optional paced pause (in for 4 seconds, out for 6, three cycles, skippable) that is not treatment, then *How are you now?*, then a **Share a support message** draft or **Open video support** room link. You review and send everything yourself; CareSphere cannot confirm delivery and invites nobody automatically.
 
 ## Health references and Emergency SOS
 

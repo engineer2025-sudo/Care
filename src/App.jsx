@@ -3,7 +3,9 @@ import {speak as speakLocally} from './lib/support'
 import {useLanguage,getLanguage,languageTag} from './lib/i18n'
 import LanguagePicker from './components/LanguagePicker'
 // Interface text localized; user-authored expressions are intentionally unchanged.
-import { tr } from "./lib/i18n";import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import { tr } from "./lib/i18n";
+import { BREATH_PHASES, TARGET_CYCLES, startBreathing, tick, cycleCount, stressRoom, supportMessage } from './lib/stressFlow.js';
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
   Heart, Shield, Brain, Sparkles, Video, Activity, Coffee, X, ExternalLink,
   Volume2, CheckCircle, Bluetooth, BluetoothConnected, Phone, PhoneCall,
@@ -1136,7 +1138,7 @@ const MOODS = [
 { score: 4, icon: Smile, label: 'Good', color: 'bg-lime-400' },
 { score: 5, icon: Laugh, label: 'Great', color: 'bg-emerald-400' }];
 
-function MoodCheckIn({ moods, setMoods }) {
+function MoodCheckIn({ moods, setMoods, onStress }) {
   const today = todayKey();
   const todayMood = moods.find((m) => m.date === today);
 
@@ -1186,8 +1188,134 @@ function MoodCheckIn({ moods, setMoods }) {
           </span>
         }
       </div>
+      <button
+        onClick={onStress}
+        className="w-full flex items-center gap-2 justify-center bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 font-bold py-3 rounded-2xl text-xs transition">
+        <Wind className="w-4 h-4 text-emerald-300" aria-hidden="true" />{tr("I'm stressed")}
+      </button>
     </div>);
 
+}
+
+function StressCheckInModal({ open, onClose, onVideoSupport }) {
+  const [step, setStep] = useState('pause');
+  const [breath, setBreath] = useState(startBreathing);
+  const [room, setRoom] = useState(stressRoom);
+  const [shareStatus, setShareStatus] = useState(null);
+  const dialogRef = useDialog(open, onClose);
+
+  useEffect(() => {
+    if (!open) return;
+    setStep('pause');setBreath(startBreathing());setRoom(stressRoom());setShareStatus(null);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || step !== 'pause' || !breath.running) return;
+    const t = setTimeout(() => setBreath((b) => tick(b)), 1000);
+    return () => clearTimeout(t);
+  }, [open, step, breath]);
+
+  useEffect(() => {
+    if (open && step === 'pause' && breath.cycles >= TARGET_CYCLES) setStep('after');
+  }, [open, step, breath.cycles]);
+
+  if (!open) return null;
+
+  const phase = BREATH_PHASES[breath.phaseIndex];
+  const shareMessage = async () => {
+    const message = supportMessage(room);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'CareSphere support', text: message });
+        setShareStatus(tr('Share sheet closed. CareSphere cannot confirm message delivery.'));
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(message);
+        setShareStatus(tr('Copied to the clipboard. Paste it into a message to someone you trust.'));
+      } else {
+        setShareStatus(message);
+      }
+    } catch (error) {
+      if (error?.name !== 'AbortError') setShareStatus(tr('Sharing was not completed. Nothing was sent.'));
+    }
+  };
+
+  const stepTitle = {
+    pause: tr("Let's pause together"),
+    after: tr('How are you now?'),
+    support: tr('Would you like someone with you?')
+  }[step];
+
+  const flowButton = (label, action, primary = false) =>
+  <button
+    onClick={action}
+    className={`w-full font-bold py-3.5 rounded-2xl text-sm transition ${primary ?
+    'bg-emerald-500 hover:bg-emerald-400 text-slate-950' :
+    'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'}`}>
+    {label}
+  </button>;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="checkin-title" className="bg-slate-900 border border-emerald-700/40 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl">
+        <div className="space-y-1.5 text-center">
+          <div className="w-14 h-14 bg-emerald-500/15 border border-emerald-500/40 rounded-2xl flex items-center justify-center mx-auto">
+            <Wind className="w-6 h-6 text-emerald-300" aria-hidden="true" />
+          </div>
+          <h3 id="checkin-title" className="text-xl font-black text-white">{stepTitle}</h3>
+        </div>
+
+        {step === 'pause' &&
+        <div className="space-y-4">
+            <Info className="text-xs text-slate-400 leading-relaxed">{tr("A paced pause, not treatment. Stop any time.")}</Info>
+            <div className="flex items-center justify-center py-2">
+              <div className="relative w-32 h-32 flex items-center justify-center">
+                <div
+                className={`absolute inset-0 rounded-full bg-emerald-500/15 border-2 border-emerald-400/50 transition-transform ease-in-out ${breath.running ? phase.scale : 'scale-[0.75]'}`}
+                style={{ transitionDuration: `${phase.seconds}s` }} />
+
+                <div className="relative z-10 text-center">
+                  <div className="text-3xl font-black text-slate-100">{breath.secondsLeft}</div>
+                  <div className="text-[11px] font-bold text-emerald-300 uppercase tracking-widest">{breath.running ? tr(phase.name) : tr('Paused')}</div>
+                </div>
+              </div>
+            </div>
+            <p className="text-center text-xs text-slate-400 font-semibold" role="status">{tr('{0} of {1} cycles', cycleCount(breath.cycles))}</p>
+            {flowButton(breath.running ? tr('Pause') : tr('Start'), () => setBreath((b) => ({ ...b, running: !b.running })))}
+            {flowButton(tr('Skip to check-in'), () => setStep('after'))}
+            {flowButton(tr('I need help now'), () => setStep('support'))}
+          </div>
+        }
+
+        {step === 'after' &&
+        <div className="space-y-2.5">
+            {flowButton(tr('Better'), onClose, true)}
+            {flowButton(tr('Contact my caregiver'), () => setStep('support'))}
+            {flowButton(tr('Still stressed'), () => setStep('support'))}
+            {flowButton(tr('I need help'), () => setStep('support'))}
+          </div>
+        }
+
+        {step === 'support' &&
+        <div className="space-y-2.5">
+            {shareStatus &&
+          <div className="bg-sky-500/10 border border-sky-500/30 rounded-2xl p-3 text-xs text-sky-200 font-semibold break-words">{shareStatus}</div>
+          }
+            <button
+            onClick={shareMessage}
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-2xl text-sm transition">
+              {tr('Share a support message')}
+            </button>
+            <button
+            onClick={() => onVideoSupport(room)}
+            className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 font-bold py-3.5 rounded-2xl text-sm transition">
+              {tr('Open video support')}
+            </button>
+            <Info className="text-[11px] text-slate-500 leading-relaxed">{tr('Choose where to share the message. Anyone with the room link can join.')}</Info>
+            {flowButton(tr('Close'), onClose)}
+          </div>
+        }
+      </div>
+    </div>);
 }
 
 // editable handoff aid, not a medical record, diagnosis, or clinical summary.
@@ -1309,6 +1437,7 @@ export default function App() {
   }, []);
   const [videoSession, setVideoSession] = useState(null);
   const [sosOpen, setSosOpen] = useState(false);
+  const [stressOpen, setStressOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState(null);
   const openSettings = (section = null) => {setSettingsSection(section);setSettingsOpen(true);};
@@ -1856,7 +1985,7 @@ export default function App() {
               </div>
             </section>
 
-            <MoodCheckIn moods={moods} setMoods={setMoods} />
+            <MoodCheckIn moods={moods} setMoods={setMoods} onStress={() => setStressOpen(true)} />
 
             {/* Routines & meds */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2274,6 +2403,10 @@ export default function App() {
 
       <VideoModal session={videoSession} displayName={settings.name} onClose={() => setVideoSession(null)} />
       <SosModal open={sosOpen} onClose={() => setSosOpen(false)} />
+      <StressCheckInModal
+        open={stressOpen}
+        onClose={() => setStressOpen(false)}
+        onVideoSupport={(room) => {setStressOpen(false);setVideoSession({ title: 'Support check-in', room });}} />
       <SettingsModal
         open={settingsOpen}
         initialSection={settingsSection}

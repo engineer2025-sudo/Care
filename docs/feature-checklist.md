@@ -131,7 +131,7 @@ Exports and messages outside the app lose its local-storage protections. Externa
 | Optional MedlinePlus download / private-network Kiwix lookup | Yes; explicit configuration/action | No | No |
 | On-device educational answer from actual Apple Intelligence | Optional eligible enabled iOS 26+ hardware | No | No |
 | AI model unavailable state, cancellation and no fabricated fallback | Yes | No model used | No model used |
-| “I'm stressed” guided support flow | Yes | Limited: breathing + contacts separately | Limited: breathing + contacts separately |
+| “I'm stressed” guided support flow | Yes: pause → check-in → support, all translated | Yes: same steps; reviewed share + room link | Yes: same steps in the mood card; reviewed share + video room |
 | Opt-in sustained live-HR check-in flow | Yes; off by default, not diagnosis | No | No |
 | Phrase-based safety interruption before Health Guide AI | Yes; incomplete, not validated crisis detection | No Health Guide AI | No Health Guide AI |
 | SOS emergency action | Yes | Yes: dialer action + reviewed share | Yes, browser/phone handoff |

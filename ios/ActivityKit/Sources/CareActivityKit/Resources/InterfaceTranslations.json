@@ -41,6 +41,12 @@
     "vi": "Một lúc bên nhau",
     "zh-Hans": "相聚片刻"
   },
+  "A paced pause, not treatment. Stop any time.": {
+    "es": "Una pausa guiada, no un tratamiento. Detente cuando quieras.",
+    "fil": "Naka-pace na pag-pause, hindi gamot. Maaari kang huminto anumang oras.",
+    "vi": "Dừng theo nhịp, không phải điều trị. Dừng bất cứ lúc nào.",
+    "zh-Hans": "这是按节奏的暂停，不是治疗。随时可以停止。"
+  },
   "A personal check-in, not a health assessment.": {
     "es": "Un registro personal, no una evaluación de salud.",
     "fil": "Sariling tala, hindi pagsusuri ng kalusugan.",
@@ -64,6 +70,12 @@
     "fil": "Tanong, balita o paalala para sa susunod mong pagbisita…",
     "vi": "Câu hỏi, cập nhật hoặc lời nhắc cho lần khám tới…",
     "zh-Hans": "下次就诊的问题、近况或提醒…"
+  },
+  "A quick check-in": {
+    "es": "Un registro breve",
+    "fil": "Mabilis na pag-check in",
+    "vi": "Kiểm tra nhanh",
+    "zh-Hans": "快速状态确认"
   },
   "A short reminder": {
     "es": "Un recordatorio breve",
@@ -383,6 +395,12 @@
     "vi": "Cuộc hẹn",
     "zh-Hans": "预约"
   },
+  "Are you moving or exercising right now?": {
+    "es": "¿Te estás moviendo o haciendo ejercicio ahora?",
+    "fil": "Gumagalaw o nag-eehersisyo ka ba ngayon?",
+    "vi": "Bây giờ bạn có đang vận động hoặc tập thể dục không?",
+    "zh-Hans": "你现在在活动或锻炼吗？"
+  },
   "Authentication did not finish in the foreground. Try again.": {
     "es": "La autenticación no terminó con la aplicación en primer plano. Inténtalo de nuevo.",
     "fil": "Hindi natapos ang pagpapatunay habang nasa foreground ang app. Subukang muli.",
@@ -479,6 +497,12 @@
     "vi": "Trước khi ra ngoài trời mưa, bạn có thể mang theo gì?",
     "zh-Hans": "下雨天出门前，可以带什么？"
   },
+  "Better": {
+    "es": "Mejor",
+    "fil": "Mas mabuti na",
+    "vi": "Đỡ hơn",
+    "zh-Hans": "好一些了"
+  },
   "Bike": {
     "es": "Cicleta",
     "fil": "Bisikleta",
@@ -526,6 +550,24 @@
     "fil": "Tawagan ang 911",
     "vi": "Gọi 911",
     "zh-Hans": "拨打 911"
+  },
+  "Call 988": {
+    "es": "Llama al 988",
+    "fil": "Tumawag sa 988",
+    "vi": "Gọi 988",
+    "zh-Hans": "拨打 988"
+  },
+  "Call Poison Control": {
+    "es": "Llama al centro de toxicología",
+    "fil": "Tumawag sa Poison Control",
+    "vi": "Gọi trung tâm chống độc",
+    "zh-Hans": "致电毒物控制中心"
+  },
+  "Call your local emergency number or poison center.": {
+    "es": "Llama a tu número de emergencias local o al centro de toxicología.",
+    "fil": "Tumawag sa lokal na emergency number o poison center.",
+    "vi": "Hãy gọi số khẩn cấp địa phương hoặc trung tâm chống độc.",
+    "zh-Hans": "请拨打当地的急救电话或毒物控制中心。"
   },
   "Call {0}": {
     "es": "Llamar a {0}",
@@ -628,6 +670,12 @@
     "fil": "Suriin ang mga yunit at halaga. Hindi ito medikal na interpretasyon.",
     "vi": "Kiểm tra đơn vị và giá trị. Đây không phải diễn giải y khoa.",
     "zh-Hans": "请核对单位和数值。这不是医学解读。"
+  },
+  "Check-in": {
+    "es": "Registro personal",
+    "fil": "Pag-check in",
+    "vi": "Kiểm tra tình trạng",
+    "zh-Hans": "状态确认"
   },
   "Choices in personal photo matching": {
     "es": "Opciones al emparejar fotos personales",
@@ -736,6 +784,12 @@
     "fil": "Piliin ang makakatulong. Walang kailangang pilitin dito.",
     "vi": "Chọn điều hữu ích. Không có gì là bắt buộc.",
     "zh-Hans": "选择对您有帮助的内容。这里没有必做事项。"
+  },
+  "Choose where to share the message. Anyone with the room link can join.": {
+    "es": "Elige dónde compartir el mensaje. Cualquiera con el enlace de la sala puede entrar.",
+    "fil": "Piliin kung saan ibabahagi ang mensahe. Sinumang may link ng room ay makakasali.",
+    "vi": "Chọn nơi chia sẻ tin nhắn. Bất kỳ ai có liên kết phòng đều có thể tham gia.",
+    "zh-Hans": "选择在哪里分享这条消息。任何有房间链接的人都可以加入。"
   },
   "Choose {0}": {
     "es": "Elegir {0}",
@@ -929,6 +983,12 @@
     "vi": "Mã kết nối: {0}",
     "zh-Hans": "连接代码：{0}"
   },
+  "Contact my caregiver": {
+    "es": "Contactar a mi cuidador",
+    "fil": "Kontakin ang tagapag-alaga ko",
+    "vi": "Liên hệ người chăm sóc tôi",
+    "zh-Hans": "联系我的照护者"
+  },
   "Contact name": {
     "es": "Nombre del contacto",
     "fil": "Pangalan ng contact",
@@ -958,6 +1018,12 @@
     "fil": "Mga kard sa pag-uusap",
     "vi": "Thẻ trò chuyện",
     "zh-Hans": "交谈卡片"
+  },
+  "Copied to the clipboard. Paste it into a message to someone you trust.": {
+    "es": "Copiado al portapapeles. Pégalo en un mensaje a alguien de confianza.",
+    "fil": "Nakopya sa clipboard. I-paste sa mensahe sa taong pinagkakatiwalaan mo.",
+    "vi": "Đã sao chép. Dán vào tin nhắn cho người bạn tin cậy.",
+    "zh-Hans": "已复制到剪贴板。粘贴给你信任的人。"
   },
   "Copy receipt": {
     "es": "Copiar recibo",
@@ -1655,6 +1721,12 @@
     "vi": "Bạn cảm thấy thế nào?",
     "zh-Hans": "您感觉如何？"
   },
+  "How are you now?": {
+    "es": "¿Cómo te sientes ahora?",
+    "fil": "Kumusta ka na ngayon?",
+    "vi": "Bây giờ bạn thấy thế nào?",
+    "zh-Hans": "你现在感觉怎么样？"
+  },
   "I checked every name and reminder time against the medication label or care-team instructions.": {
     "es": "He comprobado cada nombre y hora del recordatorio con la etiqueta del medicamento o las instrucciones del equipo de atención.",
     "fil": "Sinuri ko ang bawat pangalan at oras ng paalala ayon sa label ng gamot o tagubilin ng pangkat ng pangangalaga.",
@@ -1666,6 +1738,18 @@
     "fil": "Kailangan ko ng pahinga",
     "vi": "Tôi cần nghỉ một chút",
     "zh-Hans": "我需要休息一下"
+  },
+  "I need help": {
+    "es": "Necesito ayuda",
+    "fil": "Kailangan ko ng tulong",
+    "vi": "Tôi cần giúp đỡ",
+    "zh-Hans": "我需要帮助"
+  },
+  "I need help now": {
+    "es": "Necesito ayuda ahora",
+    "fil": "Kailangan ko ng tulong ngayon",
+    "vi": "Tôi cần giúp đỡ ngay",
+    "zh-Hans": "我现在需要帮助"
   },
   "I reviewed the schedule · enable reminders": {
     "es": "He revisado el horario · activar recordatorios",
@@ -1684,6 +1768,30 @@
     "fil": "Gusto ko ng tulong",
     "vi": "Tôi muốn được giúp đỡ",
     "zh-Hans": "我想得到帮助"
+  },
+  "I'm okay": {
+    "es": "Estoy bien",
+    "fil": "Okay lang ako",
+    "vi": "Tôi ổn",
+    "zh-Hans": "我没事"
+  },
+  "I'm safe right now": {
+    "es": "Estoy a salvo ahora",
+    "fil": "Ligtas ako ngayon",
+    "vi": "Hiện tại tôi an toàn",
+    "zh-Hans": "我现在是安全的"
+  },
+  "I'm stressed": {
+    "es": "Tengo estrés",
+    "fil": "Stressed ako",
+    "vi": "Tôi đang căng thẳng",
+    "zh-Hans": "我现在很有压力"
+  },
+  "If you haven't taken it, don't. If you have, get urgent help now.": {
+    "es": "Si no lo has tomado, no lo hagas. Si ya lo tomaste, busca ayuda urgente ahora.",
+    "fil": "Kung hindi mo pa nainom, huwag na. Kung nainom mo na, kumuha ka ng agarang tulong ngayon.",
+    "vi": "Nếu chưa uống, đừng uống. Nếu đã uống, hãy tìm trợ giúp khẩn cấp ngay.",
+    "zh-Hans": "如果还没服用，请不要服用。如果已经服用，请立即寻求紧急救助。"
   },
   "Import from Contacts": {
     "es": "Importar de Contactos",
@@ -1840,6 +1948,12 @@
     "fil": "Tingnan natin nang magkasama. Maaari kang pumili ng iba o gumamit ng pahiwatig.",
     "vi": "Cùng xem nhé. Bạn có thể thử lựa chọn khác hoặc dùng gợi ý.",
     "zh-Hans": "一起看看。您可以试试其他选项或查看提示。"
+  },
+  "Let's pause together": {
+    "es": "Pausemos juntos",
+    "fil": "Mag-pause muna tayo",
+    "vi": "Cùng dừng lại một chút",
+    "zh-Hans": "我们一起暂停一下"
   },
   "Let’s look together. Try another choice, or ask for a hint.": {
     "es": "Miremos juntos. Puedes probar otra opción o usar una pista.",
@@ -2027,6 +2141,12 @@
     "vi": "Nhắn tin cho {0}",
     "zh-Hans": "向 {0} 发消息"
   },
+  "Messages opens a draft; tap Send to share. Anyone with the room link can join.": {
+    "es": "Mensajes abre un borrador; toca Enviar para compartir. Cualquiera con el enlace de la sala puede entrar.",
+    "fil": "Magbubukas ang Messages ng draft; i-tap ang Send para ibahagi. Sinumang may link ng room ay makakasali.",
+    "vi": "Messages mở bản nháp; nhấn Gửi để chia sẻ. Bất kỳ ai có liên kết phòng đều có thể tham gia.",
+    "zh-Hans": "「信息」会打开草稿；点击发送即可分享。任何有房间链接的人都可以加入。"
+  },
   "Mood": {
     "es": "Estado de ánimo",
     "fil": "Pakiramdam",
@@ -2038,6 +2158,12 @@
     "fil": "Kasaysayan ng mood",
     "vi": "Lịch sử tâm trạng",
     "zh-Hans": "心情记录历史"
+  },
+  "Move away from anything you could use to hurt yourself. Ask someone nearby to stay with you.": {
+    "es": "Aléjate de cualquier cosa con la que puedas hacerte daño. Pide a alguien cercano que se quede contigo.",
+    "fil": "Lumayo ka sa anumang magagamit mo para saktan ang sarili mo. Hilingin sa malapit na tao na samahan ka.",
+    "vi": "Hãy tránh xa những thứ có thể dùng để làm hại bản thân. Nhờ người ở gần ở bên bạn.",
+    "zh-Hans": "远离任何可能伤害自己的东西。请身边的人陪着你。"
   },
   "Move through an imagined story at your own pace.": {
     "es": "Avanza por una historia imaginaria a tu ritmo.",
@@ -2225,6 +2351,12 @@
     "vi": "Không",
     "zh-Hans": "否"
   },
+  "No browser is available on this device.": {
+    "es": "No hay ningún navegador disponible en este dispositivo.",
+    "fil": "Walang available na browser sa device na ito.",
+    "vi": "Không có trình duyệt nào trên thiết bị này.",
+    "zh-Hans": "此设备上没有可用的浏览器。"
+  },
   "No care notes yet. Save a question, update, or reminder for your next visit.": {
     "es": "Aún no hay notas de cuidado. Guarda una pregunta, novedad o recordatorio para tu próxima consulta.",
     "fil": "Wala pang tala ng pangangalaga. Mag-save ng tanong, balita o paalala para sa susunod na pagbisita.",
@@ -2314,6 +2446,12 @@
     "fil": "Walang puntos o countdown. Huminto anumang oras.",
     "vi": "Không chấm điểm hay đếm ngược. Dừng bất cứ khi nào bạn muốn.",
     "zh-Hans": "没有评分或倒计时。随时可以停止。"
+  },
+  "No sharing app is available on this device.": {
+    "es": "No hay ninguna app para compartir en este dispositivo.",
+    "fil": "Walang available na sharing app sa device na ito.",
+    "vi": "Không có ứng dụng chia sẻ nào trên thiết bị này.",
+    "zh-Hans": "此设备上没有可用的分享应用。"
   },
   "Not connected": {
     "es": "Sin conexión",
@@ -2446,6 +2584,12 @@
     "fil": "Buksan ang link",
     "vi": "Mở liên kết",
     "zh-Hans": "打开链接"
+  },
+  "Open video support": {
+    "es": "Abrir apoyo por video",
+    "fil": "Buksan ang video na suporta",
+    "vi": "Mở hỗ trợ qua video",
+    "zh-Hans": "打开视频陪伴"
   },
   "Open your confirmed medication schedule.": {
     "es": "Abre tu horario de medicamentos confirmado.",
@@ -2602,6 +2746,12 @@
     "fil": "Kuwentong may larawan",
     "vi": "Câu chuyện bằng hình ảnh",
     "zh-Hans": "图片故事"
+  },
+  "Please don't hurt yourself.": {
+    "es": "Por favor, no te hagas daño.",
+    "fil": "Huwag mong saktan ang sarili mo.",
+    "vi": "Xin đừng làm hại bản thân.",
+    "zh-Hans": "请不要伤害自己。"
   },
   "Please explain again": {
     "es": "Por favor, explícalo otra vez",
@@ -3257,11 +3407,35 @@
     "vi": "Chia sẻ lời kêu gọi giúp đỡ",
     "zh-Hans": "分享求助信息"
   },
+  "Share a support message": {
+    "es": "Compartir un mensaje de apoyo",
+    "fil": "Ibahagi ang mensaheng suporta",
+    "vi": "Chia sẻ tin nhắn hỗ trợ",
+    "zh-Hans": "分享求助信息"
+  },
   "Share receipt": {
     "es": "Compartir recibo",
     "fil": "Ibahagi ang resibo",
     "vi": "Chia sẻ biên nhận",
     "zh-Hans": "分享回执"
+  },
+  "Share sheet closed. CareSphere cannot confirm message delivery.": {
+    "es": "Se cerró el menú de compartir. CareSphere no puede confirmar la entrega del mensaje.",
+    "fil": "Nagsara ang share sheet. Hindi makukumpirma ng CareSphere ang paghahatid ng mensahe.",
+    "vi": "Bảng chia sẻ đã đóng. CareSphere không thể xác nhận việc gửi tin nhắn.",
+    "zh-Hans": "分享面板已关闭。CareSphere 无法确认消息是否送达。"
+  },
+  "Sharing was not completed. No alert was sent.": {
+    "es": "No se completó el envío. No se envió ninguna alerta.",
+    "fil": "Hindi natapos ang pagbabahagi. Walang alerto na naipadala.",
+    "vi": "Chưa hoàn tất chia sẻ. Không có cảnh báo nào được gửi.",
+    "zh-Hans": "分享未完成。没有发送任何警报。"
+  },
+  "Sharing was not completed. Nothing was sent.": {
+    "es": "No se completó el envío. No se envió nada.",
+    "fil": "Hindi natapos ang pagbabahagi. Walang naipadala.",
+    "vi": "Chưa hoàn tất chia sẻ. Không có gì được gửi.",
+    "zh-Hans": "分享未完成。没有发送任何内容。"
   },
   "Shoe": {
     "es": "Zapato",
@@ -3310,6 +3484,12 @@
     "fil": "Laktawan",
     "vi": "Bỏ qua",
     "zh-Hans": "跳过"
+  },
+  "Skip to check-in": {
+    "es": "Saltar al registro",
+    "fil": "Lumaktaw sa pag-check in",
+    "vi": "Bỏ qua để kiểm tra",
+    "zh-Hans": "跳到状态确认"
   },
   "Small steps are enough": {
     "es": "Los pequeños pasos son suficientes",
@@ -3491,6 +3671,12 @@
     "vi": "Các bước, mỗi dòng một bước",
     "zh-Hans": "步骤，每行一个"
   },
+  "Still stressed": {
+    "es": "Sigo estresado",
+    "fil": "Stressed pa rin ako",
+    "vi": "Vẫn còn căng thẳng",
+    "zh-Hans": "还是有压力"
+  },
   "Stop": {
     "es": "Detener",
     "fil": "Itigil",
@@ -3575,6 +3761,12 @@
     "vi": "Kể một câu chuyện về bài hát, hoặc bỏ qua.",
     "zh-Hans": "讲一段与歌曲有关的故事，也可以跳过。"
   },
+  "Text 988": {
+    "es": "Envía un mensaje al 988",
+    "fil": "Mag-text sa 988",
+    "vi": "Nhắn tin đến 988",
+    "zh-Hans": "发短信至 988"
+  },
   "Text size": {
     "es": "Tamaño del texto",
     "fil": "Laki ng teksto",
@@ -3586,6 +3778,12 @@
     "fil": "Sinusunod ng laki ng teksto ang settings ng iPhone. Ikaw ang pipili ng aktibidad at bilis; hindi ito awtomatikong binabago ng edad.",
     "vi": "Cỡ chữ theo cài đặt iPhone. Bạn chọn hoạt động và nhịp độ; tuổi không tự thay đổi chúng.",
     "zh-Hans": "文字大小遵循 iPhone 设置。活动和节奏由您选择；年龄不会自动改变它们。"
+  },
+  "Text {0}": {
+    "es": "Enviar mensaje a {0}",
+    "fil": "I-text si {0}",
+    "vi": "Nhắn tin cho {0}",
+    "zh-Hans": "发短信给 {0}"
   },
   "Thank you. Dose check-in saved.": {
     "es": "Gracias. Registro de la dosis guardado.",
@@ -3628,6 +3826,12 @@
     "fil": "Ikaw ang naglagay ng mga halagang ito; hindi ito beripikadong sukat ng sensor. Hindi nito binabago ang plano ng pangangalaga mo.",
     "vi": "Đây là giá trị bạn tự nhập, không phải số đo cảm biến đã được xác minh. Chúng không thay đổi kế hoạch chăm sóc.",
     "zh-Hans": "这些是您自行输入的数值，并非经验证的传感器读数。它们不会改变您的照护计划。"
+  },
+  "This could be dangerous.": {
+    "es": "Esto podría ser peligroso.",
+    "fil": "Maaaring mapanganib ito.",
+    "vi": "Điều này có thể nguy hiểm.",
+    "zh-Hans": "这可能很危险。"
   },
   "This is not a medical device.": {
     "es": "Este no es un dispositivo médico.",
@@ -4055,6 +4259,12 @@
     "vi": "Bạn muốn nghe nhạc hay yên tĩnh?",
     "zh-Hans": "您想听音乐还是保持安静？"
   },
+  "Would you like someone with you?": {
+    "es": "¿Quieres que alguien esté contigo?",
+    "fil": "Gusto mo bang may kasama ka?",
+    "vi": "Bạn có muốn có ai ở bên không?",
+    "zh-Hans": "想让人陪着你吗？"
+  },
   "Write a care note": {
     "es": "Escribir una nota de cuidado",
     "fil": "Sumulat ng tala ng pangangalaga",
@@ -4084,6 +4294,12 @@
     "fil": "Oo",
     "vi": "Có",
     "zh-Hans": "是"
+  },
+  "Yes, I'm moving": {
+    "es": "Sí, me estoy moviendo",
+    "fil": "Oo, gumagalaw ako",
+    "vi": "Có, tôi đang vận động",
+    "zh-Hans": "是的，我在活动"
   },
   "You can fill a cup with water.": {
     "es": "Puedes llenar una taza con agua.",
@@ -4198,6 +4414,12 @@
     "fil": "kaibigan",
     "vi": "bạn",
     "zh-Hans": "朋友"
+  },
+  "{0} of {1} cycles": {
+    "es": "{0} de {1} ciclos",
+    "fil": "{0} ng {1} na pag-ikot",
+    "vi": "{0} trên {1} vòng",
+    "zh-Hans": "{0}/{1} 个循环"
   },
   "{0}, {1}.": {
     "es": "{0}, {1}.",

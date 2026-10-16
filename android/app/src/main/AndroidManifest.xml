@@ -25,6 +25,7 @@
         <activity android:name=".HealthHistoryActivity" android:exported="false" />
         <activity android:name=".SosActivity" android:exported="false" />
         <activity android:name=".ReferencesActivity" android:exported="false" />
+        <activity android:name=".CheckInActivity" android:exported="false" />
         <activity android:name=".HealthPermissionsActivity" android:exported="true">
             <intent-filter><action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" /></intent-filter>
         </activity>
