@@ -209,6 +209,12 @@
     "vi": "Thêm thuốc",
     "zh-Hans": "添加药物"
   },
+  "Add my location (optional)": {
+    "es": "Agregar mi ubicación (opcional)",
+    "fil": "Idagdag ang lokasyon ko (opsyonal)",
+    "vi": "Thêm vị trí của tôi (tùy chọn)",
+    "zh-Hans": "添加我的位置（可选）"
+  },
   "Add my own phrase": {
     "es": "Añadir una frase",
     "fil": "Magdagdag ng parirala",
@@ -473,6 +479,12 @@
     "vi": "Trước khi ra ngoài trời mưa, bạn có thể mang theo gì?",
     "zh-Hans": "下雨天出门前，可以带什么？"
   },
+  "Bike": {
+    "es": "Cicleta",
+    "fil": "Bisikleta",
+    "vi": "Đạp xe",
+    "zh-Hans": "骑行"
+  },
   "Blood oxygen · percent": {
     "es": "Oxígeno en sangre · porcentaje",
     "fil": "Oxygen sa dugo · porsiyento",
@@ -508,6 +520,12 @@
     "fil": "Tumawag",
     "vi": "Gọi",
     "zh-Hans": "拨打电话"
+  },
+  "Call 911": {
+    "es": "Llamar al 911",
+    "fil": "Tawagan ang 911",
+    "vi": "Gọi 911",
+    "zh-Hans": "拨打 911"
   },
   "Call {0}": {
     "es": "Llamar a {0}",
@@ -635,6 +653,12 @@
     "vi": "Chọn vài lời nhắc phù hợp với ngày của bạn. Dấu ghi nhận đặt lại mỗi ngày theo giờ địa phương và không chứng minh đã làm hoạt động.",
     "zh-Hans": "选择几个适合您日常生活的清单提醒。勾选记录每天按本地时间重置，并不证明实际完成了活动。"
   },
+  "Choose a messaging app and recipient, then review and send the message yourself. CareSphere cannot confirm delivery or a response.": {
+    "es": "Elige una app de mensajería y un destinatario, luego revisa y envía el mensaje tú mismo. CareSphere no puede confirmar la entrega ni una respuesta.",
+    "fil": "Pumili ng messaging app at tatanggap, pagkatapos suriin at ipadala ang mensahe nang sarili. Hindi makumpirma ng CareSphere ang paghahatid o tugon.",
+    "vi": "Chọn ứng dụng nhắn tin và người nhận, rồi tự kiểm tra và gửi tin nhắn. CareSphere không thể xác nhận đã gửi hay hồi âm.",
+    "zh-Hans": "选择一个通讯应用和收件人，然后自行查看并发送消息。CareSphere 无法确认送达或收到回复。"
+  },
   "Choose a photo": {
     "es": "Elegir una foto",
     "fil": "Pumili ng larawan",
@@ -682,6 +706,12 @@
     "fil": "Piliin lamang ang nais ibahagi",
     "vi": "Chọn chính xác nội dung chia sẻ",
     "zh-Hans": "准确选择要共享的内容"
+  },
+  "Choose how to share": {
+    "es": "Elegir cómo compartir",
+    "fil": "Pumili kung paano ibahagi",
+    "vi": "Chọn cách chia sẻ",
+    "zh-Hans": "选择分享方式"
   },
   "Choose network": {
     "es": "Elegir red",
@@ -1451,6 +1481,12 @@
     "vi": "Ghi chú sau hẹn",
     "zh-Hans": "后续笔记"
   },
+  "From Health Connect": {
+    "es": "De Health Connect",
+    "fil": "Mula sa Health Connect",
+    "vi": "Từ Health Connect",
+    "zh-Hans": "来自 Health Connect"
+  },
   "Gentle breathing": {
     "es": "Respiración suave",
     "fil": "Banayad na paghinga",
@@ -1462,6 +1498,12 @@
     "fil": "Magsimula",
     "vi": "Bắt đầu",
     "zh-Hans": "开始使用"
+  },
+  "Getting location…": {
+    "es": "Obteniendo ubicación…",
+    "fil": "Kinukuha ang lokasyon…",
+    "vi": "Đang lấy vị trí…",
+    "zh-Hans": "正在获取位置…"
   },
   "Good": {
     "es": "Bien",
@@ -1528,6 +1570,12 @@
     "fil": "Kasaysayan ng kalusugan",
     "vi": "Lịch sử sức khỏe",
     "zh-Hans": "健康历史记录"
+  },
+  "Health references": {
+    "es": "Referencias de salud",
+    "fil": "Mga sanggunian ng kalusugan",
+    "vi": "Tài liệu tham khảo sức khỏe",
+    "zh-Hans": "健康参考资料"
   },
   "Heart rate": {
     "es": "Frecuencia cardíaca",
@@ -1672,6 +1720,12 @@
     "fil": "Na-import ang mga napiling kopya. Hindi napalitan ang mga umiiral na rekord.",
     "vi": "Đã nhập các bản sao đã chọn. Không thay thế hồ sơ hiện có.",
     "zh-Hans": "已导入所选副本。未替换现有记录。"
+  },
+  "In the United States, call 911 for immediate danger. Outside the US, use the local emergency number. CareSphere does not contact anyone automatically.": {
+    "es": "En Estados Unidos, llama al 911 si hay peligro inmediato. Fuera de EE. UU., usa el número de emergencias local. CareSphere no contacta a nadie automáticamente.",
+    "fil": "Sa Estados Unidos, tumawag sa 911 para sa agarang panganib. Sa labas ng US, gamitin ang lokal na numero ng emerhensiya. Hindi awtomatikong kinokontak ng CareSphere ang sinuman.",
+    "vi": "Tại Hoa Kỳ, hãy gọi 911 khi có nguy hiểm tức thời. Ngoài Hoa Kỳ, hãy dùng số cấp cứu địa phương. CareSphere không tự động liên hệ với ai.",
+    "zh-Hans": "在美国，遇到直接危险请拨打 911。在美国以外，请拨打当地急救电话。CareSphere 不会自动联系任何人。"
   },
   "Interest": {
     "es": "Interés",
@@ -1829,6 +1883,18 @@
     "vi": "Chia sẻ cục bộ đã sẵn sàng.",
     "zh-Hans": "本地传输已就绪。"
   },
+  "Location ready to share": {
+    "es": "Ubicación lista para compartir",
+    "fil": "Handa nang ibahagi ang lokasyon",
+    "vi": "Vị trí đã sẵn sàng để chia sẻ",
+    "zh-Hans": "位置已可分享"
+  },
+  "Location unavailable or permission denied. You can still share an SOS message without coordinates.": {
+    "es": "Ubicación no disponible o permiso denegado. Aún puedes compartir un mensaje SOS sin coordenadas.",
+    "fil": "Hindi magamit ang lokasyon o tinanggihan ang pahintulot. Maaari ka pa ring magbahagi ng mensahe SOS nang walang mga coordinate.",
+    "vi": "Vị trí không khả dụng hoặc bị từ chối quyền. Bạn vẫn có thể chia sẻ tin nhắn SOS mà không có tọa độ.",
+    "zh-Hans": "位置不可用或权限被拒绝。你仍可分享不含坐标的 SOS 消息。"
+  },
   "Lock it down": {
     "es": "Proteger el acceso",
     "fil": "Protektahan ang pag-access",
@@ -1949,6 +2015,12 @@
     "vi": "Nhắn tin",
     "zh-Hans": "发消息"
   },
+  "Message preview": {
+    "es": "Vista previa del mensaje",
+    "fil": "Preview ng mensahe",
+    "vi": "Xem trước tin nhắn",
+    "zh-Hans": "消息预览"
+  },
   "Message {0}": {
     "es": "Enviar mensaje a {0}",
     "fil": "Padalhan ng mensahe si {0}",
@@ -1960,6 +2032,12 @@
     "fil": "Pakiramdam",
     "vi": "Tâm trạng",
     "zh-Hans": "心情"
+  },
+  "Mood history": {
+    "es": "Historial de estado de ánimo",
+    "fil": "Kasaysayan ng mood",
+    "vi": "Lịch sử tâm trạng",
+    "zh-Hans": "心情记录历史"
   },
   "Move through an imagined story at your own pace.": {
     "es": "Avanza por una historia imaginaria a tu ritmo.",
@@ -2105,6 +2183,12 @@
     "vi": "Không thể hiển thị cho thiết bị ở gần. Dùng địa chỉ và mã được hiển thị.",
     "zh-Hans": "附近发现不可用。请使用显示的地址和代码。"
   },
+  "Need urgent help?": {
+    "es": "¿Necesitas ayuda urgente?",
+    "fil": "Kailangan mo ba ng agarang tulong?",
+    "vi": "Bạn có cần giúp đỡ khẩn cấp không?",
+    "zh-Hans": "需要紧急帮助吗？"
+  },
   "New care note": {
     "es": "Nueva nota de cuidado",
     "fil": "Bagong tala ng pangangalaga",
@@ -2153,6 +2237,12 @@
     "vi": "Chưa ghi nhận hôm nay. Chọn một từ nếu bạn muốn.",
     "zh-Hans": "今天还没有记录。如果愿意，可以选择一个词。"
   },
+  "No check-ins yet": {
+    "es": "Aún no hay registros",
+    "fil": "Wala pang mga check-in",
+    "vi": "Chưa có lượt ghi nhận",
+    "zh-Hans": "尚无签到记录"
+  },
   "No current measurement": {
     "es": "Sin medición actual",
     "fil": "Walang kasalukuyang sukat",
@@ -2170,6 +2260,18 @@
     "fil": "Walang naka-install na boses para sa wikang ito. Mananatiling nakikita ang mga salita.",
     "vi": "Chưa cài giọng đọc cho ngôn ngữ này. Nội dung vẫn hiển thị.",
     "zh-Hans": "未安装此语言的语音。文字仍会显示。"
+  },
+  "No matching references": {
+    "es": "No hay referencias coincidentes",
+    "fil": "Walang tumugmang sanggunian",
+    "vi": "Không có tài liệu phù hợp",
+    "zh-Hans": "没有匹配的参考资料"
+  },
+  "No medical profile is attached. Only the name and optional location shown above are included.": {
+    "es": "No se adjunta ningún perfil médico. Solo se incluyen el nombre y la ubicación opcional que se muestran arriba.",
+    "fil": "Walang nakalakip na medical profile. Kasama lang ang pangalan at ang opsyonal na lokasyon sa itaas.",
+    "vi": "Không đính kèm hồ sơ y tế. Chỉ có tên và vị trí tùy chọn hiển thị ở trên.",
+    "zh-Hans": "未附加任何医疗资料。仅包含上面显示的姓名和可选位置。"
   },
   "No medications entered. You can add a personal reminder schedule later in Settings and review each entry against your current instructions.": {
     "es": "No se han añadido medicamentos. Puedes añadir un horario personal después en Ajustes y comprobar cada entrada con tus instrucciones actuales.",
@@ -2339,6 +2441,12 @@
     "vi": "Mở ứng dụng khác?",
     "zh-Hans": "打开另一个应用？"
   },
+  "Open link": {
+    "es": "Abrir enlace",
+    "fil": "Buksan ang link",
+    "vi": "Mở liên kết",
+    "zh-Hans": "打开链接"
+  },
   "Open your confirmed medication schedule.": {
     "es": "Abre tu horario de medicamentos confirmado.",
     "fil": "Buksan ang nakumpirma mong iskedyul ng gamot.",
@@ -2380,6 +2488,12 @@
     "fil": "Kahel",
     "vi": "Cam",
     "zh-Hans": "橙子"
+  },
+  "Other exercise": {
+    "es": "Otro ejercicio",
+    "fil": "Ibang ehersisyo",
+    "vi": "Bài tập khác",
+    "zh-Hans": "其他锻炼"
   },
   "Overview": {
     "es": "Resumen",
@@ -2699,6 +2813,12 @@
     "vi": "Đã nhận và mở khóa cục bộ. Kiểm tra và chọn bản sao bên dưới. Chưa nhập nội dung nào.",
     "zh-Hans": "已在本地接收并解锁。请检查并选择下方副本。尚未导入任何内容。"
   },
+  "Recent workouts": {
+    "es": "Entrenamientos recientes",
+    "fil": "Mga recent na ehersisyo",
+    "vi": "Bài tập gần đây",
+    "zh-Hans": "最近的锻炼"
+  },
   "Recently deleted notes · 30 days": {
     "es": "Notas eliminadas recientemente · 30 días",
     "fil": "Mga kamakailang binurang tala · 30 araw",
@@ -2746,6 +2866,12 @@
     "fil": "Bawasan ang galaw sa screen at mga pagdiriwang",
     "vi": "Giảm chuyển động và hiệu ứng chúc mừng",
     "zh-Hans": "减少视觉动态效果和庆祝动画"
+  },
+  "Refresh my location": {
+    "es": "Actualizar mi ubicación",
+    "fil": "I-refresh ang lokasyon ko",
+    "vi": "Làm mới vị trí của tôi",
+    "zh-Hans": "刷新我的位置"
   },
   "Remember a pattern": {
     "es": "Recordar un patrón",
@@ -2800,6 +2926,12 @@
     "fil": "Alisin sa mga paborito",
     "vi": "Xóa khỏi yêu thích",
     "zh-Hans": "取消收藏"
+  },
+  "Remove location from message": {
+    "es": "Quitar la ubicación del mensaje",
+    "fil": "Alisin ang lokasyon sa mensahe",
+    "vi": "Xóa vị trí khỏi tin nhắn",
+    "zh-Hans": "从消息中移除位置"
   },
   "Remove this reminder? This does not change your prescription.": {
     "es": "¿Eliminar este recordatorio? Esto no cambia tu receta.",
@@ -2903,6 +3035,12 @@
     "vi": "Thói quen hằng ngày",
     "zh-Hans": "日常安排"
   },
+  "Run": {
+    "es": "Correr",
+    "fil": "Takbo",
+    "vi": "Chạy bộ",
+    "zh-Hans": "跑步"
+  },
   "Save": {
     "es": "Guardar",
     "fil": "I-save",
@@ -2980,6 +3118,12 @@
     "fil": "Maghanap ng aktibidad",
     "vi": "Tìm hoạt động",
     "zh-Hans": "搜索活动"
+  },
+  "Search built-in general references offline.": {
+    "es": "Busca referencias generales integradas sin conexión.",
+    "fil": "Maghanap ng mga built-in na pangkalahatang sanggunian nang offline.",
+    "vi": "Tìm kiếm tài liệu tham khảo chung có sẵn khi ngoại tuyến.",
+    "zh-Hans": "离线搜索内置的通用参考资料。"
   },
   "Search care notes": {
     "es": "Buscar notas de cuidado",
@@ -3107,6 +3251,12 @@
     "vi": "Chia sẻ sở thích hoặc tưởng tượng câu chuyện. Không ghi lại nội dung.",
     "zh-Hans": "分享喜好或想象一个故事。不记录任何内容。"
   },
+  "Share a request for help": {
+    "es": "Compartir una petición de ayuda",
+    "fil": "Ibahagi ang kahilingan ng tulong",
+    "vi": "Chia sẻ lời kêu gọi giúp đỡ",
+    "zh-Hans": "分享求助信息"
+  },
   "Share receipt": {
     "es": "Compartir recibo",
     "fil": "Ibahagi ang resibo",
@@ -3226,6 +3376,12 @@
     "fil": "Mga tunog ng kapaligiran",
     "vi": "Âm thanh môi trường",
     "zh-Hans": "环境音"
+  },
+  "Sources found": {
+    "es": "Fuentes encontradas",
+    "fil": "Natagpuang mga sanggunian",
+    "vi": "Nguồn đã tìm thấy",
+    "zh-Hans": "找到的来源"
   },
   "Speak after I start or advance a routine": {
     "es": "Leer al iniciar o avanzar en una rutina",
@@ -3359,11 +3515,23 @@
     "vi": "Dừng đọc",
     "zh-Hans": "停止朗读"
   },
+  "Strength training": {
+    "es": "Entrenamiento de fuerza",
+    "fil": "Lakas ng katawan",
+    "vi": "Tập tạ",
+    "zh-Hans": "力量训练"
+  },
   "Struggling": {
     "es": "Me está costando",
     "fil": "Nahihirapan",
     "vi": "Đang gặp khó khăn",
     "zh-Hans": "感到吃力"
+  },
+  "Swimming": {
+    "es": "Nadar",
+    "fil": "Paglangoy",
+    "vi": "Bơi",
+    "zh-Hans": "游泳"
   },
   "System": {
     "es": "Sistema",
@@ -3538,6 +3706,12 @@
     "fil": "Sariling ulat ngayon: {0}",
     "vi": "Tự ghi nhận hôm nay: {0}",
     "zh-Hans": "今天的自述：{0}"
+  },
+  "Today's steps": {
+    "es": "Pasos de hoy",
+    "fil": "Mga hakbang ngayong araw",
+    "vi": "Số bước hôm nay",
+    "zh-Hans": "今日步数"
   },
   "Today: feeling {0}": {
     "es": "Hoy: me siento {0}",
@@ -3760,6 +3934,12 @@
     "fil": "Mga vital sign at telehealth",
     "vi": "Dấu hiệu sinh tồn và khám từ xa",
     "zh-Hans": "生命体征与远程医疗"
+  },
+  "Walk": {
+    "es": "Caminar",
+    "fil": "Lakad",
+    "vi": "Đi bộ",
+    "zh-Hans": "步行"
   },
   "Welcome to CareSphere": {
     "es": "Bienvenido a CareSphere",

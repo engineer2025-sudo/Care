@@ -653,3 +653,33 @@ Remove transfer file (verify passphrase only)|Quitar el archivo de transferencia
 Cancel verification|Cancelar la verificación|取消验证|Kanselahin ang pag-verify|Hủy xác minh
 Receipt not verified. Wrong passphrase or a changed receipt. Nothing about this import is confirmed.|Recibo no verificado. Frase de contraseña incorrecta o recibo modificado. No se confirma nada sobre esta importación.|回执未通过验证。口令错误或回执已被更改。本次导入未得到任何确认。|Hindi na-verify ang resibo. Mali ang passphrase o binago ang resibo. Walang nakumpirma tungkol sa import na ito.|Biên nhận không được xác minh. Sai mật khẩu hoặc biên nhận đã bị thay đổi. Chưa có gì được xác nhận về lần nhập này.
 Check the units and values. This is not a medical interpretation.|Comprueba las unidades y los valores. Esta no es una interpretación médica.|请核对单位和数值。这不是医学解读。|Suriin ang mga yunit at halaga. Hindi ito medikal na interpretasyon.|Kiểm tra đơn vị và giá trị. Đây không phải diễn giải y khoa.
+Need urgent help?|¿Necesitas ayuda urgente?|需要紧急帮助吗？|Kailangan mo ba ng agarang tulong?|Bạn có cần giúp đỡ khẩn cấp không?
+In the United States, call 911 for immediate danger. Outside the US, use the local emergency number. CareSphere does not contact anyone automatically.|En Estados Unidos, llama al 911 si hay peligro inmediato. Fuera de EE. UU., usa el número de emergencias local. CareSphere no contacta a nadie automáticamente.|在美国，遇到直接危险请拨打 911。在美国以外，请拨打当地急救电话。CareSphere 不会自动联系任何人。|Sa Estados Unidos, tumawag sa 911 para sa agarang panganib. Sa labas ng US, gamitin ang lokal na numero ng emerhensiya. Hindi awtomatikong kinokontak ng CareSphere ang sinuman.|Tại Hoa Kỳ, hãy gọi 911 khi có nguy hiểm tức thời. Ngoài Hoa Kỳ, hãy dùng số cấp cứu địa phương. CareSphere không tự động liên hệ với ai.
+Call 911|Llamar al 911|拨打 911|Tawagan ang 911|Gọi 911
+Share a request for help|Compartir una petición de ayuda|分享求助信息|Ibahagi ang kahilingan ng tulong|Chia sẻ lời kêu gọi giúp đỡ
+Choose a messaging app and recipient, then review and send the message yourself. CareSphere cannot confirm delivery or a response.|Elige una app de mensajería y un destinatario, luego revisa y envía el mensaje tú mismo. CareSphere no puede confirmar la entrega ni una respuesta.|选择一个通讯应用和收件人，然后自行查看并发送消息。CareSphere 无法确认送达或收到回复。|Pumili ng messaging app at tatanggap, pagkatapos suriin at ipadala ang mensahe nang sarili. Hindi makumpirma ng CareSphere ang paghahatid o tugon.|Chọn ứng dụng nhắn tin và người nhận, rồi tự kiểm tra và gửi tin nhắn. CareSphere không thể xác nhận đã gửi hay hồi âm.
+Add my location (optional)|Agregar mi ubicación (opcional)|添加我的位置（可选）|Idagdag ang lokasyon ko (opsyonal)|Thêm vị trí của tôi (tùy chọn)
+Refresh my location|Actualizar mi ubicación|刷新我的位置|I-refresh ang lokasyon ko|Làm mới vị trí của tôi
+Getting location…|Obteniendo ubicación…|正在获取位置…|Kinukuha ang lokasyon…|Đang lấy vị trí…
+Remove location from message|Quitar la ubicación del mensaje|从消息中移除位置|Alisin ang lokasyon sa mensahe|Xóa vị trí khỏi tin nhắn
+Message preview|Vista previa del mensaje|消息预览|Preview ng mensahe|Xem trước tin nhắn
+Choose how to share|Elegir cómo compartir|选择分享方式|Pumili kung paano ibahagi|Chọn cách chia sẻ
+No medical profile is attached. Only the name and optional location shown above are included.|No se adjunta ningún perfil médico. Solo se incluyen el nombre y la ubicación opcional que se muestran arriba.|未附加任何医疗资料。仅包含上面显示的姓名和可选位置。|Walang nakalakip na medical profile. Kasama lang ang pangalan at ang opsyonal na lokasyon sa itaas.|Không đính kèm hồ sơ y tế. Chỉ có tên và vị trí tùy chọn hiển thị ở trên.
+Location ready to share|Ubicación lista para compartir|位置已可分享|Handa nang ibahagi ang lokasyon|Vị trí đã sẵn sàng để chia sẻ
+Location unavailable or permission denied. You can still share an SOS message without coordinates.|Ubicación no disponible o permiso denegado. Aún puedes compartir un mensaje SOS sin coordenadas.|位置不可用或权限被拒绝。你仍可分享不含坐标的 SOS 消息。|Hindi magamit ang lokasyon o tinanggihan ang pahintulot. Maaari ka pa ring magbahagi ng mensahe SOS nang walang mga coordinate.|Vị trí không khả dụng hoặc bị từ chối quyền. Bạn vẫn có thể chia sẻ tin nhắn SOS mà không có tọa độ.
+Health references|Referencias de salud|健康参考资料|Mga sanggunian ng kalusugan|Tài liệu tham khảo sức khỏe
+Search built-in general references offline.|Busca referencias generales integradas sin conexión.|离线搜索内置的通用参考资料。|Maghanap ng mga built-in na pangkalahatang sanggunian nang offline.|Tìm kiếm tài liệu tham khảo chung có sẵn khi ngoại tuyến.
+Sources found|Fuentes encontradas|找到的来源|Natagpuang mga sanggunian|Nguồn đã tìm thấy
+No matching references|No hay referencias coincidentes|没有匹配的参考资料|Walang tumugmang sanggunian|Không có tài liệu phù hợp
+Open link|Abrir enlace|打开链接|Buksan ang link|Mở liên kết
+Recent workouts|Entrenamientos recientes|最近的锻炼|Mga recent na ehersisyo|Bài tập gần đây
+Today's steps|Pasos de hoy|今日步数|Mga hakbang ngayong araw|Số bước hôm nay
+From Health Connect|De Health Connect|来自 Health Connect|Mula sa Health Connect|Từ Health Connect
+Walk|Caminar|步行|Lakad|Đi bộ
+Run|Correr|跑步|Takbo|Chạy bộ
+Bike|Cicleta|骑行|Bisikleta|Đạp xe
+Strength training|Entrenamiento de fuerza|力量训练|Lakas ng katawan|Tập tạ
+Swimming|Nadar|游泳|Paglangoy|Bơi
+Other exercise|Otro ejercicio|其他锻炼|Ibang ehersisyo|Bài tập khác
+Mood history|Historial de estado de ánimo|心情记录历史|Kasaysayan ng mood|Lịch sử tâm trạng
+No check-ins yet|Aún no hay registros|尚无签到记录|Wala pang mga check-in|Chưa có lượt ghi nhận
