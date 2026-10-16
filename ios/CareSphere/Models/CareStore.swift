@@ -507,7 +507,8 @@ final class CareStore: ObservableObject {
         personalSupport.deletedNotes.removeAll { $0.id == entry.id }
     }
     /// Persist the complete merged snapshot before changing any observable state.
-    func importTransfer(_ transfer: TransferPayload, selected: Set<String>) throws -> Int {
+    /// Returns the imported record IDs in transfer order (for import receipts).
+    func importTransfer(_ transfer: TransferPayload, selected: Set<String>) throws -> [String] {
         guard persistenceCanWrite else { throw CareStoreError.storageUnavailable }
         try DeviceTransfer.validate(transfer)
         var box = persistedBox()
@@ -528,7 +529,7 @@ final class CareStore: ObservableObject {
         isErasingLocalData = true
         notes = box.notes; routines = box.routines; routineUndo = nil; personalSupport = support
         isErasingLocalData = false; persistenceIssue = nil
-        return chosen.count
+        return chosen.map { $0.id }
     }
     func backupSnapshot() throws -> Data { try JSONEncoder().encode(persistedBox()) }
     func inspectBackup(_ data: Data) throws -> String {

@@ -38,6 +38,15 @@ struct PersonalSupportView: View {
     @State private var aiMode = "Simplify wording"
     @State private var reviewed = ""
     @State private var transferPassword = ""
+    @AppStorage("caresphere.bareMinimum") private var bareMinimum = false
+    @State private var incomingDigest: String?
+    @State private var incomingSalt: Data?
+    @State private var incomingSource = "file"
+    @State private var pendingReceipt: ImportReceipt.Receipt?
+    @State private var importReceiptFile = false
+    @State private var verifyTransferFile = false
+    @State private var verifyReceipt: ImportReceipt.Receipt?
+    @State private var verifyFileData: Data?
     @State private var selectedRecords = Set<String>()
     @State private var incomingRecords = Set<String>()
     @State private var incomingTransfer: TransferPayload?
@@ -71,8 +80,8 @@ struct PersonalSupportView: View {
             }
             .navigationTitle(AppLanguage.text("My support tools"))
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(AppLanguage.text("Done")) { dismiss() } } }
-            .onChange(of: section) { _ in stopNearby(); draft = ""; detail = ""; third = ""; shown = ""; status = ""; password = ""; transferPassword = ""; transferGeneration = UUID(); transferBusy = false; incomingTransfer = nil; planID = nil; assistant.clearResponse(); SpeechService.shared.stop() }
-            .onDisappear { stopNearby(); transferPassword = ""; transferGeneration = UUID(); assistant.clearResponse(); SpeechService.shared.stop() }
+            .onChange(of: section) { _ in stopNearby(); draft = ""; detail = ""; third = ""; shown = ""; status = ""; password = ""; transferPassword = ""; transferGeneration = UUID(); transferBusy = false; incomingTransfer = nil; incomingDigest = nil; incomingSalt = nil; pendingReceipt = nil; verifyReceipt = nil; verifyFileData = nil; planID = nil; assistant.clearResponse(); SpeechService.shared.stop() }
+            .onDisappear { stopNearby(); transferPassword = ""; transferGeneration = UUID(); incomingDigest = nil; incomingSalt = nil; verifyReceipt = nil; verifyFileData = nil; assistant.clearResponse(); SpeechService.shared.stop() }
             .onChange(of: phase) { value in if value == .background { stopNearby() }; if value != .active { SpeechService.shared.stop(); assistant.clearResponse(); paused = true } }
             .onChange(of: connectionPhoto) { item in Task { await readConnectionPhoto(item) } }
             .onChange(of: selectedPhoto) { item in Task { await loadPhoto(item) } }
@@ -93,10 +102,32 @@ struct PersonalSupportView: View {
                     Task {
                         let result = await Task.detached { Result { try DeviceTransfer.open(data, password: pass) } }.value
                         guard transferGeneration == generation else { return }; transferBusy = false
-                        switch result { case .success(let payload): incomingTransfer = payload; incomingRecords = []; status = "Unlocked locally. Preview and select records before importing."
+                        switch result { case .success(let payload):
+                            incomingTransfer = payload; incomingRecords = []
+                            incomingDigest = ImportReceipt.fileSha256(data)
+                            incomingSalt = ((try? JSONSerialization.jsonObject(with: data)) as? [String: Any]).flatMap { ($0["salt"] as? String).flatMap { Data(base64Encoded: $0) } }
+                            incomingSource = "file"
+                            status = "Unlocked locally. Preview and select records before importing."
                         case .failure: status = "Cannot unlock this CareSphere transfer. Check the file and passphrase. Nothing was imported." }
                     }
                 } catch { status = "Could not read this transfer. Nothing was imported." }
+            }
+            .fileImporter(isPresented: $importReceiptFile, allowedContentTypes: [.json, .data]) { result in
+                do {
+                    let url = try result.get(); let access = url.startAccessingSecurityScopedResource(); defer { if access { url.stopAccessingSecurityScopedResource() } }
+                    guard (try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) <= 100_000 else { throw ImportReceipt.Failure.invalid }
+                    verifyReceipt = try ImportReceipt.parse(String(decoding: try Data(contentsOf: url), as: UTF8.self))
+                    verifyFileData = nil
+                    status = "Receipt loaded. Enter the transfer passphrase, then choose Verify receipt."
+                } catch { status = "This is not a CareSphere import receipt." }
+            }
+            .fileImporter(isPresented: $verifyTransferFile, allowedContentTypes: [.json, .data]) { result in
+                do {
+                    let url = try result.get(); let access = url.startAccessingSecurityScopedResource(); defer { if access { url.stopAccessingSecurityScopedResource() } }
+                    guard (try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) <= 1_000_000 else { throw ImportReceipt.Failure.invalid }
+                    verifyFileData = try Data(contentsOf: url)
+                    status = "Transfer file added. Choose Verify receipt."
+                } catch { status = "Could not read this transfer file." }
             }
             .fileExporter(isPresented: $exportBackup, document: backupDocument, contentType: .json, defaultFilename: "CareSphere-iPhone-backup") { result in
                 if case .failure = result { status = "The backup was not saved. Try again." }
@@ -121,7 +152,7 @@ struct PersonalSupportView: View {
         switch section {
         case "Start here":
             Section(AppLanguage.text("Start with one thing")) {
-                Text(AppLanguage.text("Activities work without a profile. Choose comfort settings or make a routine whenever you are ready. Permissions are requested only for features you choose."))
+                InfoText(AppLanguage.text("Activities work without a profile. Choose comfort settings or make a routine whenever you are ready. Permissions are requested only for features you choose."))
                 Toggle(AppLanguage.text("Simple Mode — three destinations"), isOn: $store.personalSupport.simple)
                 Button(AppLanguage.text("Choose comfort settings")) { section = "Comfort" }
                 Button(AppLanguage.text("Make a visual routine")) { section = "Visual routines" }
@@ -142,11 +173,12 @@ struct PersonalSupportView: View {
         case "Comfort":
             Section(AppLanguage.text("Your preferences, not assumptions")) {
                 Toggle(AppLanguage.text("Simple Mode"), isOn: $store.personalSupport.simple)
+                Toggle(AppLanguage.text("Bare minimum mode"), isOn: $bareMinimum)
                 Toggle(AppLanguage.text("Reduce visual motion"), isOn: $store.reduceVisualMotion)
                 Toggle(AppLanguage.text("Higher contrast"), isOn: $store.highContrast)
                 Toggle(AppLanguage.text("Speak after I start or advance a routine"), isOn: $store.personalSupport.speakSteps)
                 Picker(AppLanguage.text("Choices in personal photo matching"), selection: $store.personalSupport.choices) { ForEach(2...4, id: \.self) { Text("\($0)").tag($0) } }
-                Text(AppLanguage.text("Activity-specific choice controls remain in the library. Text follows iPhone Accessibility settings. Sound never starts automatically."))
+                InfoText(AppLanguage.text("Activity-specific choice controls remain in the library. Text follows iPhone Accessibility settings. Sound never starts automatically."))
             }
         case "Appointments": questions
         case "Recovery & backup": recovery
@@ -155,7 +187,7 @@ struct PersonalSupportView: View {
                 Picker(AppLanguage.text("Interest"), selection: $interest) { ForEach(packs.keys.sorted(), id: \.self) { Text(AppLanguage.text($0)).tag($0) } }
                 Text(AppLanguage.text((packs[interest] ?? [""])[promptIndex % 3])).font(.title2)
                 Button(AppLanguage.text("Next / skip")) { promptIndex += 1 }
-                Text(AppLanguage.text("Speak, point, listen or skip. Answers are not recorded; these are leisure prompts, not treatment."))
+                InfoText(AppLanguage.text("Speak, point, listen or skip. Answers are not recorded; these are leisure prompts, not treatment."))
             }
         case "Apple Intelligence": intelligence
         default: deviceSharing
@@ -167,7 +199,7 @@ struct PersonalSupportView: View {
     }
     private var deviceSharing: some View {
         Section(AppLanguage.text("Device-to-device · no backend")) {
-            Text(AppLanguage.text("1. Select notes or routines and prepare an encrypted file. 2. Send using AirDrop, another app, or Save to Files. 3. On the other device open CareSphere → My support tools → Device sharing, choose the received file and preview before importing."))
+            InfoText(AppLanguage.text("1. Select notes or routines and prepare an encrypted file. 2. Send using AirDrop, another app, or Save to Files. 3. On the other device open CareSphere → My support tools → Device sharing, choose the received file and preview before importing."))
             Text(AppLanguage.text("Use direct local Wi-Fi / hotspot transfer below for iPhone or Android, or use the system share sheet. This is not Bluetooth pairing or automatic sync. Other sharing apps may use their own cloud. Copies cannot be remotely revoked."))
             SecureField(AppLanguage.text("Transfer passphrase · 12+ characters"), text: $transferPassword)
                 .onChange(of: transferPassword) { _ in stopNearby(); incomingTransfer = nil; transferGeneration = UUID(); transferBusy = false; if let url = transferURL { try? FileManager.default.removeItem(at: url) }; transferURL = nil }
@@ -185,16 +217,45 @@ struct PersonalSupportView: View {
             nearbyControls
             Button(AppLanguage.text("Receive: choose a transfer file")) { stopNearby(); incomingTransfer = nil; importTransferFile = true }.disabled(transferBusy || transferPassword.count < 12)
             if let payload = incomingTransfer {
-                Text(AppLanguage.text("Preview received copies. Not verified clinical information. Existing records are never replaced.")).font(.headline)
+                InfoText(AppLanguage.text("Preview received copies. Not verified clinical information. Existing records are never replaced.")).font(.headline)
                 ForEach(payload.records) { record in
                     let imported = (store.personalSupport.receivedItems ?? []).contains(payload.id + ":" + record.id)
                     Toggle("\(record.type): \(record.text)\(imported ? " · Already imported" : "")", isOn: Binding(get: { incomingRecords.contains(record.id) }, set: { value in if value { incomingRecords.insert(record.id) } else { incomingRecords.remove(record.id) } })).disabled(imported)
                 }
                 Button(AppLanguage.text("Import selected copies")) {
-                    do { let count = try store.importTransfer(payload, selected: incomingRecords); incomingTransfer = nil; incomingRecords = []; transferPassword = ""; status = "Imported \(count) copies. Existing records were not replaced." }
+                    do {
+                        let imported = try store.importTransfer(payload, selected: incomingRecords)
+                        var made: ImportReceipt.Receipt? = nil
+                        if let digest = incomingDigest, let salt = incomingSalt {
+                            made = try? ImportReceipt.create(transfer: payload.id, fileSha256: digest, imported: imported, source: incomingSource, macSalt: salt, passphrase: transferPassword)
+                        }
+                        incomingTransfer = nil; incomingRecords = []; transferPassword = ""
+                        incomingDigest = nil; incomingSalt = nil
+                        pendingReceipt = made
+                        status = made == nil ? "Imported \(imported.count) copies. Existing records were not replaced." : "Imported \(imported.count) copies. An import receipt is ready below."
+                    }
                     catch { status = "Import could not finish. Check capacity and secure storage. Nothing was replaced." }
                 }.disabled(incomingRecords.isEmpty)
-                Button(AppLanguage.text("Cancel import")) { incomingTransfer = nil; incomingRecords = [] }
+                Button(AppLanguage.text("Cancel import")) { incomingTransfer = nil; incomingRecords = []; incomingDigest = nil; incomingSalt = nil }
+            }
+            if let receipt = pendingReceipt {
+                Text(AppLanguage.text("Import receipt")).font(.headline)
+                InfoText(AppLanguage.text("Records what was imported here, authenticated with the transfer passphrase. Anyone who knows that passphrase can verify it. This is not identity verification, not a delivery guarantee, and not a medical record. Send it back to the person who shared the records if they should know."))
+                Text(receiptJSON(receipt)).font(.caption.monospaced())
+                ShareLink(item: receiptJSON(receipt)) { Label(AppLanguage.text("Share receipt"), systemImage: "square.and.arrow.up") }
+                Button(AppLanguage.text("Copy receipt")) { UIPasteboard.general.string = receiptJSON(receipt); status = "Receipt JSON copied." }
+                Button(AppLanguage.text("Done")) { pendingReceipt = nil }
+            }
+            Button(AppLanguage.text("Verify an import receipt")) { importReceiptFile = true }.disabled(transferBusy)
+            if let receipt = verifyReceipt {
+                Text(AppLanguage.format("Receipt loaded: {0} record(s). Enter the transfer passphrase, then verify.", [String(receipt.imported.count)]))
+                if verifyFileData != nil {
+                    Button(AppLanguage.text("Remove transfer file (verify passphrase only)")) { verifyFileData = nil }
+                } else {
+                    Button(AppLanguage.text("Also choose the transfer file for the strongest check")) { verifyTransferFile = true }
+                }
+                Button(AppLanguage.text("Verify receipt")) { runReceiptVerify() }.disabled(transferPassword.count < 12)
+                Button(AppLanguage.text("Cancel verification")) { verifyReceipt = nil; verifyFileData = nil }
             }
         }
     }
@@ -218,11 +279,11 @@ struct PersonalSupportView: View {
                     Image(uiImage:image).interpolation(.none).resizable().scaledToFit().frame(maxWidth:280).padding(16).background(Color.white)
                         .accessibilityLabel(AppLanguage.text("Connection QR code. The address and code are also written below."))
                 }
-                Text(AppLanguage.text("QR contains only connection details. Keep this offer open. It does not contain your records or passphrase."))
+                InfoText(AppLanguage.text("QR contains only connection details. Keep this offer open. It does not contain your records or passphrase."))
                 Text("Device address: \(offeredAddress)").textSelection(.enabled)
                 Text(AppLanguage.format("Connection code: {0}", [offeredCode])).font(.title2.monospacedDigit()).textSelection(.enabled)
                     .accessibilityLabel(AppLanguage.text("Connection code. ") + offeredCode.map { String($0) }.joined(separator: ", "))
-                Text(AppLanguage.text("Offer expires after five minutes or when you leave/background this screen. The code is not the encryption passphrase. Tell the recipient both separately from any public channel."))
+                InfoText(AppLanguage.text("Offer expires after five minutes or when you leave/background this screen. The code is not the encryption passphrase. Tell the recipient both separately from any public channel."))
             }
             if !nearbyAdvertisement.status.isEmpty { Text(AppLanguage.text(nearbyAdvertisement.status)) }
             Button(AppLanguage.text("Find nearby devices")) { stopNearby(); nearbyDiscovery.start() }
@@ -245,7 +306,7 @@ struct PersonalSupportView: View {
                 .disabled(nearbyBusy || transferBusy || transferPassword.count < 12 || receiveAddress.isEmpty || receiveCode.count != 8)
             if nearbyBusy { ProgressView(AppLanguage.text("Connecting locally…")) }
             if nearbyBusy || !offeredAddress.isEmpty { Button(AppLanguage.text("Stop nearby connection")) { stopNearby(); nearbyStatus = "Local connection stopped. Received copies cannot be recalled." } }
-            Text(AppLanguage.text("If a guest network blocks other devices, try a private hotspot or use the encrypted-file option. A connection failure never imports records.")).font(.caption)
+            InfoText(AppLanguage.text("If a guest network blocks other devices, try a private hotspot or use the encrypted-file option. A connection failure never imports records.")).font(.caption)
         }
     }
     private func connectionQR() -> UIImage? {
@@ -310,11 +371,41 @@ struct PersonalSupportView: View {
                     let opened = await Task.detached { Result { try DeviceTransfer.open(bytes, password: pass) } }.value
                     guard nearbyGeneration == generation else { return }; nearbyBusy = false
                     switch opened {
-                    case .success(let payload): incomingTransfer = payload; nearbyStatus = "Received and unlocked locally. Review and select copies below. Nothing has been imported."
+                    case .success(let payload):
+                        incomingTransfer = payload
+                        incomingDigest = ImportReceipt.fileSha256(bytes)
+                        incomingSalt = ((try? JSONSerialization.jsonObject(with: bytes)) as? [String: Any]).flatMap { ($0["salt"] as? String).flatMap { Data(base64Encoded: $0) } }
+                        incomingSource = "nearby"
+                        nearbyStatus = "Received and unlocked locally. Review and select copies below. Nothing has been imported."
                     case .failure: nearbyStatus = "Received bytes could not be unlocked. Check the passphrase with the sender. Nothing was imported."
                     }
                 }
             }
+        }
+    }
+    private func receiptJSON(_ receipt: ImportReceipt.Receipt) -> String {
+        let data = (try? JSONEncoder().encode(receipt)) ?? Data()
+        guard let object = try? JSONSerialization.jsonObject(with: data),
+              let pretty = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys]) else { return String(decoding: data, as: UTF8.self) }
+        return String(decoding: pretty, as: UTF8.self)
+    }
+    private func runReceiptVerify() {
+        guard let receipt = verifyReceipt else { return }
+        defer { verifyReceipt = nil; verifyFileData = nil }
+        do {
+            if let file = verifyFileData {
+                let bound = try ImportReceipt.verifyAgainstTransfer(receipt, passphrase: transferPassword, transferFile: file)
+                let base = AppLanguage.format("Verified. Import of {0} record(s) at {1} (source: {2}).", [bound.details["count"] ?? "", bound.details["imported_at"] ?? "", bound.details["source"] ?? ""])
+                let extra = (bound.fileMatches && bound.importedPresent)
+                    ? AppLanguage.text("Also checked the transfer file: its hash and all imported record IDs match this receipt.")
+                    : AppLanguage.text("The transfer file does not fully match this receipt. Its hash or record IDs differ.")
+                status = base + " " + extra
+            } else {
+                let details = try ImportReceipt.verify(receipt, passphrase: transferPassword)
+                status = AppLanguage.format("Verified. Import of {0} record(s) at {1} (source: {2}).", [details["count"] ?? "", details["imported_at"] ?? "", details["source"] ?? ""]) + " " + AppLanguage.text("File binding not checked without the transfer file.")
+            }
+        } catch {
+            status = AppLanguage.text("Receipt not verified. Wrong passphrase or a changed receipt. Nothing about this import is confirmed.")
         }
     }
     private func prepareTransfer() {
@@ -354,7 +445,7 @@ struct PersonalSupportView: View {
             }
         } else {
             Section(AppLanguage.text("Your own instructions")) {
-                Text(AppLanguage.text("One step per line. Do not use this to change prescribed medication instructions."))
+                InfoText(AppLanguage.text("One step per line. Do not use this to change prescribed medication instructions."))
                 TextField(AppLanguage.text("Routine title"), text: $draft)
                 TextEditor(text: $detail).frame(minHeight: 120).accessibilityLabel(AppLanguage.text("Steps, one per line"))
                 Picker(AppLanguage.text("Optional photo"), selection: $photoID) { Text(AppLanguage.text("No photo")).tag(nil as UUID?); ForEach(store.personalSupport.photos) { Text($0.caption).tag(Optional($0.id)) } }
@@ -411,7 +502,7 @@ struct PersonalSupportView: View {
                     if !person.video.isEmpty { Button("Video with \(person.name)") { pendingURL = URL(string: person.video) } }
                 }
             }.onDelete { store.personalSupport.contacts.remove(atOffsets: $0) }
-            Text(AppLanguage.text("Nobody is notified or monitored automatically. Ask permission before saving someone's details."))
+            InfoText(AppLanguage.text("Nobody is notified or monitored automatically. Ask permission before saving someone's details."))
         }
     }
     private var questions: some View {

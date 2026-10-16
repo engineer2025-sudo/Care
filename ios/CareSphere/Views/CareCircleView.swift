@@ -57,7 +57,7 @@ struct CareCircleView: View {
 
     private var visitPrepCard: some View {
         SectionCard(title: AppLanguage.text("Prepare for a care visit"), systemImage: "doc.text") {
-            Text(AppLanguage.text("Build a preview from only the local details you choose, then share it with the system share sheet. It is not a medical record or clinical interpretation."))
+            InfoText(AppLanguage.text("Build a preview from only the local details you choose, then share it with the system share sheet. It is not a medical record or clinical interpretation."))
                 .font(.caption).foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Button {
@@ -174,7 +174,7 @@ struct CareCircleView: View {
                             .font(.caption2).foregroundStyle(.secondary)
                     }
                 }
-                Text(AppLanguage.text("This reflects only the schedule and check-ins entered in CareSphere. It does not verify that a dose was taken."))
+                InfoText(AppLanguage.text("This reflects only the schedule and check-ins entered in CareSphere. It does not verify that a dose was taken."))
                     .font(.caption2).foregroundStyle(.tertiary)
             }
         }
@@ -199,7 +199,7 @@ struct CareCircleView: View {
                                 .font(.footnote)
                         }
                     }
-                    Text(AppLanguage.text("Saved locally. Use SOS → Share SOS details to choose a messaging app and recipient."))
+                    InfoText(AppLanguage.text("Saved locally. Use SOS → Share SOS details to choose a messaging app and recipient."))
                         .font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

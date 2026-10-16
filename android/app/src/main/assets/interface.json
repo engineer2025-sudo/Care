@@ -281,6 +281,24 @@
     "vi": "Đã nhập",
     "zh-Hans": "已导入"
   },
+  "Also checked the transfer file: its hash and all imported record IDs match this receipt.": {
+    "es": "También se comprobó el archivo de transferencia: su hash y todos los ID de registros importados coinciden con este recibo.",
+    "fil": "Nasuri din ang file ng paglilipat: tumutugma ang hash nito at lahat ng ID ng na-import na rekord sa resibong ito.",
+    "vi": "Cũng đã kiểm tra tệp truyền: giá trị băm và mọi ID bản ghi đã nhập đều khớp với biên nhận này.",
+    "zh-Hans": "同时检查了传输文件：其哈希值和所有已导入记录 ID 与本回执一致。"
+  },
+  "Also choose the transfer file": {
+    "es": "Elegir también el archivo de transferencia",
+    "fil": "Piliin din ang file ng paglilipat",
+    "vi": "Chọn luôn tệp truyền",
+    "zh-Hans": "同时选择传输文件"
+  },
+  "Also choose the transfer file for the strongest check": {
+    "es": "Elegir también el archivo de transferencia para la comprobación más fuerte",
+    "fil": "Piliin din ang file ng paglilipat para sa pinakamalakas na pagsusuri",
+    "vi": "Chọn luôn tệp truyền để kiểm tra chặt chẽ nhất",
+    "zh-Hans": "同时选择传输文件以进行最强检查"
+  },
   "An apple grows on a tree.": {
     "es": "Una manzana crece en un árbol.",
     "fil": "Ang mansanas ay tumutubo sa puno.",
@@ -431,6 +449,24 @@
     "vi": "Chuối",
     "zh-Hans": "香蕉"
   },
+  "Bare minimum mode": {
+    "es": "Modo mínimo esencial",
+    "fil": "Minimal na mode",
+    "vi": "Chế độ tối giản",
+    "zh-Hans": "极简模式"
+  },
+  "Bare minimum mode · Off": {
+    "es": "Modo mínimo esencial · Desactivado",
+    "fil": "Minimal na mode · Naka-off",
+    "vi": "Chế độ tối giản · Tắt",
+    "zh-Hans": "极简模式 · 关闭"
+  },
+  "Bare minimum mode · On": {
+    "es": "Modo mínimo esencial · Activado",
+    "fil": "Minimal na mode · Naka-on",
+    "vi": "Chế độ tối giản · Bật",
+    "zh-Hans": "极简模式 · 开启"
+  },
   "Before going out in the rain, what could you take?": {
     "es": "Antes de salir bajo la lluvia, ¿qué podrías llevar?",
     "fil": "Bago lumabas sa ulan, ano ang maaari mong dalhin?",
@@ -503,6 +539,12 @@
     "vi": "Hủy nhắc lại",
     "zh-Hans": "取消稍后提醒"
   },
+  "Cancel verification": {
+    "es": "Cancelar la verificación",
+    "fil": "Kanselahin ang pag-verify",
+    "vi": "Hủy xác minh",
+    "zh-Hans": "取消验证"
+  },
   "Care": {
     "es": "Cuidado",
     "fil": "Pangangalaga",
@@ -550,6 +592,12 @@
     "fil": "Hindi ligtas na na-save ang mga pagbabago. Naibalik ang huling na-save na mga rekord. Magbakante ng storage at subukang muli.",
     "vi": "Không lưu được thay đổi một cách an toàn. Đã khôi phục hồ sơ lưu gần nhất. Giải phóng bộ nhớ thiết bị rồi thử lại.",
     "zh-Hans": "无法安全保存更改。已恢复上次保存的记录。请释放设备存储空间后重试。"
+  },
+  "Check a receipt someone sent back from an import. The same transfer passphrase is required. Optionally include the transfer file for the strongest check.": {
+    "es": "Comprueba un recibo que alguien devolvió desde una importación. Se requiere la misma frase de contraseña de transferencia. Opcionalmente incluye el archivo de transferencia para la comprobación más fuerte.",
+    "fil": "Suriin ang resibo na ibinalik ng isang tao mula sa isang import. Kailangan ang parehong passphrase ng paglilipat. Opsyonal na isama ang file ng paglilipat para sa pinakamalakas na pagsusuri.",
+    "vi": "Kiểm tra biên nhận mà ai đó gửi lại từ một lần nhập. Cần cùng mật khẩu truyền dữ liệu. Có thể kèm tệp truyền để kiểm tra chặt chẽ nhất.",
+    "zh-Hans": "检查对方从导入后发回的回执。需要相同的传输口令。可选地附上传输文件以进行最强检查。"
   },
   "Check in with yourself, follow a routine, or simply take a break. You choose what feels right.": {
     "es": "Observa cómo te sientes, sigue una rutina o simplemente descansa. Tú eliges lo que te haga sentir bien.",
@@ -874,6 +922,12 @@
     "fil": "Mga kard sa pag-uusap",
     "vi": "Thẻ trò chuyện",
     "zh-Hans": "交谈卡片"
+  },
+  "Copy receipt": {
+    "es": "Copiar recibo",
+    "fil": "Kopyahin ang resibo",
+    "vi": "Sao chép biên nhận",
+    "zh-Hans": "复制回执"
   },
   "Could not read a valid CareSphere connection QR. Use the written address and code instead.": {
     "es": "No se pudo leer un QR de conexión válido de CareSphere. Usa la dirección y el código escritos.",
@@ -1289,6 +1343,12 @@
     "vi": "Khám phá cảm xúc",
     "zh-Hans": "探索感受"
   },
+  "File binding not checked without the transfer file.": {
+    "es": "No se comprobó la vinculación del archivo sin el archivo de transferencia.",
+    "fil": "Hindi nasuri ang pagkakaugnay ng file nang walang file ng paglilipat.",
+    "vi": "Chưa kiểm tra liên kết tệp vì không có tệp truyền.",
+    "zh-Hans": "未提供传输文件，未检查文件绑定。"
+  },
   "Find a calm moment": {
     "es": "Encontrar un momento de calma",
     "fil": "Humanap ng sandali ng kapanatagan",
@@ -1493,6 +1553,18 @@
     "vi": "Để hỗ trợ, không thúc giục.",
     "zh-Hans": "提供帮助，不催促您。"
   },
+  "Hides explanatory and how-to text everywhere in the app. Status messages, empty states and safety warnings stay visible.": {
+    "es": "Oculta el texto explicativo y las instrucciones en toda la aplicación. Los mensajes de estado, los estados vacíos y las advertencias de seguridad siguen visibles.",
+    "fil": "Itinatago ang paliwanag at mga tagubilin sa buong app. Nananatiling nakikita ang mga mensahe ng status, walang-laman na estado, at mga babala sa kaligtasan.",
+    "vi": "Ẩn toàn bộ lời giải thích và hướng dẫn trong ứng dụng. Thông báo trạng thái, trạng thái trống và cảnh báo an toàn vẫn hiển thị.",
+    "zh-Hans": "隐藏应用中所有说明和操作指引文字。状态消息、空状态和安全警告仍然可见。"
+  },
+  "Hides explanatory and how-to text. Status messages and safety warnings stay visible.": {
+    "es": "Oculta el texto explicativo y las instrucciones. Los mensajes de estado y las advertencias de seguridad siguen visibles.",
+    "fil": "Itinatago ang paliwanag at mga tagubilin. Nananatiling nakikita ang mga mensahe ng status at mga babala sa kaligtasan.",
+    "vi": "Ẩn lời giải thích và hướng dẫn. Thông báo trạng thái và cảnh báo an toàn vẫn hiển thị.",
+    "zh-Hans": "隐藏说明和操作指引文字。状态消息和安全警告仍然可见。"
+  },
   "High contrast": {
     "es": "Alto contraste",
     "fil": "Mataas na contrast",
@@ -1565,6 +1637,12 @@
     "vi": "Nhập từ Danh bạ",
     "zh-Hans": "从通讯录导入"
   },
+  "Import receipt": {
+    "es": "Recibo de importación",
+    "fil": "Resibo ng pag-import",
+    "vi": "Biên nhận nhập",
+    "zh-Hans": "导入回执"
+  },
   "Import selected copies": {
     "es": "Importar copias seleccionadas",
     "fil": "I-import ang mga napiling kopya",
@@ -1576,6 +1654,12 @@
     "fil": "Mahalaga",
     "vi": "Quan trọng",
     "zh-Hans": "重要"
+  },
+  "Imported selected copies. An import receipt is ready below.": {
+    "es": "Copias seleccionadas importadas. Hay un recibo de importación listo abajo.",
+    "fil": "Na-import ang mga napiling kopya. May handa nang resibo ng pag-import sa ibaba.",
+    "vi": "Đã nhập các bản sao đã chọn. Biên nhận nhập đã sẵn sàng bên dưới.",
+    "zh-Hans": "已导入所选副本。下方已生成导入回执。"
   },
   "Imported selected copies. Existing records were not replaced.": {
     "es": "Copias seleccionadas importadas. No se reemplazaron registros existentes.",
@@ -2561,6 +2645,36 @@
     "vi": "Đọc bước này",
     "zh-Hans": "朗读此步骤"
   },
+  "Receipt JSON copied.": {
+    "es": "Recibo JSON copiado.",
+    "fil": "Nai-copy ang resibo JSON.",
+    "vi": "Đã sao chép JSON biên nhận.",
+    "zh-Hans": "回执 JSON 已复制。"
+  },
+  "Receipt file": {
+    "es": "Archivo de recibo",
+    "fil": "File ng resibo",
+    "vi": "Tệp biên nhận",
+    "zh-Hans": "回执文件"
+  },
+  "Receipt file saved. Send it to the person who shared the records.": {
+    "es": "Archivo de recibo guardado. Envíaselo a la persona que compartió los registros.",
+    "fil": "Na-save ang file ng resibo. Ipadal ito sa taong nagbahagi ng mga rekord.",
+    "vi": "Đã lưu tệp biên nhận. Hãy gửi cho người đã chia sẻ hồ sơ.",
+    "zh-Hans": "回执文件已保存。请发送给分享记录的人。"
+  },
+  "Receipt loaded: {0} record(s). Enter the transfer passphrase, then verify.": {
+    "es": "Recibo cargado: {0} registro(s). Introduce la frase de contraseña de transferencia y luego verifica.",
+    "fil": "Na-load ang resibo: {0} na rekord(s). Ilagay ang passphrase ng paglilipat, pagkatapos ay i-verify.",
+    "vi": "Đã tải biên nhận: {0} bản ghi. Nhập mật khẩu truyền dữ liệu rồi xác minh.",
+    "zh-Hans": "已加载回执：{0} 条记录。请输入传输口令，然后验证。"
+  },
+  "Receipt not verified. Wrong passphrase or a changed receipt. Nothing about this import is confirmed.": {
+    "es": "Recibo no verificado. Frase de contraseña incorrecta o recibo modificado. No se confirma nada sobre esta importación.",
+    "fil": "Hindi na-verify ang resibo. Mali ang passphrase o binago ang resibo. Walang nakumpirma tungkol sa import na ito.",
+    "vi": "Biên nhận không được xác minh. Sai mật khẩu hoặc biên nhận đã bị thay đổi. Chưa có gì được xác nhận về lần nhập này.",
+    "zh-Hans": "回执未通过验证。口令错误或回执已被更改。本次导入未得到任何确认。"
+  },
   "Receive: choose a CareSphere transfer": {
     "es": "Recibir: elegir transferencia de CareSphere",
     "fil": "Tumanggap: pumili ng CareSphere transfer",
@@ -2590,6 +2704,12 @@
     "fil": "Itala ang sukat na kinuha ngayon",
     "vi": "Ghi số đo vừa đo",
     "zh-Hans": "记录刚测量的数值"
+  },
+  "Records what was imported here, authenticated with the transfer passphrase. Anyone who knows that passphrase can verify it. This is not identity verification, not a delivery guarantee, and not a medical record. Send it back to the person who shared the records if they should know.": {
+    "es": "Registra lo que se importó aquí, autenticado con la frase de contraseña de transferencia. Cualquiera que conozca esa frase puede verificarlo. Esto no es verificación de identidad, ni garantía de entrega, ni un registro médico. Envíaselo a la persona que compartió los registros si debe saberlo.",
+    "fil": "Inirerekord kung ano ang na-import dito, na-verify gamit ang passphrase ng paglilipat. Sinumang nakakaalam ng passphrase na iyon ay maaaring mag-verify. Hindi ito pag-verify ng pagkakakilanlan, hindi garantiya ng paghahatid, at hindi medical record. Ipadal ito pabalik sa taong nagbahagi ng mga rekord kung kailangan niyang malaman.",
+    "vi": "Ghi lại những gì đã được nhập tại đây, được xác thực bằng mật khẩu truyền dữ liệu. Bất kỳ ai biết mật khẩu đó đều có thể xác minh. Đây không phải xác minh danh tính, không phải đảm bảo đã giao hàng, và không phải hồ sơ y tế. Hãy gửi lại cho người đã chia sẻ hồ sơ nếu họ cần biết.",
+    "zh-Hans": "记录在此处实际导入的内容，并使用传输口令进行身份验证。任何知道该口令的人都可以验证它。这不是身份验证、不是送达保证、也不是医疗记录。如果需要让分享记录的人知悉，请将它发回给对方。"
   },
   "Recovery & backup": {
     "es": "Recuperación y copia de seguridad",
@@ -2680,6 +2800,12 @@
     "fil": "Alisin ang paalalang ito? Hindi nito binabago ang reseta mo.",
     "vi": "Xóa lời nhắc này? Thao tác này không thay đổi đơn thuốc.",
     "zh-Hans": "删除此提醒？这不会改变您的处方。"
+  },
+  "Remove transfer file (verify passphrase only)": {
+    "es": "Quitar el archivo de transferencia (solo verificar la frase)",
+    "fil": "Alisin ang file ng paglilipat (i-verify lang ang passphrase)",
+    "vi": "Bỏ tệp truyền (chỉ xác minh mật khẩu)",
+    "zh-Hans": "移除传输文件（仅验证口令）"
   },
   "Remove {0}": {
     "es": "Quitar {0}",
@@ -2800,6 +2926,12 @@
     "fil": "I-save ang tala",
     "vi": "Lưu ghi chú",
     "zh-Hans": "保存笔记"
+  },
+  "Save receipt file": {
+    "es": "Guardar archivo de recibo",
+    "fil": "I-save ang file ng resibo",
+    "vi": "Lưu tệp biên nhận",
+    "zh-Hans": "保存回执文件"
   },
   "Save to favorites": {
     "es": "Guardar en favoritos",
@@ -2968,6 +3100,12 @@
     "fil": "Magbahagi ng gusto o bumuo ng kuwento. Walang itinatala.",
     "vi": "Chia sẻ sở thích hoặc tưởng tượng câu chuyện. Không ghi lại nội dung.",
     "zh-Hans": "分享喜好或想象一个故事。不记录任何内容。"
+  },
+  "Share receipt": {
+    "es": "Compartir recibo",
+    "fil": "Ibahagi ang resibo",
+    "vi": "Chia sẻ biên nhận",
+    "zh-Hans": "分享回执"
   },
   "Shoe": {
     "es": "Zapato",
@@ -3305,6 +3443,12 @@
     "vi": "Không lưu được trạng thái tạm dừng. Tắt thông báo CareSphere trong Cài đặt Android trước khi khởi động lại.",
     "zh-Hans": "无法保存暂停状态。重新启动前，请在Android设置中停用CareSphere通知。"
   },
+  "The transfer file does not fully match this receipt. Its hash or record IDs differ.": {
+    "es": "El archivo de transferencia no coincide completamente con este recibo. Su hash o los ID de registros difieren.",
+    "fil": "Hindi ganap na tumutugma ang file ng paglilipat sa resibong ito. Iba ang hash o ID ng mga rekord nito.",
+    "vi": "Tệp truyền không khớp hoàn toàn với biên nhận này. Giá trị băm hoặc ID bản ghi khác.",
+    "zh-Hans": "传输文件与本回执不完全匹配。其哈希值或记录 ID 不一致。"
+  },
   "These are self-entered values, not verified sensor readings. They do not change your care plan.": {
     "es": "Son valores introducidos por ti, no lecturas verificadas de sensores. No cambian tu plan de atención.",
     "fil": "Ikaw ang naglagay ng mga halagang ito; hindi ito beripikadong sukat ng sensor. Hindi nito binabago ang plano ng pangangalaga mo.",
@@ -3394,6 +3538,12 @@
     "fil": "Ngayon: {0} ang pakiramdam",
     "vi": "Hôm nay: cảm thấy {0}",
     "zh-Hans": "今天的感受：{0}"
+  },
+  "Transfer file (optional)": {
+    "es": "Archivo de transferencia (opcional)",
+    "fil": "File ng paglilipat (opsyonal)",
+    "vi": "Tệp truyền (không bắt buộc)",
+    "zh-Hans": "传输文件（可选）"
   },
   "Transfer passphrase": {
     "es": "Frase de contraseña de transferencia",
@@ -3526,6 +3676,30 @@
     "fil": "Gamitin ang screen lock ng device o ligtas na biometric. Hindi natatanggap ng CareSphere ang PIN o biometric data mo.",
     "vi": "Dùng khóa màn hình thiết bị hoặc sinh trắc học bảo mật cao. CareSphere không nhận mã PIN hay dữ liệu sinh trắc học của bạn.",
     "zh-Hans": "请使用设备屏幕锁或高安全级别的生物识别。CareSphere不会获取您的PIN码或生物识别数据。"
+  },
+  "Verified. Import of {0} record(s) at {1} (source: {2}).": {
+    "es": "Verificado. Importación de {0} registro(s) a las {1} (origen: {2}).",
+    "fil": "Na-verify. Pag-import ng {0} na rekord(s) noong {1} (pinagmulan: {2}).",
+    "vi": "Đã xác minh. Đã nhập {0} bản ghi lúc {1} (nguồn: {2}).",
+    "zh-Hans": "已验证。于 {1} 导入了 {0} 条记录（来源：{2}）。"
+  },
+  "Verify an import receipt": {
+    "es": "Verificar un recibo de importación",
+    "fil": "I-verify ang resibo ng pag-import",
+    "vi": "Xác minh biên nhận nhập",
+    "zh-Hans": "验证导入回执"
+  },
+  "Verify receipt": {
+    "es": "Verificar recibo",
+    "fil": "I-verify ang resibo",
+    "vi": "Xác minh biên nhận",
+    "zh-Hans": "验证回执"
+  },
+  "Verify with passphrase": {
+    "es": "Verificar con la frase de contraseña",
+    "fil": "I-verify gamit ang passphrase",
+    "vi": "Xác minh bằng mật khẩu",
+    "zh-Hans": "使用口令验证"
   },
   "Very low": {
     "es": "Muy bajo",

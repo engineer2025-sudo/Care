@@ -108,7 +108,7 @@ struct VisitPrepView: View {
                             Text(AppLanguage.text("All saved")).tag(0)
                         }
                     }
-                    Text(AppLanguage.text("Selections are off by default. The date range applies to notes and mood self-reports; the current medication schedule is shown only if you choose it."))
+                    InfoText(AppLanguage.text("Selections are off by default. The date range applies to notes and mood self-reports; the current medication schedule is shown only if you choose it."))
                         .font(.caption2).foregroundStyle(.secondary)
                 }
 
@@ -118,7 +118,7 @@ struct VisitPrepView: View {
                         .onChange(of: questions) { newValue in
                             if newValue.count > 1200 { questions = String(newValue.prefix(1200)) }
                         }
-                    Text(AppLanguage.text("This draft stays in memory until you close this screen. It is not saved in your journal."))
+                    InfoText(AppLanguage.text("This draft stays in memory until you close this screen. It is not saved in your journal."))
                         .font(.caption2).foregroundStyle(.secondary)
                 }
 
@@ -140,7 +140,7 @@ struct VisitPrepView: View {
                 }
 
                 Section(AppLanguage.text("Limitations")) {
-                    Text(AppLanguage.text("This prototype includes only the selected local profile name, user-entered medication reminders, mood self-reports, notes, and your questions. It does not include HealthKit readings, a clinician-verified medication list, or automatic vital-sign summaries, and it does not provide diagnosis or treatment advice."))
+                    InfoText(AppLanguage.text("This prototype includes only the selected local profile name, user-entered medication reminders, mood self-reports, notes, and your questions. It does not include HealthKit readings, a clinician-verified medication list, or automatic vital-sign summaries, and it does not provide diagnosis or treatment advice."))
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }

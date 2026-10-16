@@ -208,7 +208,7 @@ struct ConversationCardsView: View {
                 index = (index + ActivityExercises.conversations.count - 1) % ActivityExercises.conversations.count
                 showIdeas = false
             }.frame(minHeight: 44)
-            Text(AppLanguage.text("Playing together? Follow their interests. Do not quiz, correct memories, or press for personal details. Skip any topic that feels uncomfortable."))
+            InfoText(AppLanguage.text("Playing together? Follow their interests. Do not quiz, correct memories, or press for personal details. Skip any topic that feels uncomfortable."))
                 .font(.footnote).foregroundStyle(.secondary)
         }
     }

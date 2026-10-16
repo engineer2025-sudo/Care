@@ -168,7 +168,7 @@ struct OnboardingView: View {
                 Text(AppLanguage.text("Welcome to CareSphere"))
                     .font(.largeTitle.weight(.heavy))
                     .multilineTextAlignment(.center)
-                Text(AppLanguage.text("A calm companion for independent living — wearable vitals, video coffee circles, medication reminders and optional sensory activities."))
+                InfoText(AppLanguage.text("A calm companion for independent living — wearable vitals, video coffee circles, medication reminders and optional sensory activities."))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -184,7 +184,7 @@ struct OnboardingView: View {
                 store.hasCompletedOnboarding = true
             }
             .buttonStyle(.bordered).controlSize(.large)
-            Text(AppLanguage.text("Activities work without an account, health permissions, or model downloads. Add your details later in Settings."))
+            InfoText(AppLanguage.text("Activities work without an account, health permissions, or model downloads. Add your details later in Settings."))
                 .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
             Spacer()
             Spacer()
@@ -206,7 +206,7 @@ struct OnboardingView: View {
                     DatePicker("Date of birth", selection: $birthDate, in: ...Date(), displayedComponents: .date)
                         .datePickerStyle(.compact)
                 }
-                Text(AppLanguage.text("Text size follows your iPhone settings. You choose the activity and pace; age does not automatically change them."))
+                InfoText(AppLanguage.text("Text size follows your iPhone settings. You choose the activity and pace; age does not automatically change them."))
                     .font(.footnote).foregroundStyle(.secondary)
             }
         }
@@ -303,7 +303,7 @@ struct OnboardingView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            Text(AppLanguage.text("CareSphere does not prescribe, verify doses, or check interactions. You can edit this schedule in Settings; changes pause reminders until reviewed again."))
+            InfoText(AppLanguage.text("CareSphere does not prescribe, verify doses, or check interactions. You can edit this schedule in Settings; changes pause reminders until reviewed again."))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -430,7 +430,7 @@ struct OnboardingView: View {
                         .strokeBorder(wantsBiometrics ? Color.emerald.opacity(0.6) : .clear, lineWidth: 2))
             }
             .buttonStyle(.plain)
-            Text(AppLanguage.text("Device passcode fallback depends on system availability. Authentication errors keep your data locked."))
+            InfoText(AppLanguage.text("Device passcode fallback depends on system availability. Authentication errors keep your data locked."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -450,7 +450,7 @@ struct OnboardingView: View {
                 status: healthKit.hasRequestedAuthorization ? "Requested · check Health settings if empty" : "Tap Continue to request read access",
                 action: { healthKit.requestAuthorization() })
             #endif
-            Text(AppLanguage.text("CareSphere requests read-only heart rate, blood oxygen, blood pressure and workout summaries. It never writes Health data. Apple does not let apps verify whether read access was allowed."))
+            InfoText(AppLanguage.text("CareSphere requests read-only heart rate, blood oxygen, blood pressure and workout summaries. It never writes Health data. Apple does not let apps verify whether read access was allowed."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

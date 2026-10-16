@@ -41,7 +41,7 @@ struct TherapyView: View {
 
                     Toggle(AppLanguage.text("Favorites only"), isOn: $favoritesOnly)
                         .tint(.emerald)
-                    Text(AppLanguage.text("Save activities you enjoy. Favorites stay on this device; playing is never tracked."))
+                    InfoText(AppLanguage.text("Save activities you enjoy. Favorites stay on this device; playing is never tracked."))
                         .font(.footnote).foregroundStyle(.secondary)
                     if activities.isEmpty {
                         SectionCard(title: AppLanguage.text("No activities found"), systemImage: "magnifyingglass") {
@@ -80,7 +80,7 @@ struct TherapyView: View {
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }
                     .buttonStyle(.bordered)
-                    Text(AppLanguage.text("Designed with accessibility principles in mind. These activities have not been clinically validated to treat dementia or autism."))
+                    InfoText(AppLanguage.text("Designed with accessibility principles in mind. These activities have not been clinically validated to treat dementia or autism."))
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 .carePagePadding()
@@ -225,13 +225,13 @@ struct ActivityEvidenceView: View {
                             .foregroundStyle(.secondary)
                     }
                     SectionCard(title: AppLanguage.text("Playing together"), systemImage: "person.2") {
-                        Text(AppLanguage.text("Ask whether the person wants to play. Offer a hint or demonstrate, without testing or correcting personal memories. Speaking, pointing, typing elsewhere, or staying quiet are all welcome."))
-                        Text(AppLanguage.text("Stop or change activities if they become tiring, frustrating, distressing, or overstimulating. Never insist on eye contact, speed, or a particular emotional response."))
+                        InfoText(AppLanguage.text("Ask whether the person wants to play. Offer a hint or demonstrate, without testing or correcting personal memories. Speaking, pointing, typing elsewhere, or staying quiet are all welcome."))
+                        InfoText(AppLanguage.text("Stop or change activities if they become tiring, frustrating, distressing, or overstimulating. Never insist on eye contact, speed, or a particular emotional response."))
                             .foregroundStyle(.secondary)
                     }
                     SectionCard(title: AppLanguage.text("Make it comfortable"), systemImage: "accessibility") {
-                        Text(AppLanguage.text("Try fewer choices, visible hints, and one step at a time. Change text size in iPhone Settings → Accessibility → Display & Text Size. CareSphere Settings offers appearance, higher contrast, and reduced visual movement."))
-                        Text(AppLanguage.text("New games are silent, without timers or automatic advancement. Soundscapes play only on request. Game answers are not saved, shared, or turned into health scores."))
+                        InfoText(AppLanguage.text("Try fewer choices, visible hints, and one step at a time. Change text size in iPhone Settings → Accessibility → Display & Text Size. CareSphere Settings offers appearance, higher contrast, and reduced visual movement."))
+                        InfoText(AppLanguage.text("New games are silent, without timers or automatic advancement. Soundscapes play only on request. Game answers are not saved, shared, or turned into health scores."))
                             .foregroundStyle(.secondary)
                     }
                     Text(AppLanguage.text("Research & guidance")).font(.title2.weight(.bold)).accessibilityAddTraits(.isHeader)
@@ -244,7 +244,7 @@ struct ActivityEvidenceView: View {
                             }
                         }
                     }
-                    Text(AppLanguage.text("These sources concern different populations and interventions. Adult autism recommendations should not be generalized to children; clinical choices for a child require age-appropriate professional guidance."))
+                    InfoText(AppLanguage.text("These sources concern different populations and interventions. Adult autism recommendations should not be generalized to children; clinical choices for a child require age-appropriate professional guidance."))
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 .carePagePadding()

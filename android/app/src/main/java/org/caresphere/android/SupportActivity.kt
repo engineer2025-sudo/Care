@@ -426,8 +426,9 @@ class SupportActivity : ProtectedActivity() {
             require(v[0].length>=12);val pass=v[0];val file=verifyFile
             runCatching{if(file!=null)ImportReceipt.verifyAgainstTransfer(receipt,pass,file)else ImportReceipt.verify(receipt,pass)}
                 .onSuccess{d->val count=d.getJSONArray("imported").length()
-                    val extra=if(d.has("fileMatches"))tx(" Transfer file match: ")+(if(d.getBoolean("fileMatches"))"yes" else "no")+tx(". All imported record IDs present in that file: ")+(if(d.getBoolean("importedPresent"))"yes" else "no")+"." else tx(" File binding not checked without the transfer file.")
-                    message(tx("Verified. Import of $count record(s) at ")+d.getString("imported_at")+tx(" (source: ")+d.getString("source")+")."+extra)}
+                    val base=AppLanguage.format(this,"Verified. Import of {0} record(s) at {1} (source: {2}).",count,d.getString("imported_at"),d.getString("source"))
+                    val extra=if(d.has("fileMatches")){if(d.getBoolean("fileMatches")&&d.getBoolean("importedPresent"))tx("Also checked the transfer file: its hash and all imported record IDs match this receipt.")else tx("The transfer file does not fully match this receipt. Its hash or record IDs differ.")}else tx("File binding not checked without the transfer file.")
+                    message("$base $extra")}
                 .onFailure{message(tx("Receipt not verified. Wrong passphrase or a changed receipt. Nothing about this import is confirmed."))}
             verifyReceipt=null;verifyFile=null
         }

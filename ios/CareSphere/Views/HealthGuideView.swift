@@ -60,7 +60,7 @@ struct HealthGuideView: View {
             }
             Text(AppLanguage.text("A calmer way to find answers."))
                 .font(.title2.weight(.black))
-            Text(AppLanguage.text("Search built-in general references offline. On supported devices, Apple Intelligence can summarize matching passages locally. It is optional and may make mistakes."))
+            InfoText(AppLanguage.text("Search built-in general references offline. On supported devices, Apple Intelligence can summarize matching passages locally. It is optional and may make mistakes."))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             HStack(spacing: 8) {
@@ -138,7 +138,7 @@ struct HealthGuideView: View {
                         .font(.caption2)
                         .foregroundStyle(.orange)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(AppLanguage.text("Your source results are still available. Retrying runs only the local model; it does not repeat the reference search."))
+                    InfoText(AppLanguage.text("Your source results are still available. Retrying runs only the local model; it does not repeat the reference search."))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     Button {
@@ -241,7 +241,7 @@ struct HealthGuideView: View {
 
     private var medlinePlusCard: some View {
         SectionCard(title: AppLanguage.text("MedlinePlus offline library"), systemImage: "cross.case.fill") {
-            Text(AppLanguage.text("Get the current English health-topic dataset from the U.S. National Library of Medicine. It is about 30 MB as XML and stays in CareSphere's private app storage after import."))
+            InfoText(AppLanguage.text("Get the current English health-topic dataset from the U.S. National Library of Medicine. It is about 30 MB as XML and stays in CareSphere's private app storage after import."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             HStack {
@@ -271,7 +271,7 @@ struct HealthGuideView: View {
             }
             Link("Data, update schedule & attribution", destination: URL(string: "https://medlineplus.gov/xml.html")!)
                 .font(.caption2.weight(.semibold))
-            Text(AppLanguage.text("MedlinePlus content is general patient education—not individualized treatment. Search works offline after the dataset is downloaded."))
+            InfoText(AppLanguage.text("MedlinePlus content is general patient education—not individualized treatment. Search works offline after the dataset is downloaded."))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -279,7 +279,7 @@ struct HealthGuideView: View {
 
     private var kiwixCard: some View {
         SectionCard(title: AppLanguage.text("Wikipedia ZIM · Kiwix server"), systemImage: "books.vertical") {
-            Text(AppLanguage.text("This build does not include a ZIM reader: keep your existing archive where it is and run Kiwix Server separately. CareSphere sends searches only to the private server address below; it does not bundle or copy the archive."))
+            InfoText(AppLanguage.text("This build does not include a ZIM reader: keep your existing archive where it is and run Kiwix Server separately. CareSphere sends searches only to the private server address below; it does not bundle or copy the archive."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -328,7 +328,7 @@ struct HealthGuideView: View {
                     .padding(9)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.black.opacity(0.22), in: RoundedRectangle(cornerRadius: 10))
-                Text(AppLanguage.text("Use the .zim content name (normally its filename without .zim). The command listens on the Mac's network interfaces so iPhone/iPad can connect; use it only on a trusted Wi-Fi, do not port-forward it, and enter the Mac's private IP or MacBook.local address on the iPhone. For Mac-only access, bind to 127.0.0.1 instead. HTTP is restricted to private/local hosts."))
+                InfoText(AppLanguage.text("Use the .zim content name (normally its filename without .zim). The command listens on the Mac's network interfaces so iPhone/iPad can connect; use it only on a trusted Wi-Fi, do not port-forward it, and enter the Mac's private IP or MacBook.local address on the iPhone. For Mac-only access, bind to 127.0.0.1 instead. HTTP is restricted to private/local hosts."))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

@@ -29,6 +29,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: CareStore
     @EnvironmentObject private var notifications: NotificationService
+    @AppStorage("caresphere.bareMinimum") private var bareMinimum = false
 
     #if os(iOS)
     @State private var contactPickerShown = false
@@ -205,7 +206,7 @@ struct SettingsView: View {
             }
             .disabled(newMedicationName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
-            Text(AppLanguage.text("Only add schedules you have confirmed with your care team or medication label. CareSphere stores your reminder times; it does not prescribe, verify a dose, or check drug interactions."))
+            InfoText(AppLanguage.text("Only add schedules you have confirmed with your care team or medication label. CareSphere stores your reminder times; it does not prescribe, verify a dose, or check drug interactions."))
                 .font(.caption2).foregroundStyle(.secondary)
         }
     }
@@ -239,7 +240,7 @@ struct SettingsView: View {
                     Text(result).font(.caption).foregroundStyle(.secondary)
                 }
             }
-            Text(AppLanguage.text("The app locks in the background. Device passcode fallback depends on system availability. Authentication errors keep your data locked."))
+            InfoText(AppLanguage.text("The app locks in the background. Device passcode fallback depends on system availability. Authentication errors keep your data locked."))
                 .font(.caption2).foregroundStyle(.secondary)
         }
     }
@@ -266,7 +267,7 @@ struct SettingsView: View {
 
     private var accessibilitySection: some View {
         Section(AppLanguage.text("Accessibility")) {
-            Text(AppLanguage.text("Choose an appearance or follow your device. Dynamic Type, increased contrast, and Reduce Motion also follow system accessibility settings; the options below add contrast or further reduce activity motion. Buttons include VoiceOver labels."))
+            InfoText(AppLanguage.text("Choose an appearance or follow your device. Dynamic Type, increased contrast, and Reduce Motion also follow system accessibility settings; the options below add contrast or further reduce activity motion. Buttons include VoiceOver labels."))
                 .font(.caption2).foregroundStyle(.secondary)
             Picker(AppLanguage.text("Color appearance"), selection: $store.colorAppearance) {
                 Text(AppLanguage.text("Follow device")).tag("system")
@@ -276,6 +277,8 @@ struct SettingsView: View {
             Toggle(AppLanguage.text("Increase in-app contrast"), isOn: $store.highContrast)
                 .accessibilityHint(AppLanguage.text("Adds stronger outlines around section cards and status chips."))
             Toggle(AppLanguage.text("Reduce visual motion in activities"), isOn: $store.reduceVisualMotion)
+            Toggle(AppLanguage.text("Bare minimum mode"), isOn: $bareMinimum)
+                .accessibilityHint(AppLanguage.text("Hides explanatory and how-to text. Status messages and safety warnings stay visible."))
             Toggle(AppLanguage.text("Spoken in-app prompts"), isOn: $store.voiceReminders)
             Picker(AppLanguage.text("Reminder voice"), selection: $store.voiceIdentifier) {
                 Text(AppLanguage.text("Automatic · best installed Apple voice")).tag("")
@@ -287,7 +290,7 @@ struct SettingsView: View {
                 }
 
             }
-            Text(AppLanguage.text("Speech is generated on this device. In-app prompts and previews can use the selected voice; scheduled notifications still use the normal system notification sound when CareSphere is closed."))
+            InfoText(AppLanguage.text("Speech is generated on this device. In-app prompts and previews can use the selected voice; scheduled notifications still use the normal system notification sound when CareSphere is closed."))
                 .font(.caption2).foregroundStyle(.secondary)
             if SpeechService.matchingVoices.isEmpty { Text(AppLanguage.text("No installed voice for this language. The words remain visible.")).font(.caption) }
             Button {
@@ -342,10 +345,10 @@ struct SettingsView: View {
                     .font(.caption).foregroundStyle(.orange)
             }
             #if os(iOS)
-            Text(AppLanguage.text("The encrypted file also uses iOS Complete File Protection and is excluded from device backups; its Keychain key is available only while unlocked and is not migrated to another device. Older plaintext data is removed only after an encrypted copy is saved. Face ID / Touch ID is an additional app lock, not the encryption key."))
+            InfoText(AppLanguage.text("The encrypted file also uses iOS Complete File Protection and is excluded from device backups; its Keychain key is available only while unlocked and is not migrated to another device. Older plaintext data is removed only after an encrypted copy is saved. Face ID / Touch ID is an additional app lock, not the encryption key."))
                 .font(.caption2).foregroundStyle(.secondary)
             #else
-            Text(AppLanguage.text("The encrypted file is restricted to your macOS user account (POSIX permissions 0600); the key is held in the user's login Keychain. The biometric screen lock is separate from the encryption key."))
+            InfoText(AppLanguage.text("The encrypted file is restricted to your macOS user account (POSIX permissions 0600); the key is held in the user's login Keychain. The biometric screen lock is separate from the encryption key."))
                 .font(.caption2).foregroundStyle(.secondary)
             #endif
 
@@ -353,7 +356,7 @@ struct SettingsView: View {
                 Label(AppLanguage.text("Export my care data as JSON…"), systemImage: "square.and.arrow.up")
             }
             .disabled(!store.canExportCareData)
-            Text(AppLanguage.text("The system save sheet lets you choose where to place the export. It contains sensitive profile, medication and journal information; the exported copy is outside CareSphere's app-storage protections."))
+            InfoText(AppLanguage.text("The system save sheet lets you choose where to place the export. It contains sensitive profile, medication and journal information; the exported copy is outside CareSphere's app-storage protections."))
                 .font(.caption2).foregroundStyle(.secondary)
 
             Button(role: .destructive) {
@@ -393,7 +396,7 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(AppLanguage.text("Built on Apple's native stacks"))
                     .font(.caption.weight(.bold))
-                Text(AppLanguage.text("SwiftUI · HealthKit · CoreBluetooth · UserNotifications · LocalAuthentication (Touch ID / Face ID) · CoreHaptics · NaturalLanguage · CoreMotion · AVAudioEngine · AVSpeechSynthesizer · CoreLocation · MapKit · Swift Charts · Contacts · Foundation Models (optional Apple Intelligence) · FoundationXML (MedlinePlus)"))
+                InfoText(AppLanguage.text("SwiftUI · HealthKit · CoreBluetooth · UserNotifications · LocalAuthentication (Touch ID / Face ID) · CoreHaptics · NaturalLanguage · CoreMotion · AVAudioEngine · AVSpeechSynthesizer · CoreLocation · MapKit · Swift Charts · Contacts · Foundation Models (optional Apple Intelligence) · FoundationXML (MedlinePlus)"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

@@ -84,7 +84,7 @@ struct OverviewView: View {
                 .font(.largeTitle.weight(.bold))
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
-            Text(AppLanguage.text("A little structure, a moment of calm, or a familiar face. Choose what feels right today."))
+            InfoText(AppLanguage.text("A little structure, a moment of calm, or a familiar face. Choose what feels right today."))
                 .font(.body).foregroundStyle(.secondary)
             Button { navigation.selectedTab = .activities } label: {
                 Label(AppLanguage.text("Find an activity"), systemImage: "square.grid.2x2")
@@ -325,7 +325,7 @@ struct OverviewView: View {
                 }
             }
             if store.medicationScheduleConfirmed {
-                Text(AppLanguage.text("Check-ins are self-reported, reset at local midnight, and do not verify that a dose was taken."))
+                InfoText(AppLanguage.text("Check-ins are self-reported, reset at local midnight, and do not verify that a dose was taken."))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                 Label {
@@ -412,7 +412,7 @@ private struct RoutineEditorView: View {
                 }
 
                 Section {
-                    Text(AppLanguage.text("Routine check-ins are stored on this device. A checkmark resets at local midnight; it is a personal checklist, not proof of an activity."))
+                    InfoText(AppLanguage.text("Routine check-ins are stored on this device. A checkmark resets at local midnight; it is a personal checklist, not proof of an activity."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

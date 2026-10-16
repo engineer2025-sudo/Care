@@ -12,8 +12,8 @@ struct ConferenceSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     Label(circle.title, systemImage: "video").font(.title2.bold())
-                    Text(AppLanguage.text("Continue to Jitsi Meet in your browser. The provider may ask you to sign in to start a room or open its own app. CareSphere does not host or moderate calls."))
-                    Text(AppLanguage.text("Invite people you trust. Anyone with this room link may be able to join. Your saved care notes and health readings are not shared."))
+                    InfoText(AppLanguage.text("Continue to Jitsi Meet in your browser. The provider may ask you to sign in to start a room or open its own app. CareSphere does not host or moderate calls."))
+                    InfoText(AppLanguage.text("Invite people you trust. Anyone with this room link may be able to join. Your saved care notes and health readings are not shared."))
                         .foregroundStyle(.secondary)
                     Link(destination: circle.url) {
                         Label(AppLanguage.text("Continue to video provider"), systemImage: "arrow.up.right.square")

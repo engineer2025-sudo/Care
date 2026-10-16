@@ -160,3 +160,19 @@ extension View {
             .frame(maxWidth: .infinity, alignment: .center)
     }
 }
+
+// MARK: - Bare minimum mode
+/// Explanatory/guidance copy. Renders nothing in Bare minimum mode so screens
+/// keep only controls and personal content. Status messages, empty states and
+/// safety warnings use their own elements and stay visible.
+struct InfoText: View {
+    @AppStorage("caresphere.bareMinimum") private var bareMinimum = false
+    private let content: String
+    private let font: Font?
+    init(_ content: String, font: Font? = nil) { self.content = content; self.font = font }
+    var body: some View {
+        if !bareMinimum {
+            if let font { Text(content).font(font) } else { Text(content) }
+        }
+    }
+}

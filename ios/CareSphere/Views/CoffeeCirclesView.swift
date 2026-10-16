@@ -105,7 +105,7 @@ struct CoffeeCirclesView: View {
         VStack(alignment: .leading, spacing: 6) {
             Label(AppLanguage.text("How the video works"), systemImage: "lightbulb.fill")
                 .font(.subheadline.weight(.bold))
-            Text(AppLanguage.text("Calls run on Jitsi Meet using encrypted WebRTC transport. CareSphere opens the provider in your browser and does not host, schedule, or moderate rooms. The provider may require sign-in to start a room. Anyone with a room link may join, so verify participants before sharing private health details. Camera and microphone permission prompts appear only when you enable them."))
+            InfoText(AppLanguage.text("Calls run on Jitsi Meet using encrypted WebRTC transport. CareSphere opens the provider in your browser and does not host, schedule, or moderate rooms. The provider may require sign-in to start a room. Anyone with a room link may join, so verify participants before sharing private health details. Camera and microphone permission prompts appear only when you enable them."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

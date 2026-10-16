@@ -310,7 +310,7 @@ struct PictureStoryCard: View {
 
     var body: some View {
         SectionCard(title: AppLanguage.text("Picture story"), systemImage: "text.book.closed") {
-            Text(AppLanguage.text("Explore a short, predictable picture sequence. These are examples, not instructions—people’s routines and preferences differ. Move forward or back whenever you like."))
+            InfoText(AppLanguage.text("Explore a short, predictable picture sequence. These are examples, not instructions—people’s routines and preferences differ. Move forward or back whenever you like."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             Picker(AppLanguage.text("Choose a story"), selection: $storyIndex) {
@@ -367,7 +367,7 @@ struct SoundscapesCard: View {
 
     var body: some View {
         SectionCard(title: AppLanguage.text("Sensory Soundscapes"), systemImage: "speaker.wave.2.fill") {
-            Text(AppLanguage.text("Generated on-device and available offline. Start at a comfortable volume. Sound respects Silent mode; you can stop anytime."))
+            InfoText(AppLanguage.text("Generated on-device and available offline. Start at a comfortable volume. Sound respects Silent mode; you can stop anytime."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if let audioError {
