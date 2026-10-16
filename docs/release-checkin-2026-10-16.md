@@ -29,3 +29,14 @@ Every platform states the same limits: the share opens a draft the person sends 
 - iPhone: 54 Swift tests, unchanged; the flow's strings now resolve from the generated catalog.
 
 Combined totals are asserted by `scripts/package_mobile.py`, which also records the exact APK/archive hashes in `BUILD_VERIFICATION.json` inside each archive.
+
+## Runs
+
+| Platform | Run | Result |
+|---|---|---|
+| Web 1.5.0 | [38959779258](https://github.com/engineer2025-sudo/Care/actions/runs/38959779258) | **passed** — 58 unit, 32 browser (new check-in walkthrough), offline reopen |
+| Android 1.8.0 (10) | [38959779246](https://github.com/engineer2025-sudo/Care/actions/runs/38959779246) | **passed** — 60 JVM tests, lint, APK signature, emulator smoke incl. the check-in screen |
+| iPhone 3.7.0 (16) | [38959411656](https://github.com/engineer2025-sudo/Care/actions/runs/38959411656) | **passed** — 54 Swift tests, three build/launch paths |
+
+One Android attempt in this batch was not distributed: `CheckInActivity` called a `copy()` helper that only exists in `SupportActivity`, so the Kotlin compile failed. The failure-surfacing step reported the two `Unresolved reference 'copy'` lines with file and line numbers, and the fix kept those lines visible in Bare minimum mode instead of hiding them.
+

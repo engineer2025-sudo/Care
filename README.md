@@ -4,6 +4,8 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 ## This release — October 14, 2026
 
+**“I'm stressed” guided check-in on all three platforms:** an optional paced pause (in 4 seconds, out 6, three cycles, skippable, not treatment), then *How are you now?*, then reviewed **Share a support message** and **Open video support** options. Nothing is sent or invited automatically, and no line claims a message was delivered. The iPhone flow's remaining English-only strings now follow the selected language. [Behavior and validation](docs/release-checkin-2026-10-16.md).
+
 **Import receipts + Bare minimum mode:** passphrase-authenticated import receipts on all three platforms (created only after a real import, verifiable with the transfer passphrase and optionally the transfer file — never a delivery or identity claim) and a Bare minimum mode that hides all how-it-works copy while keeping status and safety lines. [Behavior and validation](docs/release-receipts-2026-10-15.md).
 
 **Android lock + snooze follow-up:** optional Android 11+ system-authenticated app lock, screenshot protection, hidden locked-screen accessibility content, background relocking, same-day ten-minute reminder snooze/cancel, and actual installed-version reporting. Strong biometrics or device credentials are verified by Android; the app never collects a PIN. [Behavior and validation](docs/release-lock-2026-10-14.md).
@@ -11,7 +13,7 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 **Security and Android follow-up:** fail-closed iPhone authentication, generic private medication notifications on all platforms, Android confirmed medication reminders, manual BP/oxygen records on iPhone, Android and web, explicit read-only Health Connect history, native connection-QR display/photo reading, failed-save rollback and a non-AI Android visit draft.
 
-[**Complete feature/parity checklist**](docs/feature-checklist.md) · [**Samsung installation steps**](docs/samsung-install.md) · [Release validation](docs/release-android-parity-2026-10-16.md)
+[**Complete feature/parity checklist**](docs/feature-checklist.md) · [**Samsung installation steps**](docs/samsung-install.md) · [Release validation](docs/release-android-parity-2026-10-16.md) · [check-in flow](docs/release-checkin-2026-10-16.md)
 
 This does **not** finish every requested feature. Richer portable sharing, authenticated import receipts, full advanced localization, physical-phone checks and owner-signed distribution remain open. See the checklist rather than assuming identical platforms.
 
