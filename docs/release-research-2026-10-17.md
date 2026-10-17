@@ -15,9 +15,9 @@ The page summarizes both user-provided open-access systematic reviews, links to 
 
 ## Validation in this change
 
-- Web unit coverage remains 67; adds one browser scenario test for the research page, cited links, and non-scored activity.
-- Android adds one catalog/search test, updates the unique-activity assertion to 12, and adds emulator checks for the research page and social moment flow. The emulator smoke does not represent a clinical or real-world validation study.
-- iPhone adds a unit test for the activity's nonclinical scope and updates the catalog assertion to 12.
+- Web [39056205898](https://github.com/engineer2025-sudo/Care/actions/runs/39056205898): passed — 67 unit tests, 35 browser tests (including the research-page links and non-scored activity), offline production check, and build.
+- Android [39060181142](https://github.com/engineer2025-sudo/Care/actions/runs/39060181142): passed — 75 unit tests, lint, signature verification, and emulator checks for the research page and social moment flow. The emulator smoke does not represent a clinical or real-world validation study.
+- iPhone [39056205885](https://github.com/engineer2025-sudo/Care/actions/runs/39056205885): passed — 61 Swift tests and the device, HealthKit, and Simulator builds/launch.
 - All new user-facing copy is in the shared offline localization catalog. `scripts/generate_localizations.py --check` validates identical web/iOS/Android catalogs.
 
 These activities have not been clinically evaluated and do not diagnose, prevent, slow, or treat dementia or autism. They are optional for enjoyment or conversation, not a substitute for professional care.
