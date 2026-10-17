@@ -74,7 +74,12 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Accessible web interaction checks
-        run: npm run test:ui
+        run: |
+          set +e
+          npm run test:ui 2>&1 | tee /tmp/e2e.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then node scripts/e2e_annotation.js /tmp/e2e.log; fi
+          exit $status
 
       - name: Offline production check
         run: npm run test:offline
