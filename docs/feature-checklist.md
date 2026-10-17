@@ -118,7 +118,7 @@ Exports and messages outside the app lose its local-storage protections. Externa
 | Feature-triggered Bluetooth permissions; cancel/timeouts | Yes | Yes | Browser-controlled |
 | Reject invalid/no-contact packets; clear stale reading after 15 seconds | Yes | Yes | Yes |
 | Source/time labeling; no simulated values / camera pulse estimates | Yes | Yes | Yes |
-| Live heart-rate sparkline | Yes | Limited: numeric current reading | Yes |
+| Live heart-rate sparkline | Yes | Yes: last 36 real monitor readings; cleared on disconnect | Yes |
 | Read-only health history | Optional HealthKit scheme/profile | **Health Connect**, foreground explicit read | No browser equivalent |
 | Historical heart rate, oxygen and blood pressure | Optional Apple Health records | Optional Health Connect; last 7 days, up to 100 records/type; latest sample per heart-rate record | No |
 | Health history saved automatically into care records or sent to AI | No | No | No |

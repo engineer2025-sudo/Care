@@ -449,6 +449,8 @@ class MainActivity : ProtectedActivity() {
         copy(tx("Connect a monitor that broadcasts the standard Bluetooth Heart Rate service. A phone camera is not used to estimate your pulse."))
         card(tx("Heart rate")) { c ->
             hrLabel = text(monitor.bpm?.let { "$it bpm" } ?: "— bpm", 40f, c, true)
+            c.addView(SparklineView(this, !dark).apply { show(monitor.samples) }, LinearLayout.LayoutParams(-1, dp(44)))
+            if (monitor.samples.size < 2) text(tx("Awaiting real readings…"), 14f, c)
             hrStatus = text(monitor.status, parent = c)
             hrTimestamp = text("", 14f, c)
             hrControl = button(tx("Pair a heart-rate monitor"), c, true) {

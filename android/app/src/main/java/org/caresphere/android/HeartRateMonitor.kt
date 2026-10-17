@@ -20,6 +20,7 @@ class HeartRateMonitor(private val activity: Activity, private val changed: () -
     private var scanner: BluetoothLeScanner? = null
     val devices = linkedMapOf<String, BluetoothDevice>()
     var bpm: Int? = null; private set
+    val samples = mutableListOf<Int>()
     var measuredAt: Long? = null; private set
     var status = "No monitor connected. Readings stay blank until a real device sends them."; private set
     var scanning = false; private set
@@ -110,6 +111,7 @@ class HeartRateMonitor(private val activity: Activity, private val changed: () -
     private fun receive(g: BluetoothGatt, id: UUID, bytes: ByteArray) = post {
         if (g !== gatt || id != measurementID || !connected) return@post
         val reading = ActivityRules.heartRate(bytes)
+        if (reading != null) { samples.add(reading); while (samples.size > HrSparkline.LIMIT) samples.removeAt(0) }
         bpm = reading; measuredAt = reading?.let { System.currentTimeMillis() }
         status = if (reading == null) "Monitor sent an invalid or no-contact reading. Adjust contact." else "Live Bluetooth reading · ${g.device.name ?: "heart-rate monitor"}"
         handler.removeCallbacks(expire)
@@ -120,7 +122,7 @@ class HeartRateMonitor(private val activity: Activity, private val changed: () -
         val previous = gatt; gatt = null
         try { previous?.disconnect() } catch (_: Exception) { }
         try { previous?.close() } catch (_: Exception) { }
-        connected = false; busy = false; bpm = null; measuredAt = null; status = message
+        connected = false; busy = false; bpm = null; measuredAt = null; samples.clear(); status = message
         changed()
     }
     fun close() { disconnect(); handler.removeCallbacksAndMessages(null) }

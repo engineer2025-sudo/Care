@@ -425,6 +425,18 @@
     "vi": "Dùng ngoại tuyến · không cần tài khoản",
     "zh-Hans": "离线可用 · 无需账户"
   },
+  "Awaiting real readings…": {
+    "es": "Esperando lecturas reales…",
+    "fil": "Naghihintay ng totoong readings…",
+    "vi": "Đang chờ số đo thật…",
+    "zh-Hans": "等待真实读数…"
+  },
+  "Awaiting stream data…": {
+    "es": "Esperando datos del flujo…",
+    "fil": "Naghihintay ng stream data…",
+    "vi": "Đang chờ dữ liệu dòng…",
+    "zh-Hans": "等待数据流…"
+  },
   "Back": {
     "es": "Volver",
     "fil": "Bumalik",
