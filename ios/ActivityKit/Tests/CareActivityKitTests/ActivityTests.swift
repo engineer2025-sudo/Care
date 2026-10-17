@@ -2,9 +2,9 @@ import XCTest
 @testable import CareActivityKit
 
 final class ActivityTests: XCTestCase {
-    func testLibraryHasElevenUniqueActivities() {
-        XCTAssertEqual(CareActivity.allCases.count, 11)
-        XCTAssertEqual(Set(CareActivity.allCases.map(\.id)).count, 11)
+    func testLibraryHasTwelveUniqueActivities() {
+        XCTAssertEqual(CareActivity.allCases.count, 12)
+        XCTAssertEqual(Set(CareActivity.allCases.map(\.id)).count, 12)
         for activity in CareActivity.allCases {
             XCTAssertFalse(activity.title.isEmpty)
             XCTAssertFalse(activity.summary.isEmpty)
@@ -14,10 +14,16 @@ final class ActivityTests: XCTestCase {
         }
     }
 
+    func testSocialMomentCardsAreOptionalAndNonclinical() {
+        XCTAssertEqual(CareActivity.socialMoments.category, .connection)
+        XCTAssertTrue(CareActivity.socialMoments.purpose.localizedCaseInsensitiveContains("not social-skills treatment"))
+        XCTAssertTrue(CareActivity.socialMoments.support.localizedCaseInsensitiveContains("no response saved"))
+    }
+
     func testSearchTrimsWhitespaceAndIgnoresCase() {
         XCTAssertEqual(CareActivity.filtered(category: .all, query: "  SORT TOGETHER \n"), [.sortTogether])
         XCTAssertEqual(CareActivity.filtered(category: .calm, query: "sort"), [])
-        XCTAssertEqual(CareActivity.filtered(category: .all, query: "  ").count, 11)
+        XCTAssertEqual(CareActivity.filtered(category: .all, query: "  ").count, 12)
     }
 
     func testEveryCategoryHasActivities() {

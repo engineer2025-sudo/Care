@@ -1,10 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { ACTIVITIES, CHOICE_ROUNDS, normalizeFavorites, toggleFavorite, filterActivities, matchesSearch } from '../src/lib/activityLibrary.js'
+import { ACTIVITIES, CHOICE_ROUNDS, SOCIAL_MOMENTS, normalizeFavorites, toggleFavorite, filterActivities, matchesSearch } from '../src/lib/activityLibrary.js'
 import { normalizePersistedValue, parseCareStorage } from '../src/lib/careStorage.js'
-test('eleven unique activities and valid answer choices', () => {
-  assert.equal(new Set(ACTIVITIES.map(a => a.id)).size, 11)
+test('twelve unique activities, valid answer choices, and unscored social scenarios', () => {
+  assert.equal(new Set(ACTIVITIES.map(a => a.id)).size, 12)
   for (const rounds of Object.values(CHOICE_ROUNDS)) for(const round of rounds) { assert.ok(round.answer >= 0 && round.answer < round.options.length); assert.ok(round.hint) }
+  assert.equal(SOCIAL_MOMENTS.length, 3)
+  for (const moment of SOCIAL_MOMENTS) assert.ok(moment.options.length >= 2)
 })
 test('favorites normalize, persist and toggle without foreign ids', () => {
   assert.deepEqual(normalizeFavorites(['breathing','breathing','invented',null]),['breathing'])

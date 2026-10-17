@@ -8,7 +8,7 @@ public enum ActivityCategory: String, CaseIterable, Identifiable {
 
 public enum CareActivity: String, CaseIterable, Identifiable {
     case picturePairs, sortTogether, completePattern, findSame, everydayOrder
-    case conversation, feelings, pictureStory, patternRecall, soundscapes, breathing
+    case conversation, feelings, pictureStory, patternRecall, soundscapes, breathing, socialMoments
     public var id: String { rawValue }
 
     public var title: String {
@@ -24,6 +24,7 @@ public enum CareActivity: String, CaseIterable, Identifiable {
         case .patternRecall: return "Remember a pattern"
         case .soundscapes: return "Soundscapes"
         case .breathing: return "Paced breathing"
+        case .socialMoments: return "Social moment cards"
         }
     }
 
@@ -40,6 +41,7 @@ public enum CareActivity: String, CaseIterable, Identifiable {
         case .patternRecall: return "hand.tap"
         case .soundscapes: return "speaker.wave.2"
         case .breathing: return "wind"
+        case .socialMoments: return "rectangle.stack"
         }
     }
 
@@ -47,7 +49,7 @@ public enum CareActivity: String, CaseIterable, Identifiable {
         switch self {
         case .picturePairs, .sortTogether, .completePattern, .findSame, .patternRecall: return .thinking
         case .everydayOrder, .pictureStory: return .everyday
-        case .conversation, .feelings: return .connection
+        case .conversation, .feelings, .socialMoments: return .connection
         case .soundscapes, .breathing: return .calm
         }
     }
@@ -65,6 +67,7 @@ public enum CareActivity: String, CaseIterable, Identifiable {
         case .patternRecall: return "Watch numbered pads, then repeat their order."
         case .soundscapes: return "Choose an optional sound. Nothing plays automatically."
         case .breathing: return "Follow a comfortable pace, or simply breathe naturally."
+        case .socialMoments: return "Explore everyday situations. There is no best response."
         }
     }
 
@@ -79,6 +82,7 @@ public enum CareActivity: String, CaseIterable, Identifiable {
         case .patternRecall: return "1–4 steps · choose a length"
         case .soundscapes: return "Sound is opt-in · stop anytime"
         case .breathing: return "Optional hold · pause anytime"
+        case .socialMoments: return "Several choices · no score · no response saved"
         }
     }
 
@@ -93,6 +97,7 @@ public enum CareActivity: String, CaseIterable, Identifiable {
         case .picturePairs, .patternRecall: return "Optional matching and recall practice. Performance is not a measure of cognition, diagnosis, or decline."
         case .pictureStory: return "Predictable visual supports can make an example easier to follow. Personal routines and preferences differ."
         case .soundscapes, .breathing: return "An optional comfort tool, not treatment. Stop if it feels uncomfortable, dizzying, tiring, or overwhelming."
+        case .socialMoments: return "Optional fictional everyday situations with several reasonable responses. This is not social-skills treatment or an assessment. A person can choose, talk about another option, or skip; no response is saved."
         }
     }
 
@@ -112,6 +117,18 @@ public struct ActivityReference: Identifiable {
     public let url: URL
 
     public static let all: [ActivityReference] = [
+        .init(id: "autism-serious-games-2024", title: "Carneiro et al. · Serious games for social skills (2024)",
+              summary: "Nine studies of children and adolescents reported positive findings in at least one measured domain, but interventions varied and risk of bias was substantial. This is not evidence that CareSphere works.",
+              url: URL(string: "https://doi.org/10.3390/healthcare12050508")!),
+        .init(id: "scholar-labs-1", title: "Google Scholar Labs search 1 (user-shared)",
+              summary: "This sign-in-protected result list was not available for review. Link only; no claims are attributed to it.",
+              url: URL(string: "https://scholar.google.com/scholar_labs/search/session/8600305665779058312?hl=en")!),
+        .init(id: "scholar-labs-2", title: "Google Scholar Labs search 2 (user-shared)",
+              summary: "This sign-in-protected result list was not available for review. Link only; no claims are attributed to it.",
+              url: URL(string: "https://scholar.google.com/scholar_labs/search/session/6581218369437547131?hl=en")!),
+        .init(id: "cognitive-tech-review-2020", title: "Irazoki et al. · Digital cognitive interventions (2020)",
+              summary: "A review of 19 studies and 11 programs for older adults found major differences in aims, users, and delivery, and called for more clinical research. Standalone CareSphere activities are not clinician-led interventions.",
+              url: URL(string: "https://doi.org/10.3389/fpsyg.2020.00648")!),
         .init(id: "cognitive-stimulation", title: "Cochrane · Cognitive stimulation (2023)",
               summary: "Structured programs probably offer small, short-term cognitive benefits in mild-to-moderate dementia. These games are not those tested programs.",
               url: URL(string: "https://www.cochrane.org/evidence/CD005562_can-cognitive-stimulation-benefit-people-dementia")!),

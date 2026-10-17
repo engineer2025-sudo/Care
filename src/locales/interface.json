@@ -59,6 +59,12 @@
     "vi": "Gối",
     "zh-Hans": "枕头"
   },
+  "A plan changes. What could help right now?": {
+    "es": "Cambia un plan. ¿Qué podría ayudar ahora?",
+    "fil": "Nagbago ang plano. Ano kaya ang makatutulong ngayon?",
+    "vi": "Kế hoạch thay đổi. Điều gì có thể giúp ngay lúc này?",
+    "zh-Hans": "计划有变。现在什么可能有帮助？"
+  },
   "A plate": {
     "es": "Un plato",
     "fil": "Plato",
@@ -76,6 +82,18 @@
     "fil": "Mabilis na pag-check in",
     "vi": "Kiểm tra nhanh",
     "zh-Hans": "快速状态确认"
+  },
+  "A review of 19 studies and 11 programs for older adults found major differences in aims, users, and delivery, and called for more clinical research. Standalone CareSphere activities are not clinician-led interventions.": {
+    "es": "Una revisión de 19 estudios y 11 programas para personas mayores encontró grandes diferencias en objetivos, usuarios y aplicación, y pidió más investigación clínica. Las actividades independientes de CareSphere no son intervenciones dirigidas por profesionales.",
+    "fil": "Natuklasan ng review sa 19 na pag-aaral at 11 programa para sa matatanda ang malalaking pagkakaiba sa layunin, gumagamit, at paghahatid, at nanawagan ng higit pang klinikal na pananaliksik. Hindi interbensyong pinangungunahan ng clinician ang mga hiwalay na aktibidad ng CareSphere.",
+    "vi": "Tổng quan 19 nghiên cứu và 11 chương trình cho người lớn tuổi cho thấy khác biệt lớn về mục tiêu, người dùng và cách triển khai, đồng thời kêu gọi thêm nghiên cứu lâm sàng. Hoạt động riêng lẻ của CareSphere không phải can thiệp do chuyên gia lâm sàng hướng dẫn.",
+    "zh-Hans": "一项针对老年人的19项研究和11个项目的综述发现，目标、用户和实施方式差异很大，并呼吁开展更多临床研究。CareSphere 的独立活动不是由临床人员指导的干预。"
+  },
+  "A room feels noisy. What might feel helpful?": {
+    "es": "La habitación parece ruidosa. ¿Qué podría ayudar?",
+    "fil": "Maingay sa silid. Ano kaya ang makatutulong?",
+    "vi": "Căn phòng có vẻ ồn. Điều gì có thể giúp bạn?",
+    "zh-Hans": "房间里有些吵。什么可能会有帮助？"
   },
   "A short reminder": {
     "es": "Un recordatorio breve",
@@ -419,6 +437,18 @@
     "vi": "Bây giờ bạn có đang vận động hoặc tập thể dục không?",
     "zh-Hans": "你现在在活动或锻炼吗？"
   },
+  "Ask for a quieter moment": {
+    "es": "Pedir un momento más tranquilo",
+    "fil": "Humiling ng sandaling mas tahimik",
+    "vi": "Đề nghị một lúc yên tĩnh hơn",
+    "zh-Hans": "请求片刻安静"
+  },
+  "Ask what happens next": {
+    "es": "Preguntar qué sigue",
+    "fil": "Magtanong kung ano ang susunod",
+    "vi": "Hỏi xem tiếp theo sẽ làm gì",
+    "zh-Hans": "询问接下来会怎样"
+  },
   "Authentication did not finish in the foreground. Try again.": {
     "es": "La autenticación no terminó con la aplicación en primer plano. Inténtalo de nuevo.",
     "fil": "Hindi natapos ang pagpapatunay habang nasa foreground ang app. Subukang muli.",
@@ -665,6 +695,12 @@
     "vi": "Thiết lập CareSphere",
     "zh-Hans": "CareSphere 设置"
   },
+  "CareSphere activities run on this device. Choose an activity, go at your own pace, and leave whenever you want. Activity answers and scores are not collected. Other features request permissions separately only when you choose them.": {
+    "es": "Las actividades de CareSphere funcionan en este dispositivo. Elige una y avanza a tu ritmo; puedes salir cuando quieras. No se recopilan respuestas ni puntuaciones. Otras funciones solicitan permisos por separado y solo cuando las eliges.",
+    "fil": "Gumagana sa device na ito ang mga aktibidad ng CareSphere. Pumili ng aktibidad, sundin ang sarili mong bilis, at umalis anumang oras. Hindi kinokolekta ang mga sagot o puntos. Hiwalay na humihingi ng pahintulot ang ibang feature at kapag pinili mo lamang ang mga ito.",
+    "vi": "Hoạt động CareSphere chạy trên thiết bị này. Chọn hoạt động, theo nhịp độ của bạn và thoát bất cứ lúc nào. Không thu thập câu trả lời hay điểm số. Các tính năng khác chỉ xin quyền riêng khi bạn chọn dùng.",
+    "zh-Hans": "CareSphere 活动在本设备上运行。选择活动，按自己的节奏进行，随时可以退出。活动答案和分数不会被收集。其他功能仅在你选择使用时单独请求权限。"
+  },
   "CareSphere does not prescribe, verify doses, or check interactions. You can edit this schedule in Settings; changes pause reminders until reviewed again.": {
     "es": "CareSphere no receta, verifica dosis ni comprueba interacciones. Puedes editar el horario en Ajustes; los cambios pausan los recordatorios hasta que lo revises de nuevo.",
     "fil": "Hindi nagrereseta, nagpapatunay ng dosis o sumusuri ng interaksyon ng gamot ang CareSphere. Maaari mong i-edit ang iskedyul sa Mga setting; ihihinto muna ng mga pagbabago ang mga paalala hanggang masuri muli.",
@@ -676,6 +712,12 @@
     "fil": "Nagpapadala ang CareSphere ng isang text sa carrier ng iyong telepono, walang server o account. Ang paghahatid ay nakadepende sa carrier at telepono ng kontak; hindi makukumpirma ng CareSphere kung natanggap o nabasa ito.",
     "vi": "CareSphere gửi một tin nhắn qua nhà mạng của điện thoại bạn, không có máy chủ hay tài khoản. Việc gửi đến phụ thuộc nhà mạng và điện thoại của liên hệ; CareSphere không thể xác nhận họ đã nhận hoặc đọc.",
     "zh-Hans": "CareSphere 通过你手机的运营商发送一条短信，没有服务器或账户。送达取决于运营商和联系人的手机；CareSphere 无法确认对方收到或阅读。"
+  },
+  "Carneiro et al. · Serious games for social skills (2024)": {
+    "es": "Carneiro et al. · Juegos serios para habilidades sociales (2024)",
+    "fil": "Carneiro et al. · Mga seryosong laro para sa kasanayang panlipunan (2024)",
+    "vi": "Carneiro và cộng sự · Trò chơi nghiêm túc về kỹ năng xã hội (2024)",
+    "zh-Hans": "Carneiro 等 · 社交技能严肃游戏（2024）"
   },
   "Chair": {
     "es": "Silla",
@@ -1235,6 +1277,12 @@
     "vi": "Tâm trương · mmHg",
     "zh-Hans": "舒张压 · mmHg"
   },
+  "Digital cognitive interventions for MCI and dementia (2020)": {
+    "es": "Intervenciones cognitivas digitales para DCL y demencia (2020)",
+    "fil": "Mga digital na interbensyon sa kognisyon para sa MCI at demensya (2020)",
+    "vi": "Can thiệp nhận thức kỹ thuật số cho suy giảm nhận thức nhẹ và sa sút trí tuệ (2020)",
+    "zh-Hans": "轻度认知障碍与痴呆的数字认知干预（2020）"
+  },
   "Disable app lock": {
     "es": "Desactivar bloqueo de la aplicación",
     "fil": "I-disable ang lock ng app",
@@ -1433,6 +1481,12 @@
     "vi": "Các bước hằng ngày",
     "zh-Hans": "日常步骤"
   },
+  "Evidence boundary: CareSphere activities have not been clinically tested and do not diagnose, prevent, slow, or treat dementia or autism. Use them for optional enjoyment or conversation, not therapy or assessment.": {
+    "es": "Límite de la evidencia: las actividades de CareSphere no se han probado clínicamente y no diagnostican, previenen, ralentizan ni tratan la demencia o el autismo. Úsalas como entretenimiento o conversación opcional, no como terapia ni evaluación.",
+    "fil": "Hangganan ng ebidensya: hindi pa klinikal na nasusubukan ang mga aktibidad ng CareSphere at hindi nagdidiyagnos, pumipigil, nagpapabagal, o gumagamot ng demensya o autism. Para lamang ito sa opsyonal na kasiyahan o pag-uusap, hindi therapy o pagtatasa.",
+    "vi": "Giới hạn bằng chứng: hoạt động CareSphere chưa được thử nghiệm lâm sàng và không chẩn đoán, phòng ngừa, làm chậm hay điều trị sa sút trí tuệ hoặc tự kỷ. Chỉ dùng để giải trí hoặc trò chuyện tự nguyện, không phải trị liệu hay đánh giá.",
+    "zh-Hans": "证据边界：CareSphere 活动未经临床测试，不能诊断、预防、延缓或治疗痴呆或自闭症。仅供自愿娱乐或交谈，不是治疗或评估。"
+  },
   "Excited": {
     "es": "Entusiasmado",
     "fil": "Nasasabik",
@@ -1457,6 +1511,12 @@
     "vi": "Khám phá theo sở thích",
     "zh-Hans": "按兴趣探索"
   },
+  "Explore everyday situations. There is no best response.": {
+    "es": "Explora situaciones cotidianas. No hay una respuesta mejor.",
+    "fil": "Siyasatin ang mga pang-araw-araw na sitwasyon. Walang iisang pinakamahusay na sagot.",
+    "vi": "Khám phá các tình huống thường ngày. Không có câu trả lời tốt nhất duy nhất.",
+    "zh-Hans": "探索日常情境，没有唯一正确的回应。"
+  },
   "Explore feeling words. Every choice is welcome.": {
     "es": "Explora palabras sobre emociones. Toda elección es válida.",
     "fil": "Tuklasin ang mga salita sa pakiramdam. Tinatanggap ang bawat pagpili.",
@@ -1480,6 +1540,12 @@
     "fil": "Mga pamilyar na bagay",
     "vi": "Đồ vật quen thuộc",
     "zh-Hans": "熟悉的物品"
+  },
+  "Familiar steps, optional hints, fewer choices, and clear stop controls support choice and predictability. Activities run offline. Favorites stay on this device.": {
+    "es": "Los pasos familiares, las pistas opcionales, menos opciones y controles claros para detenerse favorecen la elección y la previsibilidad. Las actividades funcionan sin conexión. Los favoritos permanecen en este dispositivo.",
+    "fil": "Nakakatulong sa pagpili at pagiging mahuhulaan ang pamilyar na mga hakbang, opsyonal na pahiwatig, mas kaunting pagpipilian, at malinaw na kontrol para huminto. Gumagana offline ang mga aktibidad. Nananatili sa device na ito ang mga paborito.",
+    "vi": "Các bước quen thuộc, gợi ý tùy chọn, ít lựa chọn hơn và nút dừng rõ ràng hỗ trợ quyền lựa chọn và tính dễ đoán. Hoạt động chạy ngoại tuyến. Mục yêu thích lưu trên thiết bị này.",
+    "zh-Hans": "熟悉的步骤、可选提示、较少选项和清晰的停止控制有助于自主选择与可预测性。活动可离线运行，收藏保存在本设备。"
   },
   "Favorites": {
     "es": "Favoritos",
@@ -1655,6 +1721,18 @@
     "vi": "Chào buổi sáng",
     "zh-Hans": "早上好"
   },
+  "Google Scholar Labs search 1 (user-shared)": {
+    "es": "Búsqueda 1 de Google Scholar Labs (compartida)",
+    "fil": "Google Scholar Labs search 1 (ibinahagi ng user)",
+    "vi": "Tìm kiếm Google Scholar Labs 1 (người dùng chia sẻ)",
+    "zh-Hans": "Google Scholar Labs 搜索 1（用户分享）"
+  },
+  "Google Scholar Labs search 2 (user-shared)": {
+    "es": "Búsqueda 2 de Google Scholar Labs (compartida)",
+    "fil": "Google Scholar Labs search 2 (ibinahagi ng user)",
+    "vi": "Tìm kiếm Google Scholar Labs 2 (người dùng chia sẻ)",
+    "zh-Hans": "Google Scholar Labs 搜索 2（用户分享）"
+  },
   "Great": {
     "es": "Muy bien",
     "fil": "Napakabuti",
@@ -1763,6 +1841,12 @@
     "vi": "Đây là lịch sử, không phải theo dõi trực tiếp. Nguồn và thời gian đo được hiển thị. Không tạo dữ liệu giả, diễn giải hay gửi đến dịch vụ AI.",
     "zh-Hans": "这是历史记录，不是实时监测。显示来源和测量时间。不会编造、解读数据或将其发送到AI服务。"
   },
+  "How CareSphere applies this": {
+    "es": "Cómo aplica esto CareSphere",
+    "fil": "Paano ito inilalapat ng CareSphere",
+    "vi": "CareSphere áp dụng điều này như thế nào",
+    "zh-Hans": "CareSphere 如何应用这些设计思路"
+  },
   "How are you feeling right now?": {
     "es": "¿Cómo te sientes ahora mismo?",
     "fil": "Kumusta ang pakiramdam mo sa ngayon?",
@@ -1786,6 +1870,12 @@
     "fil": "Kumusta ka na ngayon?",
     "vi": "Bây giờ bạn thấy thế nào?",
     "zh-Hans": "你现在感觉怎么样？"
+  },
+  "How the app works": {
+    "es": "Cómo funciona la app",
+    "fil": "Paano gumagana ang app",
+    "vi": "Ứng dụng hoạt động như thế nào",
+    "zh-Hans": "应用如何工作"
   },
   "I checked every name and reminder time against the medication label or care-team instructions.": {
     "es": "He comprobado cada nombre y hora del recordatorio con la etiqueta del medicamento o las instrucciones del equipo de atención.",
@@ -1912,6 +2002,12 @@
     "fil": "Hilig · {0}",
     "vi": "Sở thích · {0}",
     "zh-Hans": "兴趣 · {0}"
+  },
+  "Irazoki et al. · Digital cognitive interventions (2020)": {
+    "es": "Irazoki et al. · Intervenciones cognitivas digitales (2020)",
+    "fil": "Irazoki et al. · Mga digital na interbensyon sa kognisyon (2020)",
+    "vi": "Irazoki và cộng sự · Can thiệp nhận thức kỹ thuật số (2020)",
+    "zh-Hans": "Irazoki 等 · 数字认知干预（2020）"
   },
   "Is there a texture, food, or scent you enjoy?": {
     "es": "¿Hay una textura, comida o aroma que te guste?",
@@ -2081,6 +2177,12 @@
     "vi": "Khóa màn hình riêng tư khi CareSphere rời tiền cảnh. Cần Android 11 trở lên và khóa màn hình an toàn. Chặn ảnh chụp màn hình khi bật.",
     "zh-Hans": "CareSphere离开前台时锁定私人页面。需要Android 11或更新版本及安全屏幕锁。启用后会阻止截屏。"
   },
+  "Look at the new plan": {
+    "es": "Mirar el nuevo plan",
+    "fil": "Tingnan ang bagong plano",
+    "vi": "Xem kế hoạch mới",
+    "zh-Hans": "看看新计划"
+  },
   "Look for Circle.": {
     "es": "Busca Círculo.",
     "fil": "Hanapin ang Bilog.",
@@ -2230,6 +2332,12 @@
     "fil": "Lumayo ka sa anumang magagamit mo para saktan ang sarili mo. Hilingin sa malapit na tao na samahan ka.",
     "vi": "Hãy tránh xa những thứ có thể dùng để làm hại bản thân. Nhờ người ở gần ở bên bạn.",
     "zh-Hans": "远离任何可能伤害自己的东西。请身边的人陪着你。"
+  },
+  "Move somewhere quieter": {
+    "es": "Ir a un lugar más tranquilo",
+    "fil": "Lumipat sa mas tahimik na lugar",
+    "vi": "Di chuyển đến nơi yên tĩnh hơn",
+    "zh-Hans": "去安静一些的地方"
   },
   "Move through an imagined story at your own pace.": {
     "es": "Avanza por una historia imaginaria a tu ritmo.",
@@ -2411,11 +2519,29 @@
     "vi": "Ảnh tiếp theo",
     "zh-Hans": "下一张照片"
   },
+  "Nine studies of children and adolescents reported positive findings in at least one measured domain, but interventions varied and risk of bias was substantial. This is not evidence that CareSphere works.": {
+    "es": "Nueve estudios de niños y adolescentes informaron resultados positivos en al menos un ámbito medido, pero las intervenciones variaron y el riesgo de sesgo fue considerable. Esto no demuestra que CareSphere funcione.",
+    "fil": "May positibong resulta sa kahit isang nasukat na domain ang siyam na pag-aaral sa mga bata at kabataan, ngunit iba-iba ang mga interbensyon at malaki ang panganib ng pagkiling. Hindi nito pinatutunayang gumagana ang CareSphere.",
+    "vi": "Chín nghiên cứu ở trẻ em và thanh thiếu niên ghi nhận kết quả tích cực ở ít nhất một lĩnh vực đo lường, nhưng can thiệp khác nhau và nguy cơ sai lệch đáng kể. Điều này không chứng minh CareSphere có hiệu quả.",
+    "zh-Hans": "针对儿童和青少年的九项研究至少在一个测量领域报告积极发现，但干预各异且偏倚风险较高。这并不能证明 CareSphere 有效。"
+  },
+  "Nine studies reported a positive result in at least one social-skill outcome, but the review found substantial risk of bias, varied interventions, and a small evidence base. The evidence concerns studied programs for children and adolescents, not CareSphere or adults.": {
+    "es": "Nueve estudios informaron un resultado positivo en al menos un aspecto de las habilidades sociales, pero la revisión encontró un riesgo considerable de sesgo, intervenciones variadas y poca evidencia. Los resultados se refieren a programas estudiados con niños y adolescentes, no a CareSphere ni a adultos.",
+    "fil": "May positibong resulta sa kahit isang sukatan ng kasanayang panlipunan ang siyam na pag-aaral, ngunit may malaking panganib ng pagkiling, iba-ibang interbensyon, at kakaunting ebidensya. Tungkol ito sa mga sinuring programa para sa mga bata at kabataan, hindi sa CareSphere o matatanda.",
+    "vi": "Chín nghiên cứu ghi nhận kết quả tích cực ở ít nhất một mặt kỹ năng xã hội, nhưng tổng quan nêu nguy cơ sai lệch đáng kể, can thiệp đa dạng và bằng chứng còn ít. Bằng chứng nói về chương trình đã nghiên cứu ở trẻ em và thanh thiếu niên, không phải CareSphere hay người lớn.",
+    "zh-Hans": "九项研究至少在一项社交技能结果上报告了积极发现，但综述指出偏倚风险较高、干预各异且证据有限。这些证据针对儿童和青少年的研究项目，并非 CareSphere 或成人。"
+  },
   "No": {
     "es": "No",
     "fil": "Hindi",
     "vi": "Không",
     "zh-Hans": "否"
+  },
+  "No answer is scored as correct. Stop whenever you like.": {
+    "es": "Ninguna respuesta se califica como correcta. Detente cuando quieras.",
+    "fil": "Walang sagot na mamarkahang tama. Huminto anumang oras.",
+    "vi": "Không có câu trả lời nào được chấm là đúng. Bạn có thể dừng bất cứ lúc nào.",
+    "zh-Hans": "没有答案会被评为正确。你可以随时停止。"
   },
   "No browser is available on this device.": {
     "es": "No hay ningún navegador disponible en este dispositivo.",
@@ -2645,6 +2771,18 @@
     "vi": "Chỉ gồm ghi chú và việc hằng ngày đã chọn. Người nhận có thể giữ hoặc chuyển tiếp bản sao. Không thể thu hồi từ xa. Gửi mật khẩu riêng cho người nhận.",
     "zh-Hans": "只包含所选笔记和日常安排。接收者可以保留或转发副本。您无法远程撤回。请另行告知接收者口令。"
   },
+  "Open Google Scholar Labs search 1": {
+    "es": "Abrir búsqueda de Google Scholar Labs 1",
+    "fil": "Buksan ang Google Scholar Labs search 1",
+    "vi": "Mở tìm kiếm Google Scholar Labs 1",
+    "zh-Hans": "打开 Google Scholar Labs 搜索 1"
+  },
+  "Open Google Scholar Labs search 2": {
+    "es": "Abrir búsqueda de Google Scholar Labs 2",
+    "fil": "Buksan ang Google Scholar Labs search 2",
+    "vi": "Mở tìm kiếm Google Scholar Labs 2",
+    "zh-Hans": "打开 Google Scholar Labs 搜索 2"
+  },
   "Open Shortcuts": {
     "es": "Abrir Atajos",
     "fil": "Buksan ang Shortcuts",
@@ -2782,6 +2920,12 @@
     "fil": "I-pause ang aktibidad",
     "vi": "Tạm dừng hoạt động",
     "zh-Hans": "暂停活动"
+  },
+  "Pause before deciding": {
+    "es": "Hacer una pausa antes de decidir",
+    "fil": "Huminto muna bago magpasya",
+    "vi": "Tạm dừng trước khi quyết định",
+    "zh-Hans": "先停一停再决定"
   },
   "Pause reminders": {
     "es": "Pausar recordatorios",
@@ -2993,6 +3137,12 @@
     "vi": "Yên tĩnh",
     "zh-Hans": "安静"
   },
+  "RESEARCH, PLAINLY": {
+    "es": "INVESTIGACIÓN, EN CLARO",
+    "fil": "PANANALIKSIK, SA PAYAK NA WIKA",
+    "vi": "NGHIÊN CỨU, GIẢI THÍCH RÕ RÀNG",
+    "zh-Hans": "研究，简单说明"
+  },
   "Read connection QR from a photo": {
     "es": "Leer QR de conexión desde una foto",
     "fil": "Basahin ang QR ng koneksyon mula sa larawan",
@@ -3004,6 +3154,12 @@
     "fil": "Basahin ang kamakailang kasaysayan",
     "vi": "Đọc lịch sử gần đây",
     "zh-Hans": "读取近期历史记录"
+  },
+  "Read the open-access systematic review": {
+    "es": "Leer la revisión sistemática de acceso abierto",
+    "fil": "Basahin ang malayang mababasang sistematikong review",
+    "vi": "Đọc bài tổng quan hệ thống truy cập mở",
+    "zh-Hans": "阅读开放获取的系统综述"
   },
   "Read this step": {
     "es": "Leer este paso",
@@ -3209,6 +3365,12 @@
     "vi": "Gỡ: {0}",
     "zh-Hans": "移除：{0}"
   },
+  "Research & how CareSphere works": {
+    "es": "Investigación y cómo funciona CareSphere",
+    "fil": "Pananaliksik at kung paano gumagana ang CareSphere",
+    "vi": "Nghiên cứu và cách CareSphere hoạt động",
+    "zh-Hans": "研究与 CareSphere 的工作方式"
+  },
   "Restore": {
     "es": "Restaurar",
     "fil": "Ibalik",
@@ -3365,6 +3527,12 @@
     "vi": "Đã lưu vào yêu thích",
     "zh-Hans": "已添加到收藏"
   },
+  "Say hello": {
+    "es": "Saludar",
+    "fil": "Bumati rin",
+    "vi": "Chào lại",
+    "zh-Hans": "说你好"
+  },
   "Search": {
     "es": "Buscar",
     "fil": "Maghanap",
@@ -3491,6 +3659,12 @@
     "vi": "Đang gửi…",
     "zh-Hans": "正在发送…"
   },
+  "Serious games for social skills in autistic children and adolescents (2024)": {
+    "es": "Juegos serios para habilidades sociales en niños y adolescentes autistas (2024)",
+    "fil": "Mga seryosong laro para sa kasanayang panlipunan ng mga autistic na bata at kabataan (2024)",
+    "vi": "Trò chơi nghiêm túc về kỹ năng xã hội ở trẻ em và thanh thiếu niên tự kỷ (2024)",
+    "zh-Hans": "自闭症儿童与青少年社交技能严肃游戏（2024）"
+  },
   "Set display name": {
     "es": "Establecer nombre visible",
     "fil": "Itakda ang pangalang ipinapakita",
@@ -3538,6 +3712,12 @@
     "fil": "Mga setting at accessibility",
     "vi": "Cài đặt và trợ năng",
     "zh-Hans": "设置与无障碍"
+  },
+  "Several answers may fit. Choose, reflect, or skip. Nothing is recorded.": {
+    "es": "Varias respuestas pueden encajar. Elige, reflexiona o salta. No se registra nada.",
+    "fil": "Maaaring angkop ang ilang sagot. Pumili, mag-isip, o laktawan. Walang itinatala.",
+    "vi": "Nhiều câu trả lời có thể phù hợp. Hãy chọn, suy ngẫm hoặc bỏ qua. Không ghi lại gì.",
+    "zh-Hans": "多种回答都可能合适。可以选择、想一想或跳过。不会记录任何内容。"
   },
   "Share a preference or imagine a story. Nothing is recorded.": {
     "es": "Comparte una preferencia o imagina una historia. No se registra nada.",
@@ -3659,6 +3839,18 @@
     "vi": "Xà phòng giúp làm sạch tay.",
     "zh-Hans": "肥皂帮助清洁双手。"
   },
+  "Social moment cards": {
+    "es": "Tarjetas de situaciones sociales",
+    "fil": "Mga kard ng sitwasyong panlipunan",
+    "vi": "Thẻ tình huống giao tiếp",
+    "zh-Hans": "社交情境卡"
+  },
+  "Social moment cards are optional everyday scenarios with several reasonable responses. Choose, discuss another option, or skip. There is no right-answer score; no response is saved or sent to a server.": {
+    "es": "Las tarjetas de situaciones son escenarios cotidianos opcionales con varias respuestas razonables. Elige, comenta otra opción o sáltalas. No hay puntuación por respuestas correctas; no se guarda ni envía ninguna respuesta a un servidor.",
+    "fil": "Opsyonal na pang-araw-araw na sitwasyon ang mga Social moment card na may ilang makatuwirang tugon. Pumili, pag-usapan ang ibang opsyon, o laktawan. Walang puntos sa tamang sagot; walang tugon na sine-save o ipinapadala sa server.",
+    "vi": "Thẻ tình huống là các tình huống thường ngày không bắt buộc với nhiều cách phản hồi hợp lý. Hãy chọn, bàn về lựa chọn khác hoặc bỏ qua. Không chấm điểm đúng sai; câu trả lời không được lưu hay gửi lên máy chủ.",
+    "zh-Hans": "社交情境卡是可选的日常情境，提供几种合理回应。可以选择、讨论其他选项或跳过。没有正确答案评分；回答不会保存或发送到服务器。"
+  },
   "Sock": {
     "es": "Calcetín",
     "fil": "Medyas",
@@ -3670,6 +3862,12 @@
     "fil": "Nananatili sa Ingles ang ilang advanced na tagubilin at panlabas na nilalaman.",
     "vi": "Một số hướng dẫn nâng cao và nội dung bên ngoài vẫn bằng tiếng Anh.",
     "zh-Hans": "部分高级说明和外部内容仍为英语。"
+  },
+  "Someone says hello. What feels comfortable for you?": {
+    "es": "Alguien te saluda. ¿Qué te resulta cómodo?",
+    "fil": "May bumati sa iyo. Ano ang komportable para sa iyo?",
+    "vi": "Có người chào bạn. Cách nào khiến bạn thấy thoải mái?",
+    "zh-Hans": "有人向你问好。怎样回应让你觉得自在？"
   },
   "Something else": {
     "es": "Otra cosa",
@@ -3706,6 +3904,12 @@
     "fil": "Natagpuang mga sanggunian",
     "vi": "Nguồn đã tìm thấy",
     "zh-Hans": "找到的来源"
+  },
+  "Sources you shared": {
+    "es": "Fuentes que compartiste",
+    "fil": "Mga source na ibinahagi mo",
+    "vi": "Nguồn bạn đã chia sẻ",
+    "zh-Hans": "你分享的来源"
   },
   "Speak after I start or advance a routine": {
     "es": "Leer al iniciar o avanzar en una rutina",
@@ -3881,6 +4085,18 @@
     "vi": "Nghỉ một chút",
     "zh-Hans": "休息一下"
   },
+  "Take a break outside": {
+    "es": "Tomar un descanso afuera",
+    "fil": "Magpahinga muna sa labas",
+    "vi": "Ra ngoài nghỉ một lát",
+    "zh-Hans": "到外面休息一下"
+  },
+  "Take time before responding": {
+    "es": "Tomarte un momento antes de responder",
+    "fil": "Maglaan ng oras bago sumagot",
+    "vi": "Dành thời gian trước khi phản hồi",
+    "zh-Hans": "先花点时间再回应"
+  },
   "Take today at your own pace.": {
     "es": "Vive hoy a tu ritmo.",
     "fil": "Harapin ang araw sa sarili mong bilis.",
@@ -3947,11 +4163,29 @@
     "vi": "Phù hợp rồi. Tiếp tục khi bạn sẵn sàng.",
     "zh-Hans": "这样合适。准备好后再继续。"
   },
+  "That is one option. Your own preference matters; you can also choose differently or skip.": {
+    "es": "Esa es una opción. Tu preferencia importa; también puedes elegir otra cosa o saltar.",
+    "fil": "Isa itong opsyon. Mahalaga ang sarili mong kagustuhan; maaari ka ring pumili ng iba o lumaktaw.",
+    "vi": "Đó là một lựa chọn. Sở thích của bạn quan trọng; bạn cũng có thể chọn khác hoặc bỏ qua.",
+    "zh-Hans": "这是一种选择。你的偏好很重要，也可以选择别的或跳过。"
+  },
+  "The Google Scholar Labs links require sign-in and did not expose their result lists. They are links only; their contents have not been summarized or treated as verified evidence.": {
+    "es": "Los enlaces de Google Scholar Labs requieren iniciar sesión y no mostraron sus resultados. Aquí son solo enlaces; no se han resumido ni tratado como evidencia verificada.",
+    "fil": "Kailangan ng pag-sign in ang mga link sa Google Scholar Labs at hindi ipinakita ang mga resulta. Mga link lamang ang mga ito; hindi binuod o itinuring na beripikadong ebidensya ang nilalaman.",
+    "vi": "Các liên kết Google Scholar Labs yêu cầu đăng nhập và không hiển thị danh sách kết quả. Chỉ cung cấp liên kết; nội dung chưa được tóm tắt hay xem là bằng chứng đã xác minh.",
+    "zh-Hans": "Google Scholar Labs 链接需要登录，未显示结果列表。此处仅提供链接；未对其内容作总结或视为已核实证据。"
+  },
   "The Shortcut sends the message; CareSphere cannot confirm delivery or a response.": {
     "es": "El Atajo envía el mensaje; CareSphere no puede confirmar la entrega ni una respuesta.",
     "fil": "Ang Shortcut ang nagpapadala ng mensahe; hindi makukumpirma ng CareSphere ang paghahatid o tugon.",
     "vi": "Phím tắt gửi tin nhắn; CareSphere không thể xác nhận việc gửi hay hồi âm.",
     "zh-Hans": "快捷指令负责发送消息；CareSphere 无法确认送达或回复。"
+  },
+  "The activity does not ask for eye contact or expression imitation. Speaking, pointing, reading, or skipping are equally welcome.": {
+    "es": "La actividad no pide contacto visual ni imitar expresiones. Hablar, señalar, leer o saltar son opciones igualmente válidas.",
+    "fil": "Hindi hinihingi ng aktibidad ang eye contact o paggaya ng ekspresyon. Malugod na tinatanggap ang pagsasalita, pagturo, pagbabasa, o paglaktaw.",
+    "vi": "Hoạt động không yêu cầu nhìn vào mắt hay bắt chước biểu cảm. Nói, chỉ, đọc hoặc bỏ qua đều được chấp nhận.",
+    "zh-Hans": "此活动不要求眼神接触或模仿表情。说话、指认、阅读或跳过都可以。"
   },
   "The app-lock preference could not be saved. Try again.": {
     "es": "No se pudo guardar la preferencia de bloqueo. Inténtalo de nuevo.",
@@ -4018,6 +4252,18 @@
     "fil": "Permanenteng mabubura ang naka-save na impormasyon ng pangangalaga at encryption key sa app na ito. Hindi mabubura ang mga kopyang naibahagi na.",
     "vi": "Thao tác này xóa vĩnh viễn thông tin chăm sóc và khóa mã hóa khỏi ứng dụng. Không thể xóa các bản sao đã chia sẻ.",
     "zh-Hans": "这将从此应用永久删除已保存的照护信息和加密密钥。无法删除之前已共享的副本。"
+  },
+  "This review described 19 studies and 11 programs for adults over 60 with mild cognitive impairment or dementia. It distinguishes stimulation, training, and individualized rehabilitation; programs and evidence differed, and more clinical research was needed. Standalone app activities are not equivalent to structured therapist-led programs.": {
+    "es": "Esta revisión describió 19 estudios y 11 programas para adultos mayores de 60 años con deterioro cognitivo leve o demencia. Distingue estimulación, entrenamiento y rehabilitación individualizada; los programas y las pruebas diferían y se necesitaba más investigación clínica. Las actividades independientes de una app no equivalen a programas estructurados dirigidos por profesionales.",
+    "fil": "Inilarawan ng review ang 19 na pag-aaral at 11 programa para sa mga nasa hustong gulang na lampas 60 na may mild cognitive impairment o demensya. Ibinukod nito ang stimulation, training, at indibiduwalisadong rehabilitation; magkakaiba ang programa at ebidensya, at kailangan pa ng klinikal na pananaliksik. Hindi katumbas ng mga aktibidad sa app lamang ang mga programang pinangungunahan ng therapist.",
+    "vi": "Tổng quan mô tả 19 nghiên cứu và 11 chương trình cho người trên 60 tuổi bị suy giảm nhận thức nhẹ hoặc sa sút trí tuệ. Bài viết phân biệt kích thích nhận thức, luyện tập và phục hồi cá nhân hóa; chương trình và bằng chứng khác nhau, cần thêm nghiên cứu lâm sàng. Hoạt động riêng lẻ trong ứng dụng không tương đương chương trình có cấu trúc do chuyên gia hướng dẫn.",
+    "zh-Hans": "这篇综述介绍了针对60岁以上轻度认知障碍或痴呆成人的19项研究和11个项目。文中区分认知刺激、训练和个体化康复；各项目与证据不同，仍需更多临床研究。独立应用活动不等同于由治疗师指导的结构化项目。"
+  },
+  "This sign-in-protected result list was not available for review. Link only; no claims are attributed to it.": {
+    "es": "No se pudo revisar esta lista de resultados protegida por inicio de sesión. Solo es un enlace; no se le atribuye ninguna afirmación.",
+    "fil": "Hindi nasuri ang listahan ng resultang nangangailangan ng pag-sign in. Link lamang ito; walang pahayag na iniuugnay rito.",
+    "vi": "Không thể xem danh sách kết quả yêu cầu đăng nhập này. Chỉ là liên kết; không gán nhận định nào cho liên kết này.",
+    "zh-Hans": "无法查看此登录保护的结果列表。仅提供链接；不将任何主张归于此链接。"
   },
   "Time": {
     "es": "Hora",
@@ -4144,6 +4390,12 @@
     "fil": "I-off ang Show When Run, pangalanan ang shortcut na {0}, at i-save.",
     "vi": "Tắt Hiển thị khi chạy, đặt tên phím tắt là {0}, rồi lưu.",
     "zh-Hans": "关闭“运行时显示”，将其命名为 {0}，然后保存。"
+  },
+  "Twelve activities, one gentle step at a time. Save what you enjoy for next time.": {
+    "es": "Doce actividades, paso a paso y sin prisa. Guarda tus favoritas para otra ocasión.",
+    "fil": "Labindalawang aktibidad, isang banayad na hakbang sa bawat pagkakataon. I-save ang gusto mo para sa susunod.",
+    "vi": "Mười hai hoạt động, từng bước nhẹ nhàng theo nhịp độ của bạn. Lưu hoạt động bạn thích để dùng lần sau.",
+    "zh-Hans": "十二项活动，一步一步，按自己的节奏进行。收藏喜欢的活动，下次再用。"
   },
   "Two leaves, then a flower.": {
     "es": "Dos hojas y luego una flor.",
@@ -4307,6 +4559,12 @@
     "vi": "Đi bộ",
     "zh-Hans": "步行"
   },
+  "Wave or smile": {
+    "es": "Saludar con la mano o sonreír",
+    "fil": "Kumaway o ngumiti",
+    "vi": "Vẫy tay hoặc mỉm cười",
+    "zh-Hans": "挥手或微笑"
+  },
   "Welcome to CareSphere": {
     "es": "Bienvenido a CareSphere",
     "fil": "Maligayang pagdating sa CareSphere",
@@ -4360,6 +4618,18 @@
     "fil": "Anong mga tunog ang gusto mo?",
     "vi": "Bạn thích âm thanh nào?",
     "zh-Hans": "您喜欢什么声音？"
+  },
+  "What the research says": {
+    "es": "Qué dice la investigación",
+    "fil": "Ano ang sinasabi ng pananaliksik",
+    "vi": "Nghiên cứu cho biết gì",
+    "zh-Hans": "研究发现"
+  },
+  "What two reviews say, what CareSphere borrows, and what it does not claim.": {
+    "es": "Qué dicen dos revisiones, qué ideas usa CareSphere y qué no afirma.",
+    "fil": "Ano ang sinasabi ng dalawang review, ano ang hiniram na disenyo ng CareSphere, at ano ang hindi nito inaangkin.",
+    "vi": "Hai bài tổng quan nói gì, CareSphere tham khảo điều gì và không tuyên bố điều gì.",
+    "zh-Hans": "两篇综述的发现、CareSphere 借鉴的设计思路，以及它不作出的疗效宣称。"
   },
   "What would make today a little easier?": {
     "es": "¿Qué haría que hoy fuera un poco más fácil?",

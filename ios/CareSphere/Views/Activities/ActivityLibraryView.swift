@@ -75,7 +75,7 @@ struct TherapyView: View {
                         }
                     }
                     Button { showingEvidence = true } label: {
-                        Label(AppLanguage.text("Research, safety & playing together"), systemImage: "info.circle")
+                        Label(AppLanguage.text("Research & how CareSphere works"), systemImage: "info.circle")
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }
                     .buttonStyle(.bordered)
@@ -206,6 +206,7 @@ struct ActivitySessionView: View {
         case .patternRecall: PatternRecallCard()
         case .soundscapes: SoundscapesCard()
         case .breathing: BreathingCard()
+        case .socialMoments: SocialMomentCardsView()
         }
     }
 }
@@ -230,6 +231,12 @@ struct ActivityEvidenceView: View {
                         InfoText(AppLanguage.text("Try fewer choices, visible hints, and one step at a time. Change text size in iPhone Settings → Accessibility → Display & Text Size. CareSphere Settings offers appearance, higher contrast, and reduced visual movement."))
                         InfoText(AppLanguage.text("New games are silent, without timers or automatic advancement. Soundscapes play only on request. Game answers are not saved, shared, or turned into health scores."))
                             .foregroundStyle(.secondary)
+                    }
+                    SectionCard(title: AppLanguage.text("How CareSphere applies this"), systemImage: "hand.raised") {
+                        InfoText(AppLanguage.text("Social moment cards are optional everyday scenarios with several reasonable responses. Choose, discuss another option, or skip. There is no right-answer score; no response is saved or sent to a server."))
+                        InfoText(AppLanguage.text("Familiar steps, optional hints, fewer choices, and clear stop controls support choice and predictability. Activities run offline. Favorites stay on this device."))
+                        InfoText(AppLanguage.text("The activity does not ask for eye contact or expression imitation. Speaking, pointing, reading, or skipping are equally welcome."))
+                        Text(AppLanguage.text("Evidence boundary: CareSphere activities have not been clinically tested and do not diagnose, prevent, slow, or treat dementia or autism. Use them for optional enjoyment or conversation, not therapy or assessment."))
                     }
                     Text(AppLanguage.text("Research & guidance")).font(.title2.weight(.bold)).accessibilityAddTraits(.isHeader)
                     ForEach(ActivityReference.all) { source in

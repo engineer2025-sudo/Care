@@ -148,7 +148,7 @@ test('health has no generated reading controls or demo exports', async ({ page }
 
 test('activity discovery, favorites and one focused session persist correctly', async ({ page }) => {
   await navButton(page, 'Activities').click()
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(11)
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(12)
   await page.getByRole('button', { name: 'Save to favorites: Sort together' }).click()
   await page.getByLabel('Favorites only').check()
   await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(1)
@@ -164,7 +164,21 @@ test('activity discovery, favorites and one focused session persist correctly', 
   await page.getByLabel('Find an activity', { exact: true }).fill('no such game')
   await expect(page.getByText('Nothing here yet')).toBeVisible()
   await page.getByRole('button', { name: 'Show all activities' }).click()
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(11)
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(12)
+})
+
+test('research page explains evidence limits and social moment cards stay unscored', async ({ page }) => {
+  await navButton(page, 'Activities').click()
+  await page.getByRole('button', { name: 'Research & how CareSphere works' }).click()
+  await expect(page.getByRole('heading', { name: 'Research & how CareSphere works' })).toBeVisible()
+  await expect(page.getByText(/Nine studies reported a positive result/)).toBeVisible()
+  await expect(page.getByText(/CareSphere activities have not been clinically tested/)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Open Google Scholar Labs search 1' })).toHaveAttribute('href', /scholar_labs/)
+  await page.getByRole('button', { name: 'Back to activities' }).click()
+  await page.getByRole('button', { name: 'Open activity: Social moment cards' }).click()
+  await page.getByRole('button', { name: 'Move somewhere quieter' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Your own preference matters' })).toBeVisible()
+  await expect(page.getByText(/No answer is scored as correct/)).toBeVisible()
 })
 
 test('notes search, edit, discard protection and delete confirmation', async ({ page }) => {

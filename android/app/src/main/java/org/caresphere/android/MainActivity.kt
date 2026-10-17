@@ -97,7 +97,7 @@ class MainActivity : ProtectedActivity() {
     override fun onDestroy() { if (::monitor.isInitialized) monitor.close(); handler.removeCallbacksAndMessages(null); super.onDestroy() }
     @Deprecated("Uses the platform back dispatcher for compatibility")
     override fun onBackPressed() {
-        if (settings || activityIndex >= 0) { settings = false; activityIndex = -1; stopComfort(); render() }
+        if (settings || activityIndex != -1) { settings = false; activityIndex = -1; stopComfort(); render() }
         else if (tab != 0) { tab = 0; render() } else super.onBackPressed()
     }
     private fun stopComfort() { breathing = false; playing = false; sound.stop(); handler.removeCallbacks(breathTick) }
@@ -154,6 +154,7 @@ class MainActivity : ProtectedActivity() {
         data.error?.let { text(it, 16f).setTextColor(Color.rgb(130,55,20)); button(tx("Retry secure save")) { data.save(); render() } }
         when {
             settings -> settingsPage()
+            activityIndex == -2 -> researchPage()
             activityIndex >= 0 -> activityPage()
             tab == 0 -> today()
             tab == 1 -> activities()
@@ -272,8 +273,38 @@ class MainActivity : ProtectedActivity() {
         results = column(); activityResults(results)
         card(tx("Why these activities?")) { c ->
             copy(tx("Predictable steps, personal choice, and reduced sensory pressure draw on accessibility and wellbeing guidance. These individual games are not clinically validated dementia or autism treatments, cognitive stimulation therapy, or diagnostic tests."), parent = c)
+            button(tx("Research & how CareSphere works"), c) { activityIndex = -2; render() }
             button(tx("Read NICE dementia guidance"), c) { openURL("https://www.nice.org.uk/guidance/ng97/chapter/recommendations") }
             button(tx("Read NICE autistic-adult guidance"), c) { openURL("https://www.nice.org.uk/guidance/cg142/chapter/recommendations") }
+        }
+    }
+    private fun researchPage() {
+        button(tx("Back to activities")) { activityIndex = -1; render() }
+        text(tx("Research & how CareSphere works"), 29f, bold = true)
+        text(tx("What two reviews say, what CareSphere borrows, and what it does not claim."))
+        card(tx("Serious games for social skills in autistic children and adolescents (2024)")) { c ->
+            text(tx("Nine studies reported a positive result in at least one social-skill outcome, but the review found substantial risk of bias, varied interventions, and a small evidence base. The evidence concerns studied programs for children and adolescents, not CareSphere or adults."), parent = c)
+            button(tx("Read the open-access systematic review"), c) { openURL("https://doi.org/10.3390/healthcare12050508") }
+        }
+        card(tx("Digital cognitive interventions for MCI and dementia (2020)")) { c ->
+            text(tx("This review described 19 studies and 11 programs for adults over 60 with mild cognitive impairment or dementia. It distinguishes stimulation, training, and individualized rehabilitation; programs and evidence differed, and more clinical research was needed. Standalone app activities are not equivalent to structured therapist-led programs."), parent = c)
+            button(tx("Read the open-access systematic review"), c) { openURL("https://doi.org/10.3389/fpsyg.2020.00648") }
+        }
+        card(tx("How CareSphere applies this")) { c ->
+            text(tx("Social moment cards are optional everyday scenarios with several reasonable responses. Choose, discuss another option, or skip. There is no right-answer score; no response is saved or sent to a server."), parent = c)
+            text(tx("Familiar steps, optional hints, fewer choices, and clear stop controls support choice and predictability. Activities run offline. Favorites stay on this device."), parent = c)
+            text(tx("The activity does not ask for eye contact or expression imitation. Speaking, pointing, reading, or skipping are equally welcome."), parent = c)
+        }
+        card(tx("How the app works")) { c ->
+            text(tx("CareSphere activities run on this device. Choose an activity, go at your own pace, and leave whenever you want. Activity answers and scores are not collected. Other features request permissions separately only when you choose them."), parent = c)
+        }
+        card(tx("Important limits")) { c ->
+            text(tx("Evidence boundary: CareSphere activities have not been clinically tested and do not diagnose, prevent, slow, or treat dementia or autism. Use them for optional enjoyment or conversation, not therapy or assessment."), parent = c)
+        }
+        card(tx("Sources you shared")) { c ->
+            text(tx("The Google Scholar Labs links require sign-in and did not expose their result lists. They are links only; their contents have not been summarized or treated as verified evidence."), parent = c)
+            button(tx("Open Google Scholar Labs search 1"), c) { openURL("https://scholar.google.com/scholar_labs/search/session/8600305665779058312?hl=en") }
+            button(tx("Open Google Scholar Labs search 2"), c) { openURL("https://scholar.google.com/scholar_labs/search/session/6581218369437547131?hl=en") }
         }
     }
     private fun activityResults(parent: LinearLayout) {
@@ -363,9 +394,23 @@ class MainActivity : ProtectedActivity() {
                     render()
                 }
             }
+            11 -> card(tx("Several answers may fit. Choose, reflect, or skip. Nothing is recorded.")) { c ->
+                val moments = listOf(
+                    "A room feels noisy. What might feel helpful?" to listOf("Move somewhere quieter", "Ask for a quieter moment", "Take a break outside"),
+                    "Someone says hello. What feels comfortable for you?" to listOf("Say hello", "Wave or smile", "Take time before responding"),
+                    "A plan changes. What could help right now?" to listOf("Ask what happens next", "Look at the new plan", "Pause before deciding")
+                )
+                val moment = moments[Math.floorMod(round, moments.size)]
+                text(tx(moment.first), 24f, c, true)
+                moment.second.forEach { option -> button(tx(option), c) {
+                    feedback = "That is one option. Your own preference matters; you can also choose differently or skip."
+                    render()
+                } }
+                text(tx("No answer is scored as correct. Stop whenever you like."), parent = c)
+            }
         }
         if (feedback.isNotBlank()) text(feedback, 19f, bold = true).apply { accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE }
-        if (activityIndex < 9) button(tx("Next / start again")) {
+        if (activityIndex < 9 || activityIndex == 11) button(tx("Next / start again")) {
             round++; feedback = ""; firstPair = -1; secondPair = -1; matched.clear(); memoryHidden = false; memoryPosition = 0; render()
         }
         button(tx("Take a break")) { activityIndex = -1; stopComfort(); render() }

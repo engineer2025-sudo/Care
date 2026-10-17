@@ -10,6 +10,7 @@ export const ACTIVITIES = [
   { id: 'patternRecall', title: 'Remember a pattern', category: 'thinking', summary: 'Look, recall, and try again. No timer or score.', symbol: '✧' },
   { id: 'soundscapes', title: 'Soundscapes', category: 'calm', summary: 'Optional sound. Nothing plays until you choose.', symbol: '≈' },
   { id: 'breathing', title: 'Paced breathing', category: 'calm', summary: 'A gentle pace with clear pause and stop controls.', symbol: '❋' },
+  { id: 'socialMoments', title: 'Social moment cards', category: 'connection', summary: 'Explore everyday situations. There is no best response.', symbol: '☷' },
 ]
 export const CATEGORIES = { all: 'All activities', thinking: 'Notice & think', everyday: 'Everyday steps', connection: 'Connect & express', calm: 'Find calm' }
 export function normalizeFavorites(ids) {
@@ -47,3 +48,9 @@ export const CHOICE_ROUNDS = {
     { prompt: 'Before going out in the rain, what could you take?', options: ['An umbrella', 'A pillow', 'A plate'], answer: 0, hint: 'An umbrella keeps the rain off.' },
   ],
 }
+
+export const SOCIAL_MOMENTS = [
+  { prompt: 'A room feels noisy. What might feel helpful?', options: ['Move somewhere quieter', 'Ask for a quieter moment', 'Take a break outside'] },
+  { prompt: 'Someone says hello. What feels comfortable for you?', options: ['Say hello', 'Wave or smile', 'Take time before responding'] },
+  { prompt: 'A plan changes. What could help right now?', options: ['Ask what happens next', 'Look at the new plan', 'Pause before deciding'] },
+]

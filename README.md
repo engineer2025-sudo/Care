@@ -21,7 +21,7 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 This does **not** finish every requested feature. Richer portable sharing, authenticated import receipts, full advanced localization, physical-phone checks and owner-signed distribution remain open. See the checklist rather than assuming identical platforms.
 
-**Five-language interface preview:** English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with an offline persistent selector. 770 interface messages cover core labels, greetings, mood choices, setup guidance and comfort controls; advanced content has explicit English fallback. Private notes and care records are never translated automatically. [Coverage, setup and review limits](docs/languages.md).
+**Five-language interface preview:** English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with an offline persistent selector. 815 interface messages cover core labels, greetings, mood choices, setup guidance and comfort controls; advanced content has explicit English fallback. Private notes and care records are never translated automatically. [Coverage, setup and review limits](docs/languages.md).
 
 **Personal support tools:** Simple Mode, visual routines, communication cards, personal photo conversation/matching, comfort preferences, trusted contacts, appointment questions, routine undo, note recovery, encrypted backup/restore, interest prompts, optional first-use guidance and native iPhone AI drafting.
 
@@ -103,3 +103,6 @@ Old Mac release files are archival; there is no current native macOS target. No 
 ## Direct local phone connection
 
 The native iPhone/Android apps now include **Offer to a nearby device** and a receive connection form. Join the same private Wi-Fi or hotspot, enter the sender's address and eight-digit code inside CareSphere, then unlock with the separate encryption passphrase and preview/select copies to import. Supports either phone as sender without a hosted backend or internet relay. Offers stop on leaving/backgrounding, after five minutes, or explicitly with Stop. Choose **Find nearby devices**, select the generic offer label shown on the sender, then enter its code and encryption passphrase. Discovery is opt-in, limited to one minute, and is not Bluetooth pairing or identity verification. Manual address/code entry remains available. Web retains encrypted-file sharing. See [the sharing guide](docs/device-sharing.md) for limits and physical-device checks.
+
+
+Research sources, the app's design choices, and evidence limits are explained in [Research and how CareSphere works](docs/research-and-how-it-works.md). The explanation is also available in the Activities section of the web, iPhone, and Android apps.

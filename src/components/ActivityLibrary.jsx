@@ -3,7 +3,8 @@ import { tr } from "../lib/i18n";import React, { useEffect, useState } from 'rea
 import { Heart, Search, ArrowUpRight, X } from 'lucide-react';
 import Info from './Info';
 import { useDialog } from '../hooks/useDialog';
-import { ACTIVITIES, CATEGORIES, CHOICE_ROUNDS, filterActivities } from '../lib/activityLibrary';
+import { ACTIVITIES, CATEGORIES, CHOICE_ROUNDS, SOCIAL_MOMENTS, filterActivities } from '../lib/activityLibrary';
+import ResearchPage from './ResearchPage';
 
 export function SupportedActivity({ id, choices = 3 }) {
   const [round, setRound] = useState(0);
@@ -29,6 +30,7 @@ export default function ActivityLibrary({ favorites, onToggleFavorite, renderAct
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [paused, setPaused] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [showResearch, setShowResearch] = useState(false);
   const dialog = useDialog(!!selected, () => setSelected(null));
   const visible = filterActivities({ query, category, favoritesOnly, favorites, translate: tr });
   useEffect(() => {
@@ -36,11 +38,13 @@ export default function ActivityLibrary({ favorites, onToggleFavorite, renderAct
     document.addEventListener('visibilitychange', stop);
     return () => document.removeEventListener('visibilitychange', stop);
   }, []);
+  if (showResearch) return <ResearchPage onBack={() => setShowResearch(false)} />;
   return <>
     <section className="library-intro">
-      <div><p className="eyebrow">{tr("A LITTLE CURIOSITY")}</p><h2 className="text-2xl font-bold text-white">{tr("Find your kind of pause.")}</h2><p className="text-slate-300 mt-2">{tr("Eleven activities, one gentle step at a time. Save what you enjoy for next time.")}</p></div>
+      <div><p className="eyebrow">{tr("A LITTLE CURIOSITY")}</p><h2 className="text-2xl font-bold text-white">{tr("Find your kind of pause.")}</h2><p className="text-slate-300 mt-2">{tr("Twelve activities, one gentle step at a time. Save what you enjoy for next time.")}</p></div>
       <span className="library-offline">{tr("Available offline · no account")}</span>
     </section>
+    <button className="library-secondary my-4" onClick={() => setShowResearch(true)}>{tr('Research & how CareSphere works')}</button>
     <div className="library-filters">
       <label className="flex-1 min-w-0"><span className="block font-bold text-sm mb-2">{tr("Find an activity")}</span><div className="relative"><Search aria-hidden="true" className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" /><input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={tr("Try a word, like calm or story")} className="library-input pl-11" /></div></label>
       <label><span className="block font-bold text-sm mb-2">{tr("Explore by interest")}</span><select value={category} onChange={(e) => setCategory(e.target.value)} className="library-input">{Object.entries(CATEGORIES).map(([id, title]) => <option key={id} value={id}>{tr(title)}</option>)}</select></label>
@@ -62,4 +66,19 @@ export default function ActivityLibrary({ favorites, onToggleFavorite, renderAct
       <Info className="text-sm text-slate-400">{tr("Closing this activity or moving the app to the background ends this session and stops its sound.")}</Info>
     </section></div>}
   </>;
+}
+
+
+function SocialMomentsActivity() {
+  const [index, setIndex] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const moment = SOCIAL_MOMENTS[index % SOCIAL_MOMENTS.length];
+  return <div className="space-y-4 rounded-3xl bg-slate-900 p-5 sm:p-7">
+    <p className="text-sm text-slate-300">{tr('Several answers may fit. Choose, reflect, or skip. Nothing is recorded.')}</p>
+    <h3 className="text-xl font-bold text-white">{tr(moment.prompt)}</h3>
+    <div className="grid gap-3">{moment.options.map((option) => <button key={option} className="library-choice" onClick={() => setFeedback('That is one option. Your own preference matters; you can also choose differently or skip.')}>{tr(option)}</button>)}</div>
+    {feedback && <p role="status" className="text-emerald-200">{tr(feedback)}</p>}
+    <button className="library-primary" onClick={() => {setIndex((n) => n + 1);setFeedback('');}}>{tr('Next / skip')}</button>
+    <p className="text-sm text-slate-400">{tr('No answer is scored as correct. Stop whenever you like.')}</p>
+  </div>;
 }

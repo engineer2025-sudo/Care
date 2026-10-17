@@ -44,3 +44,8 @@ standalone games are not a validated CST program. [1](https://www.nice.org.uk/gu
 See the [native product/evidence brief](ios-product-brief.md) for the activity
 inventory, source-specific limitations, permissible deck claims, and architecture.
 Use the [device checklist](ios-device-test-plan.md) before demonstrating the build.
+
+
+## Research-informed social moment cards
+
+CareSphere adds three short, fictional situations with several reasonable responses. They are untimed, unscored, offline, and do not save the selected response. These are optional conversation prompts—not a social-skills intervention, assessment, or evidence-based treatment. They do not ask for eye contact, expression imitation, or a single “normal” response. See [Research and how CareSphere works](research-and-how-it-works.md) for the sources, population limits, and design rationale.

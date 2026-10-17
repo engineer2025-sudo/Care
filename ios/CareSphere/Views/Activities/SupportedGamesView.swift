@@ -213,3 +213,35 @@ struct ConversationCardsView: View {
         }
     }
 }
+
+
+struct SocialMomentCardsView: View {
+    @State private var index = 0
+    @State private var selected: String?
+    private let moments: [(String, [String])] = [
+        ("A room feels noisy. What might feel helpful?", ["Move somewhere quieter", "Ask for a quieter moment", "Take a break outside"]),
+        ("Someone says hello. What feels comfortable for you?", ["Say hello", "Wave or smile", "Take time before responding"]),
+        ("A plan changes. What could help right now?", ["Ask what happens next", "Look at the new plan", "Pause before deciding"])
+    ]
+
+    var body: some View {
+        let moment = moments[index % moments.count]
+        SectionCard(title: AppLanguage.text("Several answers may fit. Choose, reflect, or skip. Nothing is recorded."), systemImage: "bubble.left.and.bubble.right") {
+            Text(AppLanguage.text(moment.0)).font(.title3.weight(.semibold))
+            ForEach(moment.1, id: \.self) { option in
+                Button { selected = option } label: {
+                    Text(AppLanguage.text(option)).frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+                }
+                .buttonStyle(.bordered)
+                .accessibilityAddTraits(selected == option ? .isSelected : [])
+            }
+            if selected != nil {
+                ActivityFeedback(text: "That is one option. Your own preference matters; you can also choose differently or skip.")
+            }
+            Button(AppLanguage.text("Next / skip")) { index = (index + 1) % moments.count; selected = nil }
+                .buttonStyle(.borderedProminent).frame(minHeight: 44)
+            Text(AppLanguage.text("No answer is scored as correct. Stop whenever you like."))
+                .font(.footnote).foregroundStyle(.secondary)
+        }
+    }
+}

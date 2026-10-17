@@ -33,9 +33,9 @@ Scope: iPhone **3.7.0 (16)**, Android **1.8.0 (10)**, web **1.5.0**. This is an 
 
 Reminder confirmations are user review, not prescription verification. A taken check-in is not proof of ingestion. Do not depend on this app for time-critical medication delivery.
 
-## 2. All eleven library activities
+## 2. All twelve library activities
 
-All eleven below exist on **iPhone, Android and web**. They are optional leisure/practice activities, not validated dementia/autism treatments or cognitive assessments.
+All twelve below exist on **iPhone, Android and web**. They are optional leisure/practice activities, not validated dementia/autism treatments or cognitive assessments.
 
 1. **Picture pairs** — reveal cards and match pictures; supportive reveal/hint controls.
 2. **Sort together** — explore familiar object categories.
@@ -48,6 +48,7 @@ All eleven below exist on **iPhone, Android and web**. They are optional leisure
 9. **Remember a pattern** — adjustable short pattern practice; not a measure of cognitive decline.
 10. **Soundscapes** — opt-in sound with stop/volume controls; no autoplay.
 11. **Paced breathing** — optional pacing, pause/exit; stop if uncomfortable.
+12. **Social moment cards** — everyday situations with several plausible choices; no scoring, saved answers, or eye-contact requirement.
 
 | Library action | iPhone | Android | Web |
 |---|---|---|---|
@@ -57,7 +58,7 @@ All eleven below exist on **iPhone, Android and web**. They are optional leisure
 | Hints / reveal / next / retry where appropriate | Yes | Yes | Yes |
 | Background sound stop | Yes | Yes | Yes, with browser lifecycle limits |
 | Pause/continue retains every game state | Limited: depends on screen | Limited: depends on screen | Limited: library pause unmounts/restarts game; visual routines retain step |
-| Research rationale and limitations | In-app references + docs | Docs and activity descriptions | In-app descriptions + docs |
+| Research & how CareSphere works page, citations and limitations | Yes | Yes | Yes |
 | Clinical efficacy / diagnostic scoring / outcome monitoring | No | No | No |
 
 ## 3. Personal support tools (the original twelve requested improvements)

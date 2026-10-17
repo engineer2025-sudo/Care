@@ -28,7 +28,7 @@ object ActivityRules {
     val sequences = listOf(
         Round("To wash your hands, what comes after wetting them?", listOf("Dry hands", "Add soap", "Put on gloves"), 1, "Soap helps clean your hands."),
         Round("Before going outside in the rain, what could you take?", listOf("An umbrella", "A pillow", "A plate"), 0, "An umbrella keeps rain off."))
-    val titles = listOf("Sort together", "Complete the pattern", "Find the same", "Everyday order", "Conversation cards", "Picture pairs", "Feelings explorer", "Picture story", "Remember a pattern", "Soundscapes", "Paced breathing")
+    val titles = listOf("Sort together", "Complete the pattern", "Find the same", "Everyday order", "Conversation cards", "Picture pairs", "Feelings explorer", "Picture story", "Remember a pattern", "Soundscapes", "Paced breathing", "Social moment cards")
     fun round(activity: Int, index: Int): Round {
         val rounds = when(activity) { 0 -> sorting; 1 -> patterns; 2 -> matching; else -> sequences }
         return rounds[Math.floorMod(index, rounds.size)]
