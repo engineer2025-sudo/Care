@@ -306,6 +306,7 @@ class MainActivity : ProtectedActivity() {
             button(tx("Open Google Scholar Labs search 1"), c) { openURL("https://scholar.google.com/scholar_labs/search/session/8600305665779058312?hl=en") }
             button(tx("Open Google Scholar Labs search 2"), c) { openURL("https://scholar.google.com/scholar_labs/search/session/6581218369437547131?hl=en") }
         }
+        button(tx("Back to activities")) { activityIndex = -1; render() }
     }
     private fun activityResults(parent: LinearLayout) {
         parent.removeAllViews()
