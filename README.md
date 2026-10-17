@@ -6,6 +6,8 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 **“I'm stressed” guided check-in on all three platforms:** an optional paced pause (in 4 seconds, out 6, three cycles, skippable, not treatment), then *How are you now?*, then reviewed **Share a support message** and **Open video support** options. Nothing is sent or invited automatically, and no line claims a message was delivered. The iPhone flow's remaining English-only strings now follow the selected language. [Behavior and validation](docs/release-checkin-2026-10-16.md).
 
+**Instant SOS without a server:** Android sends one carrier text to your saved emergency contact in the background (permission-gated, sideload only, with carrier/delivery status reported honestly). iPhone cannot do that — Apple gives apps no silent-SMS API — so CareSphere runs a one-time Apple Shortcuts automation you create, and otherwise opens a prefilled Messages draft. Web opens your messaging app with the message written. [Exact behavior per platform](docs/instant-sos.md).
+
 **Emergency contact + Android sparkline:** an optional emergency contact (name and phone) on Android and web, offered as a reviewed `sms:` draft only when you tap it; CareSphere never messages anyone automatically. Android's heart-rate card now draws the last 36 readings your monitor actually sent and clears them on disconnect. [Contact behavior](docs/release-contact-2026-10-16.md) · [sparkline](docs/release-sparkline-2026-10-16.md).
 
 **Import receipts + Bare minimum mode:** passphrase-authenticated import receipts on all three platforms (created only after a real import, verifiable with the transfer passphrase and optionally the transfer file — never a delivery or identity claim) and a Bare minimum mode that hides all how-it-works copy while keeping status and safety lines. [Behavior and validation](docs/release-receipts-2026-10-15.md).
@@ -19,7 +21,7 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 This does **not** finish every requested feature. Richer portable sharing, authenticated import receipts, full advanced localization, physical-phone checks and owner-signed distribution remain open. See the checklist rather than assuming identical platforms.
 
-**Five-language interface preview:** English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with an offline persistent selector. 748 interface messages cover core labels, greetings, mood choices, setup guidance and comfort controls; advanced content has explicit English fallback. Private notes and care records are never translated automatically. [Coverage, setup and review limits](docs/languages.md).
+**Five-language interface preview:** English, Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese, with an offline persistent selector. 770 interface messages cover core labels, greetings, mood choices, setup guidance and comfort controls; advanced content has explicit English fallback. Private notes and care records are never translated automatically. [Coverage, setup and review limits](docs/languages.md).
 
 **Personal support tools:** Simple Mode, visual routines, communication cards, personal photo conversation/matching, comfort preferences, trusted contacts, appointment questions, routine undo, note recovery, encrypted backup/restore, interest prompts, optional first-use guidance and native iPhone AI drafting.
 

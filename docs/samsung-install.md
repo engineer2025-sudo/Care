@@ -76,7 +76,8 @@ When you import records someone shared, you can create an **import receipt** —
 ## Health references and Emergency SOS
 
 - **Other health data → Health references** searches five built-in safety notes offline (medication lists, home fall hazards, sensory-aware support, recording readings, urgent symptoms). Nothing is fetched or uploaded.
-- **Other health data → Emergency SOS** offers a **Call 911** dialer action and a reviewed help message you can share through any messaging app. Adding your location is optional and shown for review first; CareSphere never contacts anyone automatically and never confirms delivery.
+- **Other health data → Emergency SOS** offers a **Call 911** dialer action, an instant text to your saved emergency contact, and a reviewed help message you can share through any messaging app. Adding your location is optional and shown for review first; CareSphere never contacts anyone automatically and never confirms delivery.
+- **Instant text:** save a contact in **Settings & privacy → Emergency contact**, then tap **Send now to {name}**. Android asks once for SMS permission; the message goes straight to your carrier with no server. The screen distinguishes “handed to your carrier” from a carrier delivery report, and it cannot know whether the message was read. Multi-SIM phones use the default SMS subscription. Google Play restricts SMS sending, so this works in the sideloaded APK; a Play release would need an exception.
 
 ## Share with another phone without a backend
 

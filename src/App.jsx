@@ -6,6 +6,7 @@ import LanguagePicker from './components/LanguagePicker'
 import { tr } from "./lib/i18n";
 import { BREATH_PHASES, TARGET_CYCLES, startBreathing, tick, cycleCount, stressRoom, supportMessage } from './lib/stressFlow.js';
 import { cleanName, cleanPhone, smsDraftLink, usableContact } from './lib/emergencyContact.js';
+import { composeSos, sosSmsHref } from './lib/sosMessage.js';
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
   Heart, Shield, Brain, Sparkles, Video, Activity, Coffee, X, ExternalLink,
@@ -231,10 +232,11 @@ function VideoModal({ session, displayName, onClose }) {
 }
 
 // There is no automatic Care Circle push backend in this build.
-function SosModal({ open, onClose }) {
+function SosModal({ open, onClose, contact }) {
   const [shareStatus, setShareStatus] = useState(null);
   const [loc, setLoc] = useState(null);
   const [locState, setLocState] = useState('idle'); // idle | loading | ok | error
+  const [locAt, setLocAt] = useState('');
   const dialogRef = useDialog(open, onClose);
 
   if (!open) return null;
@@ -245,6 +247,7 @@ function SosModal({ open, onClose }) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLoc(pos.coords);
+        setLocAt(new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
         setLocState('ok');
       },
       () => setLocState('error'),
@@ -300,10 +303,17 @@ function SosModal({ open, onClose }) {
               <MapPin className="w-4 h-4" /> {locState === 'loading' ? tr('Locating…') : tr('Attach my GPS location')}
             </button>
           }
+          {usableContact(contact?.name, contact?.phone) &&
+          <a
+            href={sosSmsHref(cleanPhone(contact.phone), composeSos(locState === 'ok' && loc ? { latitude: loc.latitude.toFixed(5), longitude: loc.longitude.toFixed(5), recordedAt: locAt } : null))}
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3.5 rounded-2xl text-sm shadow-lg flex items-center justify-center gap-2 transition">
+              {tr('Message {0} now', [cleanName(contact.name)])}
+            </a>
+          }
+          <p className="text-[11px] text-slate-500 leading-relaxed">{tr("Your browser cannot send a text by itself. This opens your messaging app with the message written, and you tap Send.")}</p>
           <button
             onClick={async () => {
-              const map = loc ? ` https://www.google.com/maps?q=${loc.latitude},${loc.longitude}` : '';
-              const message = `CareSphere SOS: I am requesting help. Please check in now.${map}`;
+              const message = composeSos(locState === 'ok' && loc ? { latitude: loc.latitude.toFixed(5), longitude: loc.longitude.toFixed(5), recordedAt: locAt } : null);
               try {
                 if (navigator.share) {
                   await navigator.share({ title: 'CareSphere SOS', text: message });
@@ -2431,7 +2441,7 @@ export default function App() {
         hrRecords={hrRecords} />
 
       <VideoModal session={videoSession} displayName={settings.name} onClose={() => setVideoSession(null)} />
-      <SosModal open={sosOpen} onClose={() => setSosOpen(false)} />
+      <SosModal open={sosOpen} onClose={() => setSosOpen(false)} contact={{ name: settings.contactName, phone: settings.contactPhone }} />
       <StressCheckInModal
         open={stressOpen}
         onClose={() => setStressOpen(false)}

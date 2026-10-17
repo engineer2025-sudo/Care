@@ -4,6 +4,7 @@ import MapKit
 
 struct SosView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @EnvironmentObject private var location: LocationService
     @EnvironmentObject private var store: CareStore
     @State private var includeLocation = false
@@ -24,6 +25,41 @@ struct SosView: View {
                             .padding(.vertical, 8)
                             .background(Color.red, in: RoundedRectangle(cornerRadius: 16))
                             .foregroundStyle(.white)
+                    }
+                    SectionCard(title: AppLanguage.text("Send it now"), systemImage: "bolt.fill") {
+                        if emergencyContactName.isEmpty {
+                            Text(AppLanguage.text("Add an emergency contact in Settings & privacy first. Until then you can share the message yourself below."))
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text(AppLanguage.text("Apple does not let an app send a text silently. A Shortcut you create once sends this message through Apple Shortcuts, with no server or account."))
+                                .foregroundStyle(.secondary)
+                            Button {
+                                if let url = SosMessage.shortcutURL(message: emergencyShareMessage) {
+                                    openURL(url)
+                                }
+                            } label: {
+                                Label(AppLanguage.text("Send now with Shortcuts"), systemImage: "bolt.fill")
+                                    .frame(maxWidth: .infinity, minHeight: 44)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            DisclosureGroup(AppLanguage.text("Set up instant sending (one time)")) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    ForEach(setupSteps.indices, id: \.self) { index in
+                                        Text("\(index + 1). \(setupSteps[index])")
+                                            .font(.footnote)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                    Button(AppLanguage.text("Open Shortcuts")) {
+                                        if let url = URL(string: "shortcuts://") { openURL(url) }
+                                    }
+                                    .font(.footnote.weight(.semibold))
+                                    Text(AppLanguage.text("The Shortcut sends the message; CareSphere cannot confirm delivery or a response."))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.top, 6)
+                            }
+                        }
                     }
                     SectionCard(title: AppLanguage.text("Share a request for help"), systemImage: "square.and.arrow.up") {
                         Text(AppLanguage.text("Choose a messaging app and recipient, then review and send the message yourself. CareSphere cannot confirm delivery or a response."))
@@ -80,12 +116,23 @@ struct SosView: View {
         .presentationDetents([.large])
     }
 
+    private var setupSteps: [String] {
+        SosMessage.setupSteps(contactName: emergencyContactName)
+    }
+
+    private var emergencyContactName: String {
+        store.profile.emergencyContact.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private var emergencyShareMessage: String {
-        var message = "CareSphere SOS: \(store.displayName) is requesting help. Please check in now."
+        var recorded: SosLocation?
         if includeLocation, let fix = location.location {
-            let mapsURL = "https://www.google.com/maps?q=\(fix.coordinate.latitude),\(fix.coordinate.longitude)"
-            message += " Location recorded at \(fix.timestamp.formatted(date: .abbreviated, time: .shortened)): \(mapsURL)"
+            recorded = SosLocation(
+                latitude: fix.coordinate.latitude,
+                longitude: fix.coordinate.longitude,
+                recordedAt: fix.timestamp.formatted(date: .abbreviated, time: .shortened)
+            )
         }
-        return message
+        return SosMessage.compose(displayName: store.displayName, location: recorded)
     }
 }

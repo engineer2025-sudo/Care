@@ -134,7 +134,8 @@ Exports and messages outside the app lose its local-storage protections. Externa
 | “I'm stressed” guided support flow | Yes: pause → check-in → support, all translated | Yes: same steps; reviewed share + room link | Yes: same steps in the mood card; reviewed share + video room |
 | Opt-in sustained live-HR check-in flow | Yes; off by default, not diagnosis | No | No |
 | Phrase-based safety interruption before Health Guide AI | Yes; incomplete, not validated crisis detection | No Health Guide AI | No Health Guide AI |
-| SOS emergency action | Yes | Yes: dialer action + reviewed share | Yes, browser/phone handoff |
+| Instant SOS text without a server | Limited: no silent-SMS API; one-tap Apple Shortcuts automation does the send | Yes: background SMS via your carrier (`SEND_SMS`, sideload only) | Limited: opens your messaging app with the message written; browsers cannot send silently |
+| SOS emergency action | Yes | Yes: dialer + carrier text to your contact or reviewed share | Yes: `sms:` draft to your contact, reviewed share, browser/phone handoff |
 | Optional location in reviewed help message | Yes, permission-based | Yes, permission-based | No dedicated equivalent |
 | Diagnosis, triage, medical-device accuracy certification | No | No | No |
 
