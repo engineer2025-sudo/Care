@@ -839,6 +839,12 @@
     "vi": "Xóa tên hiển thị",
     "zh-Hans": "清除显示名称"
   },
+  "Clear emergency contact": {
+    "es": "Borrar contacto de emergencia",
+    "fil": "Burahin ang kontak sa emergency",
+    "vi": "Xóa liên hệ khẩn cấp",
+    "zh-Hans": "清除紧急联系人"
+  },
   "Clear prepared file": {
     "es": "Borrar archivo preparado",
     "fil": "Burahin ang inihandang file",
@@ -1295,6 +1301,18 @@
     "vi": "Liên hệ khẩn cấp",
     "zh-Hans": "紧急联系人"
   },
+  "Emergency contact name": {
+    "es": "Nombre del contacto de emergencia",
+    "fil": "Pangalan ng kontakt sa emergency",
+    "vi": "Tên liên hệ khẩn cấp",
+    "zh-Hans": "紧急联系人姓名"
+  },
+  "Emergency contact phone": {
+    "es": "Teléfono del contacto de emergencia",
+    "fil": "Numero ng kontakt sa emergency",
+    "vi": "Số điện thoại liên hệ khẩn cấp",
+    "zh-Hans": "紧急联系人电话"
+  },
   "Enable app lock": {
     "es": "Activar bloqueo de la aplicación",
     "fil": "I-enable ang lock ng app",
@@ -1336,6 +1354,12 @@
     "fil": "Ingles",
     "vi": "Tiếng Anh",
     "zh-Hans": "英语"
+  },
+  "Enter a name and a phone number with at least 7 digits, or cancel.": {
+    "es": "Escribe un nombre y un teléfono con al menos 7 dígitos, o cancela.",
+    "fil": "Maglagay ng pangalan at numero na may hindi bababa sa 7 digit, o kanselahin.",
+    "vi": "Nhập tên và số điện thoại có ít nhất 7 chữ số, hoặc hủy.",
+    "zh-Hans": "请输入姓名和至少 7 位数字的电话号码，或取消。"
   },
   "Enter only a schedule confirmed by your care team or medication label. Reminders stay paused until you confirm every name and time.": {
     "es": "Introduce solo un horario confirmado por tu equipo de atención o la etiqueta del medicamento. Los recordatorios se pausan hasta que confirmes cada nombre y hora.",
@@ -2411,6 +2435,12 @@
     "vi": "Chưa nhập thuốc. Bạn có thể thêm lịch nhắc cá nhân sau trong Cài đặt và đối chiếu từng mục với hướng dẫn hiện tại.",
     "zh-Hans": "尚未输入药物。稍后可在设置中添加个人提醒时间表，并根据现行指示核对每一项。"
   },
+  "No messaging app is available on this device.": {
+    "es": "No hay ninguna app de mensajería en este dispositivo.",
+    "fil": "Walang messaging app sa device na ito.",
+    "vi": "Không có ứng dụng nhắn tin nào trên thiết bị này.",
+    "zh-Hans": "此设备上没有可用的消息应用。"
+  },
   "No notes match your search.": {
     "es": "Ninguna nota coincide con la búsqueda.",
     "fil": "Walang talang tumutugma sa paghahanap.",
@@ -2464,6 +2494,12 @@
     "fil": "Hindi muna",
     "vi": "Để sau",
     "zh-Hans": "暂时不要"
+  },
+  "Not set": {
+    "es": "Sin configurar",
+    "fil": "Hindi naka-set",
+    "vi": "Chưa đặt",
+    "zh-Hans": "未设置"
   },
   "Not set up": {
     "es": "Sin configurar",
@@ -2554,6 +2590,12 @@
     "fil": "Sa device na ito lamang",
     "vi": "Chỉ trên thiết bị này",
     "zh-Hans": "仅在此设备上"
+  },
+  "Only used when you choose to call or message them. CareSphere never contacts anyone automatically.": {
+    "es": "Solo se usa cuando eliges llamarles o enviarles un mensaje. CareSphere nunca contacta a nadie automáticamente.",
+    "fil": "Ginagamit lang kapag pinili mong tawagan o i-message sila. Hindi kailanman awtomatikong kokontakin ng CareSphere ang kahit sino.",
+    "vi": "Chỉ dùng khi bạn chọn gọi hoặc nhắn tin cho họ. CareSphere không bao giờ tự động liên hệ với ai.",
+    "zh-Hans": "仅在你选择致电或发消息时使用。CareSphere 绝不会自动联系任何人。"
   },
   "Only your selected notes and routines are included. Recipients can keep or forward copies. You cannot recall them remotely. Tell the recipient the passphrase separately.": {
     "es": "Solo se incluyen las notas y rutinas seleccionadas. El destinatario puede guardar o reenviar copias. No puedes retirarlas a distancia. Comunica la frase de contraseña por separado.",
@@ -3364,6 +3406,12 @@
     "fil": "Itakda ang pangalang ipinapakita",
     "vi": "Đặt tên hiển thị",
     "zh-Hans": "设置显示名称"
+  },
+  "Set emergency contact": {
+    "es": "Configurar contacto de emergencia",
+    "fil": "Itakda ang kontak sa emergency",
+    "vi": "Đặt liên hệ khẩn cấp",
+    "zh-Hans": "设置紧急联系人"
   },
   "Set up": {
     "es": "Configurar",

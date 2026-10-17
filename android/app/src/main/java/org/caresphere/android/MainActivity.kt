@@ -524,6 +524,14 @@ class MainActivity : ProtectedActivity() {
             text("Display name: ${data.json.optString("name").ifBlank { "Not entered" }}", parent = c)
             button(tx("Set display name"), c) { input(tx("Your name"), tx("Optional display name"), 60) { data.put("name", it); render() } }.isEnabled = data.canWrite
             button(tx("Clear display name"), c) { data.put("name", ""); render() }.isEnabled = data.canWrite
+            val contactName = data.json.optString("contactName")
+            val contactPhone = data.json.optString("contactPhone")
+            text(tx("Emergency contact") + ": " + if (EmergencyContact.usable(contactName, contactPhone)) "$contactName · $contactPhone" else tx("Not set"), parent = c)
+            button(tx("Set emergency contact"), c) { contactDialog() }.isEnabled = data.canWrite
+            if (contactName.isNotBlank() || contactPhone.isNotBlank()) button(tx("Clear emergency contact"), c) {
+                data.put("contactName", ""); data.put("contactPhone", ""); render()
+            }.isEnabled = data.canWrite
+            copy(tx("Only used when you choose to call or message them. CareSphere never contacts anyone automatically."), parent = c)
         }
         card(tx("Routine management")) { c ->
             val routines = data.list("routines")
@@ -570,6 +578,36 @@ class MainActivity : ProtectedActivity() {
             if(value.isBlank()) input.error = "Enter some text, or cancel." else { save(value); dialog.dismiss() }
         } }; dialog.showProtected()
     }
+    private fun contactDialog() {
+        val name = EditText(ContextThemeWrapper(this, if(dark) android.R.style.Theme_Material else android.R.style.Theme_Material_Light)).apply {
+            hint = tx("Name"); contentDescription = tx("Emergency contact name")
+            setText(data.json.optString("contactName")); filters = arrayOf(android.text.InputFilter.LengthFilter(EmergencyContact.NAME_MAX))
+        }
+        val phone = EditText(ContextThemeWrapper(this, if(dark) android.R.style.Theme_Material else android.R.style.Theme_Material_Light)).apply {
+            hint = tx("Phone"); contentDescription = tx("Emergency contact phone")
+            inputType = android.text.InputType.TYPE_CLASS_PHONE
+            setText(data.json.optString("contactPhone")); filters = arrayOf(android.text.InputFilter.LengthFilter(30))
+        }
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL; setPadding(dp(20), 0, dp(20), 0); addView(name); addView(phone)
+        }
+        val dialog = dialogBuilder().setTitle(tx("Emergency contact")).setView(box)
+            .setPositiveButton(tx("Save"), null).setNegativeButton(tx("Cancel"), null).create()
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val cleanName = EmergencyContact.cleanName(name.text.toString())
+                val cleanPhone = EmergencyContact.cleanPhone(phone.text.toString())
+                if (!EmergencyContact.usable(cleanName, cleanPhone)) {
+                    phone.error = tx("Enter a name and a phone number with at least 7 digits, or cancel.")
+                } else {
+                    data.put("contactName", cleanName); data.put("contactPhone", cleanPhone)
+                    dialog.dismiss(); render()
+                }
+            }
+        }
+        dialog.showProtected()
+    }
+
     private fun confirm(title: String, body: String, action: () -> Unit) {
         dialogBuilder().setTitle(title).setMessage(body).setPositiveButton(tx("Continue")) { _, _ -> action() }.setNegativeButton(tx("Cancel"), null).showProtected()
     }

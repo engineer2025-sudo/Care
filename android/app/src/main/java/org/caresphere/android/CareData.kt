@@ -132,6 +132,8 @@ class CareData(private val context: Context, private val refreshOnOpen:Boolean =
                 require(m.getString("name").isNotBlank() && m.getString("name").length<=80)
                 require(MedicationRules.validTime(m.getString("time")) && m.optString("instructions").length<=240)
             }
+            require(value.optString("contactName").length <= EmergencyContact.NAME_MAX)
+            require(value.optString("contactPhone").length <= 30)
             val tools = value.optJSONObject("tools") ?: JSONObject()
             for ((name, limit) in listOf("photos" to 10, "plans" to 30, "contacts" to 20, "questions" to 100, "phrases" to 24)) {
                 val array = tools.optJSONArray(name) ?: JSONArray(); require(array.length() <= limit)

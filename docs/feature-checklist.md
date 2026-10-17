@@ -11,7 +11,7 @@ Scope: iPhone **3.7.0 (16)**, Android **1.8.0 (10)**, web **1.5.0**. This is an 
 | Empty-by-default personal records; no sample patients, contacts, medications or vital signs | Yes | Yes | Yes |
 | Use activities without creating an account/profile | Yes | Yes | Yes |
 | Local optional display name | Yes | Yes | Yes |
-| Expanded profile and emergency-contact settings | Yes | Limited: name and support-tool contacts | Limited: name and support-tool contacts |
+| Expanded profile and emergency-contact settings | Yes | Yes: display name + one emergency contact (name/phone) | Yes: display name + one emergency contact; used for a reviewed `sms:` draft |
 | First-use guidance | Onboarding + Start here | Start here | Start here |
 | Today dashboard and shortcuts | Yes | Yes | Yes |
 | Daily routine: add, edit, remove | Yes | Yes | Yes |

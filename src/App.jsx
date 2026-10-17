@@ -5,6 +5,7 @@ import LanguagePicker from './components/LanguagePicker'
 // Interface text localized; user-authored expressions are intentionally unchanged.
 import { tr } from "./lib/i18n";
 import { BREATH_PHASES, TARGET_CYCLES, startBreathing, tick, cycleCount, stressRoom, supportMessage } from './lib/stressFlow.js';
+import { cleanName, cleanPhone, smsDraftLink, usableContact } from './lib/emergencyContact.js';
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
   Heart, Shield, Brain, Sparkles, Video, Activity, Coffee, X, ExternalLink,
@@ -528,6 +529,26 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
             aria-label={tr("Display name")}
             className="w-36 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
 
+        </SettingsRow>
+
+        <SettingsRow label={tr("Emergency contact")} hint={tr("Only used when you choose to call or message them. CareSphere never contacts anyone automatically.")}>
+          <div className="flex flex-col gap-1.5">
+            <input
+              type="text"
+              value={settings.contactName || ''}
+              onChange={(e) => update({ contactName: cleanName(e.target.value) })}
+              aria-label={tr("Emergency contact name")}
+              placeholder={tr("Name")}
+              className="w-44 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
+            <input
+              type="tel"
+              inputMode="tel"
+              value={settings.contactPhone || ''}
+              onChange={(e) => update({ contactPhone: cleanPhone(e.target.value) })}
+              aria-label={tr("Emergency contact phone")}
+              placeholder={tr("Phone")}
+              className="w-44 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
+          </div>
         </SettingsRow>
 
         <SettingsRow label={tr("Text size")} hint="Larger text across the whole app — good for low vision.">
@@ -1197,7 +1218,7 @@ function MoodCheckIn({ moods, setMoods, onStress }) {
 
 }
 
-function StressCheckInModal({ open, onClose, onVideoSupport }) {
+function StressCheckInModal({ open, onClose, onVideoSupport, contact }) {
   const [step, setStep] = useState('pause');
   const [breath, setBreath] = useState(startBreathing);
   const [room, setRoom] = useState(stressRoom);
@@ -1300,9 +1321,16 @@ function StressCheckInModal({ open, onClose, onVideoSupport }) {
             {shareStatus &&
           <div className="bg-sky-500/10 border border-sky-500/30 rounded-2xl p-3 text-xs text-sky-200 font-semibold break-words">{shareStatus}</div>
           }
+            {usableContact(contact?.name, contact?.phone) &&
+          <a
+            href={smsDraftLink(contact.phone, supportMessage(room))}
+            className="block text-center w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-2xl text-sm transition">
+              {tr('Message {0}', [cleanName(contact.name)])}
+            </a>
+          }
             <button
             onClick={shareMessage}
-            className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-2xl text-sm transition">
+            className={`w-full font-bold py-3.5 rounded-2xl text-sm transition ${usableContact(contact?.name, contact?.phone) ? 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'}`}>
               {tr('Share a support message')}
             </button>
             <button
@@ -1447,7 +1475,8 @@ export default function App() {
   const localDay = useLocalDayKey();
 
   const [settings, setSettings] = usePersisted('settings', {
-    name: '', textScale: 'md', theme: 'system', highContrast: false, lowSensory: true, voice: false, bareMinimum: false
+    name: '', textScale: 'md', theme: 'system', highContrast: false, lowSensory: true, voice: false, bareMinimum: false,
+    contactName: '', contactPhone: ''
   });
   const updateSettings = (patch) => setSettings((s) => ({ ...s, ...patch }));
 
@@ -2406,6 +2435,7 @@ export default function App() {
       <StressCheckInModal
         open={stressOpen}
         onClose={() => setStressOpen(false)}
+        contact={{ name: settings.contactName, phone: settings.contactPhone }}
         onVideoSupport={(room) => {setStressOpen(false);setVideoSession({ title: 'Support check-in', room });}} />
       <SettingsModal
         open={settingsOpen}

@@ -69,6 +69,16 @@ class CheckInActivity : ToolActivity() {
             }
             CheckInFlow.Step.Support -> {
                 text(tx("Would you like someone with you?"), 24f)
+                val profile = CareData(this, false).json
+                val contactName = EmergencyContact.cleanName(profile.optString("contactName"))
+                val contactPhone = EmergencyContact.cleanPhone(profile.optString("contactPhone"))
+                val canMessage = EmergencyContact.usable(contactName, contactPhone)
+                if (canMessage) button(AppLanguage.format(this, "Message {0}", contactName)) {
+                    runCatching {
+                        startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse(EmergencyContact.smsUri(contactPhone)))
+                            .putExtra("sms_body", CheckInFlow.supportMessage(room)))
+                    }.onFailure { message(tx("No messaging app is available on this device.")) }
+                }
                 shareStatus?.let { text(it, 16f) }
                 button(tx("Share a support message")) {
                     runCatching {

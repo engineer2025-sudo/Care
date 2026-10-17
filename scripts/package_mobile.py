@@ -81,7 +81,7 @@ with zipfile.ZipFile(apk_path) as z:
 
 paths = [ROOT / p for p in command('git', 'ls-files', 'ios', 'android', *LOCALIZATION_PATHS).splitlines()]
 paths += [ROOT / p for p in ['DOWNLOAD.md', 'docs/signing-troubleshooting.md',
-    'docs/local-data-encryption.md', 'docs/feature-checklist.md', 'docs/samsung-install.md', 'docs/android-release-signing.md', 'docs/release-parity-2026-10-14.md', 'docs/release-lock-2026-10-14.md', 'docs/release-receipts-2026-10-15.md', 'docs/release-manual-vitals-2026-10-16.md', 'docs/release-android-parity-2026-10-16.md', 'docs/release-checkin-2026-10-16.md', 'docs/ios-device-test-plan.md', 'docs/activities-and-accessibility.md', 'docs/release-2026-10-14.md',
+    'docs/local-data-encryption.md', 'docs/feature-checklist.md', 'docs/samsung-install.md', 'docs/android-release-signing.md', 'docs/release-parity-2026-10-14.md', 'docs/release-lock-2026-10-14.md', 'docs/release-receipts-2026-10-15.md', 'docs/release-manual-vitals-2026-10-16.md', 'docs/release-android-parity-2026-10-16.md', 'docs/release-checkin-2026-10-16.md', 'docs/release-contact-2026-10-16.md', 'docs/ios-device-test-plan.md', 'docs/activities-and-accessibility.md', 'docs/release-2026-10-14.md',
     'docs/web-deployment.md', 'docs/device-sharing.md', 'docs/personal-tools.md', 'docs/languages.md', 'scripts/android_smoke.py']]
 project = (ROOT/'ios/CareSphere.xcodeproj/project.pbxproj').read_text()
 assert set(re.findall(r'MARKETING_VERSION = "([^"]+)"', project)) == {'3.7.0'}
@@ -90,8 +90,8 @@ gradle = (ROOT/'android/app/build.gradle.kts').read_text()
 assert re.search(r'versionName\s*=\s*\"1\.8\.0\"', gradle)
 assert re.search(r'versionCode\s*=\s*10\b', gradle)
 assert json.loads((ROOT/'package.json').read_text())['version'] == '1.5.0'
-assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 738
-language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':738,
+assert len(json.loads((ROOT/'src/locales/interface.json').read_text())) == 746
+language_manifest = {'languages':['en','es','zh-Hans','fil','vi'], 'messages':746,
     'offline_catalog':True, 'persistent_selector':True, 'automatic_patient_text_translation':False,
     'english_fallback_for_untranslated_content':True, 'complete_interface_translation':False,
     'professional_linguistic_review':False, 'physical_multilingual_speech_tested':False}
@@ -101,7 +101,7 @@ manifest = {
         'unsigned_device_build': True, 'healthkit_build': True, 'simulator_launch': True,
         'tests':54, 'physical_device_tested':False, 'apple_intelligence_on_hardware_tested':False},
     'android': {'version':'1.8.0 (10)', 'ci':android['url'], 'tested_commit':android['headSha'],
-        'tests':60, 'lint':'passed', 'apk_signing_verified_in_ci':True,
+        'tests':64, 'lint':'passed', 'apk_signing_verified_in_ci':True,
         'emulator_smoke':'passed', 'five_language_ui_smoke':'passed', 'debuggable':True, 'physical_ble_tested':False,
         'medication_reminders':'inexact local alarms; physical Samsung timing unverified', 'health_connect':'read-only foreground; real-device data grants unverified', 'owner_release_signed':False, 'app_lock':'Android 11+ system strong biometric/device credential; screen gate, not biometric-bound key', 'snooze':'same-day ten-minute review reminder; inexact delivery', 'apk_sha256':digest, 'apk_bytes':len(apk)},
     'device_sharing': {'app_backend_required':False, 'mode':'native direct LAN plus encrypted-file snapshots',
@@ -155,7 +155,7 @@ not full iOS feature parity. See android/README.md and ios/README.md for exact s
 VALIDATION
 See BUILD_VERIFICATION.json for successful CI runs and file hashes.
 iOS 3.7.0 (16): 54 logic/preference/packet/transfer/LAN/discovery/language/vitals tests; standard device, HealthKit and Simulator builds; launch.
-Android 1.8.0 (10): 60 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
+Android 1.8.0 (10): 64 tests, lint, APK signature check, emulator checks for favorites, editing, persistence, dark/large text, and browser-to-Android encrypted file import.
 Real-device BLE, actual Apple Intelligence responses, accessibility with users, and
 Mac signing remain manual acceptance work. No clinical effectiveness is claimed.
 
@@ -196,7 +196,7 @@ with tempfile.TemporaryDirectory() as tmp, zipfile.ZipFile(archive) as z:
     for executable in ['ios/scripts/preflight.sh','android/gradlew']:
         assert (z.getinfo('CareSphere-Mobile/'+executable).external_attr >> 16) & 0o100
 web_paths = [ROOT / p for p in command('git', 'ls-files', *WEB_PATHS).splitlines()]
-web_paths += [ROOT/'docs/feature-checklist.md', ROOT/'docs/release-parity-2026-10-14.md', ROOT/'docs/release-lock-2026-10-14.md', ROOT/'docs/release-receipts-2026-10-15.md', ROOT/'docs/release-manual-vitals-2026-10-16.md', ROOT/'docs/release-android-parity-2026-10-16.md', ROOT/'docs/release-checkin-2026-10-16.md', ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md', ROOT/'docs/device-sharing.md', ROOT/'docs/personal-tools.md', ROOT/'docs/languages.md']
+web_paths += [ROOT/'docs/feature-checklist.md', ROOT/'docs/release-parity-2026-10-14.md', ROOT/'docs/release-lock-2026-10-14.md', ROOT/'docs/release-receipts-2026-10-15.md', ROOT/'docs/release-manual-vitals-2026-10-16.md', ROOT/'docs/release-android-parity-2026-10-16.md', ROOT/'docs/release-checkin-2026-10-16.md', ROOT/'docs/release-contact-2026-10-16.md', ROOT/'docs/web-deployment.md', ROOT/'docs/release-2026-10-14.md', ROOT/'docs/device-sharing.md', ROOT/'docs/personal-tools.md', ROOT/'docs/languages.md']
 web_files = {str(p.relative_to(ROOT)):p for p in web_paths}
 web_files.update({'production/'+str(p.relative_to(ROOT/'dist')):p for p in (ROOT/'dist').rglob('*') if p.is_file()})
 web_manifest = {
