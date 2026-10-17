@@ -384,7 +384,7 @@ test("I'm stressed opens a guided pause that never claims a message was sent", a
   await expect(dialog.getByRole('heading', { name: 'How are you now?' })).toBeVisible()
   await dialog.getByRole('button', { name: 'Still stressed' }).click()
   await expect(dialog.getByRole('heading', { name: 'Would you like someone with you?' })).toBeVisible()
-  await expect(dialog.getByRole('button', { name: 'Share a support message' })).toBeVisible()
+  await dialog.getByRole('button', { name: 'Share a support message' }).click()
   await expect(dialog.getByText(/Copied to the clipboard|Share sheet closed|Sharing was not completed|I could use some support/)).toBeVisible()
   await dialog.getByRole('button', { name: 'Open video support' }).click()
   const video = page.getByRole('dialog', { name: 'Support check-in' })
