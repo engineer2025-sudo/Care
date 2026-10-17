@@ -127,7 +127,7 @@ def failure(kind, value, tb):
 sys.excepthook = failure
 
 def scroll_to_bottom(rounds=5):
-    size = re.search(r'(\\d+)x(\\d+)', adb('shell','wm','size'))
+    size = re.search(r'(\d+)x(\d+)', adb('shell','wm','size'))
     width, height = map(int, size.groups())
     for _ in range(rounds):
         adb('shell','input','swipe',str(width//2),str(int(height*.82)),str(width//2),str(int(height*.24)),'300')
