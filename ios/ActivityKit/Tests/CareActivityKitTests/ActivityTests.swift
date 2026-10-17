@@ -154,8 +154,8 @@ final class ActivityTests: XCTestCase {
     }
 
     func testReferencesAreHTTPSAndCoverDistinctEvidence() {
-        XCTAssertEqual(ActivityReference.all.count, 4)
-        XCTAssertEqual(Set(ActivityReference.all.map(\.id)).count, 4)
+        XCTAssertEqual(ActivityReference.all.count, 8)
+        XCTAssertEqual(Set(ActivityReference.all.map(\.id)).count, 8)
         for reference in ActivityReference.all { XCTAssertEqual(reference.url.scheme, "https") }
     }
 }
