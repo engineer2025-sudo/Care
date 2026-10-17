@@ -31,6 +31,7 @@ class MainActivity : ProtectedActivity() {
     private var activityQuery = ""
     private var noteQuery = ""
     private var favoritesOnly = false
+    private var fewerChoices = true
     private var round = 0
     private var feedback = ""
     private var firstPair = -1
@@ -74,7 +75,7 @@ class MainActivity : ProtectedActivity() {
         savedInstanceState?.let {
             activityQuery = it.getString("activityQuery", ""); noteQuery = it.getString("noteQuery", ""); favoritesOnly = it.getBoolean("favoritesOnly")
             tab = it.getInt("tab"); settings = it.getBoolean("settings")
-            activityIndex = it.getInt("activity", -1); round = it.getInt("round")
+            activityIndex = it.getInt("activity", -1); round = it.getInt("round"); fewerChoices = it.getBoolean("fewerChoices", true)
             feedback = it.getString("feedback", ""); memoryHidden = it.getBoolean("memoryHidden")
             memoryPosition = it.getInt("memoryPosition"); matched.addAll(it.getIntArray("matched")?.toList() ?: emptyList())
             firstPair = it.getInt("first", -1); secondPair = it.getInt("second", -1)
@@ -84,7 +85,7 @@ class MainActivity : ProtectedActivity() {
     override fun onSaveInstanceState(out: Bundle) {
         super.onSaveInstanceState(out)
         out.putString("activityQuery", activityQuery); out.putString("noteQuery", noteQuery); out.putBoolean("favoritesOnly", favoritesOnly)
-        out.putInt("tab", tab); out.putBoolean("settings", settings); out.putInt("activity", activityIndex); out.putInt("round", round)
+        out.putInt("tab", tab); out.putBoolean("settings", settings); out.putInt("activity", activityIndex); out.putInt("round", round); out.putBoolean("fewerChoices", fewerChoices)
         out.putString("feedback", feedback); out.putBoolean("memoryHidden", memoryHidden); out.putInt("memoryPosition", memoryPosition)
         out.putIntArray("matched", matched.toIntArray()); out.putInt("first", firstPair); out.putInt("second", secondPair)
     }
@@ -257,7 +258,7 @@ class MainActivity : ProtectedActivity() {
         })
     }
     private fun openActivity(i: Int) {
-        activityIndex = i; round = 0; feedback = ""; firstPair = -1; secondPair = -1; matched.clear(); memoryPosition = 0; memoryHidden = false
+        activityIndex = i; round = 0; fewerChoices = true; feedback = ""; firstPair = -1; secondPair = -1; matched.clear(); memoryPosition = 0; memoryHidden = false
         (getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager).hideSoftInputFromWindow(root.windowToken, 0)
         render()
     }
@@ -293,6 +294,7 @@ class MainActivity : ProtectedActivity() {
         card(tx("How CareSphere applies this")) { c ->
             text(tx("Social moment cards are optional everyday scenarios with several reasonable responses. Choose, discuss another option, or skip. There is no right-answer score; no response is saved or sent to a server."), parent = c)
             text(tx("Familiar steps, optional hints, fewer choices, and clear stop controls support choice and predictability. Activities run offline. Favorites stay on this device."), parent = c)
+            text(tx("Choice reduction is user-controlled for comfort; the app does not automatically adjust difficulty from answers."), parent = c)
             text(tx("The activity does not ask for eye contact or expression imitation. Speaking, pointing, reading, or skipping are equally welcome."), parent = c)
         }
         card(tx("How the app works")) { c ->
@@ -339,7 +341,16 @@ class MainActivity : ProtectedActivity() {
             in 0..3 -> {
                 val r = ActivityRules.round(activityIndex, round)
                 card(tx(r.prompt)) { c ->
-                    r.options.forEachIndexed { i, option -> button(tx(option), c) {
+                    val comfort = CheckBox(this).apply {
+                        text = tx("Fewer choices"); textLocale = Locale.forLanguageTag(AppLanguage.current(this@MainActivity))
+                        textSize = 17f; minHeight = dp(48); setTextColor(ink); isChecked = fewerChoices
+                        setOnCheckedChangeListener { _, checked -> fewerChoices = checked; render() }
+                    }
+                    c.addView(comfort)
+                    text(tx("You can change this anytime. Hints and skipping are always okay."), 14f, c)
+                    r.optionIndices(fewerChoices).forEach { i ->
+                        val option = r.options[i]
+                        button(tx(option), c) {
                         feedback = if(i == r.answer) "That fits. Continue when you're ready." else "Let's look together. You can try another choice or use a hint."
                         render()
                     } }

@@ -12,7 +12,13 @@ object ActivityRules {
         } else packet[1].toInt() and 255
         return value.takeIf { it in 21..249 }
     }
-    data class Round(val prompt: String, val options: List<String>, val answer: Int, val hint: String)
+    data class Round(val prompt: String, val options: List<String>, val answer: Int, val hint: String) {
+        fun optionIndices(fewerChoices: Boolean): List<Int> {
+            if (!fewerChoices || options.size <= 2 || answer !in options.indices) return options.indices.toList()
+            val alternative = options.indices.firstOrNull { it != answer } ?: return options.indices.toList()
+            return options.indices.filter { it == answer || it == alternative }
+        }
+    }
     val sorting = listOf(
         Round("Which one is a fruit?", listOf("Apple", "Chair", "Shoe"), 0, "An apple grows on a tree."),
         Round("Which one do you wear?", listOf("Cup", "Hat", "Pear"), 1, "A hat goes on your head."),

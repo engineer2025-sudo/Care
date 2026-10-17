@@ -56,6 +56,7 @@ All twelve below exist on **iPhone, Android and web**. They are optional leisure
 | Clear empty-search/favorites states | Yes | Yes | Yes |
 | One chosen activity at a time, explicit exit | Yes | Yes | Yes |
 | Hints / reveal / next / retry where appropriate | Yes | Yes | Yes |
+| User-controlled fewer-choice setting; no automatic answer-based difficulty adaptation | Yes | Yes | Yes |
 | Background sound stop | Yes | Yes | Yes, with browser lifecycle limits |
 | Pause/continue retains every game state | Limited: depends on screen | Limited: depends on screen | Limited: library pause unmounts/restarts game; visual routines retain step |
 | Research & how CareSphere works page, citations and limitations | Yes | Yes | Yes |

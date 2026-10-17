@@ -755,6 +755,12 @@
     "vi": "Kiểm tra tình trạng",
     "zh-Hans": "状态确认"
   },
+  "Choice reduction is user-controlled for comfort; the app does not automatically adjust difficulty from answers.": {
+    "es": "La persona controla la reducción de opciones según su comodidad; la app no ajusta automáticamente la dificultad a partir de las respuestas.",
+    "fil": "Ang gumagamit ang pumipili ng mas kaunting opsyon para sa ginhawa; hindi awtomatikong binabago ng app ang hirap batay sa mga sagot.",
+    "vi": "Người dùng tự chọn giảm số lựa chọn để thoải mái; ứng dụng không tự động điều chỉnh độ khó dựa trên câu trả lời.",
+    "zh-Hans": "减少选项由使用者根据舒适度自行控制；应用不会根据答案自动调整难度。"
+  },
   "Choices in personal photo matching": {
     "es": "Opciones al emparejar fotos personales",
     "fil": "Mga pagpipilian sa pagtutugma ng sariling larawan",

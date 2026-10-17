@@ -235,6 +235,7 @@ struct ActivityEvidenceView: View {
                     SectionCard(title: AppLanguage.text("How CareSphere applies this"), systemImage: "hand.raised") {
                         InfoText(AppLanguage.text("Social moment cards are optional everyday scenarios with several reasonable responses. Choose, discuss another option, or skip. There is no right-answer score; no response is saved or sent to a server."))
                         InfoText(AppLanguage.text("Familiar steps, optional hints, fewer choices, and clear stop controls support choice and predictability. Activities run offline. Favorites stay on this device."))
+                        InfoText(AppLanguage.text("Choice reduction is user-controlled for comfort; the app does not automatically adjust difficulty from answers."))
                         InfoText(AppLanguage.text("The activity does not ask for eye contact or expression imitation. Speaking, pointing, reading, or skipping are equally welcome."))
                         Text(AppLanguage.text("Evidence boundary: CareSphere activities have not been clinically tested and do not diagnose, prevent, slow, or treat dementia or autism. Use them for optional enjoyment or conversation, not therapy or assessment."))
                     }

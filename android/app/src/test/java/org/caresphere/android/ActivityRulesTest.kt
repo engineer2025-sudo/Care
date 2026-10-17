@@ -9,5 +9,20 @@ class ActivityRulesTest {
     @Test fun rejectsOutOfRange() { assertNull(ActivityRules.heartRate(byteArrayOf(0,0))); assertNull(ActivityRules.heartRate(byteArrayOf(1,0,1))) }
     @Test fun allActivityAnswersExist() { for (i in 0..3) for (r in 0..100) { val round = ActivityRules.round(i,r); assertTrue(round.answer in round.options.indices); assertTrue(round.hint.isNotBlank()) } }
     @Test fun roundIndexWraps() { assertEquals(ActivityRules.round(0,0),ActivityRules.round(0,ActivityRules.sorting.size)) }
+    @Test fun fullChoiceModeShowsEveryOption() {
+        for (i in 0..3) for (r in 0..100) {
+            val round = ActivityRules.round(i, r)
+            assertEquals(round.options.indices.toList(), round.optionIndices(false))
+        }
+    }
+    @Test fun fewerChoicesKeepsTheAnswerAndShowsTwoOptions() {
+        for (i in 0..3) for (r in 0..100) {
+            val round = ActivityRules.round(i, r)
+            val shown = round.optionIndices(true)
+            assertEquals(2, shown.size)
+            assertTrue(shown.contains(round.answer))
+            assertEquals(shown.sorted(), shown)
+        }
+    }
     @Test fun twelveUniqueActivities() { assertEquals(12,ActivityRules.titles.toSet().size) }
 }
