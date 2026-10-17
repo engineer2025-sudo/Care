@@ -126,6 +126,13 @@ def failure(kind, value, tb):
 
 sys.excepthook = failure
 
+def scroll_to_bottom(rounds=5):
+    size = re.search(r'(\\d+)x(\\d+)', adb('shell','wm','size'))
+    width, height = map(int, size.groups())
+    for _ in range(rounds):
+        adb('shell','input','swipe',str(width//2),str(int(height*.82)),str(width//2),str(int(height*.24)),'300')
+        time.sleep(.3)
+
 def tap(label):
     node = find(label)
     coords = list(map(int, re.findall(r'\d+', node.attrib['bounds'])))
@@ -283,9 +290,8 @@ tap('Sort together')
 tap('Apple')
 find("That fits. Continue when you're ready.")
 tap('Back to activities')
-tap('Find an activity')
-adb('shell','input','text','social%smoment')
-adb('shell','input','keyevent','KEYCODE_ENTER')
+tap('Activities')
+scroll_to_bottom()
 tap('Social moment cards')
 find('Several answers may fit. Choose, reflect, or skip. Nothing is recorded.')
 tap('Move somewhere quieter')
