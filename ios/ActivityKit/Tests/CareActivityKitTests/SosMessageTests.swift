@@ -36,6 +36,12 @@ final class SosMessageTests: XCTestCase {
         XCTAssertEqual(items["text"], message)
     }
 
+    func testDialURLRequiresAUsableNumber() {
+        XCTAssertEqual(SosMessage.dialURL(phone: " (555) 123-4567 ")?.absoluteString, "tel:5551234567")
+        XCTAssertEqual(SosMessage.dialURL(phone: "+1 555 123 4567")?.absoluteString, "tel:+15551234567")
+        XCTAssertNil(SosMessage.dialURL(phone: "12345"))
+    }
+
     func testSetupStepsNameTheContact() {
         let steps = SosMessage.setupSteps(contactName: "Sam")
         XCTAssertEqual(steps.count, 3)

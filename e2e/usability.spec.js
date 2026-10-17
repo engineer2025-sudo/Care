@@ -429,5 +429,8 @@ test('SOS offers a prefilled instant text to the saved contact without claiming 
   expect(body).toContain('CareSphere SOS: I am requesting help. Please check in now.')
   expect(body).not.toMatch(/sent|delivered/)
   await expect(dialog.getByText('Your browser cannot send a text by itself. This opens your messaging app with the message written, and you tap Send.')).toBeVisible()
+  const call = dialog.getByRole('link', { name: 'Call Sam Lee' })
+  await expect(call).toBeVisible()
+  expect(await call.getAttribute('href')).toBe('tel:5551234567')
   await expect(dialog.getByRole('link', { name: /Call 911 Now/ })).toBeVisible()
 })

@@ -37,13 +37,13 @@ The closest legitimate path, and what CareSphere offers:
 
 CareSphere hands the current message (including location if you added it) to Apple Shortcuts, and the Shortcut sends it immediately. The shortcut is yours, lives on your phone, and has no server involvement. CareSphere cannot see whether Shortcuts sent it, so the screen never claims it did.
 
-Without that shortcut, use **Choose how to share** — Messages opens a draft you send yourself.
+Without that shortcut, use **Choose how to share** — Messages opens a draft you send yourself. **Call {name}** dials your contact directly once you confirm the call, which is the fastest alert path Apple allows an app to offer.
 
 ## Web 1.5.0: one tap to your messaging app
 
 A browser cannot send an SMS by itself without a server. With a saved contact, **Emergency SOS** shows **Message {name} now**, which opens your messaging app with the message and location already written. You still tap Send there.
 
-On a computer without a messaging app, use **Share SOS details** to copy the message.
+**Call {name}** opens your phone app. On a computer without a messaging app, use **Share SOS details** to copy the message.
 
 ## What no platform does
 

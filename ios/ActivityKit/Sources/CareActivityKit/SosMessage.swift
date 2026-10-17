@@ -40,6 +40,14 @@ public enum SosMessage {
         return components.url
     }
 
+    public static func dialURL(phone: String) -> URL? {
+        let trimmed = phone.trimmingCharacters(in: .whitespacesAndNewlines)
+        let digits = trimmed.filter { $0.isNumber }
+        guard digits.count >= 7 else { return nil }
+        let prefix = trimmed.hasPrefix("+") ? "+" : ""
+        return URL(string: "tel:\(prefix)\(digits)")
+    }
+
     public static func setupSteps(contactName: String) -> [String] {
         [
             "Open Shortcuts and create a new shortcut.",

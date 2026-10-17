@@ -42,6 +42,13 @@ struct SosView: View {
                                     .frame(maxWidth: .infinity, minHeight: 44)
                             }
                             .buttonStyle(.borderedProminent)
+                            if let callURL = SosMessage.dialURL(phone: store.profile.emergencyContact.phone) {
+                                Link(destination: callURL) {
+                                    Label(AppLanguage.format("Call {0}", [emergencyContactName]), systemImage: "phone.fill")
+                                        .frame(maxWidth: .infinity, minHeight: 44)
+                                }
+                                .buttonStyle(.bordered)
+                            }
                             DisclosureGroup(AppLanguage.text("Set up instant sending (one time)")) {
                                 VStack(alignment: .leading, spacing: 8) {
                                     ForEach(setupSteps.indices, id: \.self) { index in

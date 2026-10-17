@@ -5,7 +5,7 @@ import LanguagePicker from './components/LanguagePicker'
 // Interface text localized; user-authored expressions are intentionally unchanged.
 import { tr } from "./lib/i18n";
 import { BREATH_PHASES, TARGET_CYCLES, startBreathing, tick, cycleCount, stressRoom, supportMessage } from './lib/stressFlow.js';
-import { cleanName, cleanPhone, smsDraftLink, usableContact } from './lib/emergencyContact.js';
+import { cleanName, cleanPhone, smsDraftLink, usableContact, callLink } from './lib/emergencyContact.js';
 import { composeSos, sosSmsHref } from './lib/sosMessage.js';
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
@@ -308,6 +308,13 @@ function SosModal({ open, onClose, contact }) {
             href={sosSmsHref(cleanPhone(contact.phone), composeSos(locState === 'ok' && loc ? { latitude: loc.latitude.toFixed(5), longitude: loc.longitude.toFixed(5), recordedAt: locAt } : null))}
             className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3.5 rounded-2xl text-sm shadow-lg flex items-center justify-center gap-2 transition">
               {tr('Message {0} now', [cleanName(contact.name)])}
+            </a>
+          }
+          {usableContact(contact?.name, contact?.phone) &&
+          <a
+            href={callLink(contact.phone)}
+            className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-2xl text-xs border border-slate-700 transition flex items-center justify-center gap-2">
+              <PhoneCall className="w-4 h-4" />{tr('Call {0}', [cleanName(contact.name)])}
             </a>
           }
           <p className="text-[11px] text-slate-500 leading-relaxed">{tr("Your browser cannot send a text by itself. This opens your messaging app with the message written, and you tap Send.")}</p>
