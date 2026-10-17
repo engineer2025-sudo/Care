@@ -264,6 +264,7 @@ class MainActivity : ProtectedActivity() {
     private fun activities() {
         text(tx("Make room for a pause."), 30f, bold = true)
         copy(tx("Find something you enjoy. Save a favorite for next time. No scores, streaks, or pressure to finish."))
+        button(tx("Research & how CareSphere works")) { activityIndex = -2; render() }
         lateinit var results: LinearLayout
         searchField("Find an activity", activityQuery) { activityQuery = it; activityResults(results) }
         val only = CheckBox(this).apply {
@@ -273,7 +274,6 @@ class MainActivity : ProtectedActivity() {
         results = column(); activityResults(results)
         card(tx("Why these activities?")) { c ->
             copy(tx("Predictable steps, personal choice, and reduced sensory pressure draw on accessibility and wellbeing guidance. These individual games are not clinically validated dementia or autism treatments, cognitive stimulation therapy, or diagnostic tests."), parent = c)
-            button(tx("Research & how CareSphere works"), c) { activityIndex = -2; render() }
             button(tx("Read NICE dementia guidance"), c) { openURL("https://www.nice.org.uk/guidance/ng97/chapter/recommendations") }
             button(tx("Read NICE autistic-adult guidance"), c) { openURL("https://www.nice.org.uk/guidance/cg142/chapter/recommendations") }
         }
