@@ -78,32 +78,30 @@ struct OpenCareSphereVisitPrepIntent: AppIntent {
 
 struct CareSphereAppShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
-        [
-            AppShortcut(
-                intent: OpenCareSphereTodayIntent(),
-                phrases: ["Open Today in \\(.applicationName)", "Show my day in \\(.applicationName)"],
-                shortTitle: "Open Today",
-                systemImageName: "sun.max"),
-            AppShortcut(
-                intent: OpenCareSphereActivitiesIntent(),
-                phrases: ["Open activities in \\(.applicationName)", "Show activities in \\(.applicationName)"],
-                shortTitle: "Activities",
-                systemImageName: "square.grid.2x2"),
-            AppShortcut(
-                intent: OpenCareSphereBreathingIntent(),
-                phrases: ["Open paced breathing in \\(.applicationName)", "Show a breathing pause in \\(.applicationName)"],
-                shortTitle: "Breathing Pause",
-                systemImageName: "wind"),
-            AppShortcut(
-                intent: OpenCareSphereMoodCheckInIntent(),
-                phrases: ["Open my mood check-in in \\(.applicationName)", "Check in with my mood in \\(.applicationName)"],
-                shortTitle: "Mood Check-In",
-                systemImageName: "face.smiling"),
-            AppShortcut(
-                intent: OpenCareSphereVisitPrepIntent(),
-                phrases: ["Prepare for a visit in \\(.applicationName)", "Open visit preparation in \\(.applicationName)"],
-                shortTitle: "Visit Preparation",
-                systemImageName: "doc.text")
-        ]
+        AppShortcut(
+            intent: OpenCareSphereTodayIntent(),
+            phrases: ["Open Today in \\(.applicationName)", "Show my day in \\(.applicationName)"],
+            shortTitle: "Open Today",
+            systemImageName: "sun.max")
+        AppShortcut(
+            intent: OpenCareSphereActivitiesIntent(),
+            phrases: ["Open activities in \\(.applicationName)", "Show activities in \\(.applicationName)"],
+            shortTitle: "Activities",
+            systemImageName: "square.grid.2x2")
+        AppShortcut(
+            intent: OpenCareSphereBreathingIntent(),
+            phrases: ["Open paced breathing in \\(.applicationName)", "Show a breathing pause in \\(.applicationName)"],
+            shortTitle: "Breathing Pause",
+            systemImageName: "wind")
+        AppShortcut(
+            intent: OpenCareSphereMoodCheckInIntent(),
+            phrases: ["Open my mood check-in in \\(.applicationName)", "Check in with my mood in \\(.applicationName)"],
+            shortTitle: "Mood Check-In",
+            systemImageName: "face.smiling")
+        AppShortcut(
+            intent: OpenCareSphereVisitPrepIntent(),
+            phrases: ["Prepare for a visit in \\(.applicationName)", "Open visit preparation in \\(.applicationName)"],
+            shortTitle: "Visit Preparation",
+            systemImageName: "doc.text")
     }
 }
