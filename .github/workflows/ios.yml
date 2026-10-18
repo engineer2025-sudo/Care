@@ -52,7 +52,11 @@ jobs:
         if: failure()
         run: |
           for log in /tmp/device.log /tmp/healthkit.log /tmp/simulator.log; do
-            if [ -f "$log" ]; then grep -E 'error:|warning:' "$log" | tail -80 | sed 's/^/::error::/' || true; fi
+            if [ -f "$log" ]; then
+              echo "::group::Last 40 lines of $log"
+              tail -40 "$log" | while IFS= read -r line; do echo "::error::$line"; done
+              echo '::endgroup::'
+            fi
           done
       - name: Upload logs and launch screenshot
         if: always()

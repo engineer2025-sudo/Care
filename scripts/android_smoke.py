@@ -161,7 +161,15 @@ adb('uninstall',package+'.test')
 def enter_system_test_pin():
         deadline=time.monotonic()+30
         while time.monotonic()<deadline:
-            fields=[n for n in screen().iter('node') if n.attrib.get('class')=='android.widget.EditText' and n.attrib.get('package')!=package]
+            tree = screen()
+            anr = next((n for n in tree.iter('node') if "isn't responding" in n.attrib.get('text', '')), None)
+            if anr is not None:
+                wait_btn = next((n for n in tree.iter('node') if n.attrib.get('text', '') == 'Wait'), None)
+                if wait_btn is not None:
+                    tap_node(wait_btn)
+                    time.sleep(2)
+                    continue
+            fields=[n for n in tree.iter('node') if n.attrib.get('class')=='android.widget.EditText' and n.attrib.get('package')!=package]
             if fields:
                 x1,y1,x2,y2=map(int,re.findall(r'\d+',fields[0].attrib['bounds']))
                 adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
