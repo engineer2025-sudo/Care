@@ -52,13 +52,16 @@ jobs:
         if: failure()
         run: |
           python3 - <<'PY'
+          import re
           from pathlib import Path
           for name in ('device', 'healthkit', 'simulator'):
               path = Path(f'/tmp/{name}.log')
               if path.exists():
-                  excerpt = '\n'.join(path.read_text(errors='replace').splitlines()[-120:])
+                  lines = path.read_text(errors='replace').splitlines()
+                  diagnostics = [line for line in lines if re.search(r'error:|fatal error:|Command .* failed|BUILD FAILED|killed|signal [0-9]+', line, re.IGNORECASE)]
+                  excerpt = '\n'.join(['MATCHED DIAGNOSTICS:', *diagnostics[-60:], 'LOG TAIL:', *lines[-80:]])
                   message = excerpt.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
-                  print(f'::error title={name} build log tail::{message}')
+                  print(f'::error title={name} build log::{message}')
           PY
       - name: Upload logs and launch screenshot
         if: always()
