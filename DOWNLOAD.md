@@ -2,11 +2,11 @@
 
 ## Downloads for the October 18, 2026 source update
 
-- [**CareSphere-Mobile-Source-3.8.0-1.9.0.zip**](https://github.com/engineer2025-sudo/Care/releases/download/caresphere-mobile-3.8.0-1.9.0/CareSphere-Mobile-Source-3.8.0-1.9.0.zip) — iPhone 3.8.0 (17) Xcode source, Android 1.9.0 (11) source, local activity package, translations, tests, and installation guides.
-- [**SHA-256 checksum**](https://github.com/engineer2025-sudo/Care/releases/download/caresphere-mobile-3.8.0-1.9.0/CareSphere-Mobile-Source-3.8.0-1.9.0.zip.sha256)
+- [**CareSphere source ZIP**](https://github.com/engineer2025-sudo/Care/archive/refs/tags/caresphere-mobile-3.8.0-1.9.0.zip) — GitHub-generated archive of the complete repository at the October 18 release tag, including iPhone 3.8.0 (17), Android 1.9.0 (11), web 1.5.1, shared translations, tests, and guides.
+- [**Release page**](https://github.com/engineer2025-sudo/Care/releases/tag/caresphere-mobile-3.8.0-1.9.0) — notes and CI validation.
 - **CareSphere-Web-1.5.1.zip** — deployable production website plus source, tests, and setup instructions. No `node_modules` or personal data included.
 
-The mobile asset is source code, not an installer. GitHub Actions passed for web checks, the Android Gradle/emulator workflow, and iOS logic/device/HealthKit/Simulator builds; see [run links and verification details](docs/release-2026-10-18.md). No signed iOS IPA or production-signed Android installer is included. The source projects require a Mac/Xcode and Android Studio/JDK to build locally.
+The source ZIP is code, not an installer. GitHub Actions passed for web checks, the Android Gradle/emulator workflow, and iOS logic/device/HealthKit/Simulator builds; see [run links and verification details](docs/release-2026-10-18.md). No signed iOS IPA or production-signed Android installer is included. The source projects require a Mac/Xcode and Android Studio/JDK to build locally.
 
 ## Languages
 
