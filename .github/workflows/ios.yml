@@ -32,15 +32,15 @@ jobs:
       - name: Build physical iPhone target without signing
         run: |
           set -o pipefail
-          xcodebuild -project ios/CareSphere.xcodeproj -scheme CareSphere -destination 'generic/platform=iOS' -derivedDataPath /tmp/device-build CODE_SIGNING_ALLOWED=NO build 2>&1 | tee /tmp/device.log | tail -60
+          xcodebuild -project ios/CareSphere.xcodeproj -scheme CareSphere -destination 'generic/platform=iOS' -derivedDataPath /tmp/device-build -jobs 1 CODE_SIGNING_ALLOWED=NO build 2>&1 | tee /tmp/device.log | tail -60
       - name: Build optional HealthKit configuration
         run: |
           set -o pipefail
-          xcodebuild -project ios/CareSphere.xcodeproj -scheme CareSphere-HealthKit -configuration Debug-HealthKit -destination 'generic/platform=iOS' -derivedDataPath /tmp/device-build CODE_SIGNING_ALLOWED=NO build 2>&1 | tee /tmp/healthkit.log | tail -40
+          xcodebuild -project ios/CareSphere.xcodeproj -scheme CareSphere-HealthKit -configuration Debug-HealthKit -destination 'generic/platform=iOS' -derivedDataPath /tmp/device-build -jobs 1 CODE_SIGNING_ALLOWED=NO build 2>&1 | tee /tmp/healthkit.log | tail -40
       - name: Build and launch iPhone Simulator
         run: |
           set -o pipefail
-          xcodebuild -project ios/CareSphere.xcodeproj -scheme CareSphere -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/simulator-build CODE_SIGNING_ALLOWED=NO build 2>&1 | tee /tmp/simulator.log | tail -40
+          xcodebuild -project ios/CareSphere.xcodeproj -scheme CareSphere -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/simulator-build -jobs 1 CODE_SIGNING_ALLOWED=NO build 2>&1 | tee /tmp/simulator.log | tail -40
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for group in d["devices"].values() for x in group if "iPhone" in x["name"]))')
           xcrun simctl boot "$DEVICE"
           xcrun simctl bootstatus "$DEVICE" -b
