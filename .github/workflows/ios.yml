@@ -51,13 +51,15 @@ jobs:
       - name: Surface native compiler diagnostics
         if: failure()
         run: |
-          for log in /tmp/device.log /tmp/healthkit.log /tmp/simulator.log; do
-            if [ -f "$log" ]; then
-              echo "::group::Last 40 lines of $log"
-              tail -40 "$log" | while IFS= read -r line; do echo "::error::$line"; done
-              echo '::endgroup::'
-            fi
-          done
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ('device', 'healthkit', 'simulator'):
+              path = Path(f'/tmp/{name}.log')
+              if path.exists():
+                  excerpt = '\n'.join(path.read_text(errors='replace').splitlines()[-120:])
+                  message = excerpt.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                  print(f'::error title={name} build log tail::{message}')
+          PY
       - name: Upload logs and launch screenshot
         if: always()
         uses: actions/upload-artifact@v7
