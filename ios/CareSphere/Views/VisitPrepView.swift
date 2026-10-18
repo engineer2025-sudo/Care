@@ -349,7 +349,7 @@ private enum VisitPrepPDFRenderer {
                     ("CARESPHERE  ·  PERSONAL CARE TOOLS" as NSString).draw(at: CGPoint(x: 105, y: 49), withAttributes: brandAttrs)
                     let eyebrowAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 8, weight: .bold), .foregroundColor: UIColor.white.withAlphaComponent(0.8)]
                     ("VISIT PREPARATION" as NSString).draw(at: CGPoint(x: 52, y: 101), withAttributes: eyebrowAttrs)
-                    let titleAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 29, weight: .bold), .foregroundColor: .white]
+                    let titleAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 29, weight: .bold), .foregroundColor: UIColor.white]
                     ("Care visit preparation" as NSString).draw(at: CGPoint(x: 52, y: 120), withAttributes: titleAttrs)
                     let subtitleAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 10), .foregroundColor: UIColor.white.withAlphaComponent(0.86)]
                     ("A personal briefing made from the items you chose." as NSString).draw(at: CGPoint(x: 53, y: 161), withAttributes: subtitleAttrs)
