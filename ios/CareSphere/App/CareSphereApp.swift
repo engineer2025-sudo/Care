@@ -33,6 +33,7 @@ struct CareSphereApp: App {
     }
 
     init() {
+        _pendingShortcutRoute = State(initialValue: CareSphereShortcutRoute.pending())
         NotificationService.shared.registerCategories()
     }
 
@@ -46,6 +47,7 @@ struct CareSphereApp: App {
                 } else {
                     RootTabView(shortcutRoute: pendingShortcutRoute) {
                         pendingShortcutRoute = nil
+                        CareSphereShortcutRoute.clear()
                     }
                 }
             }
@@ -105,7 +107,12 @@ struct CareSphereApp: App {
             }
             .onChange(of: scenePhase) { phase in
                 careSupport.setAppActive(phase == .active)
-                if phase == .active { localAssistant.refreshAvailability() }
+                if phase == .active {
+                    localAssistant.refreshAvailability()
+                    if pendingShortcutRoute == nil {
+                        pendingShortcutRoute = CareSphereShortcutRoute.pending()
+                    }
+                }
                 if phase == .active && steps.hasStarted { steps.start() }
                 if phase == .active && healthKit.hasRequestedAuthorization {
                     healthKit.refreshAll()

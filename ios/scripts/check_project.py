@@ -47,7 +47,7 @@ if 'caresphere' not in url_schemes:
     errors.append('Missing CareSphere Siri/App Shortcuts URL route')
 intent_source = (root / 'CareSphere/Services/CareSphereIntents.swift').read_text()
 for route in ['today', 'activities', 'breathing', 'mood', 'visit-prep']:
-    if f'CareSphereShortcutURL.make("{route}")' not in intent_source:
+    if f'CareSphereShortcutRoute.store("{route}")' not in intent_source:
         errors.append(f'Missing Siri/App Shortcut route: {route}')
 if 'AppShortcutsProvider' not in intent_source:
     errors.append('Missing CareSphere App Shortcuts registration')

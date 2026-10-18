@@ -164,7 +164,7 @@ test('visit preparation creates a polished print-to-PDF report with an integrity
   await expect(report.getByText(/Electronic integrity stamp/)).toBeVisible()
   await expect(report.locator('.fingerprint')).toHaveText(/^[a-f0-9]{64}$/)
   await expect(report.getByText(/not a clinician credential, PDF signature, or proof of identity/)).toBeVisible()
-  await expect(report.getByText(/Ask about follow-up timing\./)).toBeVisible()
+  await expect(report.locator('.reverse-side').getByText(/Ask about follow-up timing\./)).toBeVisible()
 })
 
 test('health has no generated reading controls or demo exports', async ({ page }) => {
