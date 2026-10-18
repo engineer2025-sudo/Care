@@ -1,0 +1,103 @@
+name: Android Build
+on:
+  push:
+    branches: ['arena/**', main]
+    paths: ['localization/**', 'scripts/generate_localizations.py', 'android/**', 'scripts/android_smoke.py', '.github/workflows/android.yml']
+  pull_request:
+    paths: ['localization/**', 'scripts/generate_localizations.py', 'android/**', 'scripts/android_smoke.py', '.github/workflows/android.yml']
+  workflow_dispatch:
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check offline translation catalogs
+        run: python3 scripts/generate_localizations.py --check
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Use preinstalled Android SDK
+        run: |
+          test -d "$ANDROID_HOME"
+          echo "SDK: $ANDROID_HOME"
+          ls "$ANDROID_HOME/platforms"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build APK, test rules and lint
+        working-directory: android
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest 2>&1 | tee /tmp/android-build.log
+      - name: Verify APK signing
+        run: |
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Enable hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install and exercise Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_2
+          disable-animations: true
+          script: python3 scripts/android_smoke.py
+      # Mirror this CI output through the GitHub API for download clients that
+      # cannot reach Azure artifact URLs. No ref, branch or commit is created.
+      - name: Prepare API-downloadable APK
+        if: success() && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/arena/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, os, subprocess
+          from pathlib import Path
+          apk = Path('android/app/build/outputs/apk/debug/app-debug.apk').read_bytes()
+          request = json.dumps({'content':base64.b64encode(apk).decode(), 'encoding':'base64'})
+          blob = json.loads(subprocess.check_output(['gh','api','--method','POST','repos/'+os.environ['GITHUB_REPOSITORY']+'/git/blobs','--input','-'], input=request, text=True))
+          print('::notice title=Verified Android APK::git_blob=' + blob['sha'] + '; sha256=' + hashlib.sha256(apk).hexdigest() + '; bytes=' + str(len(apk)))
+          picture = Path('/tmp/android-smoke/health-dark.png')
+          if picture.exists():
+              body = json.dumps({'content':base64.b64encode(picture.read_bytes()).decode(), 'encoding':'base64'})
+              image = json.loads(subprocess.check_output(['gh','api','--method','POST','repos/'+os.environ['GITHUB_REPOSITORY']+'/git/blobs','--input','-'], input=body, text=True))
+              print('::notice title=Android screenshot::git_blob=' + image['sha'])
+          PY
+      - name: Surface compiler and lint errors
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import glob
+          import re
+          from pathlib import Path
+          chunks = []
+          for report in glob.glob('android/app/build/test-results/testDebugUnitTest/*.xml'):
+              text = Path(report).read_text()
+              for m in re.finditer(r'<testcase name="([^"]+)"[^>]*>\s*<(failure|error)[^>]*message="([^"]*)"', text):
+                  chunks.append(f'TEST FAIL {m.group(1)}: {m.group(3)[:400]}')
+          p = Path('/tmp/android-build.log')
+          if p.exists():
+              lines = p.read_text().splitlines()
+              errors = [l for l in lines if re.search(r':\d+: (Error|Warning)|\be: |\berror:|Could not (find|resolve)', l)]
+              key = [l for l in lines if re.search(r'\be: |\berror:|Error:|FAILED|FAILURE|What went wrong|Caused by|Execution failed|lint found|AssertionError|Could not (find|resolve)', l)]
+              chosen = (errors[-30:] if errors else []) + [l for l in key if l not in errors][-30:]
+              if not chosen:
+                  chosen = [l for l in lines if not l.startswith('w:')][-40:]
+              chunks.append('\n'.join(chosen))
+          detail = '\n'.join(chunks)[-3600:] or 'Build failed without captured output.'
+          print('::error title=Android build::' + detail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: CareSphere-Android
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/reports/
+            android/app/build/test-results/
+            /tmp/android-smoke/

@@ -12,7 +12,7 @@ CareSphere's support flow is a simple, user-controlled sequence. It does not rel
 ## Contact and video limits
 
 - CareSphere has no remote caregiver account, push service, or delivery acknowledgement. The **Text** action opens an iOS Messages composer with the saved contact and a short support message; the user must review and tap Send. CareSphere does not send texts silently or claim that a message was delivered or read.
-- A per-flow Jitsi room is created for an optional in-app video call. A caregiver can join from the link in the message. Jitsi rooms are not hosted or moderated by CareSphere; anyone with the link may join. Share only with the intended person.
+- A per-flow Jitsi room link is created for an optional external-provider/browser video call. A caregiver can join from the link in the message. Jitsi rooms are not hosted or moderated by CareSphere; anyone with the link may join. Share only with the intended person.
 - Emergency calls, Messages, and video require the person's explicit tap. A local prompt is not a substitute for emergency services or a clinician.
 
 The flow reads only the specific question submitted to Health Guide and an explicitly enabled, paired live heart-rate sensor. It does not scan social media, Messages, or other apps. Verify all thresholds, false-positive behavior, localization, emergency contacts, and Jitsi permissions on supported iPhones before release.

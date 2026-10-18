@@ -1,10 +1,7 @@
 import Foundation
 import AVFoundation
 
-/// Procedural sensory soundscapes (rain, ocean, forest, hearth) rendered in
-/// real time by an AVAudioEngine + AVAudioSourceNode render callback — the
-/// official iOS equivalent of the web app's Web Audio engine. No audio files;
-/// all DSP is generated sample-by-sample.
+
 final class SoundScapeEngine {
     static let shared = SoundScapeEngine()
 
@@ -36,7 +33,7 @@ final class SoundScapeEngine {
     private var isRunning = false
     private var sourceInstalled = false
 
-    // ── DSP state (touched only on the render thread under stateLock) ──
+    // Touched only on the render thread under stateLock.
     private var rngState: UInt32 = 0x9E3779B9
     private var lpFast: Float = 0        // ~1.3 kHz one-pole (rain)
     private var lpSlow: Float = 0        // ~430 Hz one-pole (band split)
@@ -59,11 +56,18 @@ final class SoundScapeEngine {
 
     // MARK: Public control
 
-    func play(_ sound: SoundId) {
+    @discardableResult
+    func play(_ sound: SoundId) -> Bool {
         stateLock.lock()
         currentSound = sound
         stateLock.unlock()
-        startEngineIfNeeded()
+        guard startEngineIfNeeded() else {
+            stateLock.lock()
+            currentSound = nil
+            stateLock.unlock()
+            return false
+        }
+        return true
     }
 
     func stop() {
@@ -79,31 +83,38 @@ final class SoundScapeEngine {
 
     // MARK: Engine
 
-    private func startEngineIfNeeded() {
-        guard !isRunning else { return }
-        #if os(iOS)
-        try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
-        try? AVAudioSession.sharedInstance().setActive(true)
-        #endif
-
-        guard let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1) else { return }
-        let source = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
-            guard let self else { return noErr }
-            self.render(Int(frameCount), into: audioBufferList)
-            return noErr
-        }
-        engine.attach(source)
-        engine.connect(source, to: engine.mainMixerNode, format: format)
+    private func startEngineIfNeeded() -> Bool {
+        if engine.isRunning { return true }
         do {
+            #if os(iOS)
+            try AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+            #endif
+
+            // Stopping AVAudioEngine retains its attached nodes. Reusing the
+            // source prevents each Play/Stop cycle from adding another stream.
+            if !sourceInstalled {
+                guard let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1) else { return false }
+                let source = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
+                    guard let self else { return noErr }
+                    self.render(Int(frameCount), into: audioBufferList)
+                    return noErr
+                }
+                engine.attach(source)
+                engine.connect(source, to: engine.mainMixerNode, format: format)
+                sourceInstalled = true
+            }
             try engine.start()
             isRunning = true
+            return true
         } catch {
             isRunning = false
+            engine.stop()
+            return false
         }
     }
 
     private func rand() -> Float {
-        // xorshift32 — fast, deterministic enough for noise synthesis.
         var x = rngState
         x ^= x << 13
         x ^= x >> 17
@@ -147,7 +158,7 @@ final class SoundScapeEngine {
                         chirpNotesLeft = 2 + Int(rand() * 1.5 + 1.5)   // 2–4 notes
                         chirpBase = 2200 + rand() * 900
                         framesToNextNote = 0
-                        framesToNextChirp = Int(sampleRate * (2.2 + rand() * 4.8))
+                        framesToNextChirp = Int(sampleRate * (2.2 + (rand() + 1) * 2.4))
                     }
                 }
                 if chirpNotesLeft > 0 {
@@ -168,7 +179,7 @@ final class SoundScapeEngine {
             case .fire:
                 brown = (brown + 0.022 * white) * 0.996
                 out = brown * 2.6
-                if rand() < 1.0 / 9000.0 {
+                if (rand() + 1) * 0.5 < 1.0 / 9000.0 {
                     crackleEnv = 1
                     crackleFreq = 1200 + (rand() + 1) * 1200
                 }

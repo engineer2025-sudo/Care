@@ -1,0 +1,27 @@
+{
+  "password": "public café test phrase",
+  "payload": {
+    "version": 1,
+    "id": "78e15360-2e79-4a55-bf55-181543f048c3",
+    "records": [
+      {
+        "id": "n:fixture",
+        "type": "note",
+        "text": "Transfer fixture — café"
+      },
+      {
+        "id": "r:fixture",
+        "type": "routine",
+        "text": "Open curtains"
+      }
+    ]
+  },
+  "envelope": {
+    "format": "CareSphere Transfer",
+    "version": 1,
+    "iterations": 310000,
+    "salt": "4lRjgRtUV5MsQxHd+p0TQg==",
+    "iv": "F23STE4ZKxOc/Wqo",
+    "ciphertext": "pOMlbxN0aHWnpwPqlvSzzSUTxS0TE+1DZeFJhqTKAWlT8aqscs5TsHa6Ib6gljPjU3/qQa7N93MwxOeGgsvSD3MV1N/qFdHAiQ2KmzUih0ylf7yAOXakM6Fbq4hqO7fZiFVLxwtrhGE1ubhS8C/Nm5A2fahr/7gBwmSarhV5f0ELnprJRYwJimQpa+0hZcf4kOMzTKD7ulZrkw2a3OsCN7SHpOb3NN0Vd/4sDpfgwIdXcKwb3XwXMO5wTCeQaLFEL5xMgrgybxUQAsGp088uHf4O4As+"
+  }
+}

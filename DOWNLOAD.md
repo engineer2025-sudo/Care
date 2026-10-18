@@ -1,73 +1,63 @@
-# CareSphere iOS build and setup
+# Install CareSphere
 
-CareSphere's native development target and build pipeline are **iOS only**. Earlier macOS release artifacts are archived and are not a current product target. The separate web PWA remains available from the repository's web source.
+## Downloads for the October 18, 2026 source update
 
-There is **no public App Store, TestFlight, or signed `.ipa` download**. CareSphere for iOS is a native SwiftUI app, not a web wrapper. The CI artifact is an unsigned compile check; it cannot be installed on an iPhone by opening the artifact.
+- **CareSphere-Mobile-Source-3.8.0-1.9.0.zip** — updated iPhone 3.8.0 (17) Xcode source and Android 1.9.0 (11) source, local activity package, translations, tests, and installation guides. This is source, not a signed installer.
+- **CareSphere-Web-1.5.1.zip** — deployable production website plus source, tests, and setup instructions. No `node_modules` or personal data included.
 
-## Install the native development build on your iPhone
+Each archive has a `.sha256` checksum. **No signed IPA, APK, or native compile verification is included in this update.** The iOS and Android source changes require a Mac/Xcode and Android Studio/JDK respectively; use the platform guides below. The ZIPs are built from this workspace revision, not a successful native CI release. See [release notes and validation](docs/release-2026-10-18.md).
 
-You need a Mac with Xcode, your iPhone, and a cable (wireless device debugging can be enabled later). Keep the phone unlocked and tap **Trust This Computer** if prompted.
+## Languages
 
-1. Install Xcode and XcodeGen (`brew install xcodegen`).
-2. Clone the development branch on your Mac (or use your existing checkout), then generate and open the native project:
-   ```bash
-   git clone --branch arena/01a0626b-care https://github.com/engineer2025-sudo/Care.git
-   cd Care/ios
-   xcodegen generate
-   open CareSphere.xcodeproj
-   ```
-3. In Xcode, choose the **CareSphere** scheme and select your connected iPhone as the run destination.
-4. Select the **CareSphere** target → **Signing & Capabilities**. Turn on **Automatically manage signing** and select your Apple development team. If Xcode says the bundle identifier is unavailable, set a unique identifier under **General → Identity**.
-5. Press **Run** (⌘R). Wait for Xcode to resolve Swift packages on the first build. If the iPhone requests **Developer Mode**, enable it under **Settings → Privacy & Security**, restart, and confirm. If iOS asks you to trust the developer, follow the on-device prompt.
-6. Finish CareSphere onboarding. On the permissions step, tap the Apple Health row to request read-only access, or open **Vitals → Enable**. Review the requested categories in Apple Health if no records appear.
+Use **Settings → App language** for English, Español, 中文（简体）, Filipino / Tagalog or Tiếng Việt. The iPhone setup wizard also has a globe picker. Core interface translation is offline; some advanced content remains English. Notes and records keep their original language. See [coverage and limitations](docs/languages.md).
 
-**Use a connected physical iPhone.** The current `llama.cpp` package does not provide an iOS Simulator slice. If Xcode reports `While building for iOS Simulator, no library for this platform was found in llama.xcframework`, select the connected iPhone instead; don't change the package or try to install a simulator build on the phone.
+## Android
 
-The project requests HealthKit plus background delivery, so Xcode signing must support those capabilities. A free **Personal Team** can install development apps on a registered iPhone, but Apple says its provisioning expires after 7 days, requiring a rebuild and reinstall. HealthKit/background-delivery entitlement availability depends on the team; if Xcode reports that your team or provisioning profile does not support HealthKit, you need an eligible Apple Developer team. [Apple's account guide](https://developer.apple.com/help/account/basics/about-your-developer-account) explains Personal Team provisioning limits and membership requirements.
+**Samsung Galaxy:** this source update does not include an APK. Build your own from the Android source below, then follow the [Samsung-specific installation guide](docs/samsung-install.md), including Auto Blocker and installation/update precautions.
 
-CareSphere asks for read-only Apple Health access but cannot tell whether read access was denied; an empty list may also mean no matching Health records exist. Garmin workouts must first sync from Garmin Connect to Apple Health on the iPhone.
+[Complete feature checklist](docs/feature-checklist.md) · [Current source-update validation](docs/release-2026-10-18.md)
 
-## Optional iOS features
-
-### On-device Health Guide
-
-The Guide can use an optional **Qwen2.5 1.5B Instruct GGUF** model (about 1.1 GB), source-linked MedlinePlus references, and local summaries. Model weights are not bundled; downloading or importing a model is optional. This is general health education, not diagnosis, emergency triage, drug-interaction checking, or dosing advice. A local phrase-based safety gate runs before reference search and model inference for a narrow set of self-harm and possible-poisoning phrases; it is not a validated or complete crisis detector.
-
-### Optional local Kiwix/Wikipedia ZIM bridge
-
-CareSphere does not download or duplicate your ZIM archive. The iOS app can query the separately running Kiwix server on your trusted private network; the archive stays where it already lives. Do not port-forward the server.
-
-On the Mac or other computer that holds the `.zim` file:
+To build a local development APK, open `android/` in Android Studio with JDK 17, install SDK 36 components, then build/run. Or use:
 
 ```bash
-brew install kiwix-tools
-kiwix-serve --port=8080 --address=0.0.0.0 "/path/to/your-library.zim"
+cd android
+./gradlew testDebugUnitTest lintDebug assembleDebug
 ```
 
-Then open **Guide → Connect your Wikipedia ZIM** in CareSphere:
+The resulting local `app-debug.apk` is a debuggable development build, not a Play Store release. These native build commands were not run for this update; Java/Gradle compilation was unavailable here. Use your own protected release-signing key for production. See [Android guide](android/README.md).
 
-- Use the `.zim` content name, usually the filename without `.zim`.
-- Enter the host computer's private Wi-Fi address, such as `http://MacBook.local:8080`, with both devices on the same trusted Wi-Fi.
-- Binding to `0.0.0.0` lets other devices on the network reach Kiwix. Keep the host firewall enabled and do not configure router port forwarding.
+## iPhone
 
-CareSphere rejects non-local Kiwix hosts; it does not send the archive or searches to Wikipedia or a cloud AI. The iOS app needs local-network permission. Keep the existing Kiwix bridge separate; CareSphere does not bundle or link CoreKiwix.
+The mobile source ZIP includes the iPhone project, but is **source code**, not a signed installer. It cannot install from iPhone Files.
 
-### Optional Kokoro neural speech
+1. Unzip the whole folder on a Mac and open `ios/CareSphere.xcodeproj`.
+2. Use Xcode 26+ for Apple Intelligence support. The baseline app supports iOS 16+ and can compile with Xcode 16+, but your Xcode must support your phone's installed OS.
+3. First select **CareSphere → iPhone Simulator → Run**. No Apple signing credential is needed.
+4. For your phone, select the connected iPhone, your own signing team, and **Automatically manage signing**, then Run. Trust the Mac and enable Developer Mode if requested.
+5. The standard scheme has no HealthKit capability requirement. For optional read-only Apple Health, select **CareSphere-HealthKit** with an eligible profile/team.
 
-Apple voices remain the default. In Settings, choose **Download Kokoro English voices** to install the optional int8 English v0.19 pack (~158 MB / 151 MiB compressed; allow about 250 MB free while installing). The [pack](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-Kokoro-Int8-En-v0.19.zip) and its [SHA-256 file](https://github.com/engineer2025-sudo/Care/releases/download/mac-v2.1.0/CareSphere-Kokoro-Int8-En-v0.19.zip.sha256) are legacy release assets. Kokoro weights are Apache-2.0; included eSpeak-NG pronunciation data is GPL-3.0, and both license notices ship in the archive. Speech is synthesized on-device; generated audio is not uploaded. Scheduled iOS notifications use the system notification sound while the app is closed; they do not speak the selected neural voice in the background.
+There are no remote Swift packages to retrieve. Keep `ios/ActivityKit/` with the project. No XcodeGen step is needed. If codesign repeatedly asks for a password or you still see retrieval errors, follow [the signing and keychain guide](docs/signing-troubleshooting.md); do not keep guessing passwords.
 
-### Bluetooth heart-rate monitors
+Apple Intelligence in the app requires iOS 26+, eligible hardware, Apple Intelligence enabled and its model ready. It never runs on Android. On unsupported iPhones, references and all activities still work; there is no fake AI fallback.
 
-On a supported Garmin watch, enable **Broadcast Heart Rate**, keep the broadcast screen open, then choose **Vitals → Pair** in CareSphere. This is a direct Bluetooth LE connection to the standard Heart Rate profile—not a Garmin Connect cloud/API integration. Menu names and support vary by model and firmware. Turn off broadcasting afterward to conserve battery.
+See [iPhone guide](ios/README.md). No App Store/TestFlight/signed IPA release is provided. Automated compile/tests are not physical-device verification.
 
-## Optional support check-ins and safety
+## Web
 
-- Heart-rate check-ins are off by default and must be enabled in **Settings → Support check-ins**. They use fresh paired Bluetooth readings only while CareSphere is foregrounded and unlocked; sustained high readings offer a self-check, not a diagnosis or alert. Activity can raise heart rate.
-- A person may choose **I'm stressed** on Overview and follow a short paced-breathing exercise. The app does not measure breathing with the microphone or camera.
-- A possible self-harm or poisoning phrase in Health Guide gets a short, fixed response before search or model inference. The filter is limited and may miss messages; it does not provide clinical triage.
-- CareSphere has no remote caregiver account, push service, or delivery acknowledgement. A text action opens the iOS Messages composer, and the person must review and tap **Send**. Jitsi video is optional; anyone with the room link may join.
-- The app does not scan social media, Messages, or other apps, and it never silently sends a caregiver message or claims delivery.
+Unzip **CareSphere-Web-1.5.1.zip**. For local development run `npm ci` then `npm run dev` (Node.js 20.19+ or 22.12+). To host the prepared build, upload the **contents** of `production/` to a static HTTPS site's root. Do not double-click `index.html`: browser encryption, service workers and Bluetooth need a proper secure origin.
 
-## Privacy and safety
+Offline routines, notes and activities work after the first completed online installation. Video, external references and new downloads still need internet. Web Bluetooth is browser-dependent and is not supported in iPhone Safari; use the native iPhone app for BLE. See [web deployment](docs/web-deployment.md).
 
-Care data is stored locally on the device with encrypted storage and iOS file protection. Optional downloads are user-initiated. Health readings retain their source labels; CareSphere is not a medical device and does not replace a clinician or emergency services. Medication reminders require a schedule you enter and explicitly confirm. The app does not prescribe, verify doses, check interactions, or confirm that a dose was taken.
+## Share between devices without a backend
+
+Both people open **My support tools → Device sharing**. The sender selects notes/routines, enters a unique passphrase, reviews the selection, then uses the share sheet or saves the encrypted file. The recipient chooses that file, enters the passphrase provided separately, previews it and selects copies to import. Full backups are for same-platform recovery, not cross-platform transfers.
+
+For direct native app-to-app transfer on all three phone pairings, join the same private Wi-Fi/hotspot, choose **Offer to a nearby device** on the sender, and enter its address/code in **Connect to a nearby device** on the recipient (iPhone: **Connect and receive encrypted copy**). No hosted service or internet is required. Keep both apps open; offers expire after five minutes. Use **Find nearby devices** to select the sender’s offer label without typing an address. Manual address/code entry remains available when discovery is blocked.
+
+Alternatively, use AirDrop on compatible Apple devices, Quick Share where available on Android, or another file-transfer method you choose. CareSphere does not implement direct Bluetooth pairing or silent live sync. A received copy cannot be remotely revoked. See [step-by-step sharing](docs/device-sharing.md) and [all personal tools](docs/personal-tools.md).
+
+## Real data and safety
+
+No generated heart-rate, oxygen, or blood-pressure values. Missing data stays blank. Only user-entered care records are saved; fresh installs have no pretend people, medications, or notes. Existing data is preserved until you explicitly erase it in Settings.
+
+Activities are optional wellbeing/practice, not validated dementia/autism treatments. CareSphere is not a medical device and does not provide diagnosis, dosing or emergency monitoring. Never trigger real emergency calls or medication actions simply to test the UI.

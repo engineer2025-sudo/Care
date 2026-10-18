@@ -4,33 +4,22 @@ options:
   createIntermediateGroups: true
 
 packages:
-  JitsiMeetSDK:
-    url: https://github.com/jitsi/jitsi-meet-ios-sdk-releases
-    exactVersion: "13.1.1"
-  # JitsiMeetSDK 13.1.1 was built against this Giphy binary interface. The
-  # upstream Jitsi SPM manifest uses a lower-bound, which can otherwise resolve
-  # Giphy 2.3.x; that version changes the GPHContent.search signature, so the
-  # symbol Jitsi needs is missing and dyld aborts at launch on a physical iPhone.
-  Giphy:
-    url: https://github.com/Giphy/giphy-ios-sdk
-    exactVersion: "2.2.12"
-  LlamaSwift:
-    url: https://github.com/mattt/llama.swift
-    from: 2.10549.0
-  SherpaOnnx:
-    url: https://github.com/k2-fsa/sherpa-onnx.git
-    from: 1.13.8
-  ZIPFoundation:
-    url: https://github.com/weichsel/ZIPFoundation.git
-    from: 0.9.20
+  CareActivityKit:
+    path: ActivityKit
+
+configs:
+  Debug: debug
+  Release: release
+  Debug-HealthKit: debug
 
 settings:
   base:
-    SWIFT_VERSION: "5.9"
+    SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
-    MARKETING_VERSION: "2.2.0"
-    CURRENT_PROJECT_VERSION: "5"
+    MARKETING_VERSION: "3.8.0"
+    CURRENT_PROJECT_VERSION: "17"
     DEVELOPMENT_TEAM: ""
+    SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
 
 targets:
   # ── iPhone / iPad app ────────────────────────────────────────────────
@@ -42,19 +31,15 @@ targets:
     sources:
       - path: CareSphere
     dependencies:
-      - package: JitsiMeetSDK
-      - package: Giphy
-        product: GiphyUISDK
-      - package: LlamaSwift
-        product: LlamaSwift
-      - package: SherpaOnnx
-        product: sherpa-onnx
-      - package: ZIPFoundation
+      - package: CareActivityKit
+    settings:
+      configs:
+        Debug-HealthKit:
+          CODE_SIGN_ENTITLEMENTS: CareSphere-HealthKit.entitlements
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) CARE_HEALTHKIT"
     entitlements:
       path: CareSphere.entitlements
-      properties:
-        com.apple.developer.healthkit: true
-        com.apple.developer.healthkit.background-delivery: true
+      properties: {}
     info:
       path: CareSphere-iOS-Info.plist
       properties:
@@ -62,22 +47,24 @@ targets:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
+        CFBundleURLTypes:
+          - CFBundleURLName: org.caresphere.app
+            CFBundleURLSchemes:
+              - caresphere
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         # Reconfirm this declaration with Apple's export-compliance questionnaire after the CryptoKit AES-GCM change.
         ITSAppUsesNonExemptEncryption: false
         UIViewControllerBasedStatusBarAppearance: false
-        UIBackgroundModes:
-          - audio
-          - voip
         NSFaceIDUsageDescription: "CareSphere locks your health data behind Touch ID / Face ID."
         NSMotionUsageDescription: "CareSphere counts your daily steps to encourage gentle, healthy movement."
         NSCameraUsageDescription: "CareSphere uses the camera for video coffee circles and telehealth visits."
         NSMicrophoneUsageDescription: "CareSphere uses the microphone for video coffee circles and telehealth visits."
         NSHealthShareUsageDescription: "CareSphere reads heart rate, blood oxygen, blood pressure, and workout summaries from Apple Health after you approve. It never writes health data."
         NSBluetoothAlwaysUsageDescription: "CareSphere connects to Bluetooth heart-rate monitors — including Garmin watches broadcasting heart rate — to stream live vitals."
-        NSLocationWhenInUseUsageDescription: "CareSphere attaches your location to an emergency SOS alert so responders and family can find you."
-        NSLocalNetworkUsageDescription: "CareSphere searches a Kiwix offline library only on your private local network."
+        NSLocationWhenInUseUsageDescription: "CareSphere includes your location only when you choose to share SOS details. Nothing is sent automatically."
+        NSBonjourServices: ["_care-xfer._tcp"]
+        NSLocalNetworkUsageDescription: "CareSphere transfers selected encrypted records directly between nearby phones on your private Wi-Fi or hotspot, and can search a local Kiwix library."
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
 
@@ -88,3 +75,9 @@ schemes:
         CareSphere: all
     run:
       config: Debug
+  CareSphere-HealthKit:
+    build:
+      targets:
+        CareSphere: all
+    run:
+      config: Debug-HealthKit

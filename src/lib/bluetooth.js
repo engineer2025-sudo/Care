@@ -1,109 +1,83 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// CareSphere BLE Integration — Web Bluetooth (GATT)
-//
-// Production digital-health platforms read vitals from paired wearables and
-// medical sensors — not from thin air. This module implements the standard
-// Bluetooth SIG Heart Rate profile (service 0x180D, characteristic 0x2A37)
-// over the browser's Web Bluetooth API, the same path used by Chrome/Edge on
-// desktop and Android to talk to real BLE chest straps and watch pods.
-//
-// A canceled/failed pairing never creates mock readings. A separate, explicit
-// demo control can start a clearly-labeled simulated stream when desired.
-// ─────────────────────────────────────────────────────────────────────────────
+// Real Bluetooth SIG Heart Rate notifications only. No generated fallback data.
+const HR_SERVICE = 'heart_rate'
+const HR_MEASUREMENT = 'heart_rate_measurement'
 
-const HR_SERVICE = 'heart_rate'            // Bluetooth SIG service 0x180D
-const HR_MEASUREMENT = 'heart_rate_measurement' // characteristic 0x2A37
-
-export function startSimulatedHeartRateMonitor(onReading, onStatus) {
-  let hr = 74
-  const timer = setInterval(() => {
-    // Random-walk drift constrained to a realistic resting band, with gentle
-    // excursions toward relaxation or light activity.
-    hr += (Math.random() - 0.5) * 4
-    if (Math.random() < 0.06) hr += Math.random() < 0.5 ? -5 : 7
-    hr = Math.min(96, Math.max(58, hr))
-    onReading(Math.round(hr))
-  }, 1500)
-  onStatus({
-    mode: 'simulated',
-    message: 'Simulated sensor stream — physiologically plausible demo data. Connect a real monitor for live telemetry.',
-  })
-  return () => clearInterval(timer)
+export function parseHeartRate(dv) {
+  if (!dv || dv.byteLength < 2) return null
+  const flags = dv.getUint8(0)
+  // If contact detection is supported, do not display a no-contact measurement.
+  if ((flags & 4) && !(flags & 2)) return null
+  if ((flags & 1) && dv.byteLength < 3) return null
+  const bpm = flags & 1 ? dv.getUint16(1, true) : dv.getUint8(1)
+  return bpm > 20 && bpm < 250 ? bpm : null
 }
 
-/**
- * Connect to a BLE heart-rate monitor and stream readings.
- * Returns a disconnect function.
- *
- * @param {(bpm:number)=>void} onReading  called for every heart-rate measurement
- * @param {(status:{mode:string,message:string})=>void} onStatus
- * @returns {Promise<(()=>void)|null>} disconnect handler, or null when no sensor connected
- */
 export async function connectHeartRateMonitor(onReading, onStatus) {
-  const webBluetoothUnavailable = !('bluetooth' in navigator)
-  if (webBluetoothUnavailable) {
-    onStatus({
-      mode: 'unsupported',
-      message: 'This browser does not support Web Bluetooth (Safari/Firefox/iOS). No heart-rate reading is shown. Use the separate demo control only if you want sample data.',
-    })
+  if (!globalThis.navigator?.bluetooth) {
+    onStatus({ mode: 'unsupported', message: 'Web Bluetooth is unavailable here. Use the native iOS or Android app, or a supported Chrome/Edge browser. No reading is shown.' })
     return null
   }
-
   let device
   try {
-    device = await navigator.bluetooth.requestDevice({
-      filters: [{ services: [HR_SERVICE] }],
-      optionalServices: ['battery_service'],
-    })
-  } catch (err) {
-    // Canceling a pairing chooser must never silently start fabricated readings.
-    const cancelled = err?.name === 'NotFoundError' || err?.name === 'AbortError'
-    onStatus({
-      mode: cancelled ? 'disconnected' : 'unsupported',
-      message: cancelled
-        ? 'Pairing canceled. No sensor is connected and no heart-rate reading is shown.'
-        : `Could not open the Bluetooth chooser (${err?.message || 'unknown error'}). No reading is shown.`,
-    })
+    device = await navigator.bluetooth.requestDevice({ filters: [{ services: [HR_SERVICE] }] })
+  } catch (error) {
+    onStatus({ mode: 'disconnected', message: error?.name === 'NotFoundError' || error?.name === 'AbortError'
+      ? 'Pairing canceled. No sensor is connected.' : `Could not open Bluetooth: ${error?.message || 'check permissions'}` })
     return null
   }
-
+  let char, expiry, connectionTimer, active = true
+  const cleanup = () => {
+    active = false
+    clearTimeout(expiry)
+    clearTimeout(connectionTimer)
+    char?.removeEventListener('characteristicvaluechanged', measurement)
+    device.removeEventListener('gattserverdisconnected', disconnected)
+    if (char && device.gatt?.connected) {
+      try { Promise.resolve(char.stopNotifications()).catch(() => {}) } catch { /* already disconnected */ }
+    }
+    try { device.gatt?.disconnect() } catch { /* already disconnected */ }
+  }
+  const disconnected = () => {
+    cleanup()
+    onReading(null)
+    onStatus({ mode: 'disconnected', message: 'Monitor disconnected. No current reading; reconnect when ready.' })
+  }
+  const measurement = event => {
+    if (!active) return
+    const bpm = parseHeartRate(event.target.value)
+    clearTimeout(expiry)
+    onReading(bpm)
+    onStatus({ mode: bpm === null ? 'connected' : 'live', message: bpm === null
+      ? 'Monitor sent an invalid or no-contact reading. Check its fit.' : `Live Bluetooth reading · ${device.name || 'Heart-rate monitor'}` })
+    if (bpm !== null) expiry = setTimeout(() => {
+      if (!active) return
+      onReading(null)
+      onStatus({ mode: 'stale', message: 'No fresh reading for 15 seconds. Check the monitor and its connection.' })
+    }, 15000)
+  }
   try {
-    onStatus({ mode: 'connecting', message: `Connecting to ${device.name || 'BLE sensor'}…` })
-    const server = await device.gatt.connect()
-    const service = await server.getPrimaryService(HR_SERVICE)
-    const char = await service.getCharacteristic(HR_MEASUREMENT)
-
-    await char.startNotifications()
-    const handleMeasurement = (event) => {
-      const dv = event.target.value
-      if (!dv || dv.byteLength < 2) return
-      const flags = dv.getUint8(0)
-      // Bit 0 of the flags field selects 8-bit vs 16-bit BPM encoding.
-      if ((flags & 0x1) && dv.byteLength < 3) return
-      const bpm = flags & 0x1 ? dv.getUint16(1, true) : dv.getUint8(1)
-      if (bpm > 20 && bpm < 250) onReading(bpm)
-    }
-    const handleDisconnected = () => {
-      char.removeEventListener('characteristicvaluechanged', handleMeasurement)
-      device.removeEventListener('gattserverdisconnected', handleDisconnected)
-      onStatus({ mode: 'disconnected', message: `${device.name || 'Sensor'} disconnected. No current reading is available; reconnect to resume streaming.` })
-    }
-    char.addEventListener('characteristicvaluechanged', handleMeasurement)
-    device.addEventListener('gattserverdisconnected', handleDisconnected)
-
-    onStatus({ mode: 'live', message: `Live — receiving heart-rate notifications from ${device.name || 'BLE sensor'} via Bluetooth GATT.` })
-    return () => {
-      char.removeEventListener('characteristicvaluechanged', handleMeasurement)
-      device.removeEventListener('gattserverdisconnected', handleDisconnected)
-      try { char.stopNotifications() } catch {}
-      try { device.gatt?.disconnect() } catch {}
-    }
-  } catch (err) {
-    try { device.gatt?.disconnect() } catch {}
-    onStatus({
-      mode: 'disconnected',
-      message: `Bluetooth connection failed (${err?.message || 'unknown error'}). No simulated reading was started; try pairing again or use the labeled demo.`,
-    })
+    onStatus({ mode: 'connecting', message: `Connecting to ${device.name || 'heart-rate monitor'}…` })
+    const connection = (async () => {
+      const server = await device.gatt.connect()
+      if (!active) { device.gatt.disconnect(); throw new Error('Connection canceled') }
+      const service = await server.getPrimaryService(HR_SERVICE)
+      if (!active) throw new Error('Connection canceled')
+      char = await service.getCharacteristic(HR_MEASUREMENT)
+      if (!active) throw new Error('Connection canceled')
+      char.addEventListener('characteristicvaluechanged', measurement)
+      device.addEventListener('gattserverdisconnected', disconnected)
+      onStatus({ mode: 'connected', message: 'Connected. Waiting for the first real measurement.' })
+      await char.startNotifications()
+    })()
+    await Promise.race([connection, new Promise((_, reject) => {
+      connectionTimer = setTimeout(() => reject(new Error('Connection timed out')), 20000)
+    })])
+    clearTimeout(connectionTimer)
+    return cleanup
+  } catch (error) {
+    cleanup()
+    onReading(null)
+    onStatus({ mode: 'disconnected', message: `Bluetooth connection failed: ${error?.message || 'check the monitor and retry'}. No reading is shown.` })
     return null
   }
 }

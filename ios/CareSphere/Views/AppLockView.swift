@@ -1,12 +1,16 @@
+import CareActivityKit
 import SwiftUI
+import LocalAuthentication
 
-/// Opaque, full-window biometric gate. CareSphereApp switches its root view to
-/// this view while locked, so protected content is removed rather than rendered
-/// underneath a translucent sheet or full-screen cover.
+/// Root swap removes protected content rather than rendering it under a sheet.
 struct AppLockView: View {
     let onUnlock: () -> Void
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var context: LAContext?
+    @State private var attempt = UUID()
     @State private var isAuthenticating = false
     @State private var failureText: String?
+    @State private var returnedFromBackground = false
 
     private var biometryName: String { BiometricService.biometryName }
 
@@ -29,9 +33,9 @@ struct AppLockView: View {
                         .foregroundStyle(Color.emeraldText)
                 }
                 VStack(spacing: 8) {
-                    Text("CareSphere is locked")
+                    Text(AppLanguage.text("CareSphere is locked"))
                         .font(.title2.weight(.heavy))
-                    Text("Your private care information is hidden until you unlock.")
+                    Text(AppLanguage.text("Your private care information is hidden until you unlock."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -53,7 +57,7 @@ struct AppLockView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(isAuthenticating)
                 Spacer(minLength: 24)
-                Text("Your care data stays on this device.")
+                Text(AppLanguage.text("Your care data stays on this device."))
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
@@ -64,15 +68,25 @@ struct AppLockView: View {
         .background(Color.ink.ignoresSafeArea())
         .contentShape(Rectangle())
         .onAppear { authenticate() }
+        .onDisappear { cancelAuthentication() }
+        .onChange(of: scenePhase) { phase in
+            if phase == .background { returnedFromBackground = true; cancelAuthentication() }
+            else if phase == .active && returnedFromBackground { returnedFromBackground = false; authenticate() }
+        }
     }
 
+    private func cancelAuthentication() {
+        attempt = UUID(); context?.invalidate(); context = nil; isAuthenticating = false
+    }
     private func authenticate() {
         guard !isAuthenticating else { return }
         isAuthenticating = true
         failureText = nil
-        BiometricService.authenticate(reason: "Unlock CareSphere to view health data") { success, error in
+        let operation = UUID(); attempt = operation
+        context = BiometricService.authenticate(reason: "Unlock CareSphere to view health data") { success, error in
+            guard operation == attempt else { return }
             isAuthenticating = false
-            if success {
+            if AuthenticationGate.accepts(canEvaluate: true, verified: success, currentAttempt: operation == attempt, foreground: scenePhase != .background) {
                 onUnlock()
             } else {
                 failureText = error ?? "Authentication failed — try again."

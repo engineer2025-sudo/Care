@@ -1,30 +1,7 @@
+import CareActivityKit
 import SwiftUI
-#if os(iOS)
-import JitsiMeetSDK
 
-/// Native video conferencing via the official Jitsi Meet iOS SDK
-/// (JitsiMeetSDK Swift package). `JitsiMeetView` renders the full conference
-/// UI — audio/video, chat, participant tiles — inside CareSphere.
-struct JitsiConferenceView: UIViewRepresentable {
-    let room: String
-    let displayName: String
-
-    func makeUIView(context: Context) -> JitsiMeetView {
-        let view = JitsiMeetView()
-        let options = JitsiMeetConferenceOptions.fromBuilder { builder in
-            builder.serverURL = URL(string: "https://meet.jit.si")
-            builder.room = room
-            builder.userInfo = JitsiMeetUserInfo(displayName: displayName, andEmail: nil, andAvatar: nil)
-        }
-        view.join(options)
-        return view
-    }
-
-    func updateUIView(_ uiView: JitsiMeetView, context: Context) {}
-}
-
-/// Full-screen conference sheet with a header that keeps CareSphere branding
-/// and an escape hatch to Safari.
+/// Deliberate handoff to the real video provider, not an embedded binary SDK.
 struct ConferenceSheet: View {
     let circle: CoffeeCircle
     let displayName: String
@@ -32,65 +9,24 @@ struct ConferenceSheet: View {
 
     var body: some View {
         NavigationStack {
-            JitsiConferenceView(room: circle.room, displayName: displayName)
-                .ignoresSafeArea(edges: .bottom)
-                .navigationTitle(circle.title)
-                .inlineTitle()
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button("Leave") { dismiss() }
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Link(destination: circle.url) {
-                            Image(systemName: "safari")
-                        }
-                    }
-                }
-        }
-    }
-}
-
-#else
-import AppKit
-
-/// On macOS the Jitsi SDK is unavailable (iOS-only framework), so the room —
-/// the very same real meet.jit.si room — opens in the default browser, where
-/// macOS provides first-class WebRTC camera/microphone support.
-struct ConferenceSheet: View {
-    let circle: CoffeeCircle
-    let displayName: String
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(spacing: 18) {
-            Text(circle.emoji)
-                .font(.system(size: 52))
-            Text(circle.title)
-                .font(.title2.weight(.heavy))
-                .multilineTextAlignment(.center)
-            Text("You'll join as \(displayName). Video rooms run on meet.jit.si — on Mac the room opens in your default browser with full camera & microphone support.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            Button {
-                NSWorkspace.shared.open(circle.url)
-                dismiss()
-            } label: {
-                Label("Open video room in browser", systemImage: "video.fill")
-                    .font(.subheadline.weight(.black))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    Label(circle.title, systemImage: "video").font(.title2.bold())
+                    InfoText(AppLanguage.text("Continue to Jitsi Meet in your browser. The provider may ask you to sign in to start a room or open its own app. CareSphere does not host or moderate calls."))
+                    InfoText(AppLanguage.text("Invite people you trust. Anyone with this room link may be able to join. Your saved care notes and health readings are not shared."))
+                        .foregroundStyle(.secondary)
+                    Link(destination: circle.url) {
+                        Label(AppLanguage.text("Continue to video provider"), systemImage: "arrow.up.right.square")
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                    }.buttonStyle(.borderedProminent)
+                    ShareLink("Share room invitation", item: circle.url)
+                        .buttonStyle(.bordered).controlSize(.large)
+                    Text(circle.url.absoluteString).font(.footnote).textSelection(.enabled)
+                }.carePagePadding()
             }
-            .buttonStyle(.borderedProminent)
-            Link("Copy-safe link · \(circle.url.absoluteString)", destination: circle.url)
-                .font(.caption2)
-                .lineLimit(1)
-                .truncationMode(.middle)
-            Button("Close") { dismiss() }
-                .font(.caption.weight(.bold))
+            .navigationTitle(AppLanguage.text("Join a video room"))
+            .inlineTitle()
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(AppLanguage.text("Close")) { dismiss() } } }
         }
-        .padding(26)
-        .frame(width: 440)
     }
 }
-#endif

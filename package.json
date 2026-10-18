@@ -1,7 +1,7 @@
 {
   "name": "care-platform",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.5.1",
   "type": "module",
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
@@ -10,7 +10,10 @@
     "dev": "vite --host 0.0.0.0 --port 3000",
     "build": "vite build",
     "test": "node --test",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:ui": "playwright test",
+    "test:offline": "playwright test --config playwright.offline.config.js",
+    "test:translations": "python3 scripts/generate_localizations.py --check"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
@@ -19,13 +22,14 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/canvas-confetti": "^1.9.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^6.1.1",
-    "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.3",
+    "tailwindcss": "^4.3.3",
     "vite": "^8.3.1"
   }
 }

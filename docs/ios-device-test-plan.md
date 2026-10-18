@@ -1,0 +1,125 @@
+# iPhone acceptance checklist — CareSphere 3.2
+
+A passing compile is not a passing device test. Fill this out on the intended iPhone before demonstrating or distributing the app. Never use real medication or emergency actions just to test UI.
+
+## Build and first launch
+
+- [ ] Open `ios/CareSphere.xcodeproj` directly; choose CareSphere scheme.
+- [ ] Choose your team, a unique bundle identifier if necessary, and your connected iPhone (iOS 16+).
+- [ ] Confirm the installed Xcode supports your phone's iOS version. Use Xcode 26+ to compile Apple Intelligence; the baseline app can use Xcode 16+.
+- [ ] Open the full folder with the included local package; compile, sign, install, and launch. No remote package retrieval should occur.
+- [ ] On a clean install, use **Explore first · set up later**. No camera, microphone, motion, health, or notification permission should be needed to play games.
+- [ ] Repeat with guided setup; large text can scroll each step; birth date can remain absent; voice reminders do not turn on based on age.
+- [ ] Settings version shows 3.2.0 (9).
+
+## Layout and navigation
+
+- [ ] All five tabs are visible: Today, Activities, Connect, Care, Health. No hidden More tab.
+- [ ] Today routine/medication tiles scroll to the correct section; activities and heart-rate tiles open the correct tab.
+- [ ] Health visibly switches between Vitals and Health Guide.
+- [ ] Medication setup shortcut opens the actual medication section and retains a visible Done control.
+- [ ] Try the smallest supported phone and an iPad; repeat with largest Accessibility text, Bold Text, light, dark, and higher contrast.
+- [ ] VoiceOver announces buttons, mood labels/selected state, card positions, hints, feedback, and exits in a sensible order. Test Switch Control if available.
+
+## Favorites and care notes
+
+- [ ] Favorite/unfavorite each activity; filter favorites; search by several words; verify after restarting.
+- [ ] Existing notes still load. Search, edit, save, verify creation/edited dates and restart.
+- [ ] Cancel unchanged edits; confirm/decline discarding changed edits; try swipe dismissal and the keyboard at largest text size.
+- [ ] Whitespace-only notes cannot save; the 4,000-character limit works; delete cancellation leaves the note untouched.
+- [ ] Export/erase remain explicit; check that erasure removes favorites and notes.
+
+## Every activity
+
+- [ ] Search, filter, clear an empty result, open and exit each of the 11 activities.
+- [ ] Try fewer/more choices; answer correctly/incorrectly; use hints; skip; restart; reach the last example and wrap.
+- [ ] Wrong/duplicate taps do not advance or lock the game; correct taps wait for explicit Next.
+- [ ] Picture Pairs: visible and hidden modes, duplicate taps, mismatched pair, clear selection, all pairs matched, change pair count.
+- [ ] Pattern: choose each length, hide/show guide, retry wrong input, replay, change length midway, leave/reopen.
+- [ ] Everyday Order: wrong step, duplicate step, next-step cue, undo at empty/partial/complete states, next example.
+- [ ] Conversation: previous on first card, next on last card, hints, skip; no personal answer is recorded.
+- [ ] Take a break: content is hidden from VoiceOver and touch; Continue restores the same session. Done always exits.
+- [ ] Background/lock during games; return without surprise playback. Close/reopen starts a new session; no game scores are stored.
+- [ ] Airplane mode: all 11 activities remain usable (research links and video are network features).
+
+## Sound and breathing
+
+- [ ] No sound starts automatically. Test headphones and silent mode at a comfortable volume.
+- [ ] Each soundscape starts/stops; leaving or backgrounding stops it. Test an interruption such as an incoming call.
+- [ ] Breathing starts without a hold. Enable optional hold while paused; pause/resume; leave/background; return without automatic restart.
+- [ ] Reduced motion keeps the visual cue static. Stop if the pace is uncomfortable; never treat completion as a measured breath.
+
+## Existing care and health functions
+
+- [ ] Routine check-ins persist and reset after local midnight/app return.
+- [ ] Add a clearly fictitious medication reminder, review/confirm it, then remove it after the test. Editing pauses reminders until reconfirmed.
+- [ ] Denied notifications, motion, Bluetooth, and HealthKit permissions have understandable states; missing data is not presented as a measurement.
+- [ ] Step counting starts only after enabling; test return across local midnight.
+- [ ] Pair compatible BLE hardware, disconnect/reconnect, verify source labels; check real HealthKit records if available.
+- [ ] Test optional reference downloads. Check Apple Intelligence unavailable/disabled/not-ready/available states on eligible and ineligible devices.
+- [ ] Test Face ID/Touch ID lock and background privacy, local export/erase, visit-brief selection.
+- [ ] Open SOS and cancel. **Do not dial emergency numbers as a test.** Use a consenting non-emergency recipient for any message/video testing.
+
+Record iPhone model, iOS version, Xcode version, build commit, checks passed/failed, and reproducible issues. Clinical benefit, usability with target users, and App Store review require separate work.
+
+## Follow-up checks: Apple Intelligence, pairing, and explicit sharing
+
+- [ ] Standard scheme builds without a HealthKit profile. Optional HealthKit scheme requests access only after you tap Enable.
+- [ ] On supported iOS 26 hardware, request a reference summary, cancel, retry, clear, and background the app. Cancelled results must not reappear.
+- [ ] Unavailable Apple Intelligence leaves reference search usable; no fabricated answer replaces errors.
+- [ ] Installed Apple voices can preview without third-party voice/model downloads.
+- [ ] With two monitors nearby, confirm scanning connects to neither until you choose one. Check device-name/identifier labels.
+- [ ] Cancel pairing during scan/connection; late callbacks must not connect or display a reading afterward.
+- [ ] Test no-device timeout, denied/off Bluetooth, missing service, subscription failure, and disconnect. Reconnect is an explicit user action.
+- [ ] Stop sensor updates: the current BLE value should clear after 15 seconds; historical Apple Health readings retain their own source label.
+- [ ] In SOS, preview the text before opening the share sheet. Add/remove location; reopening SOS should not automatically include a cached fix. Never call an emergency number for testing.
+
+## Personal tools and backend-free transfer
+
+- [ ] Toggle Simple Mode; all three destinations work; restore full navigation.
+- [ ] Create a visual routine with a chosen photo; start, read, pause, advance, skip and end. Backgrounding never starts speech automatically.
+- [ ] Add/display/speak/clear a custom communication phrase using an installed voice.
+- [ ] Import/remove a personal photo, play matching and revisit after restart. Do not infer identities from photos.
+- [ ] Add a consenting contact; cancel call/message/video handoffs. Do not call emergency numbers.
+- [ ] Save an appointment question, priority, follow-up and export only after reviewing.
+- [ ] Delete/restore a note and undo a routine change. Create an encrypted backup, reject an incorrect password, preview/cancel, then restore test data only.
+- [ ] Select a note/routine, prepare a transfer, AirDrop/save it, open it on another actual device, reject an incorrect password, preview/select/import and reject repeat receipt of the same item. Check Android/web recipients too.
+- [ ] On eligible enabled hardware, generate each AI draft type from deliberately selected text; cancel/background/discard; edit and explicitly save. Original notes must remain unchanged.
+
+
+## Direct nearby connections and discovery (3.4)
+
+Use non-sensitive records and two consenting testers. Repeat in BOTH directions for iPhone/iPhone, Android/Android and iPhone/Android. Use the same private Wi-Fi first, then a phone hotspot with internet disabled where supported. Prepare one selected encrypted note/routine; offer locally, enter the shown address/code on the receiver, unlock and preview/select/import. Confirm unselected records are absent, originals unchanged and duplicate receipt marked. Test wrong code/passphrase, denied Local Network access and recovery in Settings, changing networks, multiple interfaces, interrupted receive, leaving the tool, screen lock/background, explicit Stop and five-minute expiry. Confirm a stopped/expired offer cannot be fetched with its old code, and already received copies are not described as revoked. Test a guest network that isolates clients and use the file fallback. IPv6-only Wi-Fi is deliberately unsupported. Test Find nearby devices and confirm that choosing a label only fills the address: the code, passphrase and import selection must still be required. Stop search, navigate away and background during a pending resolve; no late peer should reappear. Stop/expire the sender and verify service removal or a safe connection failure if the OS retains a stale record. Disable multicast while leaving unicast available and test manual fallback. Spoofed labels, wrong protocol versions and TXT addresses not in resolved host addresses must not bypass validation. No Bluetooth radio pairing should appear.
+
+## Multilingual interface acceptance (3.5.1)
+
+Use test-only records, not real care data. In setup and Settings, choose English,
+Spanish, Simplified Chinese, Filipino/Tagalog and Vietnamese. Confirm preference
+survives a full relaunch, navigation stays in the same destination, and form edits
+are not reset merely by changing the preference. Test device-language automatic
+selection plus an unsupported language's English fallback.
+
+Save a note named/text `Save` and a custom phrase in another language. Neither
+may be automatically translated when UI language changes. Share selected copies
+with an Android whose UI uses a different language; original Unicode text,
+selection boundaries, passphrase handling and duplicate protection must survive.
+These are manual physical-device checks, not yet established by CI.
+
+Review every safety/privacy prompt with fluent speakers before production use.
+Confirm Simplified Chinese is clearly labeled, English fallback is disclosed,
+and installed Mandarin/Spanish/Filipino/Vietnamese voices behave truthfully. With
+no matching voice, verify visible text plus an unavailability explanation, not an
+English-voice substitution. Check VoiceOver, largest Dynamic Type, narrow iPhones,
+Switch Control and mixed-script names/notes. OS dialogs and advanced/reference
+content may follow the OS/provider or remain English; see `docs/languages.md`.
+
+
+### Expanded home/setup/comfort checks
+
+In each language, inspect greetings, all mood choices, optional medication setup
+warnings and the comfort controls. At largest Dynamic Type, feeling words must
+wrap rather than clip. Test a display name containing `Save {0}`: Chinese can
+reorder the greeting, but the name and braces must remain verbatim. Persist a
+mood check-in, relaunch, and verify the same numeric choice remains selected.
+Run a visual routine with a title in another language: only action/step-counter
+labels should change, never the title or the person's instructions.

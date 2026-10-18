@@ -1,11 +1,13 @@
+import { normalizeSupport } from './support.js'
+import { normalizeFavorites } from './activityLibrary.js'
+import { validManualVital } from './vitalRules.js'
 export const STORAGE_KEY = 'caresphere.v1'
 export const RESET_LOCAL_DATA_EVENT = 'caresphere:reset-local-data'
 
-const PERSISTED_KEYS = new Set(['settings', 'routines', 'meds', 'medsConfirmed', 'notes', 'moods', 'emotionScore', 'bestPattern'])
+const PERSISTED_KEYS = new Set(['settings', 'routines', 'meds', 'medsConfirmed', 'notes', 'moods', 'manualVitals', 'emotionScore', 'bestPattern', 'favoriteActivities', 'support'])
 const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value)
 const isDayKey = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 
-/** A stable local-calendar day key for daily routines and medication check-ins. */
 export function localDayKey(date = new Date()) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -21,7 +23,6 @@ export function isMedicationTakenToday(medication, date = new Date()) {
   return medication?.takenOn === localDayKey(date)
 }
 
-/** Parse only the known CareSphere storage keys; ignore malformed or foreign data. */
 export function parseCareStorage(raw) {
   try {
     const parsed = JSON.parse(raw || '{}')
@@ -32,8 +33,9 @@ export function parseCareStorage(raw) {
   }
 }
 
-/** Bound and type-check values restored from editable browser storage. */
 export function normalizePersistedValue(key, value, fallback) {
+  if (key === 'support') return normalizeSupport(value)
+  if (key === 'favoriteActivities') return normalizeFavorites(value)
   if (key === 'settings') {
     if (!isRecord(value)) return fallback
     return {
@@ -42,6 +44,7 @@ export function normalizePersistedValue(key, value, fallback) {
       theme: ['system', 'dark', 'light'].includes(value.theme) ? value.theme : fallback.theme,
       highContrast: typeof value.highContrast === 'boolean' ? value.highContrast : fallback.highContrast,
       lowSensory: typeof value.lowSensory === 'boolean' ? value.lowSensory : fallback.lowSensory,
+      bareMinimum: typeof value.bareMinimum === 'boolean' ? value.bareMinimum : fallback.bareMinimum === true,
       voice: typeof value.voice === 'boolean' ? value.voice : fallback.voice,
     }
   }
@@ -49,8 +52,6 @@ export function normalizePersistedValue(key, value, fallback) {
     return value.slice(0, 200).filter(isRecord).map((item, index) => ({
       id: typeof item.id === 'string' ? item.id.slice(0, 120) : Number.isSafeInteger(item.id) ? item.id : `routine-${index}`,
       text: typeof item.text === 'string' ? item.text.slice(0, 240) : '',
-      // Migrate the legacy Boolean as today's check-in once; new data expires
-      // naturally at the next local calendar day.
       completedOn: isDayKey(item.completedOn) ? item.completedOn : item.done === true ? localDayKey() : null,
     }))
   }
@@ -69,6 +70,7 @@ export function normalizePersistedValue(key, value, fallback) {
       date: typeof item.date === 'string' ? item.date.slice(0, 80) : 'Date not recorded',
       author: typeof item.author === 'string' ? item.author.slice(0, 120) : 'Author not recorded',
       note: typeof item.note === 'string' ? item.note.slice(0, 10000) : '',
+      ...(typeof item.editedAt === 'string' && !Number.isNaN(new Date(item.editedAt).valueOf()) ? { editedAt: item.editedAt } : {}),
     }))
   }
   if (key === 'moods' && Array.isArray(value)) {
@@ -77,6 +79,15 @@ export function normalizePersistedValue(key, value, fallback) {
       score: item.score,
       ts: Number.isFinite(item.ts) ? item.ts : undefined,
     }))
+  }
+  if (key === 'manualVitals' && Array.isArray(value)) {
+    return value.slice(0, 100).filter(isRecord).map(item => ({
+      id: typeof item.id === 'string' ? item.id.slice(0, 120) : crypto.randomUUID(),
+      kind: item.kind === 'bp' ? 'bp' : item.kind === 'oxygen' ? 'oxygen' : '',
+      first: Number.isInteger(item.first) ? item.first : 0,
+      second: Number.isInteger(item.second) ? item.second : undefined,
+      at: typeof item.at === 'string' ? item.at.slice(0, 40) : '',
+    })).filter(item => item.id && item.at && validManualVital(item.kind, item.first, item.second ?? null))
   }
   if (key === 'medsConfirmed') return typeof value === 'boolean' ? value : fallback
   if (key === 'emotionScore' || key === 'bestPattern') {

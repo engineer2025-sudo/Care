@@ -1,12 +1,8 @@
 import Foundation
 import NaturalLanguage
 
-/// On-device NLP via Apple's NaturalLanguage framework — scores the emotional
-/// tone of care-journal notes so the Care Circle view can surface gentle
-/// mood trends. Runs entirely offline using the system sentiment model.
 enum TextInsightsService {
 
-    /// Sentiment in -1.0 (negative) … 1.0 (positive). 0 when unavailable.
     static func sentimentScore(for text: String) -> Double {
         let tagger = NLTagger(tagSchemes: [.sentimentScore])
         tagger.string = text

@@ -7,7 +7,6 @@ struct Routine: Identifiable, Codable, Equatable {
     var id: UUID
     var emoji: String
     var title: String
-    /// Local calendar day on which the routine was last checked off.
     var completedDay: String?
 
     /// Old routine stores only had a Boolean. Persist both fields during the
@@ -54,7 +53,6 @@ struct Medication: Identifiable, Codable, Equatable {
     var purpose: String
     var hour: Int      // 24-hour clock
     var minute: Int
-    /// Local calendar day on which the user last marked this reminder taken.
     var takenDay: String?
 
     /// A check-in expires at local midnight; it is never a verified dose record.
@@ -108,11 +106,10 @@ struct CareNote: Identifiable, Codable, Equatable {
     var author: String
     var body: String
     var createdAt: Date = Date()
-    /// On-device NaturalLanguage sentiment score (-1...1) for journal insights.
     var sentiment: Double?
+    var updatedAt: Date? = nil
 }
 
-/// Care focus chosen during onboarding — personalizes the whole app.
 enum CareMode: String, Codable, CaseIterable, Identifiable {
     case senior, autism, both
     var id: String { rawValue }
@@ -144,7 +141,6 @@ struct CareProfile: Codable, Equatable {
     var emergencyContact = EmergencyContact()
     var dailyStepGoal: Int = 6000
 
-    /// Age in whole years (nil when birth date not provided).
     var age: Int? {
         guard let birthDate else { return nil }
         return Calendar.current.dateComponents([.year], from: birthDate, to: Date()).year
@@ -209,5 +205,60 @@ enum CareTime {
         calendar.timeZone = .current
         let parts = calendar.dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+    }
+}
+
+// Optional at the CareStore boundary, so pre-support releases migrate safely.
+struct PersonalSupport: Codable {
+    var simple = false
+    var speakSteps = false
+    var choices = 3
+    var phrases: [String] = []
+    var plans: [VisualPlan] = []
+    var photos: [PersonalPhoto] = []
+    var contacts: [TrustedPerson] = []
+    var questions: [VisitQuestion] = []
+    var deletedNotes: [DeletedCareNote] = []
+    var receivedItems: [String]? = nil
+}
+struct VisualPlan: Identifiable, Codable {
+    var id = UUID()
+    var title: String
+    var steps: [String]
+    var photoID: UUID?
+}
+struct PersonalPhoto: Identifiable, Codable {
+    var id = UUID()
+    var caption: String
+    var jpeg: Data
+}
+struct TrustedPerson: Identifiable, Codable {
+    var id = UUID()
+    var name: String
+    var phone: String
+    var video: String
+}
+struct VisitQuestion: Identifiable, Codable {
+    var id = UUID()
+    var text: String
+    var important = false
+    var discussed = false
+    var followup = ""
+}
+struct DeletedCareNote: Identifiable, Codable {
+    var id: UUID { note.id }
+    var note: CareNote
+    var deletedAt = Date()
+}
+
+struct ManualVital: Identifiable, Codable, Equatable {
+    var id: UUID
+    var kind: String
+    var first: Int
+    var second: Int?
+    var at: Date
+
+    var formatted: String {
+        kind == "bp" ? "\(first)/\(second ?? 0) mmHg" : "\(first)% SpO₂"
     }
 }

@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 import MessageUI
 
@@ -57,11 +58,11 @@ struct CareSupportFlowView: View {
                 .frame(maxWidth: .infinity)
             }
             .background(Color.ink)
-            .navigationTitle("Check-in")
+            .navigationTitle(AppLanguage.text("Check-in"))
             .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Close") { finish() }
+                    Button(AppLanguage.text("Close")) { finish() }
                 }
             }
         }
@@ -79,17 +80,17 @@ struct CareSupportFlowView: View {
 
     private var movementCheck: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("A quick check-in")
+            Text(AppLanguage.text("A quick check-in"))
                 .font(.title2.weight(.bold))
-            Text("Are you moving or exercising right now?")
+            Text(AppLanguage.text("Are you moving or exercising right now?"))
                 .font(.title3)
-            actionButton("Yes, I'm moving", systemImage: "figure.walk", prominent: true) {
+            actionButton(AppLanguage.text("Yes, I'm moving"), systemImage: "figure.walk", prominent: true) {
                 finish()
             }
-            actionButton("No", systemImage: "hand.raised") {
+            actionButton(AppLanguage.text("No"), systemImage: "hand.raised") {
                 step = .feelingCheck
             }
-            actionButton("Not sure", systemImage: "questionmark.circle") {
+            actionButton(AppLanguage.text("Not sure"), systemImage: "questionmark.circle") {
                 step = .feelingCheck
             }
         }
@@ -97,15 +98,15 @@ struct CareSupportFlowView: View {
 
     private var feelingCheck: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("How are you feeling?")
+            Text(AppLanguage.text("How are you feeling?"))
                 .font(.title2.weight(.bold))
-            actionButton("I'm okay", systemImage: "checkmark.circle") {
+            actionButton(AppLanguage.text("I'm okay"), systemImage: "checkmark.circle") {
                 finish()
             }
-            actionButton("I'm stressed", systemImage: "wind", prominent: true) {
+            actionButton(AppLanguage.text("I'm stressed"), systemImage: "wind", prominent: true) {
                 step = .breathing
             }
-            actionButton("I need help", systemImage: "person.crop.circle.badge.exclamationmark") {
+            actionButton(AppLanguage.text("I need help"), systemImage: "person.crop.circle.badge.exclamationmark") {
                 step = .support
             }
         }
@@ -113,16 +114,16 @@ struct CareSupportFlowView: View {
 
     private var breathingStep: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Let's pause together")
+            Text(AppLanguage.text("Let's pause together"))
                 .font(.title2.weight(.bold))
             PacedBreathingActivity(
                 targetCycles: 3,
                 onComplete: { step = .afterBreathing },
                 onStop: { step = .afterBreathing })
-            actionButton("Skip to check-in", systemImage: "forward.fill") {
+            actionButton(AppLanguage.text("Skip to check-in"), systemImage: "forward.fill") {
                 step = .afterBreathing
             }
-            actionButton("I need help now", systemImage: "person.crop.circle.badge.exclamationmark") {
+            actionButton(AppLanguage.text("I need help now"), systemImage: "person.crop.circle.badge.exclamationmark") {
                 step = .support
             }
         }
@@ -130,18 +131,18 @@ struct CareSupportFlowView: View {
 
     private var afterBreathing: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("How are you now?")
+            Text(AppLanguage.text("How are you now?"))
                 .font(.title2.weight(.bold))
-            actionButton("Better", systemImage: "checkmark.circle", prominent: true) {
+            actionButton(AppLanguage.text("Better"), systemImage: "checkmark.circle", prominent: true) {
                 finish()
             }
-            actionButton("Contact my caregiver", systemImage: "message.fill") {
+            actionButton(AppLanguage.text("Contact my caregiver"), systemImage: "message.fill") {
                 step = .support
             }
-            actionButton("Still stressed", systemImage: "wind") {
+            actionButton(AppLanguage.text("Still stressed"), systemImage: "wind") {
                 step = .support
             }
-            actionButton("I need help", systemImage: "person.crop.circle.badge.exclamationmark") {
+            actionButton(AppLanguage.text("I need help"), systemImage: "person.crop.circle.badge.exclamationmark") {
                 step = .support
             }
         }
@@ -149,16 +150,16 @@ struct CareSupportFlowView: View {
 
     private var urgentSupport: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(urgentReason == .selfHarm ? "Please don't hurt yourself." : "This could be dangerous.")
+            Text(urgentReason == .selfHarm ? AppLanguage.text("Please don't hurt yourself.") : AppLanguage.text("This could be dangerous."))
                 .font(.title2.weight(.bold))
                 .foregroundStyle(.red)
             Text(urgentReason == .selfHarm
-                 ? "Move away from anything you could use to hurt yourself. Ask someone nearby to stay with you."
-                 : "If you haven't taken it, don't. If you have, get urgent help now.")
+                 ? AppLanguage.text("Move away from anything you could use to hurt yourself. Ask someone nearby to stay with you.")
+                 : AppLanguage.text("If you haven't taken it, don't. If you have, get urgent help now."))
                 .font(.body)
             emergencyCallActions
             contactActions
-            Button("I'm safe right now") { finish() }
+            Button(AppLanguage.text("I'm safe right now")) { finish() }
                 .font(.subheadline.weight(.semibold))
                 .padding(.vertical, 8)
         }
@@ -166,10 +167,10 @@ struct CareSupportFlowView: View {
 
     private var supportOptions: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Would you like someone with you?")
+            Text(AppLanguage.text("Would you like someone with you?"))
                 .font(.title2.weight(.bold))
             contactActions
-            Button("Close") { finish() }
+            Button(AppLanguage.text("Close")) { finish() }
                 .font(.subheadline.weight(.semibold))
                 .padding(.vertical, 8)
         }
@@ -179,7 +180,7 @@ struct CareSupportFlowView: View {
     private var emergencyCallActions: some View {
         if Locale.current.region?.identifier == "US" {
             Link(destination: URL(string: "tel:911")!) {
-                Label("Call 911", systemImage: "phone.fill")
+                Label(AppLanguage.text("Call 911"), systemImage: "phone.fill")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
             }
@@ -188,27 +189,27 @@ struct CareSupportFlowView: View {
 
             if urgentReason == .possiblePoisoning {
                 Link(destination: URL(string: "tel:18002221222")!) {
-                    Label("Call Poison Control", systemImage: "phone.fill")
+                    Label(AppLanguage.text("Call Poison Control"), systemImage: "phone.fill")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                 }
                 .buttonStyle(.bordered)
             } else if urgentReason == .selfHarm {
                 Link(destination: URL(string: "tel:988")!) {
-                    Label("Call 988", systemImage: "phone.fill")
+                    Label(AppLanguage.text("Call 988"), systemImage: "phone.fill")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                 }
                 .buttonStyle(.bordered)
                 Link(destination: URL(string: "sms:988")!) {
-                    Label("Text 988", systemImage: "message.fill")
+                    Label(AppLanguage.text("Text 988"), systemImage: "message.fill")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                 }
                 .buttonStyle(.bordered)
             }
         } else {
-            Text("Call your local emergency number or poison center.")
+            Text(AppLanguage.text("Call your local emergency number or poison center."))
                 .font(.subheadline.weight(.semibold))
         }
     }
@@ -219,14 +220,14 @@ struct CareSupportFlowView: View {
             Button {
                 showingMessageComposer = true
             } label: {
-                Label("Text \(contactName)", systemImage: "message.fill")
+                Label(AppLanguage.format("Text {0}", [contactName]), systemImage: "message.fill")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
             }
             .buttonStyle(.borderedProminent)
         } else {
             ShareLink(item: caregiverMessage) {
-                Label("Share a support message", systemImage: "square.and.arrow.up")
+                Label(AppLanguage.text("Share a support message"), systemImage: "square.and.arrow.up")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
             }
@@ -236,14 +237,14 @@ struct CareSupportFlowView: View {
         Button {
             showingVideo = true
         } label: {
-            Label("Open video support", systemImage: "video.fill")
+            Label(AppLanguage.text("Open video support"), systemImage: "video.fill")
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
         }
         .buttonStyle(.bordered)
         Text(canTextCaregiver
-             ? "Messages opens a draft; tap Send to share. Anyone with the room link can join."
-             : "Choose where to share the message. Anyone with the room link can join.")
+             ? AppLanguage.text("Messages opens a draft; tap Send to share. Anyone with the room link can join.")
+             : AppLanguage.text("Choose where to share the message. Anyone with the room link can join."))
             .font(.caption2)
             .foregroundStyle(.secondary)
     }

@@ -1,12 +1,20 @@
 # Local data encryption and privacy boundaries
 
-## Native iOS and macOS apps
+## Native iPhone (historical macOS implementation notes also retained)
 
 - `CareStore` serializes local care data to JSON in memory, then writes only AES-256-GCM authenticated ciphertext to the private Application Support store using CryptoKit.
 - A random 256-bit key is kept in Keychain. On iOS the key uses `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`; the encrypted file also uses Complete File Protection and is excluded from device backups. The key is not a Face ID/Touch ID key. On macOS the key is kept in the user's login Keychain and the ciphertext file is limited to owner access (`0600`).
 - Existing plaintext `carestore.json` data is read only for migration. It is removed only after a new encrypted file has been successfully written. If decryption or migration fails, the old file is preserved and new writes are stopped or reported rather than replacing the data with defaults.
 - The user-requested JSON export is intentionally readable so the user can inspect it and choose where to save it. Once exported, it is outside the app's storage protections and the UI warns the user to handle it carefully.
-- Because the iOS key is device-only and the encrypted file is excluded from backup, CareSphere does not silently restore that private store to a different device. Users should keep their own secure backup/export if they need to move data; a secure import flow is a separate feature.
+- Because the iOS key is device-only and the encrypted file is excluded from backup, CareSphere does not silently restore that private store to a different device. Users should keep their own secure backup/export if they need to move data; use an explicit passphrase-encrypted iPhone backup for recovery, or a selected-record portable transfer. These are separate formats and neither is automatic sync.
+
+## Native Android
+
+- `CareData` encrypts the local JSON store with AES-256-GCM using an Android Keystore key. `AtomicFile` protects replacement writes; automatic OS backup is disabled. The key is not biometric-bound. Android 11+ now has an optional system-authenticated **screen gate** across activities, with background relocking and FLAG_SECURE screenshot protection. This is not key-level access control or protection against debugging/root compromise.
+- A read/decryption failure disables writes instead of replacing an unreadable file. A failed save restores the in-memory JSON to the last successfully saved snapshot and shows an error. The emulator test forces an AtomicFile write failure and a corrupt ciphertext read; physical storage exhaustion and process interruption still need testing.
+- Explicit recovery uses a separate passphrase-encrypted Android backup. Replacement requires preview/confirmation and pauses medication reminders for fresh review. A selected-note/routine merge does not replace the full dataset or pause an unrelated schedule.
+- Medication names/instructions and manually entered vitals remain in encrypted care data. Alarm scheduling preferences contain only enablement, random cancellation IDs and snooze timing/day metadata, not drug names. Notifications display generic text. Health Connect readings are shown only on explicit foreground request and are not persisted into this file or sent to AI.
+- A **debuggable APK is not production-grade confidentiality** even with encrypted storage. Owner-controlled non-debuggable signing and device security are required for a release. See `android-release-signing.md`.
 
 ## Web app
 

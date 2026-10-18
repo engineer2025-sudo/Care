@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import CareActivityKit
 import CryptoKit
 import UserNotifications
 
@@ -13,7 +14,12 @@ final class CareStore: ObservableObject {
     @Published var displayName: String { didSet { save() } }
     @Published var voiceReminders: Bool { didSet { save() } }
     @Published var voiceIdentifier: String { didSet { save() } }
-    @Published var routines: [Routine] { didSet { save() } }
+    @Published private(set) var routineUndo: [Routine]?
+    private var restoringRoutine = false
+    @Published var routines: [Routine] { didSet {
+        if !isErasingLocalData && !restoringRoutine { routineUndo = oldValue }
+        save()
+    } }
     @Published var medications: [Medication] {
         didSet {
             // Names/times added or changed after confirmation need a fresh review.
@@ -33,8 +39,11 @@ final class CareStore: ObservableObject {
             syncMedicationReminders()
         }
     }
+    @Published var personalSupport: PersonalSupport { didSet { save() } }
+    @Published var favoriteActivities: [String] { didSet { save() } }
     @Published var notes: [CareNote] { didSet { save() } }
     @Published var moods: [MoodEntry] { didSet { save() } }
+    @Published var manualVitals: [ManualVital] { didSet { save() } }
     @Published var emotionScore: Int { didSet { save() } }
     @Published var bestPattern: Int { didSet { save() } }
 
@@ -65,23 +74,25 @@ final class CareStore: ObservableObject {
         encryptionKey = initialStore.key
         persistenceCanWrite = initialStore.canWrite
         let box = initialStore.box
-        displayName = box?.displayName ?? "Alex"
+        displayName = box?.displayName ?? ""
         voiceReminders = box?.voiceReminders ?? false
         voiceIdentifier = box?.voiceIdentifier ?? ""
-        routines = box?.routines ?? [
-            Routine(emoji: "💧", title: "Morning hydration"),
-            Routine(emoji: "🧩", title: "10-minute brain game"),
-            Routine(emoji: "☕", title: "Join a coffee circle"),
-            Routine(emoji: "🌿", title: "Evening stretch & wind-down"),
-        ]
+        routines = box?.routines ?? []
         // Never prefill medication names or times. Fresh users configure only
         // their own schedule during onboarding; no demo drug creates reminders.
         medications = box?.medications ?? []
         // Older stores did not carry an explicit confirmation. Preserve their
         // saved data, but pause its reminders until the user reviews it.
         medicationScheduleConfirmed = box?.medicationScheduleConfirmed ?? false
+        var loadedSupport = box?.personalSupport ?? PersonalSupport()
+        loadedSupport.deletedNotes.removeAll { $0.deletedAt < Date().addingTimeInterval(-30 * 86400) }
+        personalSupport = loadedSupport
+        favoriteActivities = ActivityPreferences.normalized(box?.favoriteActivities ?? [])
         notes = box?.notes ?? []
         moods = box?.moods ?? []
+        manualVitals = Array((box?.manualVitals ?? []).filter {
+            VitalRules.valid(kind: $0.kind, first: $0.first, second: $0.second)
+        }.prefix(100))
         emotionScore = box?.emotionScore ?? 0
         bestPattern = box?.bestPattern ?? 0
         hasCompletedOnboarding = box?.hasCompletedOnboarding ?? false
@@ -89,7 +100,7 @@ final class CareStore: ObservableObject {
         let savedAppearance = box?.colorAppearance ?? "system"
         colorAppearance = ["system", "light", "dark"].contains(savedAppearance) ? savedAppearance : "system"
         highContrast = box?.highContrast ?? false
-        reduceVisualMotion = box?.reduceVisualMotion ?? false
+        reduceVisualMotion = box?.reduceVisualMotion ?? true
         heartRateCheckInEnabled = box?.heartRateCheckInEnabled ?? false
         profile = box?.profile ?? CareProfile()
         persistenceIssue = initialStore.issue
@@ -167,6 +178,8 @@ final class CareStore: ObservableObject {
             routines: routines,
             medications: medications,
             medicationScheduleConfirmed: medicationScheduleConfirmed,
+            favoriteActivities: favoriteActivities,
+            personalSupport: personalSupport,
             notes: notes,
             moods: moods,
             emotionScore: emotionScore,
@@ -177,7 +190,8 @@ final class CareStore: ObservableObject {
             highContrast: highContrast,
             reduceVisualMotion: reduceVisualMotion,
             heartRateCheckInEnabled: heartRateCheckInEnabled,
-            profile: profile)
+            profile: profile,
+            manualVitals: manualVitals)
     }
 
     private func save() {
@@ -273,7 +287,6 @@ final class CareStore: ObservableObject {
 
     var canExportCareData: Bool { persistenceCanWrite }
 
-    /// Returns a complete, user-initiated JSON snapshot for the system file exporter.
     func makeCareDataExport() throws -> Data {
         guard persistenceCanWrite else { throw CareStoreError.storageUnavailable }
         let encoder = JSONEncoder()
@@ -291,17 +304,15 @@ final class CareStore: ObservableObject {
 
         medicationScheduleConfirmed = false
         medications = []
-        displayName = "Alex"
+        displayName = ""
         voiceReminders = false
         voiceIdentifier = ""
-        routines = [
-            Routine(emoji: "💧", title: "Morning hydration"),
-            Routine(emoji: "🧩", title: "10-minute brain game"),
-            Routine(emoji: "☕", title: "Join a coffee circle"),
-            Routine(emoji: "🌿", title: "Evening stretch & wind-down"),
-        ]
+        routines = []; routineUndo = nil
+        favoriteActivities = []
+        personalSupport = PersonalSupport()
         notes = []
         moods = []
+        manualVitals = []
         emotionScore = 0
         bestPattern = 0
         hasCompletedOnboarding = false
@@ -353,6 +364,8 @@ final class CareStore: ObservableObject {
         var medications: [Medication]
         // Optional so pre-confirmation stores decode safely; legacy schedules default paused.
         var medicationScheduleConfirmed: Bool?
+        var favoriteActivities: [String]?
+        var personalSupport: PersonalSupport?
         var notes: [CareNote]
         var moods: [MoodEntry]
         var emotionScore: Int
@@ -365,6 +378,8 @@ final class CareStore: ObservableObject {
         var reduceVisualMotion: Bool?
         var heartRateCheckInEnabled: Bool?
         var profile: CareProfile?
+        // Optional so stores saved before manual vitals continue to decode.
+        var manualVitals: [ManualVital]?
     }
 
     // MARK: Derived values
@@ -383,8 +398,6 @@ final class CareStore: ObservableObject {
             .min { ($0.hour, $0.minute) < ($1.hour, $1.minute) }
     }
 
-    /// Reconciles persisted notification requests on app launch, including
-    /// removing legacy reminders when a saved schedule still needs review.
     func refreshMedicationReminders() {
         syncMedicationReminders()
     }
@@ -403,7 +416,6 @@ final class CareStore: ObservableObject {
     }
     var moodToday: MoodEntry? { moods.first { $0.day == CareTime.dayKey() } }
 
-    /// Personalized greeting line based on age + care focus.
     var personalizedTagline: String {
         var parts: [String] = []
         if let age = profile.age { parts.append("\(age) years young") }
@@ -413,13 +425,22 @@ final class CareStore: ObservableObject {
 
     // MARK: Mutations
 
+    func addManualVital(kind: String, first: Int, second: Int?) -> Bool {
+        guard manualVitals.count < 100, VitalRules.valid(kind: kind, first: first, second: second) else { return false }
+        manualVitals.append(ManualVital(id: UUID(), kind: kind, first: first, second: second, at: Date()))
+        return true
+    }
+
+    func removeManualVital(id: UUID) {
+        manualVitals.removeAll { $0.id == id }
+    }
+
     func toggleRoutine(_ routine: Routine) {
         if let index = routines.firstIndex(where: { $0.id == routine.id }) {
             routines[index].isDone.toggle()
         }
     }
 
-    /// Add a small, predictable user-defined routine to today's checklist.
     func addRoutine(title: String, emoji: String = "✨") {
         let cleanedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleanedTitle.isEmpty, routines.count < 24 else { return }
@@ -451,8 +472,8 @@ final class CareStore: ObservableObject {
         guard medicationScheduleConfirmed,
               let med = medications.first(where: { $0.id == id }) else { return }
         let content = UNMutableNotificationContent()
-        content.title = "💊 Snoozed: \(med.shortName)"
-        content.body = "Reminder for \(med.timeLabel) snoozed 10 minutes."
+        content.title = "CareSphere"
+        content.body = AppLanguage.text("Open your confirmed medication schedule.")
         content.sound = .default
         content.categoryIdentifier = "MED_DOSE"
         content.userInfo = ["medId": med.id.uuidString]
@@ -470,9 +491,94 @@ final class CareStore: ObservableObject {
         }
     }
 
+    func toggleFavorite(_ id: String) {
+        favoriteActivities = ActivityPreferences.toggling(id, in: favoriteActivities)
+    }
+
+    func updateNote(id: UUID, body: String) {
+        let cleaned = String(body.trimmingCharacters(in: .whitespacesAndNewlines).prefix(4000))
+        guard !cleaned.isEmpty, let index = notes.firstIndex(where: { $0.id == id }) else { return }
+        notes[index].body = cleaned
+        notes[index].updatedAt = Date()
+        notes[index].sentiment = TextInsightsService.sentimentScore(for: cleaned)
+    }
+
+    func deleteNote(id: UUID) {
+        if let note = notes.first(where: { $0.id == id }) {
+            personalSupport.deletedNotes.removeAll { $0.id == id }
+            personalSupport.deletedNotes.insert(DeletedCareNote(note: note), at: 0)
+            personalSupport.deletedNotes = Array(personalSupport.deletedNotes.prefix(100))
+        }
+        notes.removeAll { $0.id == id }
+    }
+    func undoRoutineChange() {
+        guard let previous = routineUndo else { return }
+        restoringRoutine = true; routines = previous; routineUndo = nil; restoringRoutine = false
+    }
+    func restoreDeletedNote(_ entry: DeletedCareNote) {
+        if !notes.contains(where: { $0.id == entry.id }) { notes.insert(entry.note, at: 0) }
+        personalSupport.deletedNotes.removeAll { $0.id == entry.id }
+    }
+    func importTransfer(_ transfer: TransferPayload, selected: Set<String>) throws -> [String] {
+        guard persistenceCanWrite else { throw CareStoreError.storageUnavailable }
+        try DeviceTransfer.validate(transfer)
+        var box = persistedBox()
+        var support = box.personalSupport ?? PersonalSupport()
+        var history = support.receivedItems ?? []
+        let chosen = transfer.records.filter { selected.contains($0.id) && !history.contains(transfer.id + ":" + $0.id) }
+        guard !chosen.isEmpty, box.notes.count + chosen.filter({ $0.type == "note" }).count <= 500,
+              box.routines.count + chosen.filter({ $0.type == "routine" }).count <= 200 else { throw CareStoreError.storageUnavailable }
+        for record in chosen {
+            if record.type == "note" { box.notes.append(CareNote(author: "Imported copy", body: record.text, sentiment: TextInsightsService.sentimentScore(for: record.text))) }
+            else { box.routines.append(Routine(emoji: "", title: record.text)) }
+            history.append(transfer.id + ":" + record.id)
+        }
+        support.receivedItems = Array(history.suffix(2000)); box.personalSupport = support
+        let key = try SecureCareStorage.loadOrCreateKey()
+        try writePrivateFile(SecureCareStorage.seal(JSONEncoder().encode(box), using: key), to: fileURL)
+        encryptionKey = key
+        isErasingLocalData = true
+        notes = box.notes; routines = box.routines; routineUndo = nil; personalSupport = support
+        isErasingLocalData = false; persistenceIssue = nil
+        return chosen.map { $0.id }
+    }
+    func backupSnapshot() throws -> Data { try JSONEncoder().encode(persistedBox()) }
+    func inspectBackup(_ data: Data) throws -> String {
+        let box = try validatedBackup(data)
+        return "\(box.notes.count) notes, \(box.routines.count) routines. Existing local records will be replaced. Medication reminders will be paused for review."
+    }
+    private func validatedBackup(_ data: Data) throws -> PersistedBox {
+        guard data.count < 8_000_000 else { throw CareStoreError.storageUnavailable }
+        let box = try JSONDecoder().decode(PersistedBox.self, from: data)
+        guard box.notes.count <= 500, box.routines.count <= 200, box.medications.count <= 200,
+              (box.personalSupport?.photos.count ?? 0) <= 10,
+              (box.personalSupport?.photos.allSatisfy { $0.jpeg.count <= 180_000 } ?? true)
+        else { throw CareStoreError.storageUnavailable }
+        return box
+    }
+    func restoreBackup(_ data: Data) throws {
+        guard persistenceCanWrite else { throw CareStoreError.storageUnavailable }
+        var box = try validatedBackup(data)
+        box.medicationScheduleConfirmed = false
+        box.biometricEnabled = biometricEnabled
+        let key = try SecureCareStorage.loadOrCreateKey()
+        try writePrivateFile(SecureCareStorage.seal(JSONEncoder().encode(box), using: key), to: fileURL)
+        encryptionKey = key
+        isErasingLocalData = true
+        displayName = box.displayName; voiceReminders = box.voiceReminders; voiceIdentifier = box.voiceIdentifier ?? ""
+        routines = box.routines; routineUndo = nil; medications = box.medications; medicationScheduleConfirmed = false
+        notes = box.notes; moods = box.moods; favoriteActivities = ActivityPreferences.normalized(box.favoriteActivities ?? [])
+        personalSupport = box.personalSupport ?? PersonalSupport()
+        personalSupport.deletedNotes.removeAll { $0.deletedAt < Date().addingTimeInterval(-30 * 86400) }
+        emotionScore = box.emotionScore; bestPattern = box.bestPattern
+        profile = box.profile ?? CareProfile(); colorAppearance = box.colorAppearance ?? "system"
+        highContrast = box.highContrast ?? false; reduceVisualMotion = box.reduceVisualMotion ?? true
+        isErasingLocalData = false; save(); syncMedicationReminders()
+    }
+
     func addNote(author: String, body: String) {
         guard !body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = String(body.trimmingCharacters(in: .whitespacesAndNewlines).prefix(4000))
         notes.insert(
             CareNote(author: author, body: trimmed, sentiment: TextInsightsService.sentimentScore(for: trimmed)),
             at: 0)

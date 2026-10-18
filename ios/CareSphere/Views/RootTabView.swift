@@ -1,66 +1,126 @@
+import CareActivityKit
 import SwiftUI
 
+@MainActor
+final class CareNavigation: ObservableObject {
+    enum Tab: Hashable { case today, activities, connect, care, health }
+    enum HealthPage: String, CaseIterable { case vitals = "Vitals", guide = "Health Guide" }
+    @Published var selectedTab: Tab = .today
+    @Published var healthPage: HealthPage = .vitals
+    @Published var requestedActivityID: String?
+    @Published var focusMoodCheckIn = false
+}
+
 struct RootTabView: View {
+    var shortcutRoute: String? = nil
+    var onShortcutHandled: () -> Void = {}
+    @Environment(\.dynamicTypeSize) private var typeSize
     @EnvironmentObject private var store: CareStore
+    @State private var showSupport = false
+    @StateObject private var navigation = CareNavigation()
     @State private var showSettings = false
     @State private var showSOS = false
+    @State private var showVisitPrep = false
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header — mirrors the web app: brand, settings gear, SOS.
             HStack(spacing: 12) {
-                Text("💚")
-                    .font(.title2)
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("CareSphere")
-                        .font(.headline.weight(.heavy))
-                        .foregroundStyle(Color.emeraldText)
-                    Text("Senior care · isolation prevention · autism support")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                Image(systemName: "heart.circle.fill")
+                    .font(.title).foregroundStyle(Color.emeraldText).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(AppLanguage.text("CareSphere")).font(.headline.weight(.bold))
+                    if !typeSize.isAccessibilitySize {
+                        Text(AppLanguage.text("A little support, every day")).font(.caption).foregroundStyle(.secondary)
+                    }
                 }
-                Spacer()
-                Button {
-                    showSettings = true
-                } label: {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 15, weight: .bold))
-                        .padding(10)
-                        .background(Color.card, in: Circle())
+                .accessibilityElement(children: .combine)
+                Spacer(minLength: 4)
+                Button { showSupport = true } label: { Image(systemName: "hand.raised").frame(minWidth: 44, minHeight: 44) }.accessibilityLabel(AppLanguage.text("My support tools"))
+                Button { showSettings = true } label: {
+                    Image(systemName: "gearshape")
+                        .font(.title3)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .background(Color.card, in: RoundedRectangle(cornerRadius: 14))
                 }
-                .accessibilityLabel("Settings")
-                Button {
-                    showSOS = true
-                } label: {
-                    Label("SOS", systemImage: "phone.fill")
-                        .font(.caption.weight(.black))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 9)
-                        .background(.red, in: Capsule())
+                .accessibilityLabel(AppLanguage.text("Settings and accessibility"))
+                Button { showSOS = true } label: {
+                    Text(AppLanguage.text("SOS")).font(.subheadline.weight(.bold))
+                        .padding(.horizontal, 12).frame(minHeight: 44)
+                        .background(Color.red, in: RoundedRectangle(cornerRadius: 14))
                         .foregroundStyle(.white)
                 }
-                .accessibilityLabel("Emergency SOS")
+                .accessibilityLabel(AppLanguage.text("Emergency SOS"))
             }
-            .padding(.horizontal)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 16).padding(.vertical, 8)
             .background(.bar)
 
-            TabView {
+            TabView(selection: $navigation.selectedTab) {
                 OverviewView()
-                    .tabItem { Label("Overview", systemImage: "house.fill") }
+                    .tabItem { Label(AppLanguage.text("Today"), systemImage: "house") }.tag(CareNavigation.Tab.today)
                 TherapyView()
-                    .tabItem { Label("Activities", systemImage: "square.grid.2x2") }
+                    .tabItem { Label(AppLanguage.text("Activities"), systemImage: "square.grid.2x2") }.tag(CareNavigation.Tab.activities)
+                if store.personalSupport.simple {
+                    PersonalSupportView().tabItem { Label(AppLanguage.text("My People"), systemImage: "person.2") }.tag(CareNavigation.Tab.connect)
+                } else {
                 CoffeeCirclesView()
-                    .tabItem { Label("Circles", systemImage: "person.2.fill") }
+                    .tabItem { Label(AppLanguage.text("Connect"), systemImage: "person.2") }.tag(CareNavigation.Tab.connect)
                 CareCircleView()
-                    .tabItem { Label("Care", systemImage: "shield.fill") }
-                VitalsView()
-                    .tabItem { Label("Vitals", systemImage: "waveform.path.ecg") }
-                HealthGuideView()
-                    .tabItem { Label("Guide", systemImage: "sparkles") }
+                    .tabItem { Label(AppLanguage.text("Care"), systemImage: "heart.text.square") }.tag(CareNavigation.Tab.care)
+                HealthHomeView()
+                    .tabItem { Label(AppLanguage.text("Health"), systemImage: "waveform.path.ecg") }.tag(CareNavigation.Tab.health)
+                }
             }
         }
+        .environmentObject(navigation)
+        .onAppear { handleShortcutRoute(shortcutRoute) }
+        .onChange(of: shortcutRoute) { route in handleShortcutRoute(route) }
+        .onChange(of: store.personalSupport.simple) { _ in navigation.selectedTab = .today }
+        .sheet(isPresented: $showSupport) { PersonalSupportView() }
         .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(isPresented: $showSOS) { SosView() }
+        .sheet(isPresented: $showVisitPrep) { VisitPrepView().environmentObject(store) }
+    }
+
+    private func handleShortcutRoute(_ route: String?) {
+        guard let route else { return }
+        switch route {
+        case "today":
+            navigation.selectedTab = .today
+        case "activities":
+            navigation.selectedTab = .activities
+        case "breathing":
+            navigation.requestedActivityID = "breathing"
+            navigation.selectedTab = .activities
+        case "mood":
+            navigation.selectedTab = .today
+            navigation.focusMoodCheckIn = true
+        case "visit-prep":
+            showVisitPrep = true
+        default:
+            return
+        }
+        onShortcutHandled()
+    }
+}
+
+private struct HealthHomeView: View {
+    @EnvironmentObject private var navigation: CareNavigation
+    @Environment(\.dynamicTypeSize) private var typeSize
+    var body: some View {
+        VStack(spacing: 0) {
+            if typeSize.isAccessibilitySize {
+                Picker(AppLanguage.text("Health section"), selection: $navigation.healthPage) {
+                    ForEach(CareNavigation.HealthPage.allCases, id: \.self) { Text(AppLanguage.text($0.rawValue)).tag($0) }
+                }.pickerStyle(.menu).padding(.horizontal)
+            } else {
+                Picker(AppLanguage.text("Health section"), selection: $navigation.healthPage) {
+                    ForEach(CareNavigation.HealthPage.allCases, id: \.self) { Text(AppLanguage.text($0.rawValue)).tag($0) }
+                }.pickerStyle(.segmented).padding(.horizontal).padding(.top, 8)
+            }
+            switch navigation.healthPage {
+            case .vitals: VitalsView()
+            case .guide: HealthGuideView()
+            }
+        }
     }
 }

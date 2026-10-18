@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>CareSphere</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>CareSphere connects to Bluetooth heart-rate monitors — including Garmin watches broadcasting heart rate — to stream live vitals.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>CareSphere uses the camera for video coffee circles and telehealth visits.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>CareSphere locks your health data behind Touch ID / Face ID.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>CareSphere reads heart rate, blood oxygen, blood pressure, and workout summaries from Apple Health after you approve. It never writes health data.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_care-xfer._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>CareSphere transfers only selected encrypted records directly between nearby phones on your private Wi-Fi or hotspot, and can search a local Kiwix library. No hosted server is used for device transfers.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>CareSphere includes your location only when you choose to share SOS details. Nothing is sent automatically.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>CareSphere uses the microphone for video coffee circles and telehealth visits.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>CareSphere counts your daily steps to encourage gentle, healthy movement.</string>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>org.caresphere.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>caresphere</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

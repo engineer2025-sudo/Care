@@ -5,3 +5,30 @@ dist/
 
 # Downloaded CI installers and local delivery bundles are not source assets.
 deliverables/
+
+# Local browser checks and test reports
+.cache/
+playwright-report/
+test-results/
+
+# Native build and per-user Xcode state (keep the shared project and scheme)
+**/.build/
+**/.swiftpm/
+**/xcuserdata/
+**/*.xcuserstate
+DerivedData/
+
+# Native Android generated state and private signing material
+android/.gradle/
+android/.kotlin/
+android/local.properties
+android/**/build/
+android/**/*.jks
+android/**/*.keystore
+
+# Python tool caches
+__pycache__/
+
+# Local download bundles and original generated seal preview (release ZIPs are attached separately)
+/download-files/
+/caresphere-visit-prep-seal.png

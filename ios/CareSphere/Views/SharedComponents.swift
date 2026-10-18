@@ -5,9 +5,6 @@ import UIKit
 import AppKit
 #endif
 
-// MARK: - Cross-platform semantic colors & helpers
-// iOS uses UISystemBackground colors; macOS maps them to AppKit equivalents
-// so the same SwiftUI sources compile on both platforms.
 
 private struct CareSphereHighContrastKey: EnvironmentKey {
     static let defaultValue = false
@@ -21,7 +18,6 @@ extension EnvironmentValues {
 }
 
 extension Color {
-    /// Outer card background.
     static let card = {
         #if os(iOS)
         return Color(UIColor.secondarySystemBackground)
@@ -29,7 +25,6 @@ extension Color {
         return Color(NSColor.controlBackgroundColor)
         #endif
     }()
-    /// Inner row / element background inside cards.
     static let cardInner = {
         #if os(iOS)
         return Color(UIColor.tertiarySystemBackground)
@@ -40,8 +35,6 @@ extension Color {
 }
 
 extension View {
-    /// Inline navigation titles on iOS; no-op on macOS where titles are
-    /// already rendered inline in the window chrome.
     @ViewBuilder
     func inlineTitle() -> some View {
         #if os(iOS)
@@ -52,7 +45,6 @@ extension View {
     }
 }
 
-/// Card container used across all tabs.
 struct SectionCard<Content: View>: View {
     let title: String
     let systemImage: String
@@ -62,8 +54,9 @@ struct SectionCard<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label(title, systemImage: systemImage)
-                .font(.subheadline.weight(.bold))
+                .font(.headline)
                 .foregroundStyle(.primary)
+                .accessibilityAddTraits(.isHeader)
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -77,7 +70,6 @@ struct SectionCard<Content: View>: View {
     }
 }
 
-/// LIVE / SIMULATED / OFFLINE-style chip used on vitals cards.
 struct StatusChip: View {
     let text: String
     var color: Color = .emeraldText
@@ -107,13 +99,18 @@ struct BigMetricButton<Label: View>: View {
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 6) {
-                label
+                HStack {
+                    label
+                    Spacer()
+                    Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary).accessibilityHidden(true)
+                }
                 Text(title)
-                    .font(.title2.weight(.black))
+                    .font(.title3.weight(.bold))
                     .foregroundStyle(.primary)
                 Text(subtitle)
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -129,18 +126,40 @@ struct BigMetricButton<Label: View>: View {
 }
 
 extension View {
-    /// Gentle success haptic — CoreHaptics custom patterns on iPhone,
-    /// no-op on macOS. See HapticsService.
     func celebrate() {
         HapticsService.success()
     }
 }
 
-// Global haptic helpers usable from any view or model.
 func hapticWarning() {
     HapticsService.warning()
 }
 
 func hapticError() {
     HapticsService.error()
+}
+
+
+extension View {
+    func carePagePadding() -> some View {
+        self.padding(16)
+            .frame(maxWidth: 900)
+            .frame(maxWidth: .infinity, alignment: .center)
+    }
+}
+
+// MARK: - Bare minimum mode
+/// Explanatory/guidance copy. Renders nothing in Bare minimum mode so screens
+/// keep only controls and personal content. Status messages, empty states and
+/// safety warnings use their own elements and stay visible.
+struct InfoText: View {
+    @AppStorage("caresphere.bareMinimum") private var bareMinimum = false
+    private let content: String
+    private let font: Font?
+    init(_ content: String, font: Font? = nil) { self.content = content; self.font = font }
+    var body: some View {
+        if !bareMinimum {
+            if let font { Text(content).font(font) } else { Text(content) }
+        }
+    }
 }

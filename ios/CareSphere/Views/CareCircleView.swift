@@ -1,9 +1,16 @@
 import SwiftUI
+import CareActivityKit
 
 struct CareCircleView: View {
     @EnvironmentObject private var store: CareStore
     @State private var noteDraft = ""
     @State private var showingVisitPrep = false
+    @State private var query = ""
+    @State private var editingNote: CareNote?
+    @State private var deletingNote: CareNote?
+    private var visibleNotes: [CareNote] {
+        store.notes.filter { ActivityPreferences.matches($0.body + " " + $0.author, query: query) }
+    }
 
     var body: some View {
         NavigationStack {
@@ -16,12 +23,23 @@ struct CareCircleView: View {
                     medicationStatus
                     emergencyContact
                 }
-                .padding()
+                .carePagePadding()
             }
             .background(Color.ink)
-            .navigationTitle("Care Circle")
+            .navigationTitle(AppLanguage.text("Care Circle"))
             .inlineTitle()
+            .searchable(text: $query, prompt: "Search your care notes")
         }
+        .sheet(item: $editingNote) { note in
+            CareNoteEditor(note: note).environmentObject(store)
+        }
+        .alert(AppLanguage.text("Delete this note?"), isPresented: Binding(get: { deletingNote != nil }, set: { if !$0 { deletingNote = nil } })) {
+            Button(AppLanguage.text("Cancel"), role: .cancel) { deletingNote = nil }
+            Button(AppLanguage.text("Delete note"), role: .destructive) {
+                if let note = deletingNote { store.deleteNote(id: note.id) }
+                deletingNote = nil
+            }
+        } message: { Text(AppLanguage.text("This moves the note to Recently deleted in My support tools for 30 days. Previously shared copies cannot be removed.")) }
         .sheet(isPresented: $showingVisitPrep) {
             VisitPrepView()
                 .environmentObject(store)
@@ -29,8 +47,8 @@ struct CareCircleView: View {
     }
 
     private var localOnlyNotice: some View {
-        SectionCard(title: "Private to this device", systemImage: "iphone.gen3") {
-            Text("Care notes and check-ins are saved locally. This build has no family-sync, clinician portal, or push-alert server. Starter notes, if present, are sample content—not messages from real people.")
+        SectionCard(title: AppLanguage.text("Private to this device"), systemImage: "iphone.gen3") {
+            Text(AppLanguage.text("Care notes and check-ins are saved locally. This build has no family-sync, clinician portal, or push-alert server."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -38,14 +56,14 @@ struct CareCircleView: View {
     }
 
     private var visitPrepCard: some View {
-        SectionCard(title: "Prepare for a care visit", systemImage: "doc.text") {
-            Text("Build a preview from only the local details you choose, then share it with the system share sheet. It is not a medical record or clinical interpretation.")
+        SectionCard(title: AppLanguage.text("Prepare for a care visit"), systemImage: "doc.text") {
+            InfoText(AppLanguage.text("Build a preview from only the local details you choose, then share it with the system share sheet. It is not a medical record or clinical interpretation."))
                 .font(.caption).foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Button {
                 showingVisitPrep = true
             } label: {
-                Label("Choose information to include", systemImage: "square.and.arrow.up")
+                Label(AppLanguage.text("Choose information to include"), systemImage: "square.and.arrow.up")
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .buttonStyle(.borderedProminent)
@@ -53,24 +71,33 @@ struct CareCircleView: View {
     }
 
     private var careNotes: some View {
-        SectionCard(title: "Care notes · local only", systemImage: "square.and.pencil") {
-            HStack(spacing: 10) {
-                TextField("Add a private care note…", text: $noteDraft)
+        SectionCard(title: AppLanguage.text("Care notes · local only"), systemImage: "square.and.pencil") {
+            VStack(alignment: .leading, spacing: 10) {
+                TextField(AppLanguage.text("Add a private care note…"), text: $noteDraft, axis: .vertical)
+                    .lineLimit(2...6)
+                    .accessibilityLabel(AppLanguage.text("New private care note"))
                     .textFieldStyle(.roundedBorder)
-                    .font(.footnote)
+                    .font(.body)
                 Button {
-                    store.addNote(author: "You (\(store.displayName))", body: noteDraft)
+                    store.addNote(author: store.displayName.isEmpty ? "You" : "You (\(store.displayName))", body: noteDraft)
                     noteDraft = ""
                     celebrate()
                 } label: {
-                    Image(systemName: "paperplane.fill")
-                        .padding(10)
+                    Label(AppLanguage.text("Save note"), systemImage: "square.and.pencil").frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(noteDraft.trimmingCharacters(in: .whitespaces).isEmpty)
+                .disabled(noteDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
 
-            ForEach(store.notes) { note in
+            if store.notes.isEmpty {
+                Text(AppLanguage.text("No notes yet. Save a question, update, or reminder for your next visit."))
+                    .foregroundStyle(.secondary).padding(.vertical, 12)
+            }
+            if !store.notes.isEmpty && visibleNotes.isEmpty {
+                Text(AppLanguage.text("No notes match your search.")).foregroundStyle(.secondary)
+                Button(AppLanguage.text("Clear search")) { query = "" }.buttonStyle(.bordered)
+            }
+            ForEach(visibleNotes) { note in
                 VStack(alignment: .leading, spacing: 3) {
                     HStack {
                         Text(note.author).font(.caption.weight(.bold))
@@ -78,14 +105,14 @@ struct CareCircleView: View {
                         Text(note.createdAt, style: .date).font(.caption2).foregroundStyle(.tertiary)
                     }
                     Text(note.body).font(.footnote).foregroundStyle(.secondary)
-                    if let sentiment = note.sentiment {
-                        HStack(spacing: 5) {
-                            Text(TextInsightsService.emoji(for: sentiment))
-                            StatusChip(text: TextInsightsService.label(for: sentiment),
-                                       color: sentiment >= 0.35 ? .emerald : sentiment <= -0.35 ? .orange : .gray)
-                            Text("on-device NLP").font(.caption2).foregroundStyle(.tertiary)
-                        }
+                    if let date = note.updatedAt {
+                        Text("Edited \(date.formatted())").font(.caption).foregroundStyle(.secondary)
                     }
+                    ViewThatFits(in: .horizontal) {
+                        HStack { noteActions(note) }
+                        VStack(alignment: .leading) { noteActions(note) }
+                    }
+
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -94,8 +121,13 @@ struct CareCircleView: View {
         }
     }
 
+    @ViewBuilder private func noteActions(_ note: CareNote) -> some View {
+        Button(AppLanguage.text("Edit note")) { editingNote = note }.buttonStyle(.bordered).controlSize(.large)
+        Button(AppLanguage.text("Delete"), role: .destructive) { deletingNote = note }.buttonStyle(.bordered).controlSize(.large)
+    }
+
     private var todaySummary: some View {
-        SectionCard(title: "Today at a glance", systemImage: "chart.bar.fill") {
+        SectionCard(title: AppLanguage.text("Today at a glance"), systemImage: "chart.bar.fill") {
             VStack(alignment: .leading, spacing: 8) {
                 insightRow("Routine check-ins", value: "\(store.routinesDone)/\(store.routines.count)", note: "marked complete today")
                 insightRow("Activities", value: "Optional", note: "unscored; participation is not tracked")
@@ -120,12 +152,12 @@ struct CareCircleView: View {
     }
 
     private var medicationStatus: some View {
-        SectionCard(title: "Medication status · today", systemImage: "pills.fill") {
+        SectionCard(title: AppLanguage.text("Medication status · today"), systemImage: "pills.fill") {
             if store.configuredMedications.isEmpty {
-                Text("No medication schedule is saved on this device.")
+                Text(AppLanguage.text("No medication schedule is saved on this device."))
                     .font(.caption).foregroundStyle(.secondary)
             } else if !store.medicationScheduleConfirmed {
-                Text("A saved schedule is paused until you review every name and time in Settings. No dose check-ins or reminders are active yet.")
+                Text(AppLanguage.text("A saved schedule is paused until you review every name and time in Settings. No dose check-ins or reminders are active yet."))
                     .font(.caption).foregroundStyle(.secondary)
             } else {
                 ForEach(store.configuredMedications) { medication in
@@ -142,18 +174,18 @@ struct CareCircleView: View {
                             .font(.caption2).foregroundStyle(.secondary)
                     }
                 }
-                Text("This reflects only the schedule and check-ins entered in CareSphere. It does not verify that a dose was taken.")
+                InfoText(AppLanguage.text("This reflects only the schedule and check-ins entered in CareSphere. It does not verify that a dose was taken."))
                     .font(.caption2).foregroundStyle(.tertiary)
             }
         }
     }
 
     private var emergencyContact: some View {
-        SectionCard(title: "Emergency contact", systemImage: "person.crop.circle.badge.exclamationmark") {
+        SectionCard(title: AppLanguage.text("Emergency contact"), systemImage: "person.crop.circle.badge.exclamationmark") {
             let contact = store.profile.emergencyContact
             if contact.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                 && contact.phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Text("No emergency contact is set. Add one in Settings. The contact is stored on this device; CareSphere does not automatically notify them.")
+                Text(AppLanguage.text("No emergency contact is set. Add one in Settings. The contact is stored on this device; CareSphere does not automatically notify them."))
                     .font(.caption).foregroundStyle(.secondary)
             } else {
                 VStack(alignment: .leading, spacing: 6) {
@@ -167,7 +199,7 @@ struct CareCircleView: View {
                                 .font(.footnote)
                         }
                     }
-                    Text("Saved locally. Use SOS → Share SOS details to choose a messaging app and recipient.")
+                    InfoText(AppLanguage.text("Saved locally. Use SOS → Share SOS details to choose a messaging app and recipient."))
                         .font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -177,5 +209,38 @@ struct CareCircleView: View {
 
     private func moodLabel(_ score: Int) -> String {
         ["Struggling", "Low", "Okay", "Good", "Great"][score - 1]
+    }
+}
+
+private struct CareNoteEditor: View {
+    let note: CareNote
+    @EnvironmentObject private var store: CareStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var draft: String
+    @State private var discard = false
+    init(note: CareNote) { self.note = note; _draft = State(initialValue: note.body) }
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(AppLanguage.text("Your private note")) {
+                    TextEditor(text: $draft).frame(minHeight: 200).accessibilityLabel(AppLanguage.text("Edit care note"))
+                    Text("\(draft.count)/4,000 characters. Editing preserves the original creation date.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle(AppLanguage.text("Edit note")).inlineTitle()
+            .interactiveDismissDisabled(draft != note.body)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button(AppLanguage.text("Cancel")) { if draft != note.body { discard = true } else { dismiss() } } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(AppLanguage.text("Save")) { store.updateNote(id: note.id, body: draft); dismiss() }
+                        .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draft.count > 4000)
+                }
+            }
+            .confirmationDialog(AppLanguage.text("Discard unsaved changes?"), isPresented: $discard, titleVisibility: .visible) {
+                Button(AppLanguage.text("Discard changes"), role: .destructive) { dismiss() }
+                Button(AppLanguage.text("Keep editing"), role: .cancel) {}
+            }
+        }
     }
 }

@@ -4,8 +4,6 @@ import Combine
 import FoundationXML
 #endif
 
-/// A short, source-linked passage retrieved from an on-device reference library
-/// or a user-configured Kiwix server on their private network.
 struct HealthReference: Identifiable, Codable, Hashable, Sendable {
     let id: String
     let title: String
@@ -22,9 +20,6 @@ struct HealthReference: Identifiable, Codable, Hashable, Sendable {
     }
 }
 
-/// Local-first health reference search. The optional NLM MedlinePlus XML archive
-/// is downloadable for offline use; a Kiwix connector searches a user's own ZIM
-/// archive without copying or uploading the multi-gigabyte .zim file.
 @MainActor
 final class MedicalLibraryService: ObservableObject {
     @Published var kiwixServerURL: String {

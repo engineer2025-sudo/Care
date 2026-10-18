@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 #if os(iOS)
 import UIKit
@@ -7,6 +8,8 @@ import AppKit
 
 @main
 struct CareSphereApp: App {
+    @AppStorage(AppLanguage.preferenceKey) private var interfaceLanguage = "auto"
+    @StateObject private var speech = SpeechService.shared
     @StateObject private var store = CareStore()
     @StateObject private var healthKit = HealthKitService()
     @StateObject private var bluetooth = BluetoothHeartRateService()
@@ -15,11 +18,11 @@ struct CareSphereApp: App {
     @StateObject private var steps = StepCountService()
     @StateObject private var localAssistant = LocalAssistantService()
     @StateObject private var careSupport = CareSupportCoordinator()
-    @StateObject private var kokoroSpeech = KokoroSpeechService.shared
 
     @Environment(\.scenePhase) private var scenePhase
     @State private var isLocked = false
     @State private var hasCheckedInitialLock = false
+    @State private var pendingShortcutRoute: String?
 
     private var preferredColorScheme: ColorScheme? {
         switch store.colorAppearance {
@@ -39,12 +42,21 @@ struct CareSphereApp: App {
                 if !store.hasCompletedOnboarding {
                     OnboardingView()
                 } else if store.biometricEnabled && (isLocked || !hasCheckedInitialLock) {
-                    // Replace the app's root view with an opaque lock screen.
                     AppLockView(onUnlock: { isLocked = false })
                 } else {
-                    RootTabView()
+                    RootTabView(shortcutRoute: pendingShortcutRoute) {
+                        pendingShortcutRoute = nil
+                    }
                 }
             }
+            .onOpenURL { url in
+                guard url.scheme?.lowercased() == "caresphere",
+                      let route = url.host?.lowercased(),
+                      ["today", "activities", "breathing", "mood", "visit-prep"].contains(route) else { return }
+                pendingShortcutRoute = route
+            }
+            .environment(\.locale, Locale(identifier: interfaceLanguage == "auto" ? AppLanguage.resolve(Locale.preferredLanguages) : interfaceLanguage))
+            .onChange(of: interfaceLanguage) { _ in SpeechService.shared.stop(); speech.unavailableMessage = nil }
             .environmentObject(store)
             .environmentObject(healthKit)
             .environmentObject(bluetooth)
@@ -53,11 +65,16 @@ struct CareSphereApp: App {
             .environmentObject(steps)
             .environmentObject(localAssistant)
             .environmentObject(careSupport)
-            .environmentObject(kokoroSpeech)
             .preferredColorScheme(preferredColorScheme)
             .environment(\.careSphereHighContrast, store.highContrast)
             .tint(.emerald)
             .safeAreaInset(edge: .top, spacing: 0) {
+                if let issue = speech.unavailableMessage {
+                    HStack {
+                        Text(issue).font(.caption)
+                        Button(AppLanguage.text("Close")) { speech.unavailableMessage = nil }
+                    }.padding(10).background(.regularMaterial).accessibilityAddTraits(.updatesFrequently)
+                }
                 if let issue = store.persistenceIssue {
                     Label(issue, systemImage: "exclamationmark.triangle.fill")
                         .font(.caption.weight(.medium))
@@ -85,10 +102,11 @@ struct CareSphereApp: App {
                     hasCheckedInitialLock = true
                     if store.biometricEnabled { isLocked = true }
                 }
-                steps.start()
             }
             .onChange(of: scenePhase) { phase in
                 careSupport.setAppActive(phase == .active)
+                if phase == .active { localAssistant.refreshAvailability() }
+                if phase == .active && steps.hasStarted { steps.start() }
                 if phase == .active && healthKit.hasRequestedAuthorization {
                     healthKit.refreshAll()
                 }
@@ -96,8 +114,8 @@ struct CareSphereApp: App {
                 // may make a scene inactive while its own system prompt is visible.
                 if phase == .background {
                     careSupport.finish()
-                    KokoroSpeechService.shared.stopPlayback()
-                    Task { await KokoroSpeechService.shared.releaseInferenceMemory() }
+                    localAssistant.cancel()
+                    SpeechService.shared.stop()
                 }
                 if store.hasCompletedOnboarding && store.biometricEnabled && phase == .background {
                     isLocked = true
@@ -114,10 +132,8 @@ struct CareSphereApp: App {
 }
 
 extension Color {
-    /// Muted sage for filled controls; white labels remain readable on this shade.
     static let emerald = Color(red: 55 / 255, green: 111 / 255, blue: 76 / 255)
 
-    /// Contrast-aware sage text: dark ink in light appearance, light sage in dark.
     static let emeraldText: Color = {
         #if os(iOS)
         return Color(uiColor: UIColor { traits in
@@ -135,7 +151,6 @@ extension Color {
         #endif
     }()
 
-    /// Follow the user's system appearance rather than forcing a dark canvas.
     static let ink: Color = {
         #if os(iOS)
         return Color(uiColor: .systemBackground)

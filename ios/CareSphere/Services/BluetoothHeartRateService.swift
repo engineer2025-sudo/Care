@@ -1,55 +1,123 @@
 import Foundation
 import CoreBluetooth
+import CareActivityKit
 
-/// Streams live heart rate from real BLE monitors (Polar, Wahoo, most chest
-/// straps and watch pods) using the standard Bluetooth SIG Heart Rate profile
-/// — service 0x180D, characteristic 0x2A37 — via CoreBluetooth, the official
-/// iOS Bluetooth stack. Parsing follows the GATT Heart Rate Measurement spec
-/// (flags bit 0 selects 8- vs 16-bit BPM, little-endian).
+struct HeartRateMonitorCandidate: Identifiable {
+    let id: UUID
+    let name: String
+    var shortID: String { String(id.uuidString.suffix(4)) }
+}
+
+/// The person selects a discovered monitor; scanning never auto-connects.
 final class BluetoothHeartRateService: NSObject, ObservableObject {
+    @Published private(set) var measuredAt: Date?
     @Published var bpm: Int?
     @Published var sensorName: String?
-    @Published var isConnected = false
-    @Published var statusMessage = "Not connected — tap Pair to scan for heart-rate monitors."
+    @Published private(set) var isConnected = false
+    @Published private(set) var isPairing = false
+    @Published private(set) var candidates: [HeartRateMonitorCandidate] = []
+    @Published var statusMessage = "Not connected. Choose Pair to look for your monitor."
 
     static let heartRateServiceUUID = CBUUID(string: "180D")
     static let heartRateMeasurementUUID = CBUUID(string: "2A37")
 
     private var central: CBCentralManager?
     private var peripheral: CBPeripheral?
-    private var measurementCharacteristic: CBCharacteristic?
-    private var shouldAutoConnect = false
+    private var discovered: [UUID: CBPeripheral] = [:]
+    private var pairingTimeout: DispatchWorkItem?
+    private var readingTimeout: DispatchWorkItem?
 
     func pair() {
-        shouldAutoConnect = true
-        statusMessage = "Scanning for heart-rate monitors…"
+        guard !isConnected, !isPairing else { return }
+        candidates = []
+        discovered = [:]
+        isPairing = true
+        statusMessage = "Checking Bluetooth…"
         if central == nil {
             central = CBCentralManager(delegate: self, queue: nil)
-        } else {
-            centralDidBecomePoweredOn()
+        } else if let central {
+            centralManagerDidUpdateState(central)
         }
+    }
+
+    func connect(to candidate: HeartRateMonitorCandidate) {
+        guard isPairing, central?.state == .poweredOn,
+              let selected = discovered[candidate.id], peripheral == nil else { return }
+        central?.stopScan()
+        candidates = []
+        peripheral = selected
+        selected.delegate = self
+        sensorName = candidate.name
+        statusMessage = "Connecting to \(candidate.name)…"
+        setPairingTimeout(message: "The monitor did not finish connecting. Check its broadcast mode, then try again.")
+        central?.connect(selected, options: nil)
     }
 
     func disconnect() {
-        shouldAutoConnect = false
-        if let peripheral { central?.cancelPeripheralConnection(peripheral) }
-        reset()
+        stop(message: "Disconnected. No current heart-rate reading is displayed.")
     }
 
-    private func reset() {
-        DispatchQueue.main.async {
-            self.peripheral = nil
-            self.measurementCharacteristic = nil
-            self.isConnected = false
-            self.bpm = nil
-            self.statusMessage = "Not connected — tap Pair to scan for heart-rate monitors."
+    func cancelPairing() {
+        stop(message: "Pairing canceled. You can look for a monitor again whenever you like.")
+    }
+
+    private func startScan() {
+        guard isPairing, central?.state == .poweredOn else { return }
+        statusMessage = "Looking for heart-rate monitors. Choose yours from the list below."
+        central?.scanForPeripherals(withServices: [Self.heartRateServiceUUID],
+                                    options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
+        pairingTimeout?.cancel()
+        let timeout = DispatchWorkItem { [weak self] in
+            guard let self, self.isPairing, self.peripheral == nil else { return }
+            self.central?.stopScan()
+            if self.candidates.isEmpty {
+                self.isPairing = false
+                self.statusMessage = "No monitor found. Enable heart-rate broadcast, keep it nearby, and try Pair again."
+            } else {
+                self.statusMessage = "Search finished. Choose your monitor, or cancel and search again."
+            }
         }
+        pairingTimeout = timeout
+        DispatchQueue.main.asyncAfter(deadline: .now() + 20, execute: timeout)
     }
 
-    private func centralDidBecomePoweredOn() {
-        central?.scanForPeripherals(
-            withServices: [Self.heartRateServiceUUID],
-            options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
+    private func setPairingTimeout(message: String) {
+        pairingTimeout?.cancel()
+        let timeout = DispatchWorkItem { [weak self] in
+            guard let self, self.isPairing else { return }
+            self.stop(message: message)
+        }
+        pairingTimeout = timeout
+        DispatchQueue.main.asyncAfter(deadline: .now() + 20, execute: timeout)
+    }
+
+    private func stop(message: String) {
+        pairingTimeout?.cancel()
+        readingTimeout?.cancel()
+        central?.stopScan()
+        let previous = peripheral
+        peripheral = nil // Ignore delayed callbacks from a canceled connection.
+        if let previous { central?.cancelPeripheralConnection(previous) }
+        isConnected = false
+        isPairing = false
+        bpm = nil
+        measuredAt = nil
+        sensorName = nil
+        candidates = []
+        discovered = [:]
+        statusMessage = message
+    }
+
+    private func expireReadingLater() {
+        readingTimeout?.cancel()
+        let timeout = DispatchWorkItem { [weak self] in
+            guard let self, self.isConnected else { return }
+            self.bpm = nil
+            self.measuredAt = nil
+            self.statusMessage = "No fresh reading for 15 seconds. Check the monitor; the old value is no longer displayed."
+        }
+        readingTimeout = timeout
+        DispatchQueue.main.asyncAfter(deadline: .now() + 15, execute: timeout)
     }
 }
 
@@ -57,91 +125,98 @@ extension BluetoothHeartRateService: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
-            centralDidBecomePoweredOn()
+            if isPairing { startScan() }
         case .poweredOff:
-            statusMessage = "Bluetooth is off — enable it in Control Center or Settings."
-            reset()
+            stop(message: "Bluetooth is off. Enable it in iPhone Settings, then choose Pair again.")
         case .unauthorized:
-            statusMessage = "Bluetooth permission denied. Enable it in Settings → Privacy → Bluetooth."
-        default:
-            break
+            stop(message: "Bluetooth permission is denied. Review Settings → Privacy & Security → Bluetooth.")
+        case .unsupported:
+            stop(message: "This device does not support Bluetooth heart-rate monitors.")
+        case .resetting:
+            stop(message: "Bluetooth is restarting. Wait a moment, then choose Pair again.")
+        case .unknown:
+            if isPairing { setPairingTimeout(message: "Bluetooth did not become ready. Check iPhone Settings and try again.") }
+        @unknown default:
+            stop(message: "Bluetooth is unavailable. Try again later.")
         }
     }
 
-    func centralManager(
-        _ central: CBCentralManager,
-        didDiscover peripheral: CBPeripheral,
-        advertisementData: [String: Any],
-        rssi RSSI: NSNumber
-    ) {
-        central.stopScan()
-        self.peripheral = peripheral
-        peripheral.delegate = self
-        DispatchQueue.main.async {
-            self.sensorName = peripheral.name ?? "Heart-rate sensor"
-            self.statusMessage = "Connecting to \(peripheral.name ?? "sensor")…"
-        }
-        central.connect(peripheral, options: nil)
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral,
+                        advertisementData: [String: Any], rssi RSSI: NSNumber) {
+        guard isPairing, self.peripheral == nil, discovered[peripheral.identifier] == nil else { return }
+        discovered[peripheral.identifier] = peripheral
+        let name = peripheral.name ?? advertisementData[CBAdvertisementDataLocalNameKey] as? String ?? "Unnamed heart-rate monitor"
+        candidates.append(HeartRateMonitorCandidate(id: peripheral.identifier, name: name))
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        DispatchQueue.main.async { self.statusMessage = "Discovering services…" }
+        guard self.peripheral === peripheral, isPairing else { return }
+        statusMessage = "Checking the monitor's heart-rate service…"
         peripheral.discoverServices([Self.heartRateServiceUUID])
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        DispatchQueue.main.async {
-            self.statusMessage = "Could not connect\(error.map { ": \($0.localizedDescription)" } ?? ". Try pairing again.")"
-        }
+        guard self.peripheral === peripheral else { return }
+        stop(message: "Could not connect. Check the monitor and try again.\(error.map { " " + $0.localizedDescription } ?? "")")
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        DispatchQueue.main.async {
-            guard self.peripheral === peripheral else { return }
-            self.measurementCharacteristic = nil
-            self.bpm = nil
-            self.isConnected = false
-            self.statusMessage = self.shouldAutoConnect
-                ? "Connection lost — scanning to reconnect…"
-                : "Not connected — tap Pair to scan for heart-rate monitors."
-            if self.shouldAutoConnect { self.centralDidBecomePoweredOn() }
-        }
+        guard self.peripheral === peripheral else { return }
+        stop(message: "The monitor disconnected. No current reading is shown. Choose Pair to reconnect to your device.")
     }
 }
 
 extension BluetoothHeartRateService: CBPeripheralDelegate {
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        guard let service = peripheral.services?.first(where: { $0.uuid == Self.heartRateServiceUUID }) else {
-            DispatchQueue.main.async { self.statusMessage = "Heart-rate service not found on this device." }
+        guard self.peripheral === peripheral else { return }
+        guard error == nil,
+              let service = peripheral.services?.first(where: { $0.uuid == Self.heartRateServiceUUID }) else {
+            stop(message: "A heart-rate service was not found on that monitor. Choose a compatible device and try again.")
             return
         }
         peripheral.discoverCharacteristics([Self.heartRateMeasurementUUID], for: service)
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard let characteristic = service.characteristics?.first(where: { $0.uuid == Self.heartRateMeasurementUUID }) else { return }
-        measurementCharacteristic = characteristic
-        peripheral.setNotifyValue(true, for: characteristic)
-        DispatchQueue.main.async {
-            self.isConnected = true
-            self.statusMessage = "Live — streaming from \(peripheral.name ?? "BLE sensor") (GATT notifications)."
+        guard self.peripheral === peripheral else { return }
+        guard error == nil,
+              let characteristic = service.characteristics?.first(where: { $0.uuid == Self.heartRateMeasurementUUID }),
+              characteristic.properties.contains(.notify) else {
+            stop(message: "This monitor could not provide heart-rate notifications. Try another compatible device.")
+            return
         }
+        peripheral.setNotifyValue(true, for: characteristic)
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+        guard self.peripheral === peripheral, characteristic.uuid == Self.heartRateMeasurementUUID else { return }
+        guard error == nil, characteristic.isNotifying else {
+            stop(message: "Heart-rate notifications could not be enabled. Pair again when the monitor is ready.")
+            return
+        }
+        pairingTimeout?.cancel()
+        isPairing = false
+        isConnected = true
+        statusMessage = "Connected to \(sensorName ?? "your monitor"). Waiting for a reading…"
     }
 
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        guard characteristic.uuid == Self.heartRateMeasurementUUID,
-              let data = characteristic.value, data.count >= 2 else { return }
-
-        let flags = data[0]
-        let bpm: Int
-        if flags & 0x01 != 0 {
-            guard data.count >= 3 else { return }
-            bpm = Int(UInt16(data[1]) | (UInt16(data[2]) << 8))   // 16-bit little-endian
-        } else {
-            bpm = Int(data[1])                                     // 8-bit
+        guard self.peripheral === peripheral, characteristic.uuid == Self.heartRateMeasurementUUID else { return }
+        guard error == nil, let data = characteristic.value, data.count >= 2 else {
+            bpm = nil
+            measuredAt = nil
+            statusMessage = "A monitor reading could not be received. No value is displayed."
+            return
         }
-        guard bpm > 20, bpm < 250 else { return }
-
-        DispatchQueue.main.async { self.bpm = bpm }
+        guard let value = HeartRatePacket.bpm(from: Array(data)) else {
+            bpm = nil
+            measuredAt = nil
+            statusMessage = "The monitor sent an invalid, incomplete, or no-contact reading. Check its fit; no value is shown."
+            return
+        }
+        measuredAt = Date()
+        bpm = value
+        statusMessage = "Live reading from \(sensorName ?? "your selected monitor")."
+        expireReadingLater()
     }
 }

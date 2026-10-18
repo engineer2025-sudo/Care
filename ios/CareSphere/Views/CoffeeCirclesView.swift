@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 
 struct CoffeeCirclesView: View {
@@ -15,10 +16,10 @@ struct CoffeeCirclesView: View {
                     openCircleButton
                     explanation
                 }
-                .padding()
+                .carePagePadding()
             }
             .background(Color.ink)
-            .navigationTitle("Coffee Circles")
+            .navigationTitle(AppLanguage.text("Coffee Circles"))
             .inlineTitle()
             .sheet(item: $activeCircle) { circle in
                 ConferenceSheet(circle: circle, displayName: store.displayName)
@@ -28,7 +29,7 @@ struct CoffeeCirclesView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Isolation prevention, one cup at a time")
+            Text(AppLanguage.text("A familiar face, a shared moment"))
                 .font(.title3.weight(.heavy))
             Text("These buttons open real meet.jit.si rooms shared with the web app. They have no CareSphere host, schedule, attendance tracking, or moderation; anyone with a room link can join. Share only with people you trust. You'll appear as \(store.displayName).")
                 .font(.footnote)
@@ -52,7 +53,7 @@ struct CoffeeCirclesView: View {
                 .foregroundStyle(.secondary)
             }
             Text(circle.title).font(.headline)
-            Text("No CareSphere host, attendance tracking, or moderation. Anyone with this room link can join.")
+            Text(AppLanguage.text("No CareSphere host, attendance tracking, or moderation. Anyone with this room link can join."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Text(circle.room)
@@ -64,7 +65,7 @@ struct CoffeeCirclesView: View {
                 Button {
                     activeCircle = circle
                 } label: {
-                    Label("Join in app", systemImage: "video.fill")
+                    Label(AppLanguage.text("Review & join"), systemImage: "video.fill")
                         .font(.subheadline.weight(.black))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 11)
@@ -77,6 +78,7 @@ struct CoffeeCirclesView: View {
                         .padding(.vertical, 12)
                         .background(Color.cardInner, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
+                .accessibilityLabel("Open \(circle.title) in browser")
             }
         }
         .padding(16)
@@ -90,7 +92,7 @@ struct CoffeeCirclesView: View {
                 id: 99, title: "CareSphere Open Circle", emoji: "🫶",
                 schedule: "Ad-hoc room", room: "CareSphere-OpenCoffeeCircle-\(suffix)")
         } label: {
-            Label("Launch an open circle", systemImage: "plus.circle.fill")
+            Label(AppLanguage.text("Launch an open circle"), systemImage: "plus.circle.fill")
                 .font(.subheadline.weight(.black))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
@@ -101,9 +103,9 @@ struct CoffeeCirclesView: View {
 
     private var explanation: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("How the video works", systemImage: "lightbulb.fill")
+            Label(AppLanguage.text("How the video works"), systemImage: "lightbulb.fill")
                 .font(.subheadline.weight(.bold))
-            Text("Calls run on Jitsi Meet using encrypted WebRTC transport. CareSphere embeds the Jitsi SDK but does not host, schedule, or moderate rooms. Anyone with a room link may join, so verify participants before sharing private health details. Camera and microphone permission prompts appear only when you enable them.")
+            InfoText(AppLanguage.text("Calls run on Jitsi Meet using encrypted WebRTC transport. CareSphere opens the provider in your browser and does not host, schedule, or moderate rooms. The provider may require sign-in to start a room. Anyone with a room link may join, so verify participants before sharing private health details. Camera and microphone permission prompts appear only when you enable them."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

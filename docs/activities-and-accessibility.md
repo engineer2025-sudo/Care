@@ -25,3 +25,30 @@ Design should be reviewed with autistic people, people living with dementia, car
 - 2024 systematic review of serious games for social skills in autistic children and adolescents. The review describes promising findings while noting a small evidence base and need for more rigorous studies. https://pubmed.ncbi.nlm.nih.gov/38470619/
 - 2022 systematic review/meta-analysis of serious games for older adults with cognitive impairment. The authors report possible benefits but very low/heterogeneous evidence quality. https://pmc.ncbi.nlm.nih.gov/articles/PMC8949701/
 - AbilityNet, *Designing for dementia*. Practical guidance emphasizes clear language, visible labels, contrast, orientation, and avoiding unnecessary distraction. https://abilitynet.org.uk/factsheets/designing-dementia
+
+
+## Native iOS 2.3 update
+
+The native library now contains 11 offline activities. It adds Sort Together,
+Complete the Pattern, Find the Same, Everyday Order, and Conversation Cards.
+Each opens as a focused session rather than mounting every game in one scrolling
+page. Choice reduction, visible answer cues, untimed repetition, clear exit
+controls, and explicit next/skip transitions are design supports—not evidence of
+clinical effectiveness.
+
+**Important distinction for dementia claims:** NICE recommends group cognitive
+stimulation therapy for mild-to-moderate dementia but advises against cognitive
+training as treatment for mild-to-moderate Alzheimer's disease. CareSphere's
+standalone games are not a validated CST program. [1](https://www.nice.org.uk/guidance/ng97/chapter/recommendations)
+
+See the [native product/evidence brief](ios-product-brief.md) for the activity
+inventory, source-specific limitations, permissible deck claims, and architecture.
+Use the [device checklist](ios-device-test-plan.md) before demonstrating the build.
+
+
+## Research-informed social moment cards
+
+CareSphere adds three short, fictional situations with several reasonable responses. They are untimed, unscored, offline, and do not save the selected response. These are optional conversation prompts—not a social-skills intervention, assessment, or evidence-based treatment. They do not ask for eye contact, expression imitation, or a single “normal” response. See [Research and how CareSphere works](research-and-how-it-works.md) for the sources, population limits, and design rationale.
+
+
+Choice reduction is now consistent across platforms for the structured choice activities: people can choose fewer options for comfort. CareSphere does not automatically adapt difficulty from answers; choices are not stored or used as a performance measure. This is a user-control/accessibility feature, not a validated adaptive-training protocol.

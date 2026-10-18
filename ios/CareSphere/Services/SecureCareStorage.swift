@@ -36,7 +36,6 @@ enum SecureCareStorage {
         return SymmetricKey(data: data)
     }
 
-    /// Loads or creates a random, non-exported-by-CareSphere 256-bit key.
     static func loadOrCreateKey() throws -> SymmetricKey {
         if let key = try loadExistingKey() { return key }
 

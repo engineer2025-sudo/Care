@@ -1,3 +1,4 @@
+import CareActivityKit
 import SwiftUI
 #if os(iOS)
 import ContactsUI
@@ -36,17 +37,14 @@ struct ContactPicker: UIViewControllerRepresentable {
 }
 #endif
 
-/// ─────────────────────────────────────────────────────────────────────────
-/// CareSphere v2 Setup Wizard — a calm, Apple-style first-run experience:
-/// welcome → profile (age) → care focus → medications → routines →
-/// emergency contact → security (Touch ID) → permissions → done.
-/// ─────────────────────────────────────────────────────────────────────────
 struct OnboardingView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var store: CareStore
     @EnvironmentObject private var healthKit: HealthKitService
     @EnvironmentObject private var notifications: NotificationService
 
     @State private var step: Step = .welcome
+    @State private var includeBirthDate = false
     @State private var birthDate: Date = Calendar.current.date(byAdding: .year, value: -70, to: Date())!
     @State private var careMode: CareMode = .both
     @State private var meds: [Medication] = []
@@ -67,14 +65,14 @@ struct OnboardingView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Progress
+            InterfaceLanguagePicker(compact: true).padding(.horizontal)
             VStack(spacing: 8) {
                 HStack {
-                    Text("CareSphere Setup")
+                    Text(AppLanguage.text("CareSphere Setup"))
                         .font(.caption.weight(.heavy))
                         .foregroundStyle(Color.emeraldText)
                     Spacer()
-                    Text("Step \(step.rawValue + 1) of \(Step.allCases.count)")
+                    Text(AppLanguage.format("Step {0} of {1}", [String(step.rawValue + 1), String(Step.allCases.count)]))
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
@@ -84,6 +82,8 @@ struct OnboardingView: View {
             .padding(.horizontal, 24)
             .padding(.top, 12)
 
+            ScrollViewReader { proxy in
+            ScrollView {
             Group {
                 switch step {
                 case .welcome: welcomePage
@@ -97,18 +97,17 @@ struct OnboardingView: View {
                 case .done: donePage
                 }
             }
-            .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
-                                    removal: .move(edge: .leading).combined(with: .opacity)))
-            .id(step)
-            .animation(.spring(response: 0.45, dampingFraction: 0.85), value: step)
+            .id("setup-content")
+            }
+            .onChange(of: step) { _ in proxy.scrollTo("setup-content", anchor: .top) }
+            }
 
             Spacer(minLength: 0)
 
-            // Navigation
             HStack(spacing: 12) {
                 if step != .welcome {
                     Button {
-                        withAnimation { step = Step(rawValue: step.rawValue - 1) ?? .welcome }
+                        step = Step(rawValue: step.rawValue - 1) ?? .welcome
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.subheadline.weight(.black))
@@ -116,6 +115,7 @@ struct OnboardingView: View {
                             .background(Color.cardInner, in: Circle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(AppLanguage.text("Previous setup step"))
                 }
                 Button {
                     advance()
@@ -158,21 +158,27 @@ struct OnboardingView: View {
                 Text("💚").font(.system(size: 62))
             }
             VStack(spacing: 10) {
-                Text("Welcome to CareSphere")
+                Text(AppLanguage.text("Welcome to CareSphere"))
                     .font(.largeTitle.weight(.heavy))
                     .multilineTextAlignment(.center)
-                Text("A calm companion for independent living — wearable vitals, video coffee circles, medication reminders and optional sensory activities.")
+                InfoText(AppLanguage.text("A calm companion for independent living — wearable vitals, video coffee circles, medication reminders and optional sensory activities."))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 8)
             }
-            HStack(spacing: 14) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 110))], spacing: 14) {
                 featureBadge("waveform.path.ecg", "Live vitals")
                 featureBadge("video.fill", "Video circles")
                 featureBadge("pills.fill", "Reminders")
-                featureBadge("gamecontroller.fill", "Therapy")
+                featureBadge("gamecontroller.fill", "Activities")
             }
+            Button(AppLanguage.text("Explore first · set up later")) {
+                store.hasCompletedOnboarding = true
+            }
+            .buttonStyle(.bordered).controlSize(.large)
+            InfoText(AppLanguage.text("Activities work without an account, health permissions, or model downloads. Add your details later in Settings."))
+                .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
             Spacer()
             Spacer()
         }
@@ -181,22 +187,20 @@ struct OnboardingView: View {
 
     private var profilePage: some View {
         VStack(alignment: .leading, spacing: 22) {
-            pageHeader("About you", "Your profile is stored locally. Your display name is shared with Jitsi only if you join a video room.", systemImage: "person.crop.circle")
+            pageHeader(AppLanguage.text("About you"), AppLanguage.text("Your profile is stored locally. Your display name is shared with Jitsi only if you join a video room."), systemImage: "person.crop.circle")
             VStack(alignment: .leading, spacing: 8) {
-                Text("Your name").font(.caption.weight(.bold)).foregroundStyle(.secondary)
-                TextField("e.g. Alex", text: $store.displayName)
+                Text(AppLanguage.text("Your name")).font(.caption.weight(.bold)).foregroundStyle(.secondary)
+                TextField(AppLanguage.text("e.g. Alex"), text: $store.displayName)
                     .textFieldStyle(.roundedBorder)
             }
             VStack(alignment: .leading, spacing: 8) {
-                Text("Date of birth").font(.caption.weight(.bold)).foregroundStyle(.secondary)
-                DatePicker("Date of birth", selection: $birthDate, displayedComponents: .date)
-                    .datePickerStyle(.compact)
-                    .labelsHidden()
-                if let age = Calendar.current.dateComponents([.year], from: birthDate, to: Date()).year {
-                    Label("That makes you \(age) — CareSphere will adapt font sizes and pacing for you.", systemImage: "sparkles")
-                        .font(.caption)
-                        .foregroundStyle(Color.emeraldText)
+                Toggle(AppLanguage.text("Add date of birth (optional)"), isOn: $includeBirthDate)
+                if includeBirthDate {
+                    DatePicker("Date of birth", selection: $birthDate, in: ...Date(), displayedComponents: .date)
+                        .datePickerStyle(.compact)
                 }
+                InfoText(AppLanguage.text("Text size follows your iPhone settings. You choose the activity and pace; age does not automatically change them."))
+                    .font(.footnote).foregroundStyle(.secondary)
             }
         }
         .padding(28)
@@ -204,7 +208,7 @@ struct OnboardingView: View {
 
     private var focusPage: some View {
         VStack(alignment: .leading, spacing: 22) {
-            pageHeader("What brings you here?", "CareSphere adapts its pacing, games and reminders to your focus.", systemImage: "switch.2")
+            pageHeader(AppLanguage.text("What brings you here?"), AppLanguage.text("Choose a profile preference. All activities remain available; this is not a diagnosis or treatment plan."), systemImage: "switch.2")
             VStack(spacing: 12) {
                 ForEach(CareMode.allCases) { mode in
                     Button {
@@ -244,13 +248,13 @@ struct OnboardingView: View {
 
     private var medicationsPage: some View {
         VStack(alignment: .leading, spacing: 18) {
-            pageHeader("Your medications", "Enter only a schedule confirmed by your care team or medication label. Reminders stay paused until you confirm every name and time.", systemImage: "pills.fill")
+            pageHeader(AppLanguage.text("Your medications"), AppLanguage.text("Enter only a schedule confirmed by your care team or medication label. Reminders stay paused until you confirm every name and time."), systemImage: "pills.fill")
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach($meds) { $med in
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                TextField("Medication name", text: medicationNameBinding($med))
+                                TextField(AppLanguage.text("Medication name"), text: medicationNameBinding($med))
                                     .textFieldStyle(.roundedBorder)
                                 DatePicker("", selection: timeBinding(med), displayedComponents: .hourAndMinute)
                                     .labelsHidden()
@@ -263,7 +267,7 @@ struct OnboardingView: View {
                                 }
                                 .buttonStyle(.plain)
                             }
-                            TextField("Purpose (optional)", text: medicationPurposeBinding($med))
+                            TextField(AppLanguage.text("Purpose (optional)"), text: medicationPurposeBinding($med))
                                 .textFieldStyle(.roundedBorder)
                                 .font(.caption)
                         }
@@ -276,23 +280,23 @@ struct OnboardingView: View {
                 meds.append(Medication(name: "", purpose: "", hour: 9, minute: 0))
                 medicationScheduleConfirmed = false
             } label: {
-                Label("Add medication", systemImage: "plus.circle.fill")
+                Label(AppLanguage.text("Add medication"), systemImage: "plus.circle.fill")
                     .font(.subheadline.weight(.bold))
             }
             .buttonStyle(.bordered)
 
             if meds.contains(where: { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
                 Toggle(isOn: $medicationScheduleConfirmed) {
-                    Text("I checked every name and reminder time against the medication label or care-team instructions.")
+                    Text(AppLanguage.text("I checked every name and reminder time against the medication label or care-team instructions."))
                         .font(.caption)
                 }
                 .toggleStyle(.switch)
             } else {
-                Text("No medications entered. You can add a personal reminder schedule later in Settings and review each entry against your current instructions.")
+                Text(AppLanguage.text("No medications entered. You can add a personal reminder schedule later in Settings and review each entry against your current instructions."))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            Text("CareSphere does not prescribe, verify doses, or check interactions. You can edit this schedule in Settings; changes pause reminders until reviewed again.")
+            InfoText(AppLanguage.text("CareSphere does not prescribe, verify doses, or check interactions. You can edit this schedule in Settings; changes pause reminders until reviewed again."))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -335,13 +339,13 @@ struct OnboardingView: View {
 
     private var routinesPage: some View {
         VStack(alignment: .leading, spacing: 18) {
-            pageHeader("Daily rhythm", "Choose a few checklist reminders that fit your day. Check-ins reset each local day and are not proof of an activity.", systemImage: "calendar.badge.checkmark")
+            pageHeader(AppLanguage.text("Daily rhythm"), AppLanguage.text("Choose a few checklist reminders that fit your day. Check-ins reset each local day and are not proof of an activity."), systemImage: "calendar.badge.checkmark")
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach($routines) { $routine in
                         HStack {
                             Text(routine.emoji)
-                            TextField("Routine", text: $routine.title)
+                            TextField(AppLanguage.text("Routine"), text: $routine.title)
                                 .textFieldStyle(.roundedBorder)
                             Button {
                                 routines.removeAll { $0.id == routine.id }
@@ -359,7 +363,7 @@ struct OnboardingView: View {
             Button {
                 routines.append(Routine(emoji: "⭐️", title: "New routine"))
             } label: {
-                Label("Add routine", systemImage: "plus.circle.fill")
+                Label(AppLanguage.text("Add routine"), systemImage: "plus.circle.fill")
                     .font(.subheadline.weight(.bold))
             }
             .buttonStyle(.bordered)
@@ -369,14 +373,14 @@ struct OnboardingView: View {
 
     private var contactPage: some View {
         VStack(alignment: .leading, spacing: 22) {
-            pageHeader("Emergency contact", "One tap in SOS calls or texts this person — choose someone close by.", systemImage: "sos.circle")
+            pageHeader(AppLanguage.text("Emergency contact"), AppLanguage.text("One tap in SOS calls or texts this person — choose someone close by."), systemImage: "sos.circle")
             VStack(alignment: .leading, spacing: 8) {
-                Text("Name").font(.caption.weight(.bold)).foregroundStyle(.secondary)
-                TextField("e.g. Sarah M.", text: $emergencyName)
+                Text(AppLanguage.text("Name")).font(.caption.weight(.bold)).foregroundStyle(.secondary)
+                TextField(AppLanguage.text("e.g. Sarah M."), text: $emergencyName)
                     .textFieldStyle(.roundedBorder)
             }
             VStack(alignment: .leading, spacing: 8) {
-                Text("Phone").font(.caption.weight(.bold)).foregroundStyle(.secondary)
+                Text(AppLanguage.text("Phone")).font(.caption.weight(.bold)).foregroundStyle(.secondary)
                 TextField("+1 555 010 2030", text: $emergencyPhone)
                     .textFieldStyle(.roundedBorder)
                     #if os(iOS)
@@ -387,7 +391,7 @@ struct OnboardingView: View {
             Button {
                 contactPickerShown = true
             } label: {
-                Label("Import from Contacts", systemImage: "person.crop.rectangle.stack")
+                Label(AppLanguage.text("Import from Contacts"), systemImage: "person.crop.rectangle.stack")
                     .font(.subheadline.weight(.bold))
             }
             .buttonStyle(.bordered)
@@ -408,7 +412,7 @@ struct OnboardingView: View {
                         .foregroundStyle(wantsBiometrics ? Color.emeraldText : Color.secondary)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Lock with \(BiometricService.biometryName)").font(.headline).foregroundStyle(.primary)
-                        Text("App locks whenever it leaves the foreground").font(.caption).foregroundStyle(.secondary)
+                        Text(AppLanguage.text("App locks whenever it leaves the foreground")).font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
                 }
@@ -419,7 +423,7 @@ struct OnboardingView: View {
                         .strokeBorder(wantsBiometrics ? Color.emerald.opacity(0.6) : .clear, lineWidth: 2))
             }
             .buttonStyle(.plain)
-            Text("If biometrics ever fail, your device passcode always works — you can never be locked out.")
+            InfoText(AppLanguage.text("Device passcode fallback depends on system availability. Authentication errors keep your data locked."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -428,7 +432,7 @@ struct OnboardingView: View {
 
     private var permissionsPage: some View {
         VStack(alignment: .leading, spacing: 18) {
-            pageHeader("Enable superpowers", "Each one is optional and asked by iOS itself — change any time in Settings.", systemImage: "powersleep")
+            pageHeader(AppLanguage.text("Enable superpowers"), AppLanguage.text("Each one is optional and asked by iOS itself — change any time in Settings."), systemImage: "powersleep")
             permissionRow(
                 icon: "bell.badge.fill", title: "Medication reminders",
                 status: notifications.authorizationStatus == .authorized ? "Enabled ✓" : "Tap Continue to allow",
@@ -439,7 +443,7 @@ struct OnboardingView: View {
                 status: healthKit.hasRequestedAuthorization ? "Requested · check Health settings if empty" : "Tap Continue to request read access",
                 action: { healthKit.requestAuthorization() })
             #endif
-            Text("CareSphere requests read-only heart rate, blood oxygen, blood pressure and workout summaries. It never writes Health data. Apple does not let apps verify whether read access was allowed.")
+            InfoText(AppLanguage.text("CareSphere requests read-only heart rate, blood oxygen, blood pressure and workout summaries. It never writes Health data. Apple does not let apps verify whether read access was allowed."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -508,10 +512,10 @@ struct OnboardingView: View {
 
     private func advance() {
         commitCurrentStep()
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+        withAnimation((reduceMotion || store.reduceVisualMotion) ? nil : .easeInOut(duration: 0.2)) {
             if step == .done {
                 store.hasCompletedOnboarding = true
-                HapticsService.success()
+                if !store.reduceVisualMotion { HapticsService.success() }
             } else {
                 step = Step(rawValue: step.rawValue + 1) ?? .done
             }
@@ -521,8 +525,7 @@ struct OnboardingView: View {
     private func commitCurrentStep() {
         switch step {
         case .profile:
-            store.profile.birthDate = birthDate
-            if let age = store.profile.age, age >= 65 { store.voiceReminders = true }
+            store.profile.birthDate = includeBirthDate ? birthDate : nil
         case .focus:
             store.profile.careMode = careMode
         case .medications:

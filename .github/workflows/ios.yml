@@ -1,100 +1,58 @@
 name: iOS Build
-
 on:
   push:
-    branches: [arena/01a0626b-care, main]
-    paths: ['ios/**', '.github/workflows/ios.yml']
+    branches: ['arena/**', main]
+    paths: ['localization/**', 'scripts/generate_localizations.py', 'ios/**', '.github/workflows/ios.yml']
   pull_request:
-    paths: ['ios/**', '.github/workflows/ios.yml']
+    paths: ['localization/**', 'scripts/generate_localizations.py', 'ios/**', '.github/workflows/ios.yml']
   workflow_dispatch:
-
 jobs:
   ios-build:
-    name: Build CareSphere (SwiftUI · Swift · iOS)
-    runs-on: macos-14
-    timeout-minutes: 45
+    name: Native iOS · no remote packages
+    runs-on: macos-15
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v7
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Select newest installed Xcode
+      - name: Check offline translation catalogs
+        run: python3 scripts/generate_localizations.py --check
+      - name: Select Xcode 26 for real Foundation Models compilation
         run: |
-          ls -d /Applications/Xcode*.app | sort -V
-          LATEST_XCODE="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
-          echo "Selecting $LATEST_XCODE"
-          sudo xcode-select -s "$LATEST_XCODE"
+          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          test -n "$XCODE"
+          sudo xcode-select -s "$XCODE"
           xcodebuild -version
-
-      - name: Generate Xcode project
-        run: cd ios && xcodegen generate
-
-      - name: Show toolchain
-        run: |
-          xcodebuild -version
-          xcodebuild -showsdks | grep -i ios
-
-      - name: Resolve packages
-        working-directory: ios
+      - name: Validate project and no remote dependencies
+        run: python3 ios/scripts/check_project.py
+      - name: Test activity logic
         run: |
           set -o pipefail
-          xcodebuild -resolvePackageDependencies \
-            -project CareSphere.xcodeproj -scheme CareSphere 2>&1 | tee /tmp/spm.log | tail -20
-
-      - name: Verify Jitsi/Giphy ABI-compatible package resolution
-        run: |
-          RESOLVED_FILE="$(find ios -name Package.resolved -print -quit)"
-          if [[ -z "$RESOLVED_FILE" ]]; then
-            echo "::error::SwiftPM did not write Package.resolved after dependency resolution"
-            exit 1
-          fi
-          python3 - "$RESOLVED_FILE" <<'PY'
-          import json
-          import sys
-
-          with open(sys.argv[1], encoding="utf-8") as package_file:
-              resolved = json.load(package_file)
-          versions = [
-              pin["state"].get("version")
-              for pin in resolved.get("pins", [])
-              if pin.get("identity") == "giphy-ios-sdk"
-          ]
-          if versions != ["2.2.12"]:
-              raise SystemExit(
-                  f"Expected Jitsi-compatible Giphy 2.2.12, got {versions or 'no Giphy pin'}"
-              )
-          print("✅ JitsiMeetSDK resolves Giphy 2.2.12 (ABI-compatible)")
-          PY
-
-      - name: Build (compile check, unsigned iOS device target)
+          swift test --package-path ios/ActivityKit 2>&1 | tee /tmp/activity-tests.log
+      - name: Build physical iPhone target without signing
         run: |
           set -o pipefail
-          xcodebuild \
-            -project ios/CareSphere.xcodeproj \
-            -scheme CareSphere \
-            -destination 'generic/platform=iOS' \
-            -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO \
-            build 2>&1 | tee /tmp/xcodebuild.log | tail -60
-
-      - name: Upload build log
+          xcodebuild -project ios/CareSphere.xcodeproj -scheme CareSphere -destination 'generic/platform=iOS' -derivedDataPath /tmp/device-build CODE_SIGNING_ALLOWED=NO build 2>&1 | tee /tmp/device.log | tail -60
+      - name: Build optional HealthKit configuration
+        run: |
+          set -o pipefail
+          xcodebuild -project ios/CareSphere.xcodeproj -scheme CareSphere-HealthKit -configuration Debug-HealthKit -destination 'generic/platform=iOS' -derivedDataPath /tmp/device-build CODE_SIGNING_ALLOWED=NO build 2>&1 | tee /tmp/healthkit.log | tail -40
+      - name: Build and launch iPhone Simulator
+        run: |
+          set -o pipefail
+          xcodebuild -project ios/CareSphere.xcodeproj -scheme CareSphere -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/simulator-build CODE_SIGNING_ALLOWED=NO build 2>&1 | tee /tmp/simulator.log | tail -40
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for group in d["devices"].values() for x in group if "iPhone" in x["name"]))')
+          xcrun simctl boot "$DEVICE"
+          xcrun simctl bootstatus "$DEVICE" -b
+          xcrun simctl install "$DEVICE" /tmp/simulator-build/Build/Products/Debug-iphonesimulator/CareSphere.app
+          xcrun simctl launch "$DEVICE" org.caresphere.CareSphere
+          sleep 5
+          xcrun simctl io "$DEVICE" screenshot /tmp/iphone-launch.png
+      - name: Upload logs and launch screenshot
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: xcodebuild-log
-          path: /tmp/*.log
-          if-no-files-found: ignore
-
-      - name: Surface errors as annotations
-        if: failure()
-        run: |
-          grep -hE "\.swift:[0-9]+:[0-9]+: error:" /tmp/spm.log /tmp/xcodebuild.log 2>/dev/null | sort -u | head -25 | while IFS= read -r line; do
-            echo "::error::${line:0:380}"
-          done
-          if [[ -s /tmp/xcodebuild.log ]]; then
-            LOG_TAIL="$(tail -n 30 /tmp/xcodebuild.log | tr '\r' ' ' | sed -e 's/%/%25/g' -e 's/:/%3A/g' -e 's/,/%2C/g' | awk '{printf "%s%%0A", $0}')"
-            echo "::error title=Xcodebuild log tail::${LOG_TAIL:0:6000}"
-          fi
+          name: ios-validation
+          path: |
+            /tmp/*.log
+            /tmp/iphone-launch.png

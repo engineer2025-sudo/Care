@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { buildVisitBrief } from '../src/lib/visitBrief.js'
+import { webcrypto } from 'node:crypto'
+import { buildVisitBrief, buildVisitBriefHtml, createReportFingerprint } from '../src/lib/visitBrief.js'
 
 const fixedNow = new Date('2026-09-27T19:00:00.000Z')
 
@@ -73,7 +74,7 @@ test('live BLE selection never silently includes simulated heart-rate records', 
   assert.doesNotMatch(brief, /99 bpm|SIMULATED DEMONSTRATION VALUES/)
 })
 
-test('simulated values appear only after opt-in and stay visibly labeled', () => {
+test('legacy generated values are excluded even if an old caller requests them', () => {
   const brief = buildVisitBrief({
     hrRecords: [{ timestamp: '2026-09-27T18:01:00.000Z', metric: 'heart_rate_bpm', value: 99, source: 'SIMULATED' }],
     spo2: 97,
@@ -82,10 +83,56 @@ test('simulated values appear only after opt-in and stay visibly labeled', () =>
     now: fixedNow,
   })
 
-  assert.match(brief, /SIMULATED DEMONSTRATION VALUES \(not measured; not clinical data\)/)
-  assert.match(brief, /99 · SIMULATED/)
-  assert.match(brief, /97% · SIMULATED_SPOT_CHECK/)
-  assert.match(brief, /118 \/ 76 mmHg · SIMULATED_SEQUENCE/)
+  assert.doesNotMatch(brief, /SIMULATED|99|97%|118 \/ 76/)
+})
+
+test('manually entered health readings are opt-in and source-labeled', () => {
+  const readings = [
+    { kind: 'bp', first: 122, second: 78, at: '2026-09-27T18:00:00.000Z' },
+    { kind: 'oxygen', first: 97, at: '2026-09-27T18:02:00.000Z' },
+  ]
+  const omitted = buildVisitBrief({ manualVitals: readings, now: fixedNow })
+  assert.doesNotMatch(omitted, /122\/78|97% SpO₂/)
+
+  const selected = buildVisitBrief({ manualVitals: readings, includeManualVitals: true, now: fixedNow })
+  assert.match(selected, /MANUALLY ENTERED VITALS \(self-entered values; not sensor-verified\)/)
+  assert.match(selected, /122\/78 mmHg · entered by user/)
+  assert.match(selected, /97% SpO₂ · entered by user/)
+})
+
+test('report PDF has a duplex data ledger and escaped electronic stamp', async () => {
+  const brief = buildVisitBrief({
+    includeNotes: true,
+    notes: [{ date: '2026-09-27', author: 'Alex', note: '<script>alert("private")</script>' }],
+    visitQuestions: 'Ask about sleep.',
+    now: fixedNow,
+  })
+  const fingerprint = await createReportFingerprint(brief, webcrypto)
+  const html = buildVisitBriefHtml({
+    brief, fingerprint, generatedAt: fixedNow,
+    sealImageUrl: 'data:image/jpeg;base64,QUJD',
+  })
+
+  assert.match(fingerprint, /^[a-f0-9]{64}$/)
+  assert.match(html, /Electronic integrity stamp/)
+  assert.match(html, /Selected data included in this copy/)
+  assert.match(html, /class="sheet reverse-side"/)
+  assert.doesNotMatch(html, /QUESTIONS OR TOPICS I WANT TO DISCUS<\/p>/)
+  assert.match(html, /class="seal-artwork" src="data:image\/jpeg;base64,QUJD"/)
+  assert.match(html, new RegExp(fingerprint))
+  assert.match(html, /Alex: &lt;script&gt;alert\(&quot;private&quot;\)&lt;\/script&gt;/)
+  assert.doesNotMatch(html, /<script>alert\("private"\)<\/script>/)
+  assert.match(html, /not a clinician credential, PDF signature, or proof of identity/)
+  assert.throws(() => buildVisitBriefHtml({ brief, fingerprint: 'fake' }), /valid SHA-256/)
+})
+
+test('report reverse side safely handles empty sections and rejects remote seal images', async () => {
+  const brief = buildVisitBrief({ now: fixedNow })
+  const fingerprint = await createReportFingerprint(brief, webcrypto)
+  const html = buildVisitBriefHtml({ brief, fingerprint, generatedAt: fixedNow, sealImageUrl: 'https://example.invalid/seal.jpg' })
+  assert.match(html, /No personal data sections were selected/)
+  assert.match(html, /class="seal-fallback"/)
+  assert.doesNotMatch(html, /example\.invalid/)
 })
 
 test('selected mood, note and discussion sections retain their limitations', () => {
