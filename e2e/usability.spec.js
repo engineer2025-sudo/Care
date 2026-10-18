@@ -141,7 +141,7 @@ test('visit brief choices retain focus and dialogs fit small screens with large 
 test('saved activities become one-tap quick starts from the Today dashboard', async ({ page }) => {
   await navButton(page, 'Activities').click()
   await page.getByRole('button', { name: 'Save to favorites: Paced breathing' }).click()
-  await navButton(page, 'Today').click()
+  await navButton(page, 'Overview').click()
   await expect(page.getByRole('heading', { name: 'Saved activities' })).toBeVisible()
   await page.getByRole('button', { name: 'Start Paced breathing' }).click()
   await expect(page.getByRole('dialog').getByRole('heading', { name: 'Paced breathing' })).toBeVisible()
@@ -160,9 +160,10 @@ test('visit preparation creates a polished print-to-PDF report with an integrity
   const report = await popupPromise
   await expect(report).toHaveTitle('CareSphere Visit Preparation Report')
   await expect(report.getByRole('heading', { name: /Care visit/ })).toBeVisible()
-  await expect(report.getByText(/Electronic integrity seal/)).toBeVisible()
+  await expect(report.getByRole('heading', { name: 'Data & electronic stamp' })).toBeVisible()
+  await expect(report.getByText(/Electronic integrity stamp/)).toBeVisible()
   await expect(report.locator('.fingerprint')).toHaveText(/^[a-f0-9]{64}$/)
-  await expect(report.getByText(/not a cryptographic PDF signature or proof of identity/)).toBeVisible()
+  await expect(report.getByText(/not a clinician credential, PDF signature, or proof of identity/)).toBeVisible()
   await expect(report.getByText(/Ask about follow-up timing\./)).toBeVisible()
 })
 

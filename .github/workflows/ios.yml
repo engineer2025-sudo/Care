@@ -48,6 +48,12 @@ jobs:
           xcrun simctl launch "$DEVICE" org.caresphere.CareSphere
           sleep 5
           xcrun simctl io "$DEVICE" screenshot /tmp/iphone-launch.png
+      - name: Surface native compiler diagnostics
+        if: failure()
+        run: |
+          for log in /tmp/device.log /tmp/healthkit.log /tmp/simulator.log; do
+            if [ -f "$log" ]; then grep -E 'error:|warning:' "$log" | tail -80 | sed 's/^/::error::/' || true; fi
+          done
       - name: Upload logs and launch screenshot
         if: always()
         uses: actions/upload-artifact@v7

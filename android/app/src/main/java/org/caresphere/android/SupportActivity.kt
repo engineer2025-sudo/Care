@@ -196,8 +196,8 @@ class SupportActivity : ProtectedActivity() {
                 runCatching{
                     val uri=VisitPrepPdf.create(this,draft)
                     val send=Intent(Intent.ACTION_SEND).setType("application/pdf").putExtra(Intent.EXTRA_STREAM,uri)
-                        .setClipData(android.content.ClipData.newUri(contentResolver,tx("Visit preparation PDF"),uri))
-                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    send.clipData=android.content.ClipData.newUri(contentResolver,tx("Visit preparation PDF"),uri)
+                    send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     startActivity(Intent.createChooser(send,tx("Choose who receives this")))
                 }.onFailure{message(tx("PDF creation failed. Nothing was shared."))}
             }
