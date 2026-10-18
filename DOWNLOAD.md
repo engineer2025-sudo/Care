@@ -2,10 +2,11 @@
 
 ## Downloads for the October 18, 2026 source update
 
-- **CareSphere-Mobile-Source-3.8.0-1.9.0.zip** — updated iPhone 3.8.0 (17) Xcode source and Android 1.9.0 (11) source, local activity package, translations, tests, and installation guides. This is source, not a signed installer.
+- [**CareSphere-Mobile-Source-3.8.0-1.9.0.zip**](https://github.com/engineer2025-sudo/Care/releases/download/caresphere-mobile-3.8.0-1.9.0/CareSphere-Mobile-Source-3.8.0-1.9.0.zip) — iPhone 3.8.0 (17) Xcode source, Android 1.9.0 (11) source, local activity package, translations, tests, and installation guides.
+- [**SHA-256 checksum**](https://github.com/engineer2025-sudo/Care/releases/download/caresphere-mobile-3.8.0-1.9.0/CareSphere-Mobile-Source-3.8.0-1.9.0.zip.sha256)
 - **CareSphere-Web-1.5.1.zip** — deployable production website plus source, tests, and setup instructions. No `node_modules` or personal data included.
 
-Each archive has a `.sha256` checksum. **No signed IPA, APK, or native compile verification is included in this update.** The iOS and Android source changes require a Mac/Xcode and Android Studio/JDK respectively; use the platform guides below. The ZIPs are built from this workspace revision, not a successful native CI release. See [release notes and validation](docs/release-2026-10-18.md).
+The mobile asset is source code, not an installer. GitHub Actions passed for web checks, the Android Gradle/emulator workflow, and iOS logic/device/HealthKit/Simulator builds; see [run links and verification details](docs/release-2026-10-18.md). No signed iOS IPA or production-signed Android installer is included. The source projects require a Mac/Xcode and Android Studio/JDK to build locally.
 
 ## Languages
 
@@ -24,7 +25,7 @@ cd android
 ./gradlew testDebugUnitTest lintDebug assembleDebug
 ```
 
-The resulting local `app-debug.apk` is a debuggable development build, not a Play Store release. These native build commands were not run for this update; Java/Gradle compilation was unavailable here. Use your own protected release-signing key for production. See [Android guide](android/README.md).
+The resulting local `app-debug.apk` is a debuggable development build, not a Play Store release. The Android Gradle tests, lint, APK assembly, signature check, and emulator smoke passed in [hosted CI](https://github.com/engineer2025-sudo/Care/actions/runs/39164164447). Use your own protected release-signing key for production. See [Android guide](android/README.md).
 
 ## iPhone
 
