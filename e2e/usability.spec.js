@@ -152,6 +152,8 @@ test('visit preparation creates a polished print-to-PDF report with an integrity
   await page.getByRole('button', { name: 'Prepare visit brief' }).click()
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByRole('checkbox', { name: /Manually entered blood pressure and oxygen/ })).not.toBeChecked()
+  await expect(dialog.getByRole('button', { name: 'Create PDF' })).toBeDisabled()
+  await expect(dialog.getByText('Selected sections')).toBeVisible()
   await dialog.getByRole('checkbox', { name: /Display name/ }).check()
   await dialog.getByLabel(/Questions or topics to discuss/).fill('Ask about follow-up timing.')
 
@@ -159,6 +161,7 @@ test('visit preparation creates a polished print-to-PDF report with an integrity
   await dialog.getByRole('button', { name: 'Create PDF' }).click()
   const report = await popupPromise
   await expect(report).toHaveTitle('CareSphere Visit Preparation Report')
+  await expect(report.getByRole('button', { name: 'Print or save as PDF' })).toBeVisible()
   await expect(report.getByRole('heading', { name: /Care visit/ })).toBeVisible()
   await expect(report.getByRole('heading', { name: 'Data & electronic stamp' })).toBeVisible()
   await expect(report.getByText(/Electronic integrity stamp/)).toBeVisible()

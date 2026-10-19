@@ -25,7 +25,6 @@ import { celebrate as celebrateConfetti } from './lib/celebrate';
 import { soundEngine } from './lib/audio';
 import { connectHeartRateMonitor } from './lib/bluetooth';
 import { buildVisitBrief, buildVisitBriefHtml, createReportFingerprint } from './lib/visitBrief';
-import visitPrepSealUrl from './assets/caresphere-visit-prep-seal.jpg?url';
 import { encodeCsv } from './lib/csv';
 import { validManualVital, manualVitalRow, formatManualVital } from './lib/vitalRules';
 import { STORAGE_KEY, RESET_LOCAL_DATA_EVENT, normalizePersistedValue, localDayKey, isRoutineDoneToday, isMedicationTakenToday } from './lib/careStorage';
@@ -1438,6 +1437,19 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
     moodLabels: Object.fromEntries(MOODS.map((mood) => [mood.score, mood.label]))
   });
 
+  const selectedSectionCount = [includeName, includeMeds, includeMoods, includeNotes, includeLiveVitals, includeManualVitals].filter(Boolean).length + (visitQuestions.trim() ? 1 : 0);
+  const hasReportContent = selectedSectionCount > 0;
+  const clearReportSelection = () => {
+    setIncludeName(false);
+    setIncludeMeds(false);
+    setIncludeMoods(false);
+    setIncludeNotes(false);
+    setIncludeLiveVitals(false);
+    setIncludeManualVitals(false);
+    setVisitQuestions('');
+    setDownloadMessage('');
+  };
+
   const createBriefPdf = async () => {
     // Open synchronously from the user gesture so popup blockers do not discard the print window.
     const printWindow = window.open('', '_blank');
@@ -1448,7 +1460,7 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
     printWindow.opener = null;
     try {
       const fingerprint = await createReportFingerprint(brief);
-      const html = buildVisitBriefHtml({ brief, fingerprint, generatedAt: new Date(), sealImageUrl: visitPrepSealUrl });
+      const html = buildVisitBriefHtml({ brief, fingerprint, generatedAt: new Date() });
       printWindow.document.open();
       printWindow.document.write(html);
       printWindow.document.close();
@@ -1487,6 +1499,14 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
           <button onClick={onClose} aria-label={tr("Close visit preparation")} className="rounded-xl bg-slate-800 p-2 text-slate-400 hover:text-white"><X className="h-5 w-5" /></button>
         </header>
 
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3">
+          <div className="flex items-center gap-2 text-sm text-slate-200">
+            <span>{tr("Selected sections")}</span>
+            <span aria-live="polite" aria-atomic="true" className="inline-grid min-w-8 place-items-center rounded-full border border-slate-600 bg-slate-950 px-2 py-1 text-xs font-bold text-white">{selectedSectionCount}</span>
+          </div>
+          {hasReportContent && <button type="button" onClick={clearReportSelection} className="min-h-11 rounded-lg border border-slate-600 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-700">{tr("Clear selection")}</button>}
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <VisitBriefChoice checked={includeName} onChange={setIncludeName} title={tr("Display name")} detail="Optional. Off by default." />
           <VisitBriefChoice checked={includeMeds} onChange={setIncludeMeds} title={tr("Medication reminders")} detail="User-entered names and times; review/confirmation status is shown." />
@@ -1503,15 +1523,15 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
 
         <div className="rounded-2xl border border-slate-700 bg-slate-950/80 p-4">
           <h3 className="mb-2 text-xs font-bold text-slate-200">{tr("Report content preview")}</h3>
-          <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words text-[11px] leading-relaxed text-slate-300">{brief}</pre>
-          <p className="mt-3 text-[10px] leading-relaxed text-slate-500">{tr("PDFs add a final reverse-side data ledger and a decorative stamp with a SHA-256 fingerprint. Enable duplex printing to place it on paper’s back; the stamp is not an identity signature.")}</p>
+          {hasReportContent ? <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words text-[11px] leading-relaxed text-slate-300">{brief}</pre> : <p role="status" className="rounded-xl border border-dashed border-slate-600 px-3 py-4 text-sm text-slate-300">{tr("Choose at least one section or add a question to create the report.")}</p>}
+          <p className="mt-3 text-[10px] leading-relaxed text-slate-500">{tr("The report uses a formal black-and-white design. Its SHA-256 fingerprint is a text checksum, not a signature. Enable duplex printing to place the selected-data ledger on the reverse side.")}</p>
         </div>
-        <footer className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
-          <Info className="text-[10px] leading-relaxed text-slate-500">{tr("Downloaded files are outside CareSphere's local privacy controls. Verify all names, dates, and sources before sharing.")}</Info>
-          <div className="flex gap-2 shrink-0">
-            <button onClick={onClose} className="rounded-xl border border-slate-700 px-4 py-2.5 text-xs font-bold text-slate-300 hover:bg-slate-800">{tr("Close")}</button>
-            <button onClick={downloadBrief} className="flex items-center gap-2 rounded-xl border border-slate-600 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800"><Download className="h-4 w-4" />{tr("Text")}</button>
-            <button onClick={createBriefPdf} className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-500"><FileText className="h-4 w-4" />{tr("Create PDF")}</button>
+        <footer className="sticky bottom-0 z-10 -mx-5 -mb-5 flex flex-col-reverse gap-3 border-t border-slate-700 bg-slate-900/95 p-4 backdrop-blur sm:-mx-7 sm:-mb-7 sm:flex-row sm:items-center sm:justify-between">
+          <Info className="text-[10px] leading-relaxed text-slate-400">{tr("Downloaded files are outside CareSphere's local privacy controls. Verify all names, dates, and sources before sharing.")}</Info>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <button type="button" onClick={onClose} className="min-h-11 rounded-xl border border-slate-600 px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800">{tr("Close")}</button>
+            <button type="button" onClick={downloadBrief} disabled={!hasReportContent} className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-600 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"><Download className="h-4 w-4" />{tr("Text")}</button>
+            <button type="button" onClick={createBriefPdf} disabled={!hasReportContent} className="flex min-h-11 items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"><FileText className="h-4 w-4" />{tr("Create PDF")}</button>
           </div>
         </footer>
         {downloadMessage && <p role="status" className="text-[11px] text-emerald-300">{downloadMessage}</p>}

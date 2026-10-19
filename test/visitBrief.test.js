@@ -110,7 +110,6 @@ test('report PDF has a duplex data ledger and escaped electronic stamp', async (
   const fingerprint = await createReportFingerprint(brief, webcrypto)
   const html = buildVisitBriefHtml({
     brief, fingerprint, generatedAt: fixedNow,
-    sealImageUrl: 'data:image/jpeg;base64,QUJD',
   })
 
   assert.match(fingerprint, /^[a-f0-9]{64}$/)
@@ -118,7 +117,12 @@ test('report PDF has a duplex data ledger and escaped electronic stamp', async (
   assert.match(html, /Selected data included in this copy/)
   assert.match(html, /class="sheet reverse-side"/)
   assert.doesNotMatch(html, /QUESTIONS OR TOPICS I WANT TO DISCUS<\/p>/)
-  assert.match(html, /class="seal-artwork" src="data:image\/jpeg;base64,QUJD"/)
+  assert.match(html, /class="seal-fallback" role="img" aria-label="CareSphere personal-copy seal"/)
+  assert.match(html, /id="print-report">Print or save as PDF/)
+  assert.match(html, /id="close-report">Close report/)
+  assert.match(html, /color:#111/)
+  assert.match(html, /background:#fff/)
+  assert.doesNotMatch(html, /linear-gradient|gold|teal|mint|window\.addEventListener\('load'.*window\.print/s)
   assert.match(html, new RegExp(fingerprint))
   assert.match(html, /Alex: &lt;script&gt;alert\(&quot;private&quot;\)&lt;\/script&gt;/)
   assert.doesNotMatch(html, /<script>alert\("private"\)<\/script>/)
@@ -126,12 +130,13 @@ test('report PDF has a duplex data ledger and escaped electronic stamp', async (
   assert.throws(() => buildVisitBriefHtml({ brief, fingerprint: 'fake' }), /valid SHA-256/)
 })
 
-test('report reverse side safely handles empty sections and rejects remote seal images', async () => {
+test('report uses a built-in monochrome seal when no personal data sections are selected', async () => {
   const brief = buildVisitBrief({ now: fixedNow })
   const fingerprint = await createReportFingerprint(brief, webcrypto)
-  const html = buildVisitBriefHtml({ brief, fingerprint, generatedAt: fixedNow, sealImageUrl: 'https://example.invalid/seal.jpg' })
+  const html = buildVisitBriefHtml({ brief, fingerprint, generatedAt: fixedNow })
   assert.match(html, /No personal data sections were selected/)
   assert.match(html, /class="seal-fallback"/)
+  assert.doesNotMatch(html, /<img/)
   assert.doesNotMatch(html, /example\.invalid/)
 })
 

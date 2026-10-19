@@ -194,77 +194,80 @@ function renderSelectedDataLedger(brief) {
 }
 
 /** Print-ready HTML. The browser's print dialog can save it as a PDF. */
-export function buildVisitBriefHtml({ brief, fingerprint, generatedAt = new Date(), sealImageUrl = '' }) {
+export function buildVisitBriefHtml({ brief, fingerprint, generatedAt = new Date() }) {
   const digest = String(fingerprint || '').toLowerCase()
   if (!/^[a-f0-9]{64}$/.test(digest)) throw new Error('A valid SHA-256 report fingerprint is required.')
   const date = escapeHtml(generatedAt.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }))
   const preparedAt = escapeHtml(generatedAt.toLocaleString())
   const shortId = digest.slice(0, 12).toUpperCase()
   const safeDigest = escapeHtml(digest)
-  const safeSealImageUrl = /^(?:data:image\/jpeg;base64,[A-Za-z0-9+/=]+|\/[A-Za-z0-9_./-]+\.jpe?g(?:\?[A-Za-z0-9._=-]+)?)$/.test(sealImageUrl) ? sealImageUrl : ''
-  const sealArtwork = safeSealImageUrl
-    ? `<img class="seal-artwork" src="${safeSealImageUrl}" alt="CareSphere visit preparation personal-copy seal">`
-    : '<div class="seal-fallback" aria-hidden="true">CARE<br><span>VISIT PREP</span></div>'
+  const sealArtwork = '<div class="seal-fallback" role="img" aria-label="CareSphere personal-copy seal"><span class="seal-initials">CS</span><span class="seal-name">CARESPHERE<br>PERSONAL COPY</span></div>'
 
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CareSphere Visit Preparation Report</title>
 <style>
-@page { size: A4; margin: 15mm 15mm 18mm; }
-:root { color-scheme: light; --ink:#132c36; --muted:#60767a; --teal:#126e68; --mint:#eaf5ef; --gold:#d0a659; }
+@page { size: A4; margin: 16mm 16mm 18mm; }
+:root { color-scheme: light; --ink:#111; --muted:#444; --rule:#777; --soft:#eee; --paper:#fff; }
 * { box-sizing:border-box; }
-body { margin:0; color:var(--ink); background:#edf2f0; font: 11pt/1.55 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
-.sheet { max-width:820px; margin:28px auto; padding:48px 58px 36px; background:#fff; box-shadow:0 18px 55px #173b4020; }
-.hero { position:relative; overflow:hidden; margin:-48px -58px 32px; padding:38px 58px 34px; color:#f3fbf7; background:linear-gradient(125deg,#103e46 0%,#146e68 62%,#208879 100%); }
-.hero:after { content:""; position:absolute; width:250px; height:250px; right:-75px; top:-115px; border:1px solid #ffffff30; border-radius:50%; box-shadow:0 0 0 22px #ffffff0d,0 0 0 45px #ffffff08; }
-.brand { display:flex; align-items:center; gap:12px; font-size:10pt; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#d5eee4; }
-.brand-mark { display:grid; place-items:center; width:38px; height:38px; border:1px solid #9bd9bf; border-radius:13px 13px 13px 4px; background:linear-gradient(145deg,#e9fff5,#92d5b3); color:#14574d; font-size:15pt; font-weight:900; box-shadow:inset 0 0 0 3px #ffffff65; }
-h1 { max-width:550px; margin:25px 0 8px; color:#fff; font-size:31pt; line-height:1.07; letter-spacing:-.04em; }
-.subtitle { margin:0; color:#d7eee7; font-size:11pt; }
-.report-meta { display:flex; justify-content:space-between; gap:16px; margin-top:25px; color:#e2f3ed; font-size:9pt; }
-.report-meta b { color:#fff; }
-.kicker { color:var(--teal); font-weight:800; letter-spacing:.14em; text-transform:uppercase; font-size:8pt; }
-.context-note { margin:0 0 25px; padding:13px 16px; border-left:3px solid #65a99b; border-radius:0 10px 10px 0; background:#f1f7f4; color:#36555a; font-size:9.5pt; }
-section { margin:22px 0 27px; break-inside:avoid; }
-h2 { margin:0; color:#164d50; font-size:14pt; line-height:1.25; letter-spacing:-.015em; text-transform:capitalize; }
-.source-note { margin:5px 0 11px; color:var(--muted); font-size:8.2pt; }
+body { margin:0; color:var(--ink); background:#fff; font:10.5pt/1.55 Arial, Helvetica, sans-serif; }
+.screen-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; max-width:820px; margin:16px auto 0; padding:12px 18px; border:1px solid #888; background:#fff; font-size:10pt; }
+.screen-toolbar p { margin:0; color:#333; }
+.screen-toolbar-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.screen-toolbar button { min-height:42px; padding:8px 14px; border:1px solid #111; background:#fff; color:#111; font:700 10pt Arial, sans-serif; cursor:pointer; }
+.screen-toolbar button:first-child { background:#111; color:#fff; }
+.screen-toolbar button:focus-visible { outline:3px solid #555; outline-offset:3px; }
+.sheet { max-width:820px; margin:20px auto; padding:42px 58px 34px; background:#fff; border:1px solid #999; }
+.hero { margin:-42px -58px 30px; padding:26px 58px 25px; border-bottom:2px solid #111; background:#fff; color:#111; }
+.brand { display:flex; align-items:center; gap:11px; font-size:9pt; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:#222; }
+.brand-mark { display:grid; place-items:center; width:36px; height:36px; border:2px solid #111; color:#111; font:700 15pt Georgia,serif; }
+h1 { max-width:560px; margin:25px 0 8px; color:#111; font:700 29pt/1.1 Georgia, "Times New Roman", serif; letter-spacing:0; }
+.subtitle { margin:0; color:#333; font-size:10.5pt; }
+.report-meta { display:flex; justify-content:space-between; gap:16px; margin-top:23px; color:#222; font-size:8.5pt; }
+.report-meta > span:first-child { font-weight:700; letter-spacing:.13em; }
+.report-meta b { color:#111; }
+.kicker { color:#222; font-weight:700; letter-spacing:.13em; text-transform:uppercase; font-size:8pt; }
+.context-note { margin:0 0 22px; padding:10px 13px; border:1px solid #888; border-left:3px solid #111; background:#f5f5f5; color:#222; font-size:9pt; }
+section { margin:20px 0 24px; break-inside:avoid; }
+h2 { margin:0; padding-bottom:5px; border-bottom:1px solid #555; color:#111; font:700 13pt/1.25 Georgia, "Times New Roman", serif; text-transform:capitalize; }
+.source-note { margin:5px 0 9px; color:#444; font-size:8pt; }
 p { margin:8px 0; }
-ul { margin:10px 0 0; padding:0; list-style:none; }
-li { position:relative; margin:0; padding:9px 0 9px 19px; border-bottom:1px solid #e7eeeb; overflow-wrap:anywhere; }
-li:before { content:""; position:absolute; left:2px; top:17px; width:6px; height:6px; border-radius:50%; background:#42a080; }
-.key-value { display:grid; grid-template-columns:220px 1fr; gap:12px; padding:9px 0; border-bottom:1px solid #e7eeeb; }
-.key-value strong { color:#557173; font-size:9pt; }
-.reverse-hint { margin-top:28px; padding:11px 14px; border:1px solid #d6e8de; border-radius:10px; background:#f4f9f5; color:#315a53; font-size:8.5pt; }
+ul { margin:8px 0 0; padding:0; list-style:none; }
+li { position:relative; margin:0; padding:7px 0 7px 17px; border-bottom:1px solid #ddd; overflow-wrap:anywhere; }
+li:before { content:"—"; position:absolute; left:0; top:7px; color:#111; }
+.key-value { display:grid; grid-template-columns:220px 1fr; gap:12px; padding:8px 0; border-bottom:1px solid #ddd; }
+.key-value strong { color:#333; font-size:9pt; }
+.reverse-hint { margin-top:26px; padding:10px 12px; border:1px solid #777; background:#f5f5f5; color:#222; font-size:8.5pt; }
 .reverse-side { break-before:page; page-break-before:always; }
-.reverse-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; padding-bottom:15px; border-bottom:2px solid #d7e9df; }
-.reverse-heading h1 { margin:0; color:#164d50; font-size:24pt; }
-.reverse-heading .kicker { margin-bottom:7px; }
-.reverse-heading .back-label { color:#738784; font-size:8pt; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
-.back-layout { display:grid; grid-template-columns:190px 1fr; gap:22px; align-items:start; margin:20px 0 25px; padding:18px; border:1px solid #e1eae4; border-radius:16px; background:linear-gradient(135deg,#f7faf7,#eef6f0); break-inside:avoid; }
-.seal-artwork { display:block; width:100%; max-width:190px; aspect-ratio:1; object-fit:contain; border-radius:50%; clip-path:circle(49% at 50% 50%); }
-.seal-fallback { display:grid; place-content:center; width:100%; max-width:190px; aspect-ratio:1; border:5px double #a77d2b; border-radius:50%; background:#153e32; color:#f7e7b3; text-align:center; font:900 20pt Georgia,serif; }
-.seal-fallback span { font-size:12pt; }
-.stamp-title { margin:0 0 8px; color:#72531f; font-size:10pt; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
-.stamp-copy { margin:0 0 9px; color:#425d58; font-size:8.2pt; }
-.stamp-meta { display:grid; grid-template-columns:92px 1fr; gap:4px 10px; margin:11px 0; font-size:8pt; }
-.stamp-meta dt { color:#647a73; font-weight:700; }
-.stamp-meta dd { margin:0; color:#183f3d; overflow-wrap:anywhere; }
-.fingerprint { display:block; padding:9px 10px; border:1px dashed #b7cfc1; border-radius:8px; background:#fff; color:#214c50; font:700 7pt/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; overflow-wrap:anywhere; }
-.ledger-title { margin:23px 0 12px; color:#164d50; font-size:14pt; }
-.ledger-card { margin:12px 0; padding:12px 14px; border:1px solid #e3ece7; border-radius:11px; break-inside:avoid; }
+.reverse-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; padding-bottom:13px; border-bottom:2px solid #111; }
+.reverse-heading h1 { margin:0; color:#111; font-size:23pt; }
+.reverse-heading .kicker { margin-bottom:6px; }
+.reverse-heading .back-label { color:#333; font-size:8pt; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.back-layout { display:grid; grid-template-columns:170px 1fr; gap:22px; align-items:start; margin:18px 0 22px; padding:16px; border:1px solid #555; background:#fff; break-inside:avoid; }
+.seal-fallback { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; width:160px; height:160px; border:4px double #111; border-radius:50%; color:#111; text-align:center; }
+.seal-initials { font:700 28pt Georgia, "Times New Roman", serif; letter-spacing:.04em; }
+.seal-name { padding-top:6px; border-top:1px solid #111; font:700 7pt/1.5 Arial,sans-serif; letter-spacing:.12em; }
+.stamp-title { margin:0 0 8px; color:#111; font:700 9pt Arial,sans-serif; letter-spacing:.09em; text-transform:uppercase; }
+.stamp-copy { margin:0 0 8px; color:#333; font-size:8pt; }
+.stamp-meta { display:grid; grid-template-columns:92px 1fr; gap:4px 10px; margin:10px 0; font-size:8pt; }
+.stamp-meta dt { color:#333; font-weight:700; }
+.stamp-meta dd { margin:0; color:#111; overflow-wrap:anywhere; }
+.fingerprint { display:block; padding:8px; border:1px dashed #555; background:#fff; color:#111; font:700 7pt/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; overflow-wrap:anywhere; }
+.ledger-title { margin:22px 0 10px; padding-bottom:5px; border-bottom:1px solid #555; color:#111; font:700 13pt Georgia,"Times New Roman",serif; }
+.ledger-card { margin:10px 0; padding:11px 13px; border:1px solid #777; break-inside:avoid; }
 .ledger-heading { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
-.ledger-heading h2 { color:#164d50; font-size:10.5pt; }
-.ledger-heading span { color:#60767a; font-size:7.5pt; white-space:nowrap; }
-.ledger-source { margin:3px 0 6px; color:#738784; font-size:7.3pt; }
+.ledger-heading h2 { padding:0; border:0; color:#111; font:700 10pt Arial,sans-serif; }
+.ledger-heading span { color:#333; font-size:7.5pt; white-space:nowrap; }
+.ledger-source { margin:3px 0 6px; color:#444; font-size:7.3pt; }
 .ledger-card ul { margin:5px 0 0; }
-.ledger-card li { padding:5px 0 5px 15px; font-size:8pt; }
-.ledger-card li:before { top:12px; width:5px; height:5px; }
-.empty-ledger { padding:18px; border-radius:10px; background:#f3f7f4; color:#60767a; }
-.reverse-footer { margin-top:23px; padding-top:11px; border-top:1px solid #dfe9e3; color:#6c807e; font-size:7.5pt; }
-.footer { display:flex; justify-content:space-between; gap:14px; margin-top:25px; padding-top:12px; border-top:1px solid #e2ebe6; color:#6c807e; font-size:7.5pt; }
-@media print { body { background:#fff; } .sheet { max-width:none; margin:0; padding:0; box-shadow:none; } .hero { -webkit-print-color-adjust:exact; print-color-adjust:exact; } .back-layout,.reverse-hint,.ledger-card { -webkit-print-color-adjust:exact; print-color-adjust:exact; } a { color:inherit; text-decoration:none; } }
-@media screen { .sheet { border-radius:18px; } }
-@media screen and (max-width:620px) { .back-layout { grid-template-columns:1fr; } .seal-artwork,.seal-fallback { max-width:170px; margin-inline:auto; } .reverse-heading { align-items:flex-start; flex-direction:column; } }
-</style></head><body><main class="sheet">
+.ledger-card li { padding:5px 0 5px 16px; font-size:8pt; }
+.ledger-card li:before { top:5px; }
+.empty-ledger { padding:14px; border:1px solid #777; color:#222; }
+.reverse-footer { margin-top:21px; padding-top:10px; border-top:1px solid #777; color:#333; font-size:7.5pt; }
+.footer { display:flex; justify-content:space-between; gap:14px; margin-top:23px; padding-top:10px; border-top:1px solid #777; color:#333; font-size:7.5pt; }
+@media print { .screen-toolbar { display:none !important; } body { background:#fff; } .sheet { max-width:none; margin:0; padding:0; border:0; } .hero { margin:0 0 24px; padding:0 0 18px; } a { color:inherit; text-decoration:none; } }
+@media screen { .sheet { box-shadow:0 3px 16px #00000012; } }
+@media screen and (max-width:620px) { .screen-toolbar { margin:8px; align-items:flex-start; flex-direction:column; } .screen-toolbar-actions { width:100%; } .screen-toolbar button { flex:1; } .sheet { margin:8px; padding:28px 22px 24px; } .hero { margin:-28px -22px 24px; padding:22px; } .back-layout { grid-template-columns:1fr; } .seal-fallback { margin-inline:auto; } .reverse-heading { align-items:flex-start; flex-direction:column; } }
+</style></head><body><nav class="screen-toolbar" aria-label="Report actions"><p>Review this personal report before sharing.</p><div class="screen-toolbar-actions"><button type="button" id="print-report">Print or save as PDF</button><button type="button" id="close-report">Close report</button></div></nav><main class="sheet">
 <header class="hero"><div class="brand"><span class="brand-mark">C</span><span>CareSphere · Personal care tools</span></div><div class="report-meta"><span>VISIT PREPARATION</span><span>Prepared <b>${date}</b></span></div><h1>Care visit<br>preparation</h1><p class="subtitle">A clear, personal briefing made from the items you chose.</p></header>
 <div class="kicker">Your selected information</div>
 ${renderBriefBody(brief)}
@@ -277,5 +280,5 @@ ${renderBriefBody(brief)}
 <h2 class="ledger-title">Selected data included in this copy</h2>
 ${renderSelectedDataLedger(brief)}
 <footer class="reverse-footer">CareSphere · This stamp fingerprints report text only. It does not authenticate a clinician, clinic, medical record, or certified electronic signature.</footer>
-</main><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250));</script></body></html>`
+</main><script>document.getElementById('print-report')?.addEventListener('click',()=>window.print());document.getElementById('close-report')?.addEventListener('click',()=>window.close());</script></body></html>`
 }

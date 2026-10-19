@@ -39,9 +39,12 @@ struct VisitPrepView: View {
             .sorted { $0.createdAt > $1.createdAt }
     }
 
-    private var hasSelectedContent: Bool {
-        includeName || includeMedications || includeMoods || includeNotes || includeVitals || includeAppleHealth || !questions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    private var selectedSectionCount: Int {
+        [includeName, includeMedications, includeMoods, includeNotes, includeVitals, includeAppleHealth].filter { $0 }.count
+            + (questions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0 : 1)
     }
+
+    private var hasSelectedContent: Bool { selectedSectionCount > 0 }
 
     private var brief: String {
         var lines = [
@@ -152,6 +155,17 @@ struct VisitPrepView: View {
                     }
                     InfoText(AppLanguage.text("Selections are off by default. The date range applies to notes and mood self-reports; the current medication schedule is shown only if you choose it."))
                         .font(.caption2).foregroundStyle(.secondary)
+                    HStack(spacing: 12) {
+                        Label(AppLanguage.text("Selected sections"), systemImage: "checkmark.circle")
+                            .foregroundStyle(.secondary)
+                        Text("\(selectedSectionCount)")
+                            .font(.headline.monospacedDigit())
+                            .accessibilityLabel("\(selectedSectionCount) selected sections")
+                        Spacer(minLength: 8)
+                        Button { clearSelection() } label: { Label(AppLanguage.text("Clear selection"), systemImage: "xmark.circle") }
+                            .disabled(!hasSelectedContent)
+                    }
+                    .font(.caption)
                 }
 
                 Section(AppLanguage.text("Questions or topics · optional")) {
@@ -165,15 +179,19 @@ struct VisitPrepView: View {
                 }
 
                 Section(AppLanguage.text("Report content preview")) {
-                    Text(brief)
-                        .font(.system(.caption2, design: .monospaced))
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if hasSelectedContent {
+                        Text(brief)
+                            .font(.system(.caption2, design: .monospaced))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        InfoText(AppLanguage.text("Choose at least one section or add a question to create the report."))
+                    }
                 }
 
                 Section {
                     Button(action: makePDF) {
-                        Label(AppLanguage.text("Create sealed PDF…"), systemImage: "doc.richtext")
+                        Label(AppLanguage.text("Create formal black-and-white PDF"), systemImage: "doc.richtext")
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .disabled(!hasSelectedContent)
@@ -183,7 +201,7 @@ struct VisitPrepView: View {
 
                 Section(AppLanguage.text("About this report")) {
                     InfoText(AppLanguage.text("Only the sections you select are included. Medication, mood, and health entries retain their recorded source; review the report before sharing."))
-                    InfoText(AppLanguage.text("PDFs add a final reverse-side data ledger and a decorative stamp with a SHA-256 fingerprint. Enable duplex printing to place it on paper’s back; the stamp is not an identity signature."))
+                    InfoText(AppLanguage.text("The report uses a formal black-and-white design. Its SHA-256 fingerprint is a text checksum, not a signature. Enable duplex printing to place the selected-data ledger on the reverse side."))
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -209,6 +227,16 @@ struct VisitPrepView: View {
                 Text(exportError)
             }
         }
+    }
+
+    private func clearSelection() {
+        includeName = false
+        includeMedications = false
+        includeMoods = false
+        includeNotes = false
+        includeVitals = false
+        includeAppleHealth = false
+        questions = ""
     }
 
     private func makePDF() {
@@ -253,10 +281,10 @@ private struct VisitPrepActivitySheet: UIViewControllerRepresentable {
 
 private enum VisitPrepPDFRenderer {
     private static let page = CGRect(x: 0, y: 0, width: 612, height: 792)
-    private static let ink = UIColor(red: 0.08, green: 0.18, blue: 0.21, alpha: 1)
-    private static let muted = UIColor(red: 0.34, green: 0.44, blue: 0.45, alpha: 1)
-    private static let teal = UIColor(red: 0.08, green: 0.42, blue: 0.40, alpha: 1)
-    private static let mint = UIColor(red: 0.92, green: 0.97, blue: 0.94, alpha: 1)
+    private static let ink = UIColor.black
+    private static let muted = UIColor.darkGray
+    private static let teal = UIColor.black
+    private static let mint = UIColor(white: 0.95, alpha: 1)
     static func render(brief: String) throws -> Data {
         let digest = SHA256.hash(data: Data(brief.utf8)).map { String(format: "%02x", $0) }.joined()
         let briefLines = brief.components(separatedBy: .newlines)
@@ -319,7 +347,7 @@ private enum VisitPrepPDFRenderer {
                 let rule = UIBezierPath()
                 rule.move(to: CGPoint(x: 52, y: 753))
                 rule.addLine(to: CGPoint(x: 560, y: 753))
-                UIColor(red: 0.86, green: 0.91, blue: 0.88, alpha: 1).setStroke()
+                UIColor(white: 0.55, alpha: 1).setStroke()
                 rule.lineWidth = 0.7
                 rule.stroke()
                 let label = "CareSphere · Personal visit preparation                                      Page \(pageNumber)"
@@ -332,26 +360,24 @@ private enum VisitPrepPDFRenderer {
                 pageNumber += 1
                 if pageNumber == 1 {
                     let context = pdf.cgContext
-                    let colors = [UIColor(red: 0.06, green: 0.23, blue: 0.27, alpha: 1).cgColor,
-                                  UIColor(red: 0.08, green: 0.44, blue: 0.41, alpha: 1).cgColor] as CFArray
-                    let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 1])!
-                    context.drawLinearGradient(gradient, start: CGPoint(x: 0, y: 0), end: CGPoint(x: 612, y: 190), options: [])
-                    context.setStrokeColor(UIColor.white.withAlphaComponent(0.15).cgColor)
+                    context.setFillColor(UIColor.black.cgColor)
+                    context.fill(CGRect(x: 0, y: 0, width: 612, height: 190))
+                    context.setStrokeColor(UIColor.white.cgColor)
                     context.setLineWidth(1)
                     context.strokeEllipse(in: CGRect(x: 474, y: -84, width: 190, height: 190))
                     context.strokeEllipse(in: CGRect(x: 453, y: -105, width: 232, height: 232))
                     let badge = CGRect(x: 52, y: 34, width: 42, height: 42)
-                    context.setFillColor(UIColor(red: 0.88, green: 0.96, blue: 0.91, alpha: 1).cgColor)
+                    context.setFillColor(UIColor.white.cgColor)
                     context.fillEllipse(in: badge)
-                    let cAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 19, weight: .black), .foregroundColor: teal]
+                    let cAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 19, weight: .black), .foregroundColor: UIColor.black]
                     ("C" as NSString).draw(at: CGPoint(x: 66, y: 43), withAttributes: cAttrs)
-                    let brandAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 9, weight: .bold), .foregroundColor: UIColor(red: 0.84, green: 0.94, blue: 0.89, alpha: 1)]
+                    let brandAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 9, weight: .bold), .foregroundColor: UIColor.white]
                     ("CARESPHERE  ·  PERSONAL CARE TOOLS" as NSString).draw(at: CGPoint(x: 105, y: 49), withAttributes: brandAttrs)
-                    let eyebrowAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 8, weight: .bold), .foregroundColor: UIColor.white.withAlphaComponent(0.8)]
+                    let eyebrowAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 8, weight: .bold), .foregroundColor: UIColor.white]
                     ("VISIT PREPARATION" as NSString).draw(at: CGPoint(x: 52, y: 101), withAttributes: eyebrowAttrs)
-                    let titleAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 29, weight: .bold), .foregroundColor: UIColor.white]
+                    let titleAttrs: [NSAttributedString.Key: Any] = [.font: UIFont(name: "Georgia-Bold", size: 29) ?? UIFont.systemFont(ofSize: 29, weight: .bold), .foregroundColor: UIColor.white]
                     ("Care visit preparation" as NSString).draw(at: CGPoint(x: 52, y: 120), withAttributes: titleAttrs)
-                    let subtitleAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 10), .foregroundColor: UIColor.white.withAlphaComponent(0.86)]
+                    let subtitleAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 10), .foregroundColor: UIColor.white]
                     ("A personal briefing made from the items you chose." as NSString).draw(at: CGPoint(x: 53, y: 161), withAttributes: subtitleAttrs)
                     y = 214
                 } else {
@@ -382,7 +408,7 @@ private enum VisitPrepPDFRenderer {
                     mint.setFill()
                     UIBezierPath(roundedRect: rect, cornerRadius: 8).fill()
                     let rail = UIBezierPath(roundedRect: CGRect(x: 52, y: y, width: 3, height: 47), cornerRadius: 1.5)
-                    UIColor(red: 0.34, green: 0.66, blue: 0.55, alpha: 1).setFill()
+                    UIColor.black.setFill()
                     rail.fill()
                     y += 8
                     text(line, x: 66, width: 477, font: .systemFont(ofSize: 8.5), color: muted, lineSpacing: 2)
@@ -420,13 +446,18 @@ private enum VisitPrepPDFRenderer {
             text("REVERSE SIDE · SELECTED DATA RECORD", font: .systemFont(ofSize: 8), color: teal, weight: .bold, lineSpacing: 1)
             text("Data & electronic stamp", font: .systemFont(ofSize: 23), color: ink, weight: .bold, lineSpacing: 2)
             let imageTop = y + 5
-            if let sealImage = UIImage(named: "VisitPrepSeal") {
-                let sealFrame = CGRect(x: 52, y: imageTop, width: 160, height: 160)
-                pdf.cgContext.saveGState()
-                UIBezierPath(ovalIn: sealFrame).addClip()
-                sealImage.draw(in: sealFrame)
-                pdf.cgContext.restoreGState()
-            }
+            let sealFrame = CGRect(x: 52, y: imageTop, width: 160, height: 160)
+            let sealContext = pdf.cgContext
+            sealContext.setStrokeColor(UIColor.black.cgColor)
+            sealContext.setLineWidth(2.2)
+            sealContext.strokeEllipse(in: sealFrame)
+            sealContext.setLineWidth(0.7)
+            sealContext.strokeEllipse(in: sealFrame.insetBy(dx: 8, dy: 8))
+            let initialsAttrs: [NSAttributedString.Key: Any] = [.font: UIFont(name: "Georgia-Bold", size: 30) ?? UIFont.boldSystemFont(ofSize: 30), .foregroundColor: UIColor.black]
+            ("CS" as NSString).draw(at: CGPoint(x: 102, y: imageTop + 46), withAttributes: initialsAttrs)
+            let sealBrandAttrs: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 8, weight: .bold), .foregroundColor: UIColor.black]
+            ("CARESPHERE" as NSString).draw(at: CGPoint(x: 93, y: imageTop + 91), withAttributes: sealBrandAttrs)
+            ("PERSONAL COPY" as NSString).draw(at: CGPoint(x: 86, y: imageTop + 106), withAttributes: sealBrandAttrs)
             let metadataTop = y + 8
             y = metadataTop
             text("ELECTRONIC INTEGRITY STAMP · \(digest.prefix(12).uppercased())", x: 225, width: 335, font: .systemFont(ofSize: 8, weight: .heavy), color: teal, lineSpacing: 1)

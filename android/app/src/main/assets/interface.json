@@ -869,6 +869,12 @@
     "vi": "Chọn hoạt động, lắng nghe bản thân hoặc nghỉ ngơi. Mọi thứ ở đây đều là tùy chọn.",
     "zh-Hans": "选择一项活动、关注自己的感受，或只是休息一下。这里的一切都是可选的。"
   },
+  "Choose at least one section or add a question to create the report.": {
+    "es": "Elige al menos una sección o añade una pregunta para crear el informe.",
+    "fil": "Pumili ng kahit isang seksyon o magdagdag ng tanong para malikha ang ulat.",
+    "vi": "Chọn ít nhất một mục hoặc thêm câu hỏi để tạo báo cáo.",
+    "zh-Hans": "至少选择一个部分或添加问题以创建报告。"
+  },
   "Choose backup to preview": {
     "es": "Elegir copia de seguridad para revisar",
     "fil": "Pumili ng backup na susuriin",
@@ -995,11 +1001,23 @@
     "vi": "Xóa tìm kiếm",
     "zh-Hans": "清除搜索"
   },
+  "Clear selection": {
+    "es": "Borrar selección",
+    "fil": "I-clear ang pagpili",
+    "vi": "Xóa lựa chọn",
+    "zh-Hans": "清除所选内容"
+  },
   "Close": {
     "es": "Cerrar",
     "fil": "Isara",
     "vi": "Đóng",
     "zh-Hans": "关闭"
+  },
+  "Close report": {
+    "es": "Cerrar informe",
+    "fil": "Isara ang ulat",
+    "vi": "Đóng báo cáo",
+    "zh-Hans": "关闭报告"
   },
   "Close settings": {
     "es": "Cerrar ajustes",
@@ -1192,6 +1210,12 @@
     "fil": "Gumawa ng naka-encrypt na backup",
     "vi": "Tạo bản sao lưu được mã hóa",
     "zh-Hans": "创建加密备份"
+  },
+  "Create formal black-and-white PDF": {
+    "es": "Crear PDF formal en blanco y negro",
+    "fil": "Gumawa ng pormal na itim-at-puting PDF",
+    "vi": "Tạo PDF trang trọng đen trắng",
+    "zh-Hans": "创建正式黑白 PDF"
   },
   "Create sealed PDF": {
     "es": "Crear PDF sellado",
@@ -3221,6 +3245,12 @@
     "vi": "Bước thiết lập trước",
     "zh-Hans": "上一个设置步骤"
   },
+  "Print or save as PDF": {
+    "es": "Imprimir o guardar como PDF",
+    "fil": "I-print o i-save bilang PDF",
+    "vi": "In hoặc lưu thành PDF",
+    "zh-Hans": "打印或另存为 PDF"
+  },
   "Privacy": {
     "es": "Privacidad",
     "fil": "Pagkapribado",
@@ -3587,6 +3617,12 @@
     "vi": "Kiểm tra người nhận trong ứng dụng tiếp theo. Không gửi gì tự động. Nhà cung cấp bên ngoài có điều khoản riêng về quyền riêng tư.",
     "zh-Hans": "请在下一个应用中核对接收者。不会自动发送任何内容。外部服务商有其自身的隐私条款。"
   },
+  "Review this personal report before sharing.": {
+    "es": "Revisa este informe personal antes de compartirlo.",
+    "fil": "Suriin ang personal na ulat na ito bago ibahagi.",
+    "vi": "Xem lại báo cáo cá nhân này trước khi chia sẻ.",
+    "zh-Hans": "分享前请先检查这份个人报告。"
+  },
   "Routine": {
     "es": "Rutina",
     "fil": "Gawain",
@@ -3760,6 +3796,18 @@
     "fil": "Napili",
     "vi": "Đã chọn",
     "zh-Hans": "已选择"
+  },
+  "Selected items": {
+    "es": "Elementos seleccionados",
+    "fil": "Mga napiling item",
+    "vi": "Mục đã chọn",
+    "zh-Hans": "已选项目"
+  },
+  "Selected sections": {
+    "es": "Secciones seleccionadas",
+    "fil": "Mga napiling seksyon",
+    "vi": "Mục đã chọn",
+    "zh-Hans": "已选部分"
   },
   "Self-entered readings with their saved dates; off by default.": {
     "es": "Lecturas ingresadas por ti con sus fechas guardadas; desactivado de forma predeterminada.",
@@ -4397,11 +4445,23 @@
     "vi": "Không lưu được trạng thái tạm dừng. Tắt thông báo CareSphere trong Cài đặt Android trước khi khởi động lại.",
     "zh-Hans": "无法保存暂停状态。重新启动前，请在Android设置中停用CareSphere通知。"
   },
+  "The report uses a formal black-and-white design. Its SHA-256 fingerprint is a text checksum, not a signature. Enable duplex printing to place the selected-data ledger on the reverse side.": {
+    "es": "El informe tiene un diseño formal en blanco y negro. La huella SHA-256 es una suma de comprobación del texto, no una firma. Activa la impresión a doble cara para colocar el registro de datos en el reverso.",
+    "fil": "Pormal na itim-at-puting disenyo ang ulat. Checksum ng teksto ang SHA-256 fingerprint nito, hindi lagda. I-on ang duplex printing para mailagay sa likod ang talaan ng napiling datos.",
+    "vi": "Thiết kế báo cáo trang trọng, chỉ đen trắng. Dấu vân tay SHA-256 là mã kiểm tra văn bản, không phải chữ ký. Bật in hai mặt để in bảng kê dữ liệu ở mặt sau.",
+    "zh-Hans": "报告采用正式的黑白设计。SHA-256 指纹是文本校验和，不是签名。启用双面打印可将所选数据清单印在背面。"
+  },
   "The transfer file does not fully match this receipt. Its hash or record IDs differ.": {
     "es": "El archivo de transferencia no coincide completamente con este recibo. Su hash o los ID de registros difieren.",
     "fil": "Hindi ganap na tumutugma ang file ng paglilipat sa resibong ito. Iba ang hash o ID ng mga rekord nito.",
     "vi": "Tệp truyền không khớp hoàn toàn với biên nhận này. Giá trị băm hoặc ID bản ghi khác.",
     "zh-Hans": "传输文件与本回执不完全匹配。其哈希值或记录 ID 不一致。"
+  },
+  "There are no saved items to include yet. Add a care note, question, mood check-in, medication reminder, or vital record first.": {
+    "es": "Todavía no hay elementos guardados para incluir. Primero añade una nota de cuidado, una pregunta, un registro de ánimo, un recordatorio de medicación o una medición vital.",
+    "fil": "Wala pang naka-save na item na maisasama. Magdagdag muna ng tala sa pangangalaga, tanong, mood check-in, paalala sa gamot, o vital record.",
+    "vi": "Chưa có mục nào được lưu để thêm vào. Trước tiên, hãy thêm ghi chú chăm sóc, câu hỏi, bản ghi tâm trạng, lời nhắc thuốc hoặc chỉ số sinh hiệu.",
+    "zh-Hans": "目前没有可纳入的已保存项目。请先添加护理备注、问题、情绪记录、用药提醒或生命体征记录。"
   },
   "These are self-entered values, not verified sensor readings. They do not change your care plan.": {
     "es": "Son valores introducidos por ti, no lecturas verificadas de sensores. No cambian tu plan de atención.",

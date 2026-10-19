@@ -178,16 +178,21 @@ class SupportActivity : ProtectedActivity() {
     private fun visitSummary(){
         text(tx("Structured draft · no AI"),24f)
         copy(tx("Choose your notes and questions. This offline template copies only your selected words; it does not diagnose, simplify wording, or invent advice. Review and edit before saving a new note."))
-        copy(tx("PDFs add a final reverse-side data ledger and a decorative stamp with a SHA-256 fingerprint. Enable duplex printing to place it on paper’s back; the stamp is not an identity signature."))
+        copy(tx("The report uses a formal black-and-white design. Its SHA-256 fingerprint is a text checksum, not a signature. Enable duplex printing to place the selected-data ledger on the reverse side."))
         val notes=data.list("notes")
         val records=(0 until notes.length()).map{val n=notes.getJSONObject(it);("note:"+n.optString("id")) to (tx("Care note")+" · "+n.optString("at")+"\n"+n.optString("body"))}+
             rows("questions").map{q->("question:"+q.optString("id")) to (tx("Question")+" · "+q.optString("text")+if(q.optString("followup").isBlank())"" else "\n"+tx("Follow-up")+": "+q.optString("followup"))}+
             MoodHistory.recent(data.list("moods"),30).map{(day,label)->("mood:"+day) to (tx("Mood")+" · $day: "+AppLanguage.moodLabel(label,::tx)+" · "+tx("self-reported"))}+
             rows("medications").map{m->("medication:"+m.optString("id")) to (tx("Medication reminders (user-entered; not pharmacy-verified)")+" · "+m.optString("name")+" · "+m.optString("time")+" · "+tx(if(data.json.optBoolean("medicationConfirmed"))"reviewed by user" else "unconfirmed by user"))}+
             (0 until data.list("manualVitals").length()).map{index->val v=data.list("manualVitals").getJSONObject(index);val value=if(v.optString("kind")=="bp")"${v.optInt("first")}/${v.optInt("second")} mmHg" else "${v.optInt("first")}% SpO₂";("vital:"+v.optString("id")) to (tx("Manually entered vital")+" · "+v.optString("at")+" · "+value+" · "+tx("entered by user"))}
-        records.forEach{(id,body)->page.addView(CheckBox(this).apply{text=body;textSize=18f;setTextColor(ink);isChecked=summarySelection.contains(id);setOnCheckedChangeListener{_,checked->if(checked)summarySelection.add(id)else summarySelection.remove(id)}})}
+        summarySelection.retainAll(records.map { it.first }.toSet())
+        val selectionStatus = TextView(this).apply { text=tx("Selected items")+": ${summarySelection.size}"; textSize=16f; setTextColor(ink); setPadding(0,dp(8),0,dp(8)); contentDescription=text }
+        page.addView(selectionStatus)
+        if(records.isEmpty()) copy(tx("There are no saved items to include yet. Add a care note, question, mood check-in, medication reminder, or vital record first."))
+        if(summarySelection.isNotEmpty()) button(tx("Clear selection")){summarySelection.clear();render()}
+        records.forEach{(id,body)->page.addView(CheckBox(this).apply{text=body;textSize=18f;setTextColor(ink);isChecked=summarySelection.contains(id);setOnCheckedChangeListener{_,checked->if(checked)summarySelection.add(id)else summarySelection.remove(id);selectionStatus.text=tx("Selected items")+": ${summarySelection.size}";selectionStatus.contentDescription=selectionStatus.text}})}
         button(tx("Add appointment question")){form(tx("Question"),listOf("What would you like to ask?" to "")){v->require(v[0].isNotBlank()&&rows("questions").size<100);update("questions",rows("questions")+JSONObject().put("id",UUID.randomUUID()).put("text",v[0].take(1000)))}}
-        button(tx("Create sealed PDF")){
+        button(tx("Create formal black-and-white PDF")){
             val chosen=records.filter{summarySelection.contains(it.first)}
             if(chosen.isEmpty()){message(tx("Choose at least one note or question."));return@button}
             val draft=tx("CareSphere · Visit preparation report")+"\n"+tx("Prepared (UTC):")+" "+java.time.Instant.now().toString()+"\n"+tx("User-prepared information only. This is not a verified medical record, diagnosis, or clinical interpretation.")+"\n\n"+chosen.joinToString("\n\n"){it.second}
