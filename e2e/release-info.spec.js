@@ -5,7 +5,7 @@ test('home dashboard opens visit preparation directly', async ({ page }) => {
   await page.getByRole('button', { name: 'Prepare visit brief', exact: true }).first().click()
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
-  await expect(dialog.getByText('Selected sections')).toBeVisible()
+  await expect(dialog.locator('[aria-live="polite"]')).toHaveText('0')
   await expect(dialog.getByRole('button', { name: 'Create PDF' })).toBeDisabled()
 })
 

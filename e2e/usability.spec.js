@@ -153,7 +153,7 @@ test('visit preparation creates a polished print-to-PDF report with an integrity
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByRole('checkbox', { name: /Manually entered blood pressure and oxygen/ })).not.toBeChecked()
   await expect(dialog.getByRole('button', { name: 'Create PDF' })).toBeDisabled()
-  await expect(dialog.getByText('Selected sections')).toBeVisible()
+  await expect(dialog.locator('[aria-live="polite"]')).toHaveText('0')
   await dialog.getByRole('checkbox', { name: /Display name/ }).check()
   await dialog.getByLabel(/Questions or topics to discuss/).fill('Ask about follow-up timing.')
 
