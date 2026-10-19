@@ -8,7 +8,7 @@ Local routines, connection, and optional accessible activities. **Native iPhone 
 
 **iOS Siri & Shortcuts:** five private navigation shortcuts open Today, Activities, breathing, mood check-in, or visit preparation. They queue through onboarding and the app lock; breathing does not start automatically, and a mood is not recorded. Settings explains how to find the shortcuts.
 
-**Current source versions:** iPhone 3.8.0 (17), Android 1.9.0 (11), and web 1.5.1. [Download the source ZIP](https://github.com/engineer2025-sudo/Care/archive/refs/tags/caresphere-mobile-3.8.0-1.9.0.zip) or see [download and installation instructions](DOWNLOAD.md). iOS, Android, and web CI checks pass; no signed iOS installer or production-signed Android installer is included.
+**Current source versions:** iPhone 3.8.0 (17), Android 1.9.0 (11), and web 1.5.1. [Version history](docs/version-history.md) · [Manual repository transfer checklist](docs/REPOSITORY-TRANSFER.md). [Download the source ZIP](https://github.com/engineer2025-sudo/Care/archive/refs/tags/caresphere-mobile-3.8.0-1.9.0.zip) or see [download and installation instructions](DOWNLOAD.md). iOS, Android, and web CI checks pass; no signed iOS installer or production-signed Android installer is included.
 
 ## Previous release — October 14, 2026
 

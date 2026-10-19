@@ -31,6 +31,7 @@ import { STORAGE_KEY, RESET_LOCAL_DATA_EVENT, normalizePersistedValue, localDayK
 import { CARE_STORAGE_SECURITY_EVENT, eraseCareStorage, getCareStorageCache, getCareStorageSecurityStatus, persistCareStorage } from './lib/secureCareStorage';
 import Info from './components/Info';
 import { setBareMinimum, useBareMinimum } from './lib/displayMode';
+import { RELEASE_INFO } from './lib/releaseInfo';
 
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
 navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
@@ -421,7 +422,7 @@ function MedicationScheduleEditor({ meds, setMeds, medsConfirmed, setMedsConfirm
     <div className="border-t border-slate-800 pt-4 mt-3 space-y-3">
       <div>
         <h4 id="medication-settings" tabIndex={-1} className="text-sm font-bold text-white">{tr("Medication schedule · local only")}</h4>
-        <Info className="text-[11px] text-slate-400 mt-1">{tr("Add only medicines and times confirmed by your care team or label. CareSphere does not prescribe, verify a dose, or check interactions.")}</Info>
+        <Info className="text-[11px] text-slate-400 mt-1">{tr("Enter only label or care-team instructions. CareSphere does not verify doses or interactions.")}</Info>
       </div>
       {meds.length === 0 ?
       <p className="text-xs text-slate-500">{tr("No medication reminders are configured.")}</p> :
@@ -503,6 +504,8 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
   if (!open) return null;
 
   const formatBytes = (bytes) => bytes < 1024 ? `${bytes} bytes` : `${(bytes / 1024).toFixed(1)} KB`;
+  const releaseDate = new Intl.DateTimeFormat(languageTag(), { dateStyle: 'long', timeZone: 'UTC' })
+    .format(new Date(`${RELEASE_INFO.sourceSnapshotOn}T00:00:00Z`));
   const handleExport = () => {
     const success = onExportData();
     setPrivacyMessage(success ?
@@ -548,7 +551,7 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
 
         </SettingsRow>
 
-        <SettingsRow label={tr("Emergency contact")} hint={tr("Only used when you choose to call or message them. CareSphere never contacts anyone automatically.")}>
+        <SettingsRow label={tr("Emergency contact")} hint={tr("Used only when you choose to call or message; never contacted automatically.")}>
           <div className="flex flex-col gap-1.5">
             <input
               type="text"
@@ -568,7 +571,7 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
           </div>
         </SettingsRow>
 
-        <SettingsRow label={tr("Text size")} hint="Larger text across the whole app — good for low vision.">
+        <SettingsRow label={tr("Text size")}>
           <div className="flex bg-slate-800 border border-slate-700 rounded-xl p-1 gap-1">
             {[
             { id: 'md', label: 'A' },
@@ -589,7 +592,7 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
           </div>
         </SettingsRow>
 
-        <SettingsRow label={tr("Color appearance")} hint="Choose the device appearance, calm charcoal, or warm light. Contrast stays readable in each theme.">
+        <SettingsRow label={tr("Color appearance")}>
           <select
             value={settings.theme || 'system'}
             onChange={(event) => update({ theme: event.target.value })}
@@ -602,23 +605,23 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
           </select>
         </SettingsRow>
 
-        <SettingsRow label={tr("High contrast")} hint="Brightens grey text and borders; keep this on if it makes text easier to see.">
+        <SettingsRow label={tr("High contrast")}>
           <SettingsToggle on={settings.highContrast} onClick={() => update({ highContrast: !settings.highContrast })} label={tr("High contrast")} />
         </SettingsRow>
 
-        <SettingsRow label={tr("Reduce visual movement")} hint="Turns off confetti, pulsing decoration, and hover scaling. Activities remain untimed; you can change this any time.">
+        <SettingsRow label={tr("Reduce visual movement")} hint={tr("Reduces animation and decoration.")}>
           <SettingsToggle on={settings.lowSensory} onClick={() => update({ lowSensory: !settings.lowSensory })} label={tr("Reduce visual movement")} />
         </SettingsRow>
 
-        <SettingsRow label={tr("Bare minimum mode")} hint="Hides explanatory and how-to text everywhere in the app. Status messages, empty states and safety warnings stay visible.">
+        <SettingsRow label={tr("Bare minimum mode")} hint={tr("Hides optional help text.")}>
           <SettingsToggle on={settings.bareMinimum === true} onClick={() => update({ bareMinimum: settings.bareMinimum !== true })} label={tr("Bare minimum mode")} />
         </SettingsRow>
 
-        <SettingsRow label={tr("Voice reminders")} hint="Speaks medication and routine prompts aloud (browser speech synthesis).">
+        <SettingsRow label={tr("Voice reminders")} hint={tr("Reads medication and routine prompts aloud.")}>
           <SettingsToggle on={settings.voice} onClick={() => update({ voice: !settings.voice })} label={tr("Voice reminders")} />
         </SettingsRow>
 
-        <SettingsRow label={tr("Preview reminder")} hint="Hear a generic voice preview; a saved schedule preview never records a dose or enables reminders.">
+        <SettingsRow label={tr("Preview reminder")} hint={tr("Generic preview only; no dose is recorded and reminders do not change.")}>
           <button
             onClick={() => {
               speak(tr('This is your CareSphere reminder. Please check your medication label and follow the schedule agreed with your care team.'));
@@ -688,6 +691,20 @@ function SettingsModal({ open, initialSection, onClose, settings, update, notify
           </div>
           {privacyMessage && <p className="text-[11px] text-emerald-200" role="status" aria-live="polite">{privacyMessage}</p>}
           <Info className="text-[10px] text-slate-500 leading-relaxed">{tr("A downloaded export is no longer protected by CareSphere. Store it carefully and share it only with a person you trust. Optional third-party features such as Jitsi and SOS sharing operate only when you choose them.")}</Info>
+        </section>
+        <section className="rounded-2xl border border-slate-700 bg-slate-950/50 p-4" aria-labelledby="version-information-title">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <h4 id="version-information-title" className="text-xs font-bold text-slate-200">{tr("Version information")}</h4>
+            <time dateTime={RELEASE_INFO.sourceSnapshotOn} className="text-[11px] text-slate-400">{tr("Source snapshot")} · {releaseDate}</time>
+          </div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {RELEASE_INFO.targets.map(({ id, label, version, build }) =>
+              <div key={id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2.5">
+                <span className="text-xs text-slate-400">{label}</span>
+                <span className="font-mono text-xs font-bold text-slate-100">{version}{build ? ` (${build})` : ''}</span>
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </div>);
@@ -1494,7 +1511,7 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-sky-700/50 bg-sky-950/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-sky-200"><FileText className="h-3.5 w-3.5" />{tr(" Local preview · no sync")}</div>
             <h2 id="visit-brief-title" className="mt-3 text-xl font-black text-white">{tr("Prepare for a care visit")}</h2>
-            <Info className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">{tr("Choose exactly what to include. The summary is assembled on this device from your entries; it is not a medical record, diagnosis, or clinical advice, and nothing is sent automatically.")}</Info>
+            <Info className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">{tr("Only selected sections are included. The brief is prepared on this device; it is not a medical record or clinical advice.")}</Info>
           </div>
           <button onClick={onClose} aria-label={tr("Close visit preparation")} className="rounded-xl bg-slate-800 p-2 text-slate-400 hover:text-white"><X className="h-5 w-5" /></button>
         </header>
@@ -1527,7 +1544,7 @@ function VisitBriefModal({ open, onClose, displayName, meds, medsConfirmed, note
           <p className="mt-3 text-[10px] leading-relaxed text-slate-500">{tr("The report uses a formal black-and-white design. Its SHA-256 fingerprint is a text checksum, not a signature. Enable duplex printing to place the selected-data ledger on the reverse side.")}</p>
         </div>
         <footer className="sticky bottom-0 z-10 -mx-5 -mb-5 flex flex-col-reverse gap-3 border-t border-slate-700 bg-slate-900/95 p-4 backdrop-blur sm:-mx-7 sm:-mb-7 sm:flex-row sm:items-center sm:justify-between">
-          <Info className="text-[10px] leading-relaxed text-slate-400">{tr("Downloaded files are outside CareSphere's local privacy controls. Verify all names, dates, and sources before sharing.")}</Info>
+          <Info className="text-[10px] leading-relaxed text-slate-400">{tr("Downloaded reports are outside CareSphere's privacy controls. Check names, dates, and sources before sharing.")}</Info>
           <div className="flex shrink-0 flex-wrap gap-2">
             <button type="button" onClick={onClose} className="min-h-11 rounded-xl border border-slate-600 px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800">{tr("Close")}</button>
             <button type="button" onClick={downloadBrief} disabled={!hasReportContent} className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-600 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"><Download className="h-4 w-4" />{tr("Text")}</button>
@@ -2047,11 +2064,11 @@ export default function App() {
       }
 
       <main id="main-content" ref={mainRef} tabIndex={-1} aria-label={tabs.find((tab) => tab.id === activeTab)?.label} className="main-content flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-8">
-        {activeTab !== 'support' && <div className="flex flex-wrap gap-3 items-center"><button className="library-secondary" onClick={() => setActiveTab('support')}>{tr("My support tools")}</button>{!support.onboarded && <span className="text-sm">{tr("New here? Try an activity or choose your comfort settings—no profile required.")}</span>}</div>}
+        {activeTab !== 'support' && <div className="flex flex-wrap gap-3 items-center"><button className="library-secondary" onClick={() => setActiveTab('support')}>{tr("My support tools")}</button></div>}
 
         {/* ══════════ OVERVIEW ══════════ */}
         {activeTab === 'support' && <SupportHub support={support} setSupport={setSupport} notes={notes} setNotes={setNotes} routines={routines} setRoutines={setRoutines} settings={settings} updateSettings={updateSettings} navigate={setActiveTab} />}
-        {activeTab === 'home' && support.simple && <div className="space-y-5"><section className="support-card"><h1 className="text-3xl font-bold">{tr("My day, at my pace")}</h1><Info>{tr("One thing at a time. Choose what feels useful.")}</Info><div className="support-actions"><button className="library-primary" onClick={() => setActiveTab('games')}>{tr("Activities")}</button><button className="library-primary" onClick={() => setActiveTab('support')}>{tr("My people & support tools")}</button></div><h2>{tr("My daily routine")}</h2>{routines.length ? routines.map((r) => <button key={r.id} className="library-choice" aria-pressed={routineIsDone(r)} onClick={() => toggleRoutine(r.id)}>{routineIsDone(r) ? '✓ ' : ''}{r.text}</button>) : <p>{tr("No daily routines yet. Visual routines are in My support tools. Restore the full view to customize your daily checklist.")}</p>}<button className="library-secondary" onClick={() => setSupport((s) => ({ ...s, simple: false }))}>{tr("Restore full view")}</button></section><SavedActivitiesCard favorites={favorites} onStart={(id) => { setQuickStartActivity(id); setActiveTab('games'); }} onBrowse={() => setActiveTab('games')} /></div>}
+        {activeTab === 'home' && support.simple && <div className="space-y-5"><section className="support-card"><h1 className="text-3xl font-bold">{tr("My day, at my pace")}</h1><Info>{tr("One thing at a time. Choose what feels useful.")}</Info><div className="support-actions"><button className="library-primary" onClick={() => setActiveTab('games')}>{tr("Activities")}</button><button className="library-primary" onClick={() => setActiveTab('support')}>{tr("My people & support tools")}</button></div><h2>{tr("My daily routine")}</h2>{routines.length ? routines.map((r) => <button key={r.id} className="library-choice" aria-pressed={routineIsDone(r)} onClick={() => toggleRoutine(r.id)}>{routineIsDone(r) ? '✓ ' : ''}{r.text}</button>) : <p>{tr("No routines yet.")}</p>}<button className="library-secondary" onClick={() => setVisitBriefOpen(true)} aria-haspopup="dialog"><FileText aria-hidden="true" className="w-4 h-4" />{tr("Prepare visit brief")}</button><button className="library-secondary" onClick={() => setSupport((s) => ({ ...s, simple: false }))}>{tr("Restore full view")}</button></section><SavedActivitiesCard favorites={favorites} onStart={(id) => { setQuickStartActivity(id); setActiveTab('games'); }} onBrowse={() => setActiveTab('games')} /></div>}
         {activeTab === 'home' && routineUndo?.day === localDayKey() && <button className="library-secondary" onClick={undoRoutine}>{tr("Undo last routine change")}</button>}
         {activeTab === 'home' && !support.simple &&
         <div className="space-y-8">
@@ -2063,13 +2080,13 @@ export default function App() {
                 <div className="welcome-actions">
                   <button onClick={() => goToSection('daily-routine')} className="primary-action">{tr("View my routine ")}<ArrowRight className="w-4 h-4" /></button>
                   <button onClick={() => setActiveTab('games')} className="secondary-action"><Wind className="w-4 h-4" />{tr(" Find a calm moment")}</button>
+                  <button onClick={() => setVisitBriefOpen(true)} className="secondary-action" aria-haspopup="dialog"><FileText className="w-4 h-4" />{tr("Prepare visit brief")}</button>
                 </div>
               </div>
               <div className="daily-note">
                 <div className="daily-note-icon"><TreePine className="w-7 h-7" strokeWidth={1.5} /></div>
                 <span className="eyebrow">{tr("ONE THING AT A TIME")}</span>
                 <h2>{tr("Your day, your pace.")}</h2>
-                <Info>{tr("Check in with yourself, follow a routine, or simply take a break. You choose what feels right.")}</Info>
                 <span className="daily-note-footer"><Check className="w-4 h-4" />{tr(" Small steps are enough")}</span>
               </div>
             </section>
@@ -2305,7 +2322,7 @@ export default function App() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button onClick={() => setVisitBriefOpen(true)} className="text-xs bg-sky-700 hover:bg-sky-600 text-white px-4 py-2.5 rounded-2xl font-bold flex items-center gap-2 transition" aria-haspopup="dialog">
-                  <FileText className="w-4 h-4" />{tr(" Prepare visit brief")}
+                  <FileText className="w-4 h-4" />{tr("Prepare visit brief")}
               </button>
                 <span className="text-xs bg-purple-500/15 text-purple-300 border border-purple-500/30 px-4 py-2 rounded-2xl font-bold flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5" />{tr(" Stored on this device")}

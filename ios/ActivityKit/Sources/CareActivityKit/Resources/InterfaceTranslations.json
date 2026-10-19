@@ -467,6 +467,12 @@
     "vi": "Hỏi xem tiếp theo sẽ làm gì",
     "zh-Hans": "询问接下来会怎样"
   },
+  "Audio stops when you leave an activity.": {
+    "es": "El audio se detiene al salir de una actividad.",
+    "fil": "Hihinto ang audio kapag umalis ka sa aktibidad.",
+    "vi": "Âm thanh sẽ dừng khi bạn rời hoạt động.",
+    "zh-Hans": "离开活动时音频会停止。"
+  },
   "Authentication did not finish in the foreground. Try again.": {
     "es": "La autenticación no terminó con la aplicación en primer plano. Inténtalo de nuevo.",
     "fil": "Hindi natapos ang pagpapatunay habang nasa foreground ang app. Subukang muli.",
@@ -1439,6 +1445,12 @@
     "vi": "Đã lưu ghi nhận liều thuốc.",
     "zh-Hans": "用药记录已保存。"
   },
+  "Downloaded reports are outside CareSphere's privacy controls. Check names, dates, and sources before sharing.": {
+    "es": "Los informes descargados quedan fuera de los controles de privacidad de CareSphere. Revisa nombres, fechas y fuentes antes de compartirlos.",
+    "fil": "Wala na sa kontrol sa privacy ng CareSphere ang mga na-download na ulat. Suriin ang mga pangalan, petsa, at pinagmulan bago ibahagi.",
+    "vi": "Báo cáo đã tải xuống không còn được CareSphere bảo vệ quyền riêng tư. Hãy kiểm tra tên, ngày và nguồn trước khi chia sẻ.",
+    "zh-Hans": "下载的报告不受 CareSphere 隐私控制保护。分享前请核对姓名、日期和来源。"
+  },
   "Downloaded to this device. Review every line before sharing.": {
     "es": "Descargado en este dispositivo. Revisa cada línea antes de compartir.",
     "fil": "Na-download sa device na ito. Suriin ang bawat linya bago ibahagi.",
@@ -1558,6 +1570,12 @@
     "fil": "Maglagay lamang ng iskedyul na kinumpirma ng pangkat ng pangangalaga o label ng gamot. Mananatiling naka-pause ang paalala hanggang kumpirmahin mo ang bawat pangalan at oras.",
     "vi": "Chỉ nhập lịch được xác nhận bởi nhóm chăm sóc hoặc nhãn thuốc. Lời nhắc tạm dừng cho đến khi bạn xác nhận từng tên và giờ.",
     "zh-Hans": "仅输入经照护团队或药品标签确认的时间表。确认每个名称和时间之前，提醒将保持暂停。"
+  },
+  "Enter only label or care-team instructions. CareSphere does not verify doses or interactions.": {
+    "es": "Introduce solo las indicaciones de la etiqueta o del equipo de atención. CareSphere no verifica dosis ni interacciones.",
+    "fil": "Ilagay lamang ang tagubilin sa label o mula sa care team. Hindi bine-verify ng CareSphere ang dosis o interaksiyon.",
+    "vi": "Chỉ nhập theo nhãn thuốc hoặc hướng dẫn của nhóm chăm sóc. CareSphere không xác minh liều dùng hay tương tác.",
+    "zh-Hans": "仅输入药品标签或护理团队提供的说明。CareSphere 不会核实剂量或相互作用。"
   },
   "Erase all local data": {
     "es": "Borrar todos los datos locales",
@@ -1799,6 +1817,12 @@
     "vi": "Tạo PDF từ các mục đã chọn này?",
     "zh-Hans": "根据这些所选项目生成 PDF？"
   },
+  "Generic preview only; no dose is recorded and reminders do not change.": {
+    "es": "Solo es una vista previa genérica; no registra dosis ni cambia los recordatorios.",
+    "fil": "Pangkalahatang preview lang; walang itinatala na dosis at hindi binabago ang paalala.",
+    "vi": "Chỉ là bản nghe thử chung; không ghi liều dùng hay thay đổi lời nhắc.",
+    "zh-Hans": "仅为通用试听；不会记录剂量或更改提醒。"
+  },
   "Gentle breathing": {
     "es": "Respiración suave",
     "fil": "Banayad na paghinga",
@@ -1942,6 +1966,12 @@
     "fil": "Itinatago ang paliwanag at mga tagubilin. Nananatiling nakikita ang mga mensahe ng status at mga babala sa kaligtasan.",
     "vi": "Ẩn lời giải thích và hướng dẫn. Thông báo trạng thái và cảnh báo an toàn vẫn hiển thị.",
     "zh-Hans": "隐藏说明和操作指引文字。状态消息和安全警告仍然可见。"
+  },
+  "Hides optional help text.": {
+    "es": "Oculta la ayuda opcional.",
+    "fil": "Itinatago ang opsyonal na tulong.",
+    "vi": "Ẩn phần trợ giúp tùy chọn.",
+    "zh-Hans": "隐藏可选帮助文字。"
   },
   "High contrast": {
     "es": "Alto contraste",
@@ -2777,6 +2807,12 @@
     "vi": "Chưa chọn hồ sơ.",
     "zh-Hans": "尚未选择记录。"
   },
+  "No routines yet.": {
+    "es": "Aún no hay rutinas.",
+    "fil": "Wala pang gawain.",
+    "vi": "Chưa có sinh hoạt nào.",
+    "zh-Hans": "还没有日常安排。"
+  },
   "No routines yet. Add something that matters to you.": {
     "es": "Aún no hay rutinas. Añade algo importante para ti.",
     "fil": "Wala pang gawain. Magdagdag ng bagay na mahalaga sa iyo.",
@@ -2902,6 +2938,12 @@
     "fil": "Sa device na ito lamang",
     "vi": "Chỉ trên thiết bị này",
     "zh-Hans": "仅在此设备上"
+  },
+  "Only selected sections are included. The brief is prepared on this device; it is not a medical record or clinical advice.": {
+    "es": "Solo se incluyen las secciones seleccionadas. El resumen se prepara en este dispositivo; no es un expediente médico ni consejo clínico.",
+    "fil": "Mga napiling seksyon lang ang isasama. Inihahanda ang buod sa device na ito; hindi ito medical record o klinikal na payo.",
+    "vi": "Chỉ bao gồm các mục đã chọn. Bản tóm tắt được tạo trên thiết bị này; đây không phải hồ sơ y tế hay lời khuyên lâm sàng.",
+    "zh-Hans": "仅包含所选部分。简报在此设备上生成；它不是医疗记录或临床建议。"
   },
   "Only the sections you select are included. Medication, mood, and health entries retain their recorded source; review the report before sharing.": {
     "es": "Solo se incluyen las secciones que seleccionas. Los datos de medicamentos, estado de ánimo y salud conservan su fuente registrada; revisa el informe antes de compartirlo.",
@@ -3209,6 +3251,12 @@
     "vi": "Chuẩn bị các bản sao đã chọn?",
     "zh-Hans": "准备所选内容的副本？"
   },
+  "Prepare visit brief": {
+    "es": "Preparar resumen de consulta",
+    "fil": "Ihanda ang buod ng pagbisita",
+    "vi": "Chuẩn bị tóm tắt buổi khám",
+    "zh-Hans": "准备就诊简报"
+  },
   "Prepared (UTC):": {
     "es": "Preparado (UTC):",
     "fil": "Inihanda (UTC):",
@@ -3341,6 +3389,12 @@
     "vi": "Đọc bước này",
     "zh-Hans": "朗读此步骤"
   },
+  "Reads medication and routine prompts aloud.": {
+    "es": "Lee en voz alta los avisos de medicamentos y rutinas.",
+    "fil": "Binibigkas ang mga paalala sa gamot at gawain.",
+    "vi": "Đọc to lời nhắc thuốc và sinh hoạt.",
+    "zh-Hans": "朗读用药和日常安排提醒。"
+  },
   "Receipt JSON copied.": {
     "es": "Recibo JSON copiado.",
     "fil": "Nai-copy ang resibo JSON.",
@@ -3448,6 +3502,12 @@
     "fil": "Bawasan ang galaw sa screen at mga pagdiriwang",
     "vi": "Giảm chuyển động và hiệu ứng chúc mừng",
     "zh-Hans": "减少视觉动态效果和庆祝动画"
+  },
+  "Reduces animation and decoration.": {
+    "es": "Reduce las animaciones y los adornos.",
+    "fil": "Binabawasan ang animation at dekorasyon.",
+    "vi": "Giảm hoạt ảnh và hiệu ứng trang trí.",
+    "zh-Hans": "减少动画和装饰效果。"
   },
   "Refresh my location": {
     "es": "Actualizar mi ubicación",
@@ -4127,6 +4187,12 @@
     "vi": "Âm thanh môi trường",
     "zh-Hans": "环境音"
   },
+  "Source snapshot": {
+    "es": "Instantánea de fuentes",
+    "fil": "Snapshot ng source",
+    "vi": "Bản chụp mã nguồn",
+    "zh-Hans": "源代码快照"
+  },
   "Sources found": {
     "es": "Fuentes encontradas",
     "fil": "Natagpuang mga sanggunian",
@@ -4282,6 +4348,12 @@
     "fil": "Itigil ang pagsasalita",
     "vi": "Dừng đọc",
     "zh-Hans": "停止朗读"
+  },
+  "Stored on this device; sharing is always manual.": {
+    "es": "Guardado en este dispositivo; compartir siempre es manual.",
+    "fil": "Naka-save sa device na ito; ikaw lang ang manu-manong nagbabahagi.",
+    "vi": "Lưu trên thiết bị này; việc chia sẻ luôn do bạn tự thực hiện.",
+    "zh-Hans": "保存在此设备上；分享始终由你手动操作。"
   },
   "Strength training": {
     "es": "Entrenamiento de fuerza",
@@ -4703,6 +4775,12 @@
     "vi": "Đã mở khóa cục bộ. Chưa lưu gì cho đến khi bạn chọn hồ sơ và nhập.",
     "zh-Hans": "已在本地解锁。在您选择记录并导入之前，不会保存任何内容。"
   },
+  "Updated": {
+    "es": "Actualizado",
+    "fil": "Na-update",
+    "vi": "Cập nhật",
+    "zh-Hans": "更新日期"
+  },
   "Use 24-hour time, for example 09:30.": {
     "es": "Usa el formato de 24 horas, por ejemplo 09:30.",
     "fil": "Gumamit ng 24-oras na format, halimbawa 09:30.",
@@ -4739,6 +4817,12 @@
     "vi": "Dùng khóa màn hình thiết bị hoặc sinh trắc học bảo mật cao. CareSphere không nhận mã PIN hay dữ liệu sinh trắc học của bạn.",
     "zh-Hans": "请使用设备屏幕锁或高安全级别的生物识别。CareSphere不会获取您的PIN码或生物识别数据。"
   },
+  "Used only when you choose to call or message; never contacted automatically.": {
+    "es": "Solo se usa si eliges llamar o enviar un mensaje; nunca se contacta automáticamente.",
+    "fil": "Gagamitin lamang kapag pinili mong tumawag o magpadala ng mensahe; hindi ito awtomatikong makikipag-ugnayan.",
+    "vi": "Chỉ sử dụng khi bạn chọn gọi hoặc nhắn tin; không tự động liên hệ.",
+    "zh-Hans": "仅在你选择拨打电话或发送消息时使用；不会自动联系对方。"
+  },
   "Verified. Import of {0} record(s) at {1} (source: {2}).": {
     "es": "Verificado. Importación de {0} registro(s) a las {1} (origen: {2}).",
     "fil": "Na-verify. Pag-import ng {0} na rekord(s) noong {1} (pinagmulan: {2}).",
@@ -4762,6 +4846,12 @@
     "fil": "I-verify gamit ang passphrase",
     "vi": "Xác minh bằng mật khẩu",
     "zh-Hans": "使用口令验证"
+  },
+  "Version information": {
+    "es": "Información de la versión",
+    "fil": "Impormasyon ng bersyon",
+    "vi": "Thông tin phiên bản",
+    "zh-Hans": "版本信息"
   },
   "Very low": {
     "es": "Muy bajo",

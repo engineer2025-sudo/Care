@@ -26,7 +26,7 @@ export default function CareNotes({ notes, setNotes, displayName, onDelete }) {
     return () => window.removeEventListener(RESET_LOCAL_DATA_EVENT, reset);
   }, []);
   return <section className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 space-y-5">
-    <div><h3 className="text-lg font-bold text-white">{tr("Care notes · local only")}</h3><Info><p className="text-sm text-slate-400 mt-1">{tr("Keep your questions and reminders together. Nothing is sent to anyone.")}</p></Info></div>
+    <div><h3 className="text-lg font-bold text-white">{tr("Care notes · local only")}</h3><Info><p className="text-sm text-slate-400 mt-1">{tr("Stored on this device; sharing is always manual.")}</p></Info></div>
     <form onSubmit={(e) => {
       e.preventDefault();if (!draft.trim()) return;
       setNotes((current) => [{ id: crypto.randomUUID(), date: new Date().toISOString(), author: displayName.trim() ? `You (${displayName})` : 'You', note: draft.trim() }, ...current]);
