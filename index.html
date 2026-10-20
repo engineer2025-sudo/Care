@@ -2,16 +2,56 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💚</text></svg>" />
+    <link rel="icon" type="image/svg+xml" href="/care-icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>CareSphere — Your day, at your pace</title>
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#376f4c" />
+    <meta name="theme-color" content="#20362a" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
-    <meta name="description" content="Private routines, care notes, optional accessible activities and real Bluetooth heart-rate readings. No generated health data." />
+    <meta name="description" content="Private routines, care notes, optional activities, and real health readings." />
+    <style>
+      :root { color-scheme: dark light; }
+      body { margin: 0; background: #131b16; color: #e8ece6; font: 16px system-ui, sans-serif; }
+      .boot-screen { position: fixed; inset: 0; z-index: 100; box-sizing: border-box; min-height: 100vh; min-height: 100dvh; display: grid; align-content: center; justify-items: center; gap: 1rem; padding: 1.5rem; background: #131b16; color: #e8ece6; }
+      .boot-mark { width: 76px; height: 76px; border-radius: 22px; }
+      .boot-wordmark { font-size: 1.25rem; font-weight: 750; letter-spacing: -.025em; }
+      .boot-label { color: #b2beb4; font-size: .9rem; }
+      .boot-skeleton { width: min(340px, 86vw); display: grid; gap: .7rem; margin-top: 1rem; }
+      .boot-card { height: 64px; border: 1px solid #3b4b40; border-radius: 16px; background: #202b24; }
+      .boot-card:first-child { height: 92px; }
+      @media (prefers-color-scheme: light) {
+        body { background: #f4f5ef; color: #27352c; }
+        .boot-screen { background: #f4f5ef; color: #27352c; }
+        .boot-label { color: #56665a; }
+        .boot-card { border-color: #d5ddd5; background: #fffefa; }
+      }
+    </style>
   </head>
   <body class="bg-slate-950 text-slate-100 antialiased">
-    <div id="root"></div>
+    <div id="root" aria-busy="true"></div>
+    <div id="boot-screen" class="boot-screen" role="status" aria-live="polite" aria-label="Loading CareSphere" data-boot-status>
+      <img class="boot-mark" src="/care-icon.svg" alt="" />
+      <span class="boot-wordmark">CareSphere</span>
+      <span class="boot-label" data-loading-label>Loading…</span>
+      <div class="boot-skeleton" aria-hidden="true"><span class="boot-card"></span><span class="boot-card"></span></div>
+    </div>
+    <script>
+      (() => {
+        const labels = { en: 'Loading…', es: 'Cargando…', 'zh-Hans': '加载中…', fil: 'Naglo-load…', vi: 'Đang tải…' };
+        const toLanguage = (tag) => {
+          const base = String(tag || '').toLowerCase().replaceAll('_', '-').split('-')[0];
+          return base === 'zh' ? 'zh-Hans' : base === 'tl' ? 'fil' : ['en', 'es', 'fil', 'vi'].includes(base) ? base : 'en';
+        };
+        try {
+          const preference = localStorage.getItem('CareSphere.interfaceLanguage');
+          const language = preference && preference !== 'auto' ? preference : toLanguage(navigator.languages?.[0] || navigator.language);
+          const label = labels[language] || labels.en;
+          document.documentElement.lang = { en: 'en-US', es: 'es-US', 'zh-Hans': 'zh-CN', fil: 'fil-PH', vi: 'vi-VN' }[language] || 'en-US';
+          document.querySelector('[data-loading-label]').textContent = label;
+          document.querySelector('[data-boot-status]').setAttribute('aria-label', `${label} CareSphere`);
+        } catch {}
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

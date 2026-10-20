@@ -5,11 +5,17 @@ import { initializeCareStorage } from './lib/secureCareStorage'
 import './index.css'
 
 const mountCareSphere = () => {
-  ReactDOM.createRoot(document.getElementById('root')).render(
+  const container = document.getElementById('root')
+  ReactDOM.createRoot(container).render(
     <React.StrictMode>
       <App />
     </React.StrictMode>,
   )
+  window.requestAnimationFrame(() => {
+    container.removeAttribute('aria-busy')
+    document.getElementById('boot-screen')?.remove()
+    document.documentElement.dataset.appReady = 'true'
+  })
 }
 
 void initializeCareStorage().finally(mountCareSphere)

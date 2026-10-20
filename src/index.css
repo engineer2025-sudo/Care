@@ -211,7 +211,8 @@ button, p, h1, h2, h3, h4 { overflow-wrap: anywhere; }
   padding: .8rem 1.2rem; border-radius: .75rem; font-weight: 700;
 }
 .skip-link:focus { top: 1rem; }
-.brand-mark { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px; background: var(--tint); color: var(--accent); border: 1px solid var(--line); }
+.brand-mark { width: 44px; height: 44px; display: grid; place-items: center; overflow: hidden; border-radius: 14px; background: var(--tint); border: 1px solid var(--line); box-shadow: 0 3px 10px #00000018; }
+.brand-mark img { width: 100%; height: 100%; display: block; border-radius: inherit; }
 .header-settings { display: inline-flex; align-items: center; gap: .5rem; font-size: .8rem; font-weight: 600; }
 .desktop-nav { padding: .25rem; background: transparent !important; border: 0; }
 .desktop-nav button { padding: .75rem; font-size: .8rem; }
@@ -219,8 +220,12 @@ button, p, h1, h2, h3, h4 { overflow-wrap: anywhere; }
 
 .overview-welcome {
   display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 2rem;
-  align-items: center; padding: 1.5rem 0 .5rem;
+  align-items: center; padding: clamp(1.25rem, 3vw, 2.5rem);
+  border: 1px solid var(--line); border-radius: 28px;
+  background: radial-gradient(ellipse at 92% 8%, rgba(106, 157, 115, .15), transparent 42%), var(--surface);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, .12);
 }
+html[data-theme='light'] .overview-welcome { background: radial-gradient(ellipse at 92% 8%, rgba(121, 160, 113, .12), transparent 42%), var(--surface); box-shadow: 0 14px 34px rgba(45, 64, 49, .08); }
 .eyebrow { display: flex; align-items: center; gap: .5rem; font-size: .68rem; letter-spacing: .13em; font-weight: 750; color: var(--accent); }
 .welcome-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 .welcome-date { color: var(--muted); letter-spacing: 0; font-size: .75rem; font-weight: 450; margin-left: .5rem; padding-left: 1rem; border-left: 1px solid var(--line); }
@@ -243,7 +248,7 @@ button, p, h1, h2, h3, h4 { overflow-wrap: anywhere; }
 .section-heading h2 { font-size: 1rem; font-weight: 700; color: var(--ink); }
 .section-heading > span { font-size: .75rem; color: var(--muted); }
 .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
-.summary-card { display: flex; flex-direction: column; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 1.15rem; min-width: 0; position: relative; overflow: hidden; transition: border-color .2s, background-color .2s; }
+.summary-card { display: flex; flex-direction: column; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 1.15rem; min-width: 0; position: relative; overflow: hidden; transition: border-color .2s, background-color .2s, box-shadow .2s, transform .2s; }
 .summary-card:hover { border-color: var(--accent); background: var(--surface-soft); }
 .summary-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; width: 100%; }
 .summary-top > svg { width: 16px; height: 16px; color: var(--muted); }
@@ -381,3 +386,15 @@ html[data-theme='light'] .support-card{background:#fff;color:#223b2b}
 /* Translated feeling words need room at narrow widths and larger text sizes. */
 .mood-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 6.5rem), 1fr)); gap: .5rem; }
 .mood-label { overflow-wrap: anywhere; }
+
+@keyframes caresphere-enter {
+  from { opacity: .92; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html[data-app-ready='true'][data-low-sensory='false'] .app-shell { animation: caresphere-enter .2s ease-out both; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-low-sensory='false'] .summary-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0, 0, 0, .18); }
+  html[data-low-sensory='false'] .primary-action:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(28, 65, 40, .2); }
+}

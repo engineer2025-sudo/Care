@@ -1,12 +1,18 @@
 {
-  "name": "CareSphere \u2014 Your day, at your pace",
+  "name": "CareSphere",
   "short_name": "CareSphere",
-  "description": "Private routines, notes, and optional accessible activities. Real readings only.",
+  "description": "Your day, at your pace.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f6f8f4",
-  "theme_color": "#376f4c",
+  "background_color": "#20362a",
+  "theme_color": "#20362a",
   "icons": [
+    {
+      "src": "/care-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",

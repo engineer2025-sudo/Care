@@ -1,8 +1,8 @@
 // CareSphere service worker — private, same-origin offline app shell.
 // Navigations are network-first; hashed assets are cache-first. No third-party
 // requests or user-export downloads are cached by this worker.
-const SHELL_CACHE = 'caresphere-shell-v4'
-const ASSET_CACHE = 'caresphere-assets-v4'
+const SHELL_CACHE = 'caresphere-shell-v5'
+const ASSET_CACHE = 'caresphere-assets-v5'
 const SHELL_URL = new URL('/', self.location.origin).href
 const MAX_ASSETS = 80
 
@@ -16,7 +16,7 @@ self.addEventListener('install', event => {
     const assets = [...html.matchAll(/(?:src|href)=["'](\/assets\/[^"']+)["']/g)].map(match => match[1])
     if (!assets.length) throw new Error('No built application assets found')
     const cache = await caches.open(ASSET_CACHE)
-    await cache.addAll([...new Set([...assets, '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'])])
+    await cache.addAll([...new Set([...assets, '/manifest.webmanifest', '/care-icon.svg', '/icon-192.png', '/icon-512.png'])])
     await (await caches.open(SHELL_CACHE)).put(SHELL_URL, response)
     await self.skipWaiting()
   })())
@@ -69,7 +69,7 @@ self.addEventListener('fetch', event => {
   // Only application assets are eligible for offline caching. This avoids
   // retaining arbitrary same-origin query responses or personal exports.
   const isAppAsset = url.pathname.startsWith('/assets/') ||
-    /^\/(?:icon-\d+\.png|manifest\.webmanifest)$/.test(url.pathname)
+    /^\/(?:care-icon\.svg|icon-\d+\.png|manifest\.webmanifest)$/.test(url.pathname)
   if (!isAppAsset) return
 
   event.respondWith((async () => {

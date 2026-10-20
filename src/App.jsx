@@ -1975,12 +1975,9 @@ export default function App() {
       <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 pb-4 safe-x ios-header">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <button type="button" aria-label={tr("Go to Overview")} className="flex items-center space-x-3 shrink-0 text-left" onClick={() => setActiveTab('home')}>
-            <div className="brand-mark"><Heart className="w-6 h-6" aria-hidden="true" /></div>
+            <div className="brand-mark"><img src="/care-icon.svg" alt="" aria-hidden="true" /></div>
             <div className="brand-copy">
-              <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-lg tracking-tight text-emerald-300">{tr("CareSphere")}</span>
-              </div>
-              <Info className="text-[11px] text-slate-400">{tr("A little support, every day")}</Info>
+              <span className="font-extrabold text-lg tracking-tight text-emerald-300">{tr("CareSphere")}</span>
             </div>
           </button>
 
@@ -2076,7 +2073,6 @@ export default function App() {
               <div className="welcome-copy">
                 <div className="eyebrow"><span className="welcome-dot" />{tr(" YOUR DAILY SPACE ")}<span className="welcome-date">{new Date().toLocaleDateString(languageTag(), { weekday: 'long', month: 'short', day: 'numeric' })}</span></div>
                 <h1 id="welcome-title">{tr('{0}, {1}.',[tr(greeting),settings.name || tr('friend')])}</h1>
-                <Info>{tr("A little structure. A moment of calm. A familiar face.")}<br className="hidden sm:block" />{tr(" Take today at your own pace.")}</Info>
                 <div className="welcome-actions">
                   <button onClick={() => goToSection('daily-routine')} className="primary-action">{tr("View my routine ")}<ArrowRight className="w-4 h-4" /></button>
                   <button onClick={() => setActiveTab('games')} className="secondary-action"><Wind className="w-4 h-4" />{tr(" Find a calm moment")}</button>
@@ -2087,14 +2083,13 @@ export default function App() {
                 <div className="daily-note-icon"><TreePine className="w-7 h-7" strokeWidth={1.5} /></div>
                 <span className="eyebrow">{tr("ONE THING AT A TIME")}</span>
                 <h2>{tr("Your day, your pace.")}</h2>
-                <span className="daily-note-footer"><Check className="w-4 h-4" />{tr(" Small steps are enough")}</span>
               </div>
             </section>
 
             <SavedActivitiesCard favorites={favorites} onStart={(id) => { setQuickStartActivity(id); setActiveTab('games'); }} onBrowse={() => setActiveTab('games')} />
 
             <section aria-labelledby="today-summary">
-              <div className="section-heading"><h2 id="today-summary">{tr("Today at a glance")}</h2><span>{tr("Here to help, not to hurry.")}</span></div>
+              <div className="section-heading"><h2 id="today-summary">{tr("Today at a glance")}</h2></div>
               <div className="summary-grid">
                 <button onClick={() => goToSection('daily-routine')} className="summary-card">
                   <span className="summary-top"><span className="summary-icon"><CheckCircle /></span><ChevronRight /></span>
