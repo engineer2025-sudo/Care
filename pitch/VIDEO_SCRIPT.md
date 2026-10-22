@@ -18,7 +18,7 @@ first commit to v2.2.") — the narration below fits both.
 
 | Time | On screen | Say |
 |---|---|---|
-| 0:00–0:14 | **Slide 1** — title | Hi, I'm **[Name]**, a **[grade]** at **[School]** in **[City]**, California. This is **CareSphere AI** — a private care companion for older adults, autistic people and their families, on iPhone and on the web. |
+| 0:00–0:14 | **Slide 1** — title | Hi, I'm **Arnav Kochar**, a **[grade]** at **[School]** in **[City]**, California. This is **CareSphere AI** — a private care companion for older adults, autistic people and their families, on iPhone and on the web. |
 | 0:14–0:26 | **Slide 2** — why I built it | **[Your story in one sentence — name a specific person and a specific moment. e.g. "My grandmother lives alone, and every call started the same way: did you take your pills? did you talk to anyone today?"]** So I built the app I wished she had: calm, honest, and private by design. |
 | 0:26–0:39 | **Slide 3** — problem | One in four older adults is socially isolated — a twenty-nine percent higher risk of early death. One in thirty-one children is autistic. Half of long-term medications aren't taken as prescribed. And sixty-three million family caregivers hold it all together. |
 | 0:39–0:47 | **Slide 4** — today | Today a family juggles four apps — four accounts, four clouds — and none of them was designed for autistic users. |
@@ -64,23 +64,15 @@ Tip: if shot 2's timing is awkward, record it separately and cut it in. Keep the
 - Deck in **Slide Show** mode, 16:9, 1080p export; record with OBS, QuickTime or Zoom (local recording).
 - Browser zoom 100 %, window 1920×1080, no bookmarks bar, no other tabs. Use the **calm charcoal** theme for the demo (matches the screenshots in the deck).
 - Say your name and "CareSphere AI" in the first ten seconds (judging requirement).
-- Replace `[Student Name]`, `[School]`, `[City]`, `[email]`, `[CA-XX]` (slides 1, 2, 13), your story (slide 2) and `[YouTube link]` (slide 13) before exporting.
+- Replace `[School]`, `[City]`, `[grade]` (slides 1, 2, 13), your story (slide 2) and `[YouTube link]` (slide 13) before exporting — name, district (CA-10) and email are already filled in.
 - Upload the video as **public** on YouTube or Vimeo; paste the link into the CAC portal before **Oct 26, 2026, 12:00 PM ET**.
 
 ---
 
-## Written-answer drafts (CAC portal)
+## Written answers (CAC portal)
 
-### Short description (≤ 350 characters) — 321 chars
-CareSphere AI is a privacy-first care companion for older adults, autistic people and their caregivers: live Jitsi coffee circles against isolation, honest Bluetooth vitals, calm sensory activities, medication self-check-ins, visit-prep briefs and an on-device AI health guide. No account, no server, encrypted on device.
-
-### Technical difficulty and how I overcame it (≤ 1,500 characters) — 1,421 chars
-The hardest part was making the vitals screen honest. Web Bluetooth delivers heart-rate notifications asynchronously, so a cancelled pairing dialog, a dropped connection or a late callback from an old sensor could leave misleading numbers on screen—exactly the kind of "fake data" that makes families distrust health apps. I studied the Bluetooth SIG Heart Rate profile (service 0x180D, characteristic 0x2A37), parsed the flags byte to read 8- or 16-bit BPM correctly, and tagged every sample LIVE_BLE or SIMULATED at the moment it is produced. A connection generation counter discards notifications from any previous session, cancelling the chooser never starts a demo stream, and the label travels through the sparkline, the range check and the CSV export. The same rule shaped the iPhone app, where CoreBluetooth and read-only HealthKit feed one labeled pipeline.
-
-The second challenge was privacy without a server. Browser localStorage is plaintext, so I rebuilt storage on AES-256-GCM through Web Crypto with a non-extractable key kept in IndexedDB, then wrote a migration that decrypts legacy JSON, re-encrypts it and deletes the plaintext, with node:test covering round-trips and tampered ciphertext. On iPhone the key lives in the Keychain (device-only) with Complete File Protection. Running Qwen2.5-1.5B through llama.cpp offline took careful ChatML prompt formatting and releasing the model after every answer.
-
-### What I would improve in version 2.0 (≤ 750 characters) — 691 chars
-Version 2.0 starts with co-design sessions with autistic people, people living with dementia, caregivers and accessibility specialists, then VoiceOver and Dynamic Type testing on real devices and a TestFlight beta. I will bring real HealthKit and Bluetooth observations into the visit brief with 7/30/90-day filters, add non-diagnostic trends computed only from source-labeled data, offer passphrase-protected encrypted backup and restore that still needs no server, and add Spanish localization. I am deliberately not adding cloud sync, a clinician portal or a drug-interaction checker until there is clinical review and a licensed knowledge base—honesty about limits is part of the design.
+The portal's "Full Application" has six long answers (400 words each), plus the language / platform / cover-photo
+fields. Complete drafts, word counts, the cover photo and a pre-submit checklist are in **`APPLICATION_ANSWERS.md`**.
 
 ---
 

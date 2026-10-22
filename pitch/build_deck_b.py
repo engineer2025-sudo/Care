@@ -84,14 +84,14 @@ def build() -> Deck:
     s = d.slide(footer=False, chrome=False)
     s.image('bg-mesh', 0, 0, w=W, h=H)
     s.image('glow', 6.6, -2.4, 9.0, 9.0)
-    eyebrow(s, 'Congressional App Challenge 2026  ·  [CA-XX]', y=1.5)
+    eyebrow(s, 'Congressional App Challenge 2026  ·  CA-10', y=1.5)
     s.text(M, 1.95, 7.3, 1.3, 'CareSphere AI', size=64, color=WHITE, weight=800, anchor='t', lh=1.05, fit=False)
     s.text(M, 3.3, 7.3, 0.6, 'Connected care for independent living', size=26, color=ACCENT, weight=500)
     s.text(M, 3.95, 6.0, 1.1, 'A private care companion for older adults, autistic people and the families who care for them.',
            size=19, color=TEXT, lh=1.35)
     s.rect(M, 5.12, 0.5, 0.04, fill=ACCENT, r=0.02)
-    s.text(M, 5.38, 7.0, 0.45, '[Student Name]', size=18, color=WHITE, weight=700)
-    s.text(M, 5.78, 7.0, 0.4, '[School]  ·  [City], California  ·  [email@example.com]', size=14.5, color=MUTED)
+    s.text(M, 5.38, 7.0, 0.45, 'Arnav Kochar', size=18, color=WHITE, weight=700)
+    s.text(M, 5.78, 7.0, 0.4, '[School]  ·  [City], California  ·  kochar4646@gmail.com', size=14.5, color=MUTED)
     s.image('phone-vitals', 7.6, 1.45, h=6.3, rot=-8)
     s.image('phone-overview', 9.5, 1.0, h=7.0)
 
@@ -103,7 +103,7 @@ def build() -> Deck:
         p['runs'] = [(t, {**st, 'alpha': 0.3}) for t, st in p['runs']]
     s.text(M + 0.1, 1.95, 6.9, 2.9, '[Your story in one or two sentences — e.g. My grandmother lives alone, and every call started '
            'the same way: did you take your pills? did you talk to anyone today?]', size=27, color=WHITE, weight=500, lh=1.3)
-    s.text(M + 0.1, 4.95, 6.9, 0.4, '— [Student Name], [grade], [School]', size=16, color=ACCENT, weight=700)
+    s.text(M + 0.1, 4.95, 6.9, 0.4, '— Arnav Kochar, [grade], [School]', size=16, color=ACCENT, weight=700)
     s.text(M + 0.1, 5.55, 6.9, 0.8, 'So I built the app I wished she had: **calm, honest, and private by design.**',
            size=18, color=MUTED, lh=1.35)
     s.image('crop-meds', 8.45, 1.5, w=4.1)
@@ -336,7 +336,7 @@ def build() -> Deck:
     gap = 0.3
     cw = (CW - 2 * gap) / 3
     plan = [('Next · v2.0 of this entry', 'Co-design sessions with autistic people, people living with dementia and caregivers; TestFlight beta.'),
-            ('Then', 'Sensor history in the visit brief · encrypted backup · Spanish · caregiver-paced reminders.'),
+            ('Then', 'Apple Health and Bluetooth history in the visit brief, with true source labels · non-diagnostic trends only from real readings.'),
             ('Deliberately not', 'Cloud sync, a clinician portal or a drug-interaction checker — not without clinical review.')]
     for i, (t, body) in enumerate(plan):
         x = M + i * (cw + gap)
@@ -359,7 +359,7 @@ def build() -> Deck:
         s.chip(x, 4.6, c, size=11)
         x += w + 0.2
     s.text(M, 5.3, CW, 0.45, 'github.com/engineer2025-sudo/Care', size=21, color=WHITE, weight=700, align='c')
-    s.text(M, 5.85, CW, 0.4, '[Student Name]  ·  [email@example.com]  ·  [School], [City], California', size=14.5, color=MUTED, align='c')
+    s.text(M, 5.85, CW, 0.4, 'Arnav Kochar  ·  kochar4646@gmail.com  ·  [School], [City], California', size=14.5, color=MUTED, align='c')
     s.text(M, 6.3, CW, 0.35, 'Demo video: [YouTube link]', size=12.5, color=DIM, align='c')
     qx, qy = W - M - 1.45, 0.75
     card(s, qx, qy, 1.45, 1.8, alpha=0.5)

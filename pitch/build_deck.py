@@ -25,15 +25,15 @@ def build() -> Deck:
     # 1 ------------------------------------------------------------------ Title
     s = d.slide(footer=False)
     s.image('glow', 6.9, -2.9, 9.5, 9.5)
-    s.eyebrow('Congressional App Challenge 2026  ·  [CA-XX]', y=1.05)
+    s.eyebrow('Congressional App Challenge 2026  ·  CA-10', y=1.05)
     s.text(M, 1.55, 7.6, 1.4, 'CareSphere AI', size=70, color=WHITE, weight=800, anchor='t', lh=1.05, fit=False)
     s.text(M, 3.15, 7.6, 0.6, 'Connected care for independent living', size=27, color=ACCENT, weight=500)
     s.text(M, 3.95, 6.7, 1.1, 'A private care companion for older adults, autistic people and the families who care for them.',
            size=20, color=TEXT, lh=1.35)
-    s.text(M, 5.75, 7.4, 0.45, '[Student Name]', size=19, color=WHITE, weight=700)
-    s.text(M, 6.2, 7.4, 0.4, '[School]  ·  [City], California  ·  [email@example.com]', size=15, color=MUTED)
+    s.text(M, 5.75, 7.4, 0.45, 'Arnav Kochar', size=19, color=WHITE, weight=700)
+    s.text(M, 6.2, 7.4, 0.4, '[School]  ·  [City], California  ·  kochar4646@gmail.com', size=15, color=MUTED)
     s.image('phone-overview', 8.45, 0.95, h=7.3)
-    s.notes = "[0:00–0:14] Hi, I'm [NAME], a [GRADE] at [SCHOOL] in [CITY], California. This is CareSphere AI — a private care companion for older adults, autistic people and their families, on iPhone and on the web."
+    s.notes = "[0:00–0:14] Hi, I'm Arnav Kochar, a [GRADE] at [SCHOOL] in [CITY], California. This is CareSphere AI — a private care companion for older adults, autistic people and their families, on iPhone and on the web."
 
     # 2 ------------------------------------------------------------- Why I built it
     s = d.slide()
@@ -41,7 +41,7 @@ def build() -> Deck:
     s.text(M, 1.55, 7.0, 3.2, '“[Your story in one or two sentences — e.g. My grandmother lives alone, and every call started '
            'the same way: did you take your pills? did you talk to anyone today?]”',
            size=30, color=WHITE, weight=700, lh=1.3)
-    s.text(M, 5.05, 7.0, 0.5, '— [Student Name], [grade], [School]', size=17, color=ACCENT, weight=500)
+    s.text(M, 5.05, 7.0, 0.5, '— Arnav Kochar, [grade], [School]', size=17, color=ACCENT, weight=500)
     s.text(M, 5.6, 7.0, 0.8, 'So I built the app I wished she had: calm, honest, and private by design.', size=18, color=MUTED, lh=1.3)
     s.image('phone-toast', 8.4, 0.75, h=6.9)
     s.notes = '[0:14–0:26] (Your story in one sentence — name a specific person, a specific moment. E.g.: My grandmother lives alone, and every call started the same way: did you take your pills? did you talk to anyone today?) So I built the app I wished she had: calm, honest, and private by design.'
@@ -220,7 +220,7 @@ def build() -> Deck:
     s.header('Where it stands', 'Shipped and tested. Next: built with the people it serves.', title_w=11.5)
     stages = [('Today', 'v2.2 on GitHub', '3 releases · 17 tests · CI for web and iOS'),
               ('Next · v2.0 of this entry', 'Co-design & TestFlight', 'sessions with autistic people, people with dementia, caregivers'),
-              ('Then', 'Real data, no server', 'sensor history in the visit brief · encrypted backup · Spanish')]
+              ('Then', 'Real data, no server', 'sensor history in the visit brief · trends only from real readings')]
     sw = (CW - 2 * 0.4) / 3
     y0 = 2.75
     s.line(M + 0.2, y0 + 0.14, W - M - 0.2, y0 + 0.14, color=WHITE, lw=1.5, alpha=0.18)
@@ -247,7 +247,7 @@ def build() -> Deck:
            size=20, color=TEXT, lh=1.35)
     s.text(M, 5.35, 7.4, 0.4, 'Try the web app  ·  read the code  ·  watch the demo', size=16, color=ACCENT, weight=700)
     s.text(M, 5.8, 7.4, 0.4, 'github.com/engineer2025-sudo/Care', size=17, color=WHITE, weight=500)
-    s.text(M, 6.35, 7.4, 0.4, '[Student Name]  ·  [email@example.com]  ·  [School], [City], California', size=14, color=MUTED)
+    s.text(M, 6.35, 7.4, 0.4, 'Arnav Kochar  ·  kochar4646@gmail.com  ·  [School], [City], California', size=14, color=MUTED)
     qx = W - M - 3.2
     s.card(qx, 1.75, 3.2, 4.0)
     s.image('qr', qx + 0.45, 2.05, w=2.3, r=0.14)

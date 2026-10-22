@@ -10,7 +10,9 @@ the timings in `VIDEO_SCRIPT.md`, so you can switch between them (or mix slides)
 | `CareSphere_Congressional_App_Challenge_Deck.pptx` | **Version A — clean.** Translucent panels on the navy gradient, Bold 40 pt headlines, one accent. Previews in `preview/`. |
 | `CareSphere_Congressional_App_Challenge_Deck_B.pptx` | **Version B — editorial.** Same palette and type, re-composed: dot-grid backdrop with two soft glows, a faint slide numeral top-right, ExtraBold headlines with the key phrase in the accent, ink-dark cards, layered screenshots (stacked phones on the title, phone over browser on the demo, a heart-rate card over the code), plus three new visuals — an on-device architecture diagram (privacy), a date-proportional six-week timeline (traction) and a need / today / CareSphere comparison table (status quo). Previews in `preview-b/`. |
 | both | 16:9, typefaces **embedded** (identical on any PowerPoint 2016+ / 365), speaker notes with the timed narration, and **slide transitions**: a 600 ms fade between slides, a push into the demo slide and a fade-through-black into the close. Set `AUTO_ADVANCE = True` in `build_deck_b.py` to make the slides advance on the script's timings while you record. |
-| `VIDEO_SCRIPT.md` | Run-of-show with timings, the click-by-click demo shot list, a recording checklist, and drafts of the three CAC written answers (within the 350 / 1,500 / 750-character limits). |
+| `VIDEO_SCRIPT.md` | Run-of-show with timings, the click-by-click demo shot list and a recording checklist. |
+| `APPLICATION_ANSWERS.md` | The CAC portal form, field by field: what to tick, complete drafts of the six 400-word answers (with word counts and fact notes), the process questions and a pre-submit checklist. |
+| `cover/CareSphere_cover_600x800.jpg` | The portal's cover photo — 3:4, 600×800 px JPEG, built from the real icon and a real screenshot (`make_cover.py`; a 1200×1600 version is beside it). |
 | `preview/`, `preview-b/` | Pixel-exact renders of each slide (`slide-NN.jpg` + `contact-sheet.jpg`, same fonts, same layout). Use them to check on a phone — or drop them straight into the video editor if you don't have PowerPoint. Transitions only show in PowerPoint / Keynote / Google Slides. |
 | `assets/` | Every picture in the deck: real screenshots of the running web app in drawn device frames, the app icon, a QR code to the repo, a soft glow. `assets/extra/` holds spare framed screenshots and crops (SOS, Settings, Visit brief, light theme, high-contrast, games, breathing…) for swapping in or as video B-roll. |
 | `fonts/` | Plus Jakarta Sans (Regular / Medium / Bold / ExtraBold) and JetBrains Mono — SIL Open Font License. Embedded in the .pptx; install them only if you edit in Keynote or Google Slides. |
@@ -19,6 +21,7 @@ the timings in `VIDEO_SCRIPT.md`, so you can switch between them (or mix slides)
 | `embed_fonts.py` | Wraps the TTFs as Embedded OpenType and registers them in the .pptx (`<p:embeddedFontLst>`). |
 | `make_assets.py` | Frames screenshots (navy bezel + soft shadow), builds icon / glow / dot-grid backdrop / QR; re-frames existing assets when raw captures are absent. |
 | `make_fonts.py` | Regenerates the static font files from Google Fonts' variable sources (needs `fonttools`). |
+| `make_cover.py` | Renders the portal cover photo from the same assets as the deck. |
 | `tools/` | Headless-Chromium capture scripts that seed realistic demo data into the web app and screenshot every tab, crop and overlay. |
 
 **No AI-generated imagery is used anywhere.** All visuals are screenshots of CareSphere, its icon, or vector shapes drawn by the scripts.
@@ -57,9 +60,10 @@ close that asks for something — never a bare "Thank you". Everything trimmed f
 
 ## Before you record
 
-1. Replace the placeholders: `[Student Name]`, `[School]`, `[City]`, `[email]`, `[CA-XX]` (slides 1, 2, 13) and `[YouTube link]` (slide 13).
+1. Replace the remaining placeholders: `[School]`, `[City]`, `[grade]` (slides 1, 2, 13) and `[YouTube link]` (slide 13). Name, district and email are filled in.
 2. Write **your own story** on slide 2 — one or two sentences about a real person and a real moment (edit in PowerPoint or in `build_deck.py` and rebuild).
 3. Follow `VIDEO_SCRIPT.md`: slides 1 → 2 → 3 → 4 → 5 → 6 *(screen recording)* → 7 … 13, about 2:50 in total.
+4. Fill the portal from `APPLICATION_ANSWERS.md` (answers, cover photo, links) and save a draft there early.
 
 ## Rebuilding
 
