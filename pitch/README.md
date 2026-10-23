@@ -103,8 +103,7 @@ BLE service 0x180D / 0x2A37 and the connection generation counter (the code pane
 
 ## 36 iPhone-framed screenshots
 
-The downloadable ZIP is attached to the **CAC pitch kit 2026** GitHub release
-(tag `cac-pitch-kit-2026`). It contains 36 numbered high-resolution PNGs,
+The downloadable ZIP is stored in `pitch/downloads/CareSphere_iPhone_Screenshots_36.zip`. It contains 36 numbered high-resolution PNGs,
 a visual index, and provenance notes. Captures are the mobile web app with
 fictional sample data, not native iOS screenshots. Frames are script-drawn;
 no AI-generated imagery is used.
