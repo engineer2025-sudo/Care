@@ -1,3 +1,6 @@
 tools/out/
 tools/node_modules/
 __pycache__/
+
+# Raw gallery captures are reproducible local artifacts.
+tools/out-gallery/

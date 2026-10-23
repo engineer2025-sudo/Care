@@ -1,5 +1,23 @@
 # CareSphere AI — Congressional App Challenge 2026 pitch kit
 
+## Latest screenshot-led update
+
+**Recommended:** `CareSphere_Congressional_App_Challenge_Deck_Updated.pptx`.
+Preview all 13 slides in `preview-updated/contact-sheet.jpg`.
+
+- Actual CareSphere web screenshots only; no generated photography or imagery.
+- Screenshot-led reminders / routines / Coffee Circles slide replaces the competitor comparison.
+- Neutral design motivation replaces the unfilled example family story. Add your truthful personal story in narration if desired.
+- Privacy language distinguishes local care storage from external Jitsi calls and online reference requests.
+- No visible school, city or video-link placeholders; source link and contact details remain.
+- Editable text and layouts, five embedded fonts, fade / demo-push / closing transitions.
+- Screenshot figures are seeded sample data, not patient outcomes; screenshots are web UI, not native iOS UI.
+
+Rebuild: `python3 pitch/build_deck_updated.py`. The previous A/B decks remain unchanged.
+The existing video script needs the revised motivation and everyday-support narration from the updated slide notes; rehearse and keep the final video under three minutes.
+
+Validation: all 17 Node tests passed; PowerPoint reopened with 13 slides; ZIP integrity and XML parsing passed; five font parts present; no visible bracket placeholders.
+
 Everything needed to record the 3-minute submission video.
 
 Two versions of the same 13-slide deck ship side by side. They share the arc, the narration, the slide numbers and
@@ -82,3 +100,16 @@ and run `make_assets.py` again.
 
 All feature claims were read from the code (`src/App.jsx`, `src/lib/*`, `ios/CareSphere/**`, `docs/*`, `ROADMAP.md`):
 BLE service 0x180D / 0x2A37 and the connection generation counter (the code panel on slide 11 quotes `src/lib/bluetooth.js` and `src/App.jsx` verbatim), 15-second reminder loop with 10-minute snooze, local-midnight day keys, AES-256-GCM with a non-extractable Web Crypto key / device-only Keychain key, Jitsi External API + JitsiMeetSDK 13.1, Qwen2.5-1.5B Q4_K_M via llama.cpp (`n_ctx = 2048`, ChatML prompt), MedlinePlus XML + Kiwix ZIM, Kokoro via Sherpa-ONNX, support check-in thresholds (110 bpm / 90 s / 30-min cooldown), 17 node:test cases, two GitHub Actions workflows, three public GitHub releases (v1.0, v2.0, v2.1), and the line counts (3,420 web + 7,741 Swift). Public-health statistics and their sources are listed at the end of `VIDEO_SCRIPT.md`.
+
+## 36 iPhone-framed screenshots
+
+The downloadable ZIP is attached to the **CAC pitch kit 2026** GitHub release
+(tag `cac-pitch-kit-2026`). It contains 36 numbered high-resolution PNGs,
+a visual index, and provenance notes. Captures are the mobile web app with
+fictional sample data, not native iOS screenshots. Frames are script-drawn;
+no AI-generated imagery is used.
+
+Reproduce with `node pitch/tools/capture_gallery.js` (requires the app on port
+4173 and Chromium runtime dependencies), then
+`python3 pitch/make_screenshot_gallery.py`. Output stays in ignored
+`deliverables/`; raw captures stay in ignored `pitch/tools/out-gallery/`.
