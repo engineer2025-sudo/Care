@@ -1,5 +1,10 @@
 # CareSphere AI — Congressional App Challenge 2026 pitch kit
 
+## Pitch the Deck — named slideshow downloads
+
+- **[Pitch the Deck.pptx](Pitch%20the%20Deck.pptx)** — the editable final 10-slide presentation.
+- **[Pitch the Deck.pdf](Pitch%20the%20Deck.pdf)** — the same 10 slides as a landscape PDF, one slide per page. This is the slideshow, not the narration script. It uses the slide previews, so text is rasterized and transitions are not included.
+
 ## Recommended submission kit — final 10 slides
 
 - **[CareSphere_CAC_Final_10_Slides.pptx](CareSphere_CAC_Final_10_Slides.pptx)** — focused editable deck in the existing navy/mint design. Ten slides, real screenshots only, embedded fonts and click-driven transitions.
