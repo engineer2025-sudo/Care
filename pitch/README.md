@@ -1,6 +1,14 @@
 # CareSphere AI — Congressional App Challenge 2026 pitch kit
 
-## Latest screenshot-led update
+## Recommended: Congressional App Challenge feature-led deck
+
+- **`CareSphere_CAC_Features_Deck.pptx`** — latest recommended deck. Same design/colors, clearer purpose and feature map, dedicated four-game slide, sensory tools and research-to-design slide.
+- `preview-cac/contact-sheet.jpg` — all 13 slides.
+- **`VIDEO_SCRIPT_CAC.md`** — matching 2:55 narration, 40-second real interaction plan, recording checklist. Use this instead of the older video script for the feature-led deck.
+- `CAC_RESEARCH_AND_VIDEO_REVIEW.md` — official requirements, two example-video transcript reviews, sources, implementation mapping and evidence limits. Full videos were not downloaded or visually reviewed.
+- Rebuild: `python3 pitch/build_deck_cac.py`.
+
+## Previous screenshot-led update
 
 **Recommended:** `CareSphere_Congressional_App_Challenge_Deck_Updated.pptx`.
 Preview all 13 slides in `preview-updated/contact-sheet.jpg`.
