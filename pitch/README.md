@@ -1,5 +1,18 @@
 # CareSphere AI — Congressional App Challenge 2026 pitch kit
 
+## Recommended submission kit — final 10 slides
+
+- **[CareSphere_CAC_Final_10_Slides.pptx](CareSphere_CAC_Final_10_Slides.pptx)** — focused editable deck in the existing navy/mint design. Ten slides, real screenshots only, embedded fonts and click-driven transitions.
+- **[CareSphere_CAC_Script_and_Recording_Guide.pdf](CareSphere_CAC_Script_and_Recording_Guide.pdf)** — six-page timed narration, real app action plan, setup, editing workflow and source notes.
+- [FINAL_10_SLIDE_SCRIPT.md](FINAL_10_SLIDE_SCRIPT.md) — editable narration.
+- [preview-final-10/contact-sheet.jpg](preview-final-10/contact-sheet.jpg) — all ten slides.
+
+**How it works:** slides 1–5 explain purpose and features; slide 6 is the only handoff. Switch to genuine app interaction for 80 seconds, then return to slides 7–10. Target export: **2:56**, including all footage and transitions. Rehearse; the final video must stay within three minutes. The PPTX itself does not contain the recorded app video and does not auto-advance.
+
+The previous 21-slide combined deck remains available below as backup. Use this new ten-slide kit and its matching PDF for the recommended short submission, rather than the older scripts.
+
+Build: `pip install python-pptx pillow qrcode fonttools lxml reportlab` then `python3 pitch/build_submission_kit.py`.
+
 ## Latest: combined full-length deck — 21 slides
 
 **`CareSphere_Combined_Deck.pptx`** combines every unique slide from the last two presentations, keeping the earlier design/story as its backbone and adding the feature map, games, sensory tools, research, feature-demo and learning slides. Exact shared slides appear once.
